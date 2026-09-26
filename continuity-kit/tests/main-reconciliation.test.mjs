@@ -4,7 +4,11 @@ import vm from "node:vm";
 import test from "node:test";
 import ts from "typescript";
 import { HandoffChannel } from "../src/handoff.ts";
-import { LOCAL_POLICY } from "../src/sdk/policy.ts";
+import {
+  contextFor,
+  LOCAL_POLICY,
+  validateContext,
+} from "../src/sdk/policy.ts";
 import {
   CONTROL_URL,
   TESTNET_RUNTIME_CODE_HASH,
@@ -61,7 +65,7 @@ function config() {
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 async function boot(options = {}) {
-  const { search = "" } = options;
+  const { search = "", recovery = false, opener = false } = options;
   const explicitConfig = Object.hasOwn(options, "explicitConfig")
     ? options.explicitConfig
     : config();
@@ -70,10 +74,14 @@ async function boot(options = {}) {
   const intervals = new Set();
   const calls = [];
   const sent = [];
+  const opened = [];
   const popup = {
     closed: false,
     postMessage(data, origin) {
-      assert.equal(origin, LOCAL_POLICY.bOrigin);
+      assert.equal(
+        origin,
+        recovery ? LOCAL_POLICY.aOrigin : LOCAL_POLICY.bOrigin,
+      );
       sent.push(data);
     },
   };
@@ -147,7 +155,7 @@ async function boot(options = {}) {
         };
       },
     },
-    "./sdk/policy.ts": {},
+    "./sdk/policy.ts": { validateContext },
     "./sdk/passkeys.ts": {
       MeraPasskeyAdapter: class {
         constructor(client) {
@@ -186,7 +194,10 @@ async function boot(options = {}) {
     },
     __CONTINUITY_TESTNET_CONFIG__: explicitConfig,
     physicalEnv: "false",
-    location: { origin: LOCAL_POLICY.aOrigin, search },
+    location: {
+      origin: recovery ? LOCAL_POLICY.bOrigin : LOCAL_POLICY.aOrigin,
+      search,
+    },
     URLSearchParams,
     URL,
     AbortSignal,
@@ -198,11 +209,13 @@ async function boot(options = {}) {
       }
     },
     window: {
+      opener: opener ? popup : null,
       addEventListener(event, fn) {
         listeners.set(event, fn);
       },
-      open(url) {
+      open(url, target, features) {
         assert.equal(url, `${LOCAL_POLICY.bOrigin}/?enroll=1&mode=physical`);
+        opened.push({ url, target, features });
         return popup;
       },
     },
@@ -237,17 +250,29 @@ async function boot(options = {}) {
     handler();
     await settle();
   };
-  const message = async (data) => {
+  const message = async (data, overrides = {}) => {
     listeners.get("message")({
-      origin: LOCAL_POLICY.bOrigin,
+      origin: recovery ? LOCAL_POLICY.aOrigin : LOCAL_POLICY.bOrigin,
       source: popup,
       data,
+      ...overrides,
     });
     await settle();
   };
   return {
     calls,
     sent,
+    opened,
+    click,
+    message,
+    closePeer() {
+      popup.closed = true;
+      for (const tick of [...intervals]) tick();
+    },
+    tick(ms = 500) {
+      now += ms;
+      for (const tick of [...intervals]) tick();
+    },
     get html() {
       return html;
     },
@@ -354,4 +379,108 @@ test("expired enrollment popup cannot invalidate a later confirmed registry resu
   await ui.check();
   ui.confirmed();
   assert.equal(ui.sent.filter((m) => m.kind === "committed").length, 0);
+});
+
+test("primary setup opens a fresh window with an opener, never a reusable named target", async () => {
+  const ui = await boot();
+  await ui.click("#prepare");
+  await ui.click("#prepare");
+  assert.equal(ui.opened.length, 1);
+  assert.equal(ui.opened[0].target, "_blank");
+  assert.equal(
+    ui.opened[0].features,
+    undefined,
+    "The bound handoff requires window.opener",
+  );
+  assert.deepEqual(ui.calls, ["local-status", "create-primary"]);
+});
+
+test("an enrollment link without an opener offers no creation or recovery action", async () => {
+  const ui = await boot({ recovery: true, search: "?enroll=1" });
+  assert.match(ui.html, /This setup window has no active primary connection/);
+  assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
+  assert.deepEqual(ui.calls, ["local-status"]);
+  ui.tick();
+  assert.equal(ui.sent.length, 0);
+});
+
+test("B waits for the exact opener and origin before offering credential creation", async () => {
+  const ui = await boot({ recovery: true, opener: true, search: "?enroll=1" });
+  assert.match(ui.html, /Connecting to the primary app/);
+  assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
+  ui.tick();
+  const ready = ui.sent.find((m) => m.kind === "ready");
+  assert.ok(ready);
+  const offer = {
+    protocol: "continuity-handoff/v1",
+    kind: "offer",
+    step: 1,
+    aNonce: "a".repeat(64),
+    bNonce: ready.bNonce,
+    payload: {
+      context: contextFor(
+        createRuntime(config()).policy,
+        "0x4444444444444444444444444444444444444444",
+        `0x${"6".repeat(64)}`,
+      ),
+      dataKey: new Uint8Array(32).fill(7),
+    },
+  };
+  await ui.message(offer, { origin: "https://untrusted.example" });
+  await ui.message(offer, { source: {} });
+  assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
+  await ui.message(offer);
+  assert.match(ui.html, /id="enroll"/);
+  assert.doesNotMatch(ui.html, /id="recover"/);
+  assert.deepEqual(ui.calls, ["local-status"]);
+  const count = ui.sent.length;
+  ui.tick();
+  assert.equal(
+    ui.sent.length,
+    count,
+    "Ready polling ends once the offer arrives",
+  );
+  ui.closePeer();
+  assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
+});
+
+test("normal B recovery still offers the existing-passkey flow", async () => {
+  const ui = await boot({ recovery: true });
+  assert.match(ui.html, /id="recover"/);
+  assert.doesNotMatch(ui.html, /id="enroll"/);
+});
+
+test("expired or closed handoffs cannot reopen with the wiped primary account", async () => {
+  for (const close of [false, true]) {
+    const ui = await boot();
+    await ui.click("#prepare");
+    await ui.click("#prepare");
+    if (close) ui.closePeer();
+    else ui.expire();
+    assert.match(ui.html, /id="prepare" disabled>Setup ended/);
+    assert.equal(ui.calls.filter((c) => c === "close-account").length, 1);
+    // Exercise the handler directly too: disabled markup is not the only guard.
+    await ui.click("#prepare");
+    assert.equal(ui.opened.length, 1);
+    assert.equal(ui.calls.filter((c) => c === "create-primary").length, 1);
+    await ui.message({
+      protocol: "continuity-handoff/v1",
+      kind: "ready",
+      step: 0,
+      bNonce: "b".repeat(64),
+    });
+    assert.equal(ui.sent.length, 0);
+  }
+});
+
+test("B loses all setup actions and stops polling when its opener closes", async () => {
+  const ui = await boot({ recovery: true, opener: true, search: "?enroll=1" });
+  ui.tick();
+  const count = ui.sent.length;
+  ui.closePeer();
+  assert.match(ui.html, /The other enrollment window closed/);
+  assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
+  ui.tick();
+  assert.equal(ui.sent.length, count);
+  assert.deepEqual(ui.calls, ["local-status"]);
 });
