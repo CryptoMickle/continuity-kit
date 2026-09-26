@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ContinuityKit · deploymentoperatør</title>
+    <style>
+      body {
+        max-width: 58rem;
+        margin: 3rem auto;
+        padding: 0 1.2rem;
+        background: #111713;
+        color: #eaf0e8;
+        font: 17px/1.6 system-ui;
+      }
+      h1 {
+        line-height: 1.15;
+      }
+      .notice {
+        border-left: 4px solid #e9bf6a;
+        padding: 1rem;
+        background: #24241c;
+      }
+      pre {
+        padding: 1rem;
+        background: #1c251e;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 0.85rem;
+      }
+      button {
+        padding: 0.75rem 1rem;
+        margin: 0.25rem;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: default;
+        opacity: 0.5;
+      }
+      label {
+        display: block;
+        margin: 1rem 0;
+      }
+      a {
+        color: #c3e5b6;
+      }
+    </style>
+  </head>
+  <body>
+    <p>CONTINUITYKIT / KUN LOKAL OPERATØR</p>
+    <h1>Én avgrenset testnet-deployment</h1>
+    <p class="notice">
+      Vilkår er fortsatt registrert som uavklarte. Panelet er klargjort, men
+      krever separat konkret godkjenning i chat og avklaring av
+      leverandør-/faucetvilkår før operatøren starter det. Oppstartsbryteren og
+      avkrysningen gir ingen slik godkjenning.
+    </p>
+    <p>
+      Eksisterende passnøkkel for primary.localhost brukes bare til den
+      foreslåtte deploymenten. Du håndterer OS-/biometriprompten. Maksimalt
+      gebyr: <strong>0,2 test-MON</strong>; verdi: 0; én transaksjon. Dette er
+      et gebyrtak, ikke et estimat eller en grense for juridisk ansvar.
+    </p>
+    <p>
+      Ingen ny passnøkkel, konto eller faucetforespørsel opprettes her.
+      Adresser, kontraktkode, nonce, gas og transaksjonshash blir offentlige ved
+      sending. Lokal reserve blir ikke flyttet eller bundet om.
+    </p>
+    <details open>
+      <summary>Eksakt forslag og grenser</summary>
+      <pre id="proposal"></pre>
+    </details>
+    <label
+      ><input id="reviewed" type="checkbox" disabled /> Operatøren har
+      kontrollert separat chatgodkjenning, avklarte vilkår, testmidler og dette
+      eksakte forslaget.</label
+    >
+    <button id="execute" disabled>
+      Bruk eksisterende passnøkkel og send én gang
+    </button>
+    <button id="reconcile" disabled>Kontroller samme hash (kun lesing)</button>
+    <button id="close" disabled>Steng videre sending</button>
+    <button id="export" disabled>Last ned offentlig billett</button>
+    <p id="status" role="status" aria-live="polite">
+      dormant — ingen RPC eller passnøkkelbruk startet
+    </p>
+    <pre id="ticket">Ingen offentlig transaksjonsbillett.</pre>
+    <p>
+      submitted og uncertain betyr ikke ferdigbekreftet deployment. Bare
+      finalized betyr at executorens kontroll hos begge tilbydere bestod.
+      Nettverks-/CORS-feil stopper flyten; ingen alternativ tilbyder velges.
+    </p>
+    <p>
+      Hold denne siden åpen og eksporter billetten. Etter omlasting finnes ingen
+      automatisk gjenopptakelse; ikke start en ny deployment blindt. Stenging
+      kan ikke trekke tilbake en transaksjon som allerede er sendt.
+    </p>
+    <script type="module" src="/src/deployment-panel.ts"></script>
+  </body>
+</html>

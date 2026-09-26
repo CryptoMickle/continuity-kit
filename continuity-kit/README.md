@@ -25,13 +25,13 @@ For a reproducible recovery-only demo when popup automation is unavailable, run 
 npm run demo:seed
 ```
 
-This creates the same public synthetic fixture, including v1, directly through the SDK and HTTP adapters. It deliberately bypasses the browser enrollment handoff and is **not evidence that that handoff or physical WebAuthn works**. If the fixture is already enrolled, use **Restore primary** instead of creating another enrollment. The immutable record must not be rebound. The public fixture seed makes its content public in practice; use sample text only.
+This creates the same public synthetic fixture, including v1, directly through the SDK and HTTP adapters. It deliberately bypasses the browser enrollment handoff and is **not evidence that that handoff or physical WebAuthn works**. If the fixture is already enrolled, use **Open existing workspace** instead of creating another enrollment. The immutable record must not be rebound. The public fixture seed makes its content public in practice; use sample text only.
 
 ## Reproduce the useful failure
 
-1. In A, choose **Restore primary from a fresh session** if using the seed helper. The original account and private workspace reconstruct from the fixture credential and encrypted stores.
+1. In A, choose **Open existing workspace** if using the seed helper. The original account and private workspace reconstruct from the fixture credential and encrypted stores.
 2. Change the draft and **Save checkpoint**. Confirm v2.
-3. Choose **Take primary offline**. A now returns HTTP 503, including its pages and application source requests.
+3. Expand **Demonstration tools · outages and verification tests**, then choose **Take primary offline**. A now returns HTTP 503, including its pages and application source requests.
 4. Open a fresh B client, or use **Discard this session & reload** there. No key, credential ID, owner address or recovery file is entered.
 5. Select **Mirror 1 serves an old valid copy** and recover. B rejects v1 and opens v2 from the other mirror. Inspect its receipt.
 6. Select **Both mirrors serve an old valid copy**, then recover again. B refuses to display it as current. **Latest bytes unavailable** exercises explicit absence.
@@ -122,7 +122,11 @@ The staged competition package is in `delivery/`. No public repository, deployme
 
 ## AI assistance and provenance
 
-Mikkel is the sole planned human developer. OpenAI Codex and GPT agents assisted protocol design, implementation, tests, documentation and review. The separate reviews are AI-assisted and are not independent security audits. This isolated product source was created locally on 26 September 2026; no Delveworn or Market Dungeon source/assets were copied into this implementation. Earlier research informed its design. The published build-window and substantial-majority requirement must still be checked against the final submitted commit history.
+Mikkel is the sole planned human developer. OpenAI Codex and GPT agents assisted protocol design, implementation, tests, documentation and review. These reviews are AI-assisted, not independent security audits.
+
+This source tree first appears in local commit `ff5a2d9f50327815a6ac05987e7e04212c4bb36c`, dated 26 September 2026. Subsequent commits record physical recovery evidence and the testnet SDK refactor. Earlier Delveworn, Market Dungeon and research/planning work informed the design and is not presented as newly authored ContinuityKit product code. This repository does not contain those earlier source trees for a complete comparison; local Git dates alone do not certify the competition's substantial-majority requirement. Any identified reused component must be named with its original source, author, license and date before final submission. See the [release provenance inspection](delivery/RELEASE_READINESS.md).
+
+The physical observations predate the T1 refactor and later UI guidance. Subsequent synthetic verification does not establish a new physical test of the final source. No controlled compatibility matrix or single-prompt onboarding result is claimed.
 
 Dependencies retain their own licenses and notices. ContinuityKit's local MIT license applies to its original source; it does not relicense Mera, viem, scure or development tools. Exact dependency versions and integrity values are in package-lock.json.
 
