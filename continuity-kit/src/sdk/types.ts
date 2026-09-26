@@ -288,7 +288,10 @@ export interface PrfResult {
 }
 export interface PasskeyAdapter {
   createPrimary(policy: RecoveryPolicy): Promise<PrfResult>;
-  openPrimary(policy: RecoveryPolicy): Promise<PrfResult>;
+  openPrimary(
+    policy: RecoveryPolicy,
+    credentialId?: string,
+  ): Promise<PrfResult>;
   createBackup(
     secret: Uint8Array,
     policy: RecoveryPolicy,

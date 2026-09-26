@@ -98,7 +98,13 @@ async function boot(options = {}) {
     dataKey: new Uint8Array(32),
     manifestDigest: `0x${"5".repeat(64)}`,
     enrollment: { capsuleDigest },
-    writer: { pendingTicket: ticket },
+    writer: {
+      pendingTicket: undefined,
+      expiresAt: 601000,
+      assertActive() {
+        if (now >= this.expiresAt) throw new Error("Expired");
+      },
+    },
     close() {
       calls.push("close-account");
     },
@@ -170,7 +176,54 @@ async function boot(options = {}) {
         return account;
       },
     },
+    "./sdk/setup-draft.ts": {
+      SetupDraft: class {
+        phase = "ready";
+        static async create() {
+          return new this();
+        }
+        get resumable() {
+          return this.phase === "ready" || this.phase === "paused";
+        }
+        get paused() {
+          return this.phase === "paused";
+        }
+        pause() {
+          if (this.phase !== "ready") return false;
+          this.phase = "paused";
+          account.close();
+          return true;
+        }
+        async resume() {
+          assert.equal(this.phase, "paused");
+          calls.push("resume-primary");
+          this.phase = "ready";
+          account.writer.expiresAt = now + 600000;
+          return account;
+        }
+        beginBackup() {
+          assert.equal(this.phase, "ready");
+          this.phase = "spent";
+        }
+        close() {
+          this.phase = "spent";
+        }
+      },
+    },
     "./sdk/index.ts": {
+      async restorePrimary() {
+        calls.push("restore-primary");
+        assert.ok(options.restoreResult);
+        return options.restoreResult(account);
+      },
+      async prepareBackup() {
+        calls.push("create-backup");
+        if (options.backupResult) return options.backupResult();
+        throw Object.assign(
+          new Error("Synthetic native cancellation after creation"),
+          { code: "AUTH_CANCELLED" },
+        );
+      },
       async finalizeEnrollment() {
         return sdkResult("finalize-enrollment");
       },
@@ -265,6 +318,12 @@ async function boot(options = {}) {
     opened,
     click,
     message,
+    pagehide() {
+      listeners.get("pagehide")();
+    },
+    pageshow() {
+      listeners.get("pageshow")();
+    },
     nodeText(selector) {
       return nodes.get(selector)?.textContent;
     },
@@ -298,7 +357,7 @@ async function boot(options = {}) {
       await click("#prepare");
       await click("#prepare");
       await message({
-        protocol: "continuity-handoff/v1",
+        protocol: "continuity-handoff/v2",
         kind: "ready",
         step: 0,
         bNonce: "b".repeat(64),
@@ -306,9 +365,16 @@ async function boot(options = {}) {
       const offer = sent.find((m) => m.kind === "offer");
       assert.ok(offer, "The real handoff must send its bound offer");
       await message({
-        protocol: "continuity-handoff/v1",
-        kind: "backup",
+        protocol: "continuity-handoff/v2",
+        kind: "begin",
         step: 2,
+        aNonce: offer.aNonce,
+        bNonce: offer.bNonce,
+      });
+      await message({
+        protocol: "continuity-handoff/v2",
+        kind: "backup",
+        step: 4,
         aNonce: offer.aNonce,
         bNonce: offer.bNonce,
         payload: { synthetic: true },
@@ -415,7 +481,7 @@ test("B waits for the exact opener and origin before offering credential creatio
   const ready = ui.sent.find((m) => m.kind === "ready");
   assert.ok(ready);
   const offer = {
-    protocol: "continuity-handoff/v1",
+    protocol: "continuity-handoff/v2",
     kind: "offer",
     step: 1,
     aNonce: "a".repeat(64),
@@ -426,7 +492,6 @@ test("B waits for the exact opener and origin before offering credential creatio
         "0x4444444444444444444444444444444444444444",
         `0x${"6".repeat(64)}`,
       ),
-      dataKey: new Uint8Array(32).fill(7),
     },
   };
   await ui.message(offer, { origin: "https://untrusted.example" });
@@ -456,26 +521,31 @@ test("normal B recovery still offers the existing-passkey flow", async () => {
   assert.doesNotMatch(ui.html, /id="enroll"/);
 });
 
-test("expired or closed handoffs cannot reopen with the wiped primary account", async () => {
+test("pre-B expiry pauses instead of creating another account; resume requires the existing key", async () => {
   for (const close of [false, true]) {
     const ui = await boot();
     await ui.click("#prepare");
     await ui.click("#prepare");
     if (close) ui.closePeer();
     else ui.expire();
-    assert.match(ui.html, /id="prepare" disabled>Setup ended/);
+    assert.match(ui.html, /Continue setup with passkey/);
     assert.equal(ui.calls.filter((c) => c === "close-account").length, 1);
-    // Exercise the handler directly too: disabled markup is not the only guard.
-    await ui.click("#prepare");
-    assert.equal(ui.opened.length, 1);
-    assert.equal(ui.calls.filter((c) => c === "create-primary").length, 1);
     await ui.message({
-      protocol: "continuity-handoff/v1",
+      protocol: "continuity-handoff/v2",
       kind: "ready",
       step: 0,
       bNonce: "b".repeat(64),
     });
     assert.equal(ui.sent.length, 0);
+    await ui.click("#prepare");
+    assert.equal(
+      ui.opened.length,
+      1,
+      "Reauthentication does not silently open another popup",
+    );
+    assert.equal(ui.calls.filter((c) => c === "resume-primary").length, 1);
+    assert.equal(ui.calls.filter((c) => c === "create-primary").length, 1);
+    assert.match(ui.html, /Same setup reopened/);
   }
 });
 
@@ -510,7 +580,7 @@ test("B stops misleading connection guidance when its opener never supplies an o
     /Connecting to the primary app|id="(?:enroll|recover|setup-clock)"/,
   );
   await ui.message({
-    protocol: "continuity-handoff/v1",
+    protocol: "continuity-handoff/v2",
     kind: "offer",
     step: 1,
     aNonce: "a".repeat(64),
@@ -521,7 +591,6 @@ test("B stops misleading connection guidance when its opener never supplies an o
         "0x4444444444444444444444444444444444444444",
         `0x${"6".repeat(64)}`,
       ),
-      dataKey: new Uint8Array(32).fill(7),
     },
   });
   ui.tick();
@@ -532,7 +601,7 @@ test("B stops misleading connection guidance when its opener never supplies an o
 
 test("setup time is disclosed before creating a primary key and does not extend on ticks", async () => {
   const ui = await boot();
-  assert.match(ui.html, /window expires after five minutes/);
+  assert.match(ui.html, /You can pause before recovery-key creation starts/);
   await ui.click("#prepare");
   await ui.click("#prepare");
   assert.match(ui.html, /Setup time remaining: 5:00/);
@@ -541,7 +610,140 @@ test("setup time is disclosed before creating a primary key and does not extend 
   ui.tick(239999);
   assert.match(ui.nodeText("#setup-clock"), /Setup time remaining: 0:01/);
   ui.tick(1);
-  assert.match(ui.html, /Reserve preparation expired/);
+  assert.match(ui.html, /Setup paused/);
   assert.doesNotMatch(ui.html, /id="setup-clock"/);
   assert.equal(ui.calls.filter((c) => c === "close-account").length, 1);
+});
+
+async function recoveryOffer(ui) {
+  ui.tick();
+  const ready = ui.sent.find((m) => m.kind === "ready");
+  const offer = {
+    protocol: "continuity-handoff/v2",
+    kind: "offer",
+    step: 1,
+    aNonce: "a".repeat(64),
+    bNonce: ready.bNonce,
+    payload: {
+      context: contextFor(
+        createRuntime(config()).policy,
+        "0x4444444444444444444444444444444444444444",
+        `0x${"6".repeat(64)}`,
+      ),
+    },
+  };
+  await ui.message(offer);
+  return offer;
+}
+test("public offer sends no key; an old begin request cannot cross a pause and renewed handshake", async () => {
+  const ui = await boot();
+  await ui.click("#prepare");
+  await ui.click("#prepare");
+  const ready = {
+    protocol: "continuity-handoff/v2",
+    kind: "ready",
+    step: 0,
+    bNonce: "b".repeat(64),
+  };
+  await ui.message(ready);
+  const offer = ui.sent.find((m) => m.kind === "offer");
+  assert.deepEqual(Object.keys(offer.payload), ["context"]);
+  const oldBegin = { ...ready, kind: "begin", step: 2, aNonce: offer.aNonce };
+  await ui.click("#pause-setup");
+  await ui.message(oldBegin);
+  await ui.click("#prepare");
+  await ui.click("#prepare");
+  await ui.message(ready);
+  await ui.message(oldBegin);
+  assert.equal(ui.sent.filter((m) => m.kind === "grant").length, 0);
+  const fresh = ui.sent.filter((m) => m.kind === "offer").at(-1);
+  assert.notEqual(fresh.aNonce, offer.aNonce);
+  await ui.message({ ...oldBegin, aNonce: fresh.aNonce });
+  assert.equal(ui.sent.filter((m) => m.kind === "grant").length, 1);
+  ui.expire();
+  assert.match(ui.html, /id="prepare" disabled>Setup ended/);
+  assert.doesNotMatch(ui.html, /Continue setup with passkey/);
+});
+test("cancelled B ceremony cannot create another credential after a grant", async () => {
+  const ui = await boot({ recovery: true, opener: true, search: "?enroll=1" });
+  const offer = await recoveryOffer(ui);
+  await ui.click("#enroll");
+  assert.equal(ui.calls.filter((c) => c === "create-backup").length, 0);
+  const grant = {
+    ...offer,
+    kind: "grant",
+    step: 3,
+    payload: { ...offer.payload, dataKey: new Uint8Array(32).fill(7) },
+  };
+  await ui.message(grant);
+  assert.equal(ui.calls.filter((c) => c === "create-backup").length, 1);
+  assert.match(ui.html, /Setup needs review/);
+  assert.doesNotMatch(ui.html, /id="enroll"/);
+  await ui.message(grant);
+  assert.equal(ui.calls.filter((c) => c === "create-backup").length, 1);
+  assert.equal(ui.sent.filter((m) => m.kind === "backup").length, 0);
+});
+test("a late B native result after expiry cannot publish backup bytes", async () => {
+  let finish;
+  const ui = await boot({
+    recovery: true,
+    opener: true,
+    search: "?enroll=1",
+    backupResult: () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  });
+  const offer = await recoveryOffer(ui);
+  await ui.click("#enroll");
+  await ui.message({
+    ...offer,
+    kind: "grant",
+    step: 3,
+    payload: { ...offer.payload, dataKey: new Uint8Array(32).fill(7) },
+  });
+  assert.equal(ui.calls.filter((c) => c === "create-backup").length, 1);
+  ui.expire();
+  finish({ synthetic: true });
+  await settle();
+  assert.equal(ui.sent.filter((m) => m.kind === "backup").length, 0);
+  assert.doesNotMatch(ui.html, /id="enroll"/);
+});
+test("idle signer expiry pauses before any popup and pagehide permanently retires the RAM draft", async () => {
+  const ui = await boot();
+  await ui.click("#prepare");
+  ui.tick(600000);
+  assert.match(ui.html, /Continue setup with passkey/);
+  assert.equal(ui.opened.length, 0);
+  ui.pagehide();
+  ui.pageshow();
+  assert.match(ui.html, /This page session has ended/);
+  await ui.click("#prepare");
+  assert.equal(ui.calls.filter((c) => c === "resume-primary").length, 0);
+  assert.equal(ui.opened.length, 0);
+});
+test("primary restoration finishing after pagehide closes its new signer instead of installing it", async () => {
+  let finish, restoredAccount;
+  const ui = await boot({
+    restoreResult: (account) => {
+      restoredAccount = account;
+      return new Promise((resolve) => {
+        finish = resolve;
+      });
+    },
+  });
+  await ui.click("#restore");
+  ui.pagehide();
+  ui.pageshow();
+  finish({
+    state: restoredAccount,
+    recovered: { content: { title: "Must not be installed" } },
+  });
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "close-account").length, 1);
+  assert.doesNotMatch(
+    ui.html,
+    /Same account\. Same private workspace|Must not be installed/,
+  );
+  assert.match(ui.html, /This page session has ended/);
 });

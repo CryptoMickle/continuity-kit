@@ -61,12 +61,50 @@ test("handoff accepts exactly one ordered exchange bound to both nonces and the 
   });
   queue.push(replay);
   assert.equal(deliver(), null);
+  assert.throws(() => B.backup({}));
+  B.begin();
+  assert.deepEqual(deliver(), { kind: "begin", payload: undefined });
+  A.grant({ key: "synthetic" });
+  assert.deepEqual(deliver(), { kind: "grant", payload: { key: "synthetic" } });
+  assert.throws(() => B.begin());
+  assert.throws(() => A.grant({}));
   B.backup({ sealed: "bytes" });
   assert.deepEqual(deliver(), { kind: "backup", payload: { sealed: "bytes" } });
   A.committed({ version: "1" });
   assert.deepEqual(deliver(), { kind: "committed", payload: { version: "1" } });
   assert.throws(() => B.backup({}));
   assert.throws(() => A.committed({}));
+});
+test("a stale creation request cannot release a key after expiry or into a new channel", () => {
+  const old = setup();
+  old.A.setOffer({ context: "public-only" });
+  old.B.ready();
+  old.deliver();
+  old.deliver();
+  old.B.begin();
+  const request = old.queue.shift()!;
+  old.advance();
+  assert.equal(
+    old.A.accept({
+      origin: "http://recovery.localhost:4174",
+      source: old.b,
+      data: request.data,
+    }),
+    null,
+  );
+  assert.throws(() => old.A.grant({ key: "must-not-send" }));
+  assert.equal(old.queue.length, 0);
+  const fresh = setup();
+  fresh.A.setOffer({ context: "public-only" });
+  assert.equal(
+    fresh.A.accept({
+      origin: "http://recovery.localhost:4174",
+      source: old.b,
+      data: request.data,
+    }),
+    null,
+  );
+  assert.equal(fresh.queue.length, 0);
 });
 test("wrong origin, source, reordered message and expired sessions cannot deliver a key", () => {
   const { A, B, b, queue, advance, deliver } = setup();

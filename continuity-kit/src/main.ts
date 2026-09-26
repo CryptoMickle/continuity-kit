@@ -5,6 +5,7 @@ import { MeraPasskeyAdapter } from "./sdk/passkeys.ts";
 import { SyntheticWebAuthnClient } from "./sdk/demo-fixture.ts";
 import { createPrimary } from "./sdk/account.ts";
 import type { PrimaryAccount, PrimaryState } from "./sdk/account.ts";
+import { SetupDraft } from "./sdk/setup-draft.ts";
 import {
   prepareBackup,
   finalizeEnrollment,
@@ -54,7 +55,13 @@ let recovered: Recovered | null = null;
 let backup: PreparedBackup | null = null;
 let pendingTicket: WriteTicket | null = null;
 let writeProof: WriteProof | null = null;
-let offer: { context: Context; dataKey: Uint8Array } | null = null;
+let offer: { context: Context } | null = null;
+let grant: { context: Context; dataKey: Uint8Array } | null = null;
+let grantWaiter: { resolve: () => void; reject: (e: Error) => void } | null =
+  null;
+let backupAttempted = false;
+let setupDraft: SetupDraft | null = null;
+let pageEnded = false;
 let channel: HandoffChannel | null = null;
 let busy = false;
 let enrollmentPending = false;
@@ -160,13 +167,17 @@ function fail(error: unknown) {
   };
 }
 async function run(action: () => Promise<void>, required = false) {
-  if (busy && !required) return;
+  if (pageEnded || (busy && !required)) return;
   const previous = actionTail;
   let finish!: () => void;
   actionTail = new Promise<void>((resolve) => {
     finish = resolve;
   });
   await previous;
+  if (pageEnded) {
+    finish();
+    return;
+  }
   busy = true;
   render();
   try {
@@ -239,6 +250,11 @@ function guideMarkup() {
     text = physical
       ? "Follow any device prompt already open, then wait for the result here. Your device may ask for more than one confirmation. Do not start another action yet."
       : "The simulated action is running. No device confirmation is needed; wait for the result here.";
+  } else if (setupDraft?.paused) {
+    label = "SETUP PAUSED";
+    title = "Continue with the same primary key.";
+    text =
+      "This tab retains an encrypted setup draft. Continue setup with passkey reopens the same account and reserve plan. Keep this primary tab open; closing or reloading it loses the unfinished setup.";
   } else if (notice.tone === "error") {
     label = "ACTION NEEDS ATTENTION";
     title = "Check the message above before continuing.";
@@ -287,11 +303,11 @@ function guideMarkup() {
   } else if (primary) {
     label = "SETUP · STEP 2 OF 2";
     title = "Open the reserve app.";
-    text = `Your original app key is ready. Choose Open recovery setup to prepare a separate key for ${b}. Your reserve is not ready yet. Once opened, reserve setup has a five-minute limit; complete it while both windows remain open.`;
+    text = `Your original app key is ready. Choose Open recovery setup to prepare a separate key for ${b}. Your reserve is not ready yet. The reserve window expires after five minutes. Before recovery-key creation starts, an interruption pauses setup in this primary tab.`;
   } else {
     label = "SETUP · STEP 1 OF 2";
     title = "Create the original app’s passkey.";
-    text = `Choose Create primary passkey and save a new key for ${a}. Already completed setup? Choose Open existing workspace instead, using your existing ${a} key. New reserve setup must be completed in one sitting; its window expires after five minutes.`;
+    text = `Choose Create primary passkey and save a new key for ${a}. Already completed setup? Choose Open existing workspace instead, using your existing ${a} key. Keep this primary tab open until setup finishes. You can pause before recovery-key creation starts.`;
   }
   if (
     chainRun &&
@@ -318,6 +334,8 @@ function recoveryStartMarkup() {
   // offer from this window's actual opener is required before creating B.
   if (recoveryEnrollment && !offer && !reserveConfirmed)
     return `<div class="recovery-empty"><span class="eyebrow">RESERVE SETUP</span><h2>${enrollmentAborted ? "Setup could not continue." : backup ? "Waiting for the first checkpoint." : "Connecting to the primary app."}</h2><p>${enrollmentAborted ? "No reserve was confirmed in this window. Keep any existing passkeys. Return to the primary app and check its setup status." : backup ? "Your recovery passkey is ready. Keep both windows open while the primary app finishes saving and the reserve checks the result." : "Keep both windows open. The option to create your recovery passkey appears after the apps establish their connection."}</p></div>`;
+  if (offer && backupAttempted && !busy)
+    return '<div class="recovery-empty"><h2>Setup needs review.</h2><p>Recovery-key creation was attempted. A cancelled or incomplete prompt may still have created a key. Keep existing keys; this setup will not create another.</p></div>';
   return `<div class="recovery-empty"><div class="recovery-art"><span>▤</span><i>↳</i><b>✓</b></div><span class="eyebrow">${offer ? "PREPARE YOUR INDEPENDENT RESERVE" : "START FROM A FRESH CLIENT"}</span><h2>${offer ? "A separate key. A second way in." : "No old tab. No saved file."}</h2><p>${offer ? "This client will wrap a separate data key. It receives no primary wallet key or permission to write its history." : "Choose your prepared recovery credential. The client discovers the encrypted reserve and verifies which copy is current."}</p><button class="button dark large" id="${offer ? "enroll" : "recover"}" ${busy ? "disabled" : ""}>${offer ? (physical ? "Create recovery passkey" : "Prepare simulated reserve") : physical ? "Recover with passkey" : "Recover demo workspace"} ↗</button><small>${physical ? "Use the passkey for recovery.localhost. Your device may ask for more than one confirmation." : "Uses public test credentials. Do not put private information in this demo."}</small></div>`;
 }
 function render() {
@@ -335,7 +353,7 @@ function render() {
   ${chainRun ? `<section class="boundary-card"><h3>Monad testnet · separate setup</h3><p>This run uses real testnet transactions and two encrypted copies in one local service. The earlier local reserve stays bound to its original registry.</p><p>Registry: <code>${escape(policy.registryAddress)}</code></p>${!isRecovery && primary ? `<p>${enrollmentAborted ? "Test account" : "Test account to fund before reserve setup"}: <code>${escape(primary.context.owner)}</code></p>` : ""}</section>` : ""}
   ${guideMarkup()}
   <section class="content-grid"><article class="document">${!isRecovery || recovered ? editorMarkup() : recoveryStartMarkup()}</article>
-  <aside class="right-stack"><section class="reserve-card"><div class="card-kicker">${isRecovery ? "RECOVERY RECEIPT" : "INDEPENDENT RESERVE"}<span>↗</span></div>${isRecovery ? proofMarkup() : `<div class="reserve-illustration"><div>A</div><span>╌╌╌<i>◈</i>╌╌╌</span><div>B</div></div><h2>${state ? "Your reserve is prepared." : "Give your work a second home."}</h2><p>${state ? "Checkpoint updates use the same reserve. Your primary signing session is scoped and expires after ten minutes." : "A separate credential protects the data key. Two encrypted copies and a version registry complete the path back."}</p><button class="button pale" id="prepare" ${busy || enrollmentPending || enrollmentAborted || !!state ? "disabled" : ""}>${state ? "✓ Reserve prepared" : enrollmentAborted ? "Setup ended" : primary ? "Open recovery setup" : physical ? "Create primary passkey" : "Create demo account"}</button><button class="text-button" id="restore" ${busy || enrollmentPending || (!!primary && !state) ? "disabled" : ""}>Open existing workspace ↗</button>`}</section>
+  <aside class="right-stack"><section class="reserve-card"><div class="card-kicker">${isRecovery ? "RECOVERY RECEIPT" : "INDEPENDENT RESERVE"}<span>↗</span></div>${isRecovery ? proofMarkup() : `<div class="reserve-illustration"><div>A</div><span>╌╌╌<i>◈</i>╌╌╌</span><div>B</div></div><h2>${state ? "Your reserve is prepared." : "Give your work a second home."}</h2><p>${state ? "Checkpoint updates use the same reserve. Your primary signing session is scoped and expires after ten minutes." : "A separate credential protects the data key. Two encrypted copies and a version registry complete the path back."}</p><button class="button pale" id="prepare" ${busy || enrollmentPending || (enrollmentAborted && !setupDraft?.paused) || !!state || pageEnded ? "disabled" : ""}>${state ? "✓ Reserve prepared" : setupDraft?.paused ? "Continue setup with passkey" : enrollmentAborted ? "Setup ended" : primary ? "Open recovery setup" : physical ? "Create primary passkey" : "Create demo account"}</button>${setupDraft?.resumable && !setupDraft.paused && !busy ? '<button class="text-button" id="pause-setup">Pause setup</button>' : ""}<button class="text-button" id="restore" ${busy || enrollmentPending || (!!primary && !state) ? "disabled" : ""}>Open existing workspace ↗</button>`}</section>
   <section class="boundary-card"><span class="mini-icon">◈</span><h3>${isRecovery ? "Your copy, your next step." : "Private content stays encrypted."}</h3><p>${isRecovery ? "Read, edit locally and export. Recovery does not restore the primary wallet or authorize new registry writes." : chainRun ? "The local stores receive ciphertext. Monad testnet receives the version and digest. These two local copies do not demonstrate independent hosting." : "The stores receive ciphertext. The registry receives a version and digest. The registry in this demonstration is a local model."}</p></section></aside></section>
   <details class="test-tools" id="test-tools" ${toolsOpen ? "open" : ""}><summary>Demonstration tools · outages and verification tests</summary><section class="demo-controls"><div><span class="eyebrow">TRY THE FAILURE, TOO</span><h2>Recovery should earn your trust.</h2><p>Change the conditions. Then run recovery in a fresh client.</p></div><div class="controls"><label>Mirror / registry condition<select id="scenario" ${busy || enrollmentPending ? "disabled" : ""}><option value="healthy">Both copies healthy</option><option value="stale-one">Mirror 1 serves an old valid copy</option><option value="stale-both">Both mirrors serve an old valid copy</option><option value="missing-current">Latest bytes unavailable</option>${chainRun ? "" : '<option value="freshness-offline">Registry unavailable</option>'}<option value="corrupt-index">Reserve metadata corrupted</option></select></label><button class="button outline" id="outage" ${busy || enrollmentPending ? "disabled" : ""}>${primaryOnline ? "Take primary offline" : "Bring primary back"}</button><button class="text-button" id="fresh" ${busy ? "disabled" : ""}>Discard this session & reload ↻</button>${isRecovery && recovered ? `<button class="button dark" id="recover-again" ${busy ? "disabled" : ""}>Check recovery again ↗</button>` : ""}</div></section></details>
   ${!isRecovery && pendingTicket ? '<section class="boundary-card"><h3>Transaction confirmation is unresolved.</h3><p>Your draft remains here. Checking status only reads the registry; it never submits another transaction.</p><button class="button outline" id="check-transaction">Check transaction status</button><button class="text-button" id="export-ticket">Export transaction reference</button></section>' : ""}
@@ -427,6 +445,7 @@ function render() {
   if (select)
     select.value =
       chainRun && scenario === "freshness-offline" ? "healthy" : scenario;
+  document.querySelector("#pause-setup")?.addEventListener("click", pauseSetup);
   document
     .querySelector("#prepare")
     ?.addEventListener("click", startEnrollment);
@@ -445,6 +464,10 @@ function render() {
       void run(async () => {
         primary?.close();
         const restored = await restorePrimary(policy, passkeys, adapters);
+        if (pageEnded) {
+          restored.state.close();
+          return;
+        }
         state = restored.state;
         primary = state;
         setRecovered(restored.recovered);
@@ -526,9 +549,10 @@ function render() {
       }),
   );
   document.querySelector("#fresh")?.addEventListener("click", () => {
+    setupDraft?.close();
     primary?.close();
     channel?.close();
-    offer?.dataKey.fill(0);
+    grant?.dataKey.fill(0);
     location.replace(`${location.origin}${modeQuery}`);
   });
   for (const field of ["title", "plan", "draft"] as const)
@@ -571,6 +595,37 @@ async function recover() {
       : "The independent client discovered the reserve and opened the current exact copy.",
   };
 }
+function pauseSetup() {
+  if (pageEnded || !setupDraft?.pause()) return;
+  channel?.close();
+  channel = null;
+  enrollmentPending = false;
+  enrollmentAborted = true;
+  notice = {
+    tone: "neutral",
+    title: "Setup paused. Keep this primary tab open.",
+    text: "Continue with your existing primary passkey when ready. Closing or reloading this tab loses this unfinished setup.",
+  };
+  render();
+}
+function watchIdleSetup() {
+  const watched = primary;
+  const timer = setInterval(() => {
+    if (
+      pageEnded ||
+      primary !== watched ||
+      !setupDraft?.resumable ||
+      setupDraft.paused
+    ) {
+      clearInterval(timer);
+      return;
+    }
+    if (watched && Date.now() >= watched.writer.expiresAt) {
+      clearInterval(timer);
+      pauseSetup();
+    }
+  }, 500);
+}
 function watchEnrollment(bound: HandoffChannel, peer: Window) {
   const started = Date.now();
   enrollmentStartedAt = started;
@@ -588,19 +643,27 @@ function watchEnrollment(bound: HandoffChannel, peer: Window) {
       enrollmentAborted = true;
       channel = null;
       bound.close();
-      offer?.dataKey.fill(0);
+      grant?.dataKey.fill(0);
+      grant = null;
+      grantWaiter?.reject(new Error("Setup connection ended"));
+      grantWaiter = null;
       offer = null;
-      if (!state) primary?.close();
+      const paused = !isRecovery && !state && setupDraft?.pause();
+      if (!state && !paused) primary?.close();
       notice = {
-        tone: "error",
-        title: peer.closed
-          ? "The other enrollment window closed."
+        tone: paused ? "neutral" : "error",
+        title: paused
+          ? "Setup paused. Keep this primary tab open."
+          : peer.closed
+            ? "The other enrollment window closed."
+            : connectionTimedOut
+              ? "No setup request arrived from the primary app."
+              : "Reserve preparation expired.",
+        text: paused
+          ? "No recovery-key creation was granted. Continue with your existing primary passkey to reopen this same setup. Reloading or closing this tab loses the unfinished setup."
           : connectionTimedOut
-            ? "No setup request arrived from the primary app."
-            : "Reserve preparation expired.",
-        text: connectionTimedOut
-          ? "The primary setup may have expired, or this window may have been reloaded. There is no recovery-passkey button to use. Check the primary app's status; keep existing passkeys."
-          : "The setup window has closed and its passkey action is unavailable. Preparation has not been confirmed here. Keep existing passkeys and check the primary app before planning another setup.",
+            ? "The primary setup may have expired, or this window may have been reloaded. There is no recovery-passkey button to use. Check the primary app's status; keep existing passkeys."
+            : "The setup window has closed and its passkey action is unavailable. Preparation has not been confirmed here. Keep existing passkeys and check the primary app before planning another setup.",
       };
       render();
       return;
@@ -627,7 +690,21 @@ function notifyReserveCommitted(head: {
   }
 }
 function startEnrollment() {
-  if (busy || enrollmentPending || enrollmentAborted) return;
+  if (busy || enrollmentPending || pageEnded) return;
+  if (setupDraft?.paused) {
+    void run(async () => {
+      primary = await setupDraft!.resume(policy, passkeys, adapters);
+      enrollmentAborted = false;
+      notice = {
+        tone: "success",
+        title: "Same setup reopened. No new key was created.",
+        text: "Choose Open recovery setup when ready. Keep this primary tab open until setup finishes.",
+      };
+      watchIdleSetup();
+    });
+    return;
+  }
+  if (enrollmentAborted) return;
   if (!primary) {
     notice = {
       tone: "neutral",
@@ -640,6 +717,22 @@ function startEnrollment() {
     };
     void run(async () => {
       primary = await createPrimary(policy, passkeys, adapters);
+      if (pageEnded) {
+        primary.close();
+        return;
+      }
+      try {
+        setupDraft = await SetupDraft.create(primary, adapters);
+      } catch (error) {
+        primary.close();
+        enrollmentAborted = true;
+        throw error;
+      }
+      if (pageEnded) {
+        setupDraft.close();
+        return;
+      }
+      watchIdleSetup();
       notice = {
         tone: "success",
         title: "Primary account ready. Now prepare its reserve.",
@@ -672,7 +765,6 @@ function startEnrollment() {
   });
   channel.setOffer({
     context: primary.context,
-    dataKey: new Uint8Array(primary.dataKey),
   });
   watchEnrollment(channel, popup);
   notice = {
@@ -683,12 +775,35 @@ function startEnrollment() {
   render();
 }
 async function enrollRecovery() {
-  if (!offer || !channel) throw new Error("No bound enrollment");
+  if (!offer || !channel || backupAttempted || pageEnded)
+    throw new Error("No unused bound enrollment");
+  const bound = channel;
+  backupAttempted = true;
   validateContext(offer.context, policy);
-  backup = await prepareBackup(policy, passkeys, offer);
-  offer.dataKey.fill(0);
-  offer = null;
-  channel.backup(backup);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      grantWaiter = { resolve, reject };
+      bound.begin();
+    });
+    if (channel !== bound || !bound.isActive || !grant || pageEnded)
+      throw new Error("Setup grant expired");
+    const granted = grant;
+    const prepared = await prepareBackup(
+      policy,
+      passkeys,
+      granted,
+      () => channel === bound && bound.isActive && !pageEnded,
+    );
+    if (channel !== bound || !bound.isActive || pageEnded)
+      throw new Error("Setup ended during authentication");
+    backup = prepared;
+    offer = null;
+    bound.backup(backup);
+  } finally {
+    grant?.dataKey.fill(0);
+    grant = null;
+    grantWaiter = null;
+  }
   notice = {
     tone: "neutral",
     title: "Reserve wrapped. Waiting for the primary commit.",
@@ -696,24 +811,16 @@ async function enrollRecovery() {
   };
 }
 window.addEventListener("message", (event) => {
+  if (pageEnded) return;
   const delivery = channel?.accept(event);
   if (!delivery) return;
   if (delivery.kind === "offer" && isRecovery) {
     try {
-      const received = delivery.payload as {
-        context: Context;
-        dataKey: Uint8Array;
-      };
+      const received = delivery.payload as { context: Context };
       validateContext(received.context, policy);
-      if (
-        !(received.dataKey instanceof Uint8Array) ||
-        received.dataKey.length !== 32
-      )
-        throw new Error("Invalid handoff key");
-      offer = {
-        context: received.context,
-        dataKey: new Uint8Array(received.dataKey),
-      };
+      if (Object.keys(received).length !== 1)
+        throw new Error("Invalid setup offer");
+      offer = { context: received.context };
       enrollmentPending = true;
       notice = {
         tone: "neutral",
@@ -725,6 +832,55 @@ window.addEventListener("message", (event) => {
       channel?.close();
       fail(error);
       render();
+    }
+  }
+  if (delivery.kind === "begin" && !isRecovery) {
+    try {
+      if (!primary || !setupDraft || !channel)
+        throw new Error("No primary setup");
+      // Fence before key release: a lost grant or cancelled native ceremony cannot reset it.
+      setupDraft.beginBackup(primary);
+      channel.grant({
+        context: primary.context,
+        dataKey: new Uint8Array(primary.dataKey),
+      });
+      render();
+    } catch (error) {
+      channel?.close();
+      channel = null;
+      enrollmentPending = false;
+      enrollmentAborted = true;
+      if (!setupDraft?.pause()) primary?.close();
+      fail(error);
+      render();
+    }
+  }
+  if (delivery.kind === "grant" && isRecovery) {
+    try {
+      const received = delivery.payload as {
+        context: Context;
+        dataKey: Uint8Array;
+      };
+      validateContext(received.context, policy);
+      if (
+        !offer ||
+        !grantWaiter ||
+        JSON.stringify(received.context) !== JSON.stringify(offer.context) ||
+        !(received.dataKey instanceof Uint8Array) ||
+        received.dataKey.length !== 32
+      )
+        throw new Error("Invalid creation grant");
+      grant = {
+        context: received.context,
+        dataKey: new Uint8Array(received.dataKey),
+      };
+      grantWaiter.resolve();
+      grantWaiter = null;
+    } catch (error) {
+      grantWaiter?.reject(error as Error);
+      grantWaiter = null;
+      channel?.close();
+      channel = null;
     }
   }
   if (delivery.kind === "backup" && !isRecovery)
@@ -872,9 +1028,27 @@ if (recoveryEnrollment) {
   }
 }
 window.addEventListener("pagehide", () => {
+  pageEnded = true;
+  setupDraft?.close();
   primary?.close();
   channel?.close();
-  offer?.dataKey.fill(0);
+  channel = null;
+  grant?.dataKey.fill(0);
+  grant = null;
+  offer = null;
+  grantWaiter?.reject(new Error("Page ended"));
+  grantWaiter = null;
+  enrollmentPending = false;
+  enrollmentAborted = true;
+});
+window.addEventListener("pageshow", () => {
+  if (!pageEnded) return;
+  notice = {
+    tone: "error",
+    title: "This page session has ended.",
+    text: "Returning to an old page cannot reopen its unfinished setup. Keep existing keys. Completed work can be opened in a fresh session.",
+  };
+  render();
 });
 render();
 void refreshStatus();

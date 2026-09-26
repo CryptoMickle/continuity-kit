@@ -52,11 +52,15 @@ export class MeraPasskeyAdapter implements PasskeyAdapter {
       }),
     );
   }
-  async openPrimary(p: RecoveryPolicy): Promise<PrfResult> {
+  async openPrimary(
+    p: RecoveryPolicy,
+    credentialId?: string,
+  ): Promise<PrfResult> {
     validatePolicy(p);
     return mapped(() =>
       getPasskeyPrfOutput({
         rpId: p.aRpId,
+        ...(credentialId ? { credential: { credentialId } } : {}),
         webAuthnClient: this.webAuthnClient,
         timeout: 120000,
       }),

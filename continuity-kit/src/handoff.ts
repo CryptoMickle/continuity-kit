@@ -1,4 +1,4 @@
-const protocol = "continuity-handoff/v1";
+const protocol = "continuity-handoff/v2";
 const noncePattern = /^[a-f0-9]{64}$/;
 const randomNonce = () =>
   [...crypto.getRandomValues(new Uint8Array(32))]
@@ -14,7 +14,7 @@ type Message = {
 };
 type HandoffEvent = { origin: string; source: unknown; data: unknown };
 export type Delivery = {
-  kind: "offer" | "backup" | "committed";
+  kind: "offer" | "begin" | "grant" | "backup" | "committed";
   payload: unknown;
 };
 
@@ -57,13 +57,13 @@ export class HandoffChannel {
   }
   private active() {
     return (
-      this.phase < 4 &&
+      this.phase < 6 &&
       this.now() - this.startedAt < 300000 &&
       this.now() >= this.startedAt
     );
   }
   setOffer(payload: unknown) {
-    if (this.role !== "primary" || this.phase !== 0)
+    if (!this.active() || this.role !== "primary" || this.phase !== 0)
       throw new Error("Unexpected offer");
     this.offerPayload = payload;
   }
@@ -137,32 +137,85 @@ export class HandoffChannel {
     if (
       this.role === "primary" &&
       this.phase === 1 &&
-      m.kind === "backup" &&
-      m.step === 2
+      m.kind === "begin" &&
+      m.step === 2 &&
+      m.payload === undefined
     ) {
       this.phase = 2;
-      return { kind: "backup", payload: m.payload };
+      return { kind: "begin", payload: undefined };
     }
     if (
       this.role === "recovery" &&
       this.phase === 2 &&
-      m.kind === "committed" &&
+      m.kind === "grant" &&
       m.step === 3
     ) {
+      this.phase = 3;
+      return { kind: "grant", payload: m.payload };
+    }
+    if (
+      this.role === "primary" &&
+      this.phase === 3 &&
+      m.kind === "backup" &&
+      m.step === 4
+    ) {
       this.phase = 4;
+      return { kind: "backup", payload: m.payload };
+    }
+    if (
+      this.role === "recovery" &&
+      this.phase === 4 &&
+      m.kind === "committed" &&
+      m.step === 5
+    ) {
+      this.phase = 6;
       return { kind: "committed", payload: m.payload };
     }
     return null;
   }
-  backup(payload: unknown) {
+  get isActive() {
+    return this.active();
+  }
+  begin() {
     if (!this.active() || this.role !== "recovery" || this.phase !== 1)
       throw new Error("Handoff expired or out of order");
     this.phase = 2;
     this.send(
       {
         protocol,
-        kind: "backup",
+        kind: "begin",
         step: 2,
+        aNonce: this.aNonce,
+        bNonce: this.bNonce,
+      },
+      this.origin,
+    );
+  }
+  grant(payload: unknown) {
+    if (!this.active() || this.role !== "primary" || this.phase !== 2)
+      throw new Error("Handoff expired or out of order");
+    this.phase = 3;
+    this.send(
+      {
+        protocol,
+        kind: "grant",
+        step: 3,
+        aNonce: this.aNonce,
+        bNonce: this.bNonce,
+        payload,
+      },
+      this.origin,
+    );
+  }
+  backup(payload: unknown) {
+    if (!this.active() || this.role !== "recovery" || this.phase !== 3)
+      throw new Error("Handoff expired or out of order");
+    this.phase = 4;
+    this.send(
+      {
+        protocol,
+        kind: "backup",
+        step: 4,
         aNonce: this.aNonce,
         bNonce: this.bNonce,
         payload,
@@ -171,13 +224,13 @@ export class HandoffChannel {
     );
   }
   committed(payload: unknown) {
-    if (!this.active() || this.role !== "primary" || this.phase !== 2)
+    if (!this.active() || this.role !== "primary" || this.phase !== 4)
       throw new Error("Handoff expired or out of order");
     this.send(
       {
         protocol,
         kind: "committed",
-        step: 3,
+        step: 5,
         aNonce: this.aNonce,
         bNonce: this.bNonce,
         payload,
@@ -187,7 +240,7 @@ export class HandoffChannel {
     this.close();
   }
   close() {
-    this.phase = 4;
+    this.phase = 6;
     this.offerPayload = undefined;
     this.aNonce = "";
     this.bNonce = "";

@@ -123,7 +123,12 @@ export async function prepareBackup(
   policy: RecoveryPolicy,
   passkeys: PasskeyAdapter,
   input: { context: Context; dataKey: Uint8Array },
+  isActive: () => boolean = () => true,
 ): Promise<PreparedBackup> {
+  const assertActive = () => {
+    if (!isActive()) throw new ContinuityError("SESSION_EXPIRED");
+  };
+  assertActive();
   validateContext(input.context, policy);
   if (input.dataKey.length !== 32) throw new ContinuityError("SCHEMA_INVALID");
   const context = structuredClone(input.context);
@@ -138,25 +143,29 @@ export async function prepareBackup(
   } finally {
     wrapped.fill(0);
   }
+  // Native work already inside Mera may finish late. Never start our next
+  // separate ceremony on behalf of a handoff that has since ended.
+  assertActive();
   validateVault(vault);
   const discovered = await passkeys.discover(
     policy,
     vault.credential.credentialId,
   );
-  if (discovered.credentialId !== vault.credential.credentialId)
-    throw new ContinuityError("CREDENTIAL_MISMATCH");
-  const keys = await lookupKeys(discovered.prfOutput);
-  discovered.prfOutput.fill(0);
-  const manifest: Manifest = {
-    format: "continuity-manifest/v1",
-    context,
-    vault,
-  };
-  const bytes = bytesOf(manifest);
-  if (bytes.length > policy.maxManifestBytes)
-    throw new ContinuityError("SCHEMA_INVALID");
+  let keys: Awaited<ReturnType<typeof lookupKeys>> | undefined;
   try {
-    return {
+    assertActive();
+    if (discovered.credentialId !== vault.credential.credentialId)
+      throw new ContinuityError("CREDENTIAL_MISMATCH");
+    keys = await lookupKeys(discovered.prfOutput);
+    const manifest: Manifest = {
+      format: "continuity-manifest/v1",
+      context,
+      vault,
+    };
+    const bytes = bytesOf(manifest);
+    if (bytes.length > policy.maxManifestBytes)
+      throw new ContinuityError("SCHEMA_INVALID");
+    const result = {
       manifest,
       manifestDigest: await digest(bytes),
       locator: keys.locator,
@@ -165,8 +174,11 @@ export async function prepareBackup(
         ...(await seal(keys.key, bytes, indexAAD(policy, keys.locator))),
       }),
     };
+    assertActive();
+    return result;
   } finally {
-    keys.key.fill(0);
+    discovered.prfOutput.fill(0);
+    keys?.key.fill(0);
   }
 }
 export async function encryptCapsule(
