@@ -12,9 +12,13 @@ import {
   discoverRecovery,
   recoverCurrent,
   saveCheckpoint,
+  reconcileCheckpoint,
+  reconcileEnrollment,
 } from "./sdk/index.ts";
 import type {
   PreparedBackup,
+  WriteTicket,
+  WriteProof,
   Recovered,
   Workspace,
   Context,
@@ -32,15 +36,20 @@ const fixture = new SyntheticWebAuthnClient({
   seed: "continuity-demo-profile-1",
 });
 const passkeys = new MeraPasskeyAdapter(physical ? undefined : fixture);
+const registry = new HttpRegistry(policy);
 const adapters = {
+  trustMode: "local-model" as const,
+  localWriter: registry,
   mirrors: policy.mirrorUrls.map((url) => new HttpMirrorStore(url)),
-  registry: new HttpRegistry(policy.registryUrl),
+  registry,
 };
 const app = document.querySelector<HTMLDivElement>("#app")!;
 let primary: PrimaryAccount | null = null;
 let state: PrimaryState | null = null;
 let recovered: Recovered | null = null;
 let backup: PreparedBackup | null = null;
+let pendingTicket: WriteTicket | null = null;
+let writeProof: WriteProof | null = null;
 let offer: { context: Context; dataKey: Uint8Array } | null = null;
 let channel: HandoffChannel | null = null;
 let busy = false;
@@ -155,6 +164,7 @@ async function run(action: () => Promise<void>, required = false) {
   try {
     await action();
   } catch (error) {
+    pendingTicket = (state ?? primary)?.writer.pendingTicket ?? pendingTicket;
     fail(error);
   } finally {
     busy = false;
@@ -198,7 +208,7 @@ function editorMarkup() {
 function proofMarkup() {
   if (!recovered)
     return '<div class="empty-proof"><span class="proof-ring">◎</span><p>A successful recovery comes with a receipt.</p><small>The selected version, digest and source checks appear here.</small></div>';
-  return `<div class="verified-label">✓ VERIFIED IN LOCAL MODEL</div><div class="version-number">v${escape(recovered.version)}<span>current at the accepted read</span></div><dl><dt>Owner</dt><dd title="${escape(recovered.context.owner)}">${short(recovered.context.owner)}</dd><dt>Checkpoint</dt><dd title="${escape(recovered.capsuleDigest)}">${short(recovered.capsuleDigest)}</dd><dt>Model block</dt><dd>${escape(recovered.evidence.blockNumber)}</dd><dt>Checked</dt><dd>${new Date(recovered.evidence.observedAt).toLocaleTimeString()}</dd></dl>${recovered.diagnostics.length ? `<div class="mirror-warning">${recovered.diagnostics.length} invalid or unavailable mirror response(s) rejected. A valid copy passed all checks.</div>` : '<p class="proof-footnote">The exact stored bytes match the owner-approved digest.</p>'}<details><summary>Inspect verification receipt</summary><pre>${escape(JSON.stringify({ ...recovered, content: undefined }, null, 2))}</pre></details>`;
+  return `<div class="verified-label">✓ ${recovered.evidence.trustMode === "local-model" ? "VERIFIED IN LOCAL MODEL" : "VERIFIED THROUGH FINALIZED RPC QUORUM"}</div><div class="version-number">v${escape(recovered.version)}<span>current at the accepted read</span></div><dl><dt>Owner</dt><dd title="${escape(recovered.context.owner)}">${short(recovered.context.owner)}</dd><dt>Checkpoint</dt><dd title="${escape(recovered.capsuleDigest)}">${short(recovered.capsuleDigest)}</dd><dt>${recovered.evidence.trustMode === "local-model" ? "Model" : "Finalized"} block</dt><dd>${escape(recovered.evidence.blockNumber)}</dd><dt>Checked</dt><dd>${new Date(recovered.evidence.observedAt).toLocaleTimeString()}</dd></dl>${recovered.diagnostics.length ? `<div class="mirror-warning">${recovered.diagnostics.length} invalid or unavailable mirror response(s) rejected. A valid copy passed all checks.</div>` : '<p class="proof-footnote">The exact stored bytes match the owner-approved digest.</p>'}<details><summary>Inspect verification receipt</summary><pre>${escape(JSON.stringify({ ...recovered, content: undefined, writeProof }, null, 2))}</pre></details>`;
 }
 function render() {
   if (!validOrigin) {
@@ -214,8 +224,87 @@ function render() {
   <aside class="right-stack"><section class="reserve-card"><div class="card-kicker">${isRecovery ? "RECOVERY RECEIPT" : "INDEPENDENT RESERVE"}<span>↗</span></div>${isRecovery ? proofMarkup() : `<div class="reserve-illustration"><div>A</div><span>╌╌╌<i>◈</i>╌╌╌</span><div>B</div></div><h2>${state ? "Your reserve is prepared." : "Give your work a second home."}</h2><p>${state ? "Checkpoint updates use the same reserve. Your primary signing session is scoped and expires after ten minutes." : "A separate credential protects the data key. Two encrypted copies and a version registry complete the path back."}</p><button class="button pale" id="prepare" ${busy || enrollmentPending || !!state ? "disabled" : ""}>${state ? "✓ Reserve prepared" : primary ? "Open recovery setup" : physical ? "Create primary passkey" : "Create demo account"}</button><button class="text-button" id="restore" ${busy || enrollmentPending || (!!primary && !state) ? "disabled" : ""}>Restore primary from a fresh session ↗</button>`}</section>
   <section class="boundary-card"><span class="mini-icon">◈</span><h3>${isRecovery ? "Your copy, your next step." : "Private content stays encrypted."}</h3><p>${isRecovery ? "Read, edit locally and export. Recovery does not restore the primary wallet or authorize new registry writes." : "The stores receive ciphertext. The registry receives a version and digest. The registry in this demonstration is a local model."}</p></section></aside></section>
   <section class="demo-controls"><div><span class="eyebrow">TRY THE FAILURE, TOO</span><h2>Recovery should earn your trust.</h2><p>Change the conditions. Then run recovery in a fresh client.</p></div><div class="controls"><label>Mirror / registry condition<select id="scenario" ${busy || enrollmentPending ? "disabled" : ""}><option value="healthy">Both copies healthy</option><option value="stale-one">Mirror 1 serves an old valid copy</option><option value="stale-both">Both mirrors serve an old valid copy</option><option value="missing-current">Latest bytes unavailable</option><option value="freshness-offline">Registry unavailable</option><option value="corrupt-index">Reserve metadata corrupted</option></select></label><button class="button outline" id="outage" ${busy || enrollmentPending ? "disabled" : ""}>${primaryOnline ? "Take primary offline" : "Bring primary back"}</button><button class="text-button" id="fresh" ${busy ? "disabled" : ""}>Discard this session & reload ↻</button>${isRecovery && recovered ? `<button class="button dark" id="recover-again" ${busy ? "disabled" : ""}>Check recovery again ↗</button>` : ""}</div></section>
+  ${!isRecovery && pendingTicket ? '<section class="boundary-card"><h3>Transaction confirmation is unresolved.</h3><p>Your draft remains here. Checking status only reads the registry; it never submits another transaction.</p><button class="button outline" id="check-transaction">Check transaction status</button><button class="text-button" id="export-ticket">Export transaction reference</button></section>' : ""}
   <footer><span>ContinuityKit / Experimental developer preview</span><span>${physical ? "Real authenticator · simulated registry" : "Simulated authenticator · simulated registry"} · No Monad transactions</span></footer>
   </main></div>`;
+  document.querySelector("#check-transaction")?.addEventListener(
+    "click",
+    () =>
+      void run(async () => {
+        const account = state ?? primary;
+        if (!account || !pendingTicket) return;
+        if (pendingTicket.command.operation === "create") {
+          const result = await reconcileEnrollment(
+            account,
+            pendingTicket,
+            adapters,
+          );
+          if (result.status === "pending") {
+            notice = {
+              tone: "neutral",
+              title: "Reserve confirmation is still pending.",
+              text: "Your enrollment and transaction reference remain unchanged.",
+            };
+            return;
+          }
+          state = result.state;
+          enrollmentPending = false;
+          pendingTicket = result.unresolvedTicket ?? null;
+          writeProof = result.proof;
+          // Keep the draft; a status check never treats it as newly recovered current content.
+          recovered = null;
+          notice = {
+            tone: pendingTicket ? "neutral" : "success",
+            title: pendingTicket
+              ? "Reserve prepared; transaction attribution remains unresolved."
+              : "Reserve prepared and transaction confirmed.",
+            text: "Your draft remains here. Restore or recover to open the verified current checkpoint.",
+          };
+          return;
+        }
+        if (!state) return;
+        const result = await reconcileCheckpoint(
+          state,
+          pendingTicket,
+          adapters,
+        );
+        if (result.status === "pending") {
+          notice = {
+            tone: "neutral",
+            title: "Checkpoint confirmation is still pending.",
+            text: "Your draft and transaction reference remain here. No new transaction was sent.",
+          };
+          return;
+        }
+        writeProof = result.proof;
+        pendingTicket =
+          result.status === "saved" ? (result.unresolvedTicket ?? null) : null;
+        if (result.status === "saved") recovered = result.recovered;
+        notice = {
+          tone: pendingTicket ? "neutral" : "success",
+          title: pendingTicket
+            ? "Checkpoint found; transaction attribution remains unresolved."
+            : "Transaction confirmed.",
+          text:
+            result.status === "saved"
+              ? "The exact checkpoint is current at the accepted read. Your text in this window remains unchanged."
+              : "A newer checkpoint is current. Your draft remains here; restore or recover to read the latest content.",
+        };
+      }),
+  );
+  document.querySelector("#export-ticket")?.addEventListener("click", () => {
+    if (!pendingTicket) return;
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(pendingTicket, null, 2)], {
+        type: "application/json",
+      }),
+    );
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "continuity-transaction-reference.json";
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
   const select = document.querySelector<HTMLSelectElement>("#scenario");
   if (select) select.value = scenario;
   document
@@ -252,11 +341,36 @@ function render() {
       void run(async () => {
         if (!state) return;
         const next = await saveCheckpoint(state, workspace, adapters);
-        setRecovered(next);
+        if (next.status === "pending") {
+          pendingTicket = next.ticket;
+          notice = {
+            tone: "neutral",
+            title: "Checkpoint confirmation is pending.",
+            text: "Your draft remains here. Check transaction status before saving again.",
+          };
+          return;
+        }
+        if (next.status === "superseded") {
+          writeProof = next.proof;
+          notice = {
+            tone: "neutral",
+            title: "A newer checkpoint is available.",
+            text: "Your write committed, then another checkpoint replaced it. Your draft remains here; restore to read the current checkpoint.",
+          };
+          return;
+        }
+        pendingTicket = next.unresolvedTicket ?? null;
+        writeProof = next.proof;
+        setRecovered(next.recovered);
         notice = {
           tone: "success",
-          title: `Checkpoint v${next.version} is committed.`,
-          text: "Both exact encrypted copies were checked before the signed local registry update.",
+          title: `Checkpoint v${next.recovered.version} is committed.${pendingTicket ? " Transaction confirmation is unresolved." : ""}`,
+          text:
+            next.proof.kind === "local-model"
+              ? "Both exact encrypted copies were checked before the signed local registry update."
+              : next.proof.kind === "finalized-state"
+                ? "The finalized registry contains this checkpoint. Its transaction attribution remains unresolved; check its status before another save."
+                : "The transaction, event and finalized registry state passed the configured RPC checks.",
         };
       }),
   );
@@ -373,7 +487,7 @@ function startEnrollment() {
         : "No real credential is created in simulation mode.",
     };
     void run(async () => {
-      primary = await createPrimary(policy, passkeys);
+      primary = await createPrimary(policy, passkeys, adapters);
       notice = {
         tone: "success",
         title: "Primary account ready. Now prepare its reserve.",
@@ -464,21 +578,39 @@ window.addEventListener("message", (event) => {
     void run(async () => {
       if (!primary || !channel) throw new Error("Primary session missing");
       backup = delivery.payload as PreparedBackup;
-      state = await finalizeEnrollment(primary, backup, workspace, adapters);
-      const head = await adapters.registry.getHead(
-        policy,
-        state.context.owner,
-        state.context.streamId,
+      const result = await finalizeEnrollment(
+        primary,
+        backup,
+        workspace,
+        adapters,
       );
-      recovered = {
-        content: structuredClone(workspace),
-        context: state.context,
-        manifestDigest: state.manifestDigest,
-        version: head.version,
-        capsuleDigest: head.capsuleDigest,
-        evidence: head.evidence,
-        diagnostics: [],
-      };
+      if (result.status === "pending") {
+        pendingTicket = result.ticket;
+        notice = {
+          tone: "neutral",
+          title: "Reserve confirmation is pending.",
+          text: "Preparation has not been confirmed. Your enrollment bytes remain unchanged.",
+        };
+        return;
+      }
+      state = result.state;
+      writeProof = result.proof;
+      pendingTicket = result.unresolvedTicket ?? null;
+      const head = result.currentHead;
+      // The enrollment draft belongs only to the exact v1 capsule, never a later head.
+      recovered =
+        head.version === "1" &&
+        head.capsuleDigest === primary.enrollment?.capsuleDigest
+          ? {
+              content: structuredClone(workspace),
+              context: state.context,
+              manifestDigest: state.manifestDigest,
+              version: head.version,
+              capsuleDigest: head.capsuleDigest,
+              evidence: head.evidence,
+              diagnostics: [],
+            }
+          : null;
       channel.committed({
         version: head.version,
         capsuleDigest: head.capsuleDigest,
@@ -486,15 +618,21 @@ window.addEventListener("message", (event) => {
       enrollmentPending = false;
       notice = {
         tone: "success",
-        title: "Your reserve is prepared. Checkpoint v1 is protected.",
-        text: "Edit the workspace and save v2. Then take the primary offline and open a fresh recovery client.",
+        title: pendingTicket
+          ? "Reserve prepared; transaction confirmation is unresolved."
+          : `Your reserve is prepared. Checkpoint v${head.version} is current.`,
+        text:
+          head.version !== "1"
+            ? "A newer checkpoint has already replaced the enrollment draft. Restore or recover to read its verified content."
+            : pendingTicket
+              ? "The finalized registry confirms the reserve. Check transaction status before saving another checkpoint."
+              : "Edit the workspace and save v2. Then take the primary offline and open a fresh recovery client.",
       };
     }, true);
   if (delivery.kind === "committed" && isRecovery)
     void run(async () => {
       if (!backup) throw new Error("Reserve missing");
       const head = await adapters.registry.getHead(
-        policy,
         backup.manifest.context.owner,
         backup.manifest.context.streamId,
       );

@@ -297,7 +297,7 @@ test("prepared function ABI matches compiled contract ABI", () => {
   }[];
   for (const entry of registryAbi) {
     const actual = artifact.find(
-      (e) => e.type === "function" && e.name === entry.name,
+      (e) => e.type === entry.type && e.name === entry.name,
     )!;
     assert.deepEqual(
       actual.inputs.map((e) => e.type),
@@ -305,7 +305,23 @@ test("prepared function ABI matches compiled contract ABI", () => {
     );
     assert.deepEqual(
       actual.outputs?.map((e) => e.type),
-      entry.outputs.map((e) => e.type),
+      entry.type === "function" ? entry.outputs.map((e) => e.type) : undefined,
     );
   }
+});
+test("standalone reader rejects uint64 overflow and noncanonical ABI padding", async () => {
+  const f = fixture();
+  const rpc: ReadRpc = async (...args) =>
+    args[1] === "eth_call"
+      ? "0x" +
+        "0".repeat(63) +
+        "1" +
+        id(2).slice(2) +
+        (1n << 64n).toString(16).padStart(64, "0") +
+        id(3).slice(2)
+      : f.rpc(...args);
+  await assert.rejects(
+    new MonadRegistryReader(policy, rpc, () => now).getHead(owner, id(1)),
+    { code: "FRESHNESS_UNAVAILABLE" },
+  );
 });

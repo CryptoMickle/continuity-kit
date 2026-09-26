@@ -12,17 +12,20 @@ import { SyntheticWebAuthnClient } from "../src/sdk/demo-fixture.ts";
 const passkeys = new MeraPasskeyAdapter(
   new SyntheticWebAuthnClient({ seed: "continuity-demo-profile-1" }),
 );
+const registry = new HttpRegistry(LOCAL_POLICY);
 const adapters = {
+  trustMode: "local-model" as const,
+  localWriter: registry,
   mirrors: LOCAL_POLICY.mirrorUrls.map((url) => new HttpMirrorStore(url)),
-  registry: new HttpRegistry(LOCAL_POLICY.registryUrl),
+  registry,
 };
-const primary = await createPrimary(LOCAL_POLICY, passkeys);
+const primary = await createPrimary(LOCAL_POLICY, passkeys, adapters);
 try {
   const backup = await prepareBackup(LOCAL_POLICY, passkeys, {
     context: primary.context,
     dataKey: primary.dataKey,
   });
-  const state = await finalizeEnrollment(
+  const result = await finalizeEnrollment(
     primary,
     backup,
     {
@@ -42,6 +45,9 @@ try {
     },
     adapters,
   );
+  if (result.status !== "prepared")
+    throw new Error("Local fixture preparation pending");
+  const state = result.state;
   process.stdout.write(
     `Public synthetic fixture prepared at v1. Owner: ${state.context.owner}\nUse Restore primary in A or Recover demo workspace in B.\nThis seed bypasses browser enrollment; it is not evidence of physical passkeys or the window handoff.\n`,
   );

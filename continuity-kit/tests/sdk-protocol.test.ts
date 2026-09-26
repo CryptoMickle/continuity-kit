@@ -5,8 +5,8 @@ import {
   LOCAL_POLICY,
   createPrimary,
   prepareBackup,
-  finalizeEnrollment,
-  saveCheckpoint,
+  finalizeEnrollment as finalizeResult,
+  saveCheckpoint as saveResult,
   discoverRecovery,
   recoverCurrent,
   restorePrimary,
@@ -16,13 +16,13 @@ import {
   createLocalCopy,
   exportLocalCopy,
   validatePolicy,
-  ScopedOwnerSession,
+  OwnerWriter,
   encryptCapsule,
-  deriveOwnerSession,
+  deriveOwnerWriter,
 } from "../src/sdk/index.ts";
 import type {
   Workspace,
-  Adapters,
+  PrimaryAdapters,
   RecoveryPolicy,
   Hex,
 } from "../src/sdk/index.ts";
@@ -39,6 +39,56 @@ import {
   b64,
   hex,
 } from "../src/sdk/crypto.ts";
+// Local regressions assert the new result discriminator before accessing content/state.
+async function finalizeEnrollment(...args: Parameters<typeof finalizeResult>) {
+  const result = await finalizeResult(...args);
+  assert.equal(result.status, "prepared");
+  if (result.status !== "prepared")
+    throw new Error("Unexpected pending local fixture");
+  return result.state;
+}
+async function saveCheckpoint(...args: Parameters<typeof saveResult>) {
+  const result = await saveResult(...args);
+  assert.equal(result.status, "saved");
+  if (result.status !== "saved")
+    throw new Error("Unexpected noncurrent local fixture");
+  return result.recovered;
+}
+function localAdapters(
+  mirrors = [
+    new MemoryMirrorStore("mirror-0"),
+    new MemoryMirrorStore("mirror-1"),
+  ],
+  registry = new MemoryRegistry(),
+) {
+  return {
+    mirrors,
+    registry,
+    trustMode: "local-model" as const,
+    localWriter: registry,
+  };
+}
+function deriveOwnerSession(prf: Uint8Array) {
+  return deriveOwnerWriter(prf, LOCAL_POLICY, localAdapters());
+}
+async function captureLocalSignature(
+  s: Awaited<ReturnType<typeof setup>>,
+  command: Parameters<OwnerWriter["execute"]>[0],
+): Promise<Hex> {
+  let captured: Hex | undefined;
+  const execute = s.registry.executeLocal.bind(s.registry);
+  s.registry.executeLocal = async (c, signature) => {
+    captured = signature;
+    return execute(c, signature);
+  };
+  try {
+    await s.state.writer.execute(command);
+  } finally {
+    s.registry.executeLocal = execute;
+  }
+  assert.ok(captured);
+  return captured;
+}
 const workspace: Workspace = {
   title: "Synthetic workspace",
   plan: "Only public synthetic test content",
@@ -58,8 +108,8 @@ async function setup(options: { fallback?: boolean } = {}) {
     new MemoryMirrorStore("mirror-1"),
   ];
   const registry = new MemoryRegistry();
-  const adapters: Adapters = { mirrors, registry };
-  const primary = await createPrimary(LOCAL_POLICY, passkeys);
+  const adapters: PrimaryAdapters = localAdapters(mirrors, registry);
+  const primary = await createPrimary(LOCAL_POLICY, passkeys, adapters);
   const backup = await prepareBackup(LOCAL_POLICY, passkeys, primary);
   const state = await finalizeEnrollment(primary, backup, workspace, adapters);
   return { seed, client, passkeys, mirrors, registry, adapters, state, backup };
@@ -305,7 +355,7 @@ test("registry immutable manifest mismatch rejects valid encrypted content", asy
   await assert.rejects(() => freshB(s), code("MANIFEST_BINDING_MISMATCH"));
   s.state.close();
 });
-test("two concurrent checkpoint writers use CAS; exactly one succeeds", async () => {
+test("same-account concurrent checkpoint preparation admits one draft", async () => {
   const s = await setup();
   const results = await Promise.allSettled([
     saveCheckpoint(s.state, { ...workspace, draft: "writer 1" }, s.adapters),
@@ -315,14 +365,13 @@ test("two concurrent checkpoint writers use CAS; exactly one succeeds", async ()
   const failed = results.find(
     (r) => r.status === "rejected",
   ) as PromiseRejectedResult;
-  assert.equal(failed.reason.code, "WRITE_CONFLICT");
+  assert.equal(failed.reason.code, "WRITE_PENDING");
   assert.equal((await freshB(s)).recovered.version, "2");
   s.state.close();
 });
 test("storage failure prevents owner commit, retry reuses exact enrollment bytes", async () => {
   const s = await setup();
   const prior = await s.registry.getHead(
-    LOCAL_POLICY,
     s.state.context.owner,
     s.state.context.streamId,
   );
@@ -334,13 +383,8 @@ test("storage failure prevents owner commit, retry reuses exact enrollment bytes
   );
   s.mirrors[1].offline = false;
   assert.equal(
-    (
-      await s.registry.getHead(
-        LOCAL_POLICY,
-        s.state.context.owner,
-        s.state.context.streamId,
-      )
-    ).capsuleDigest,
+    (await s.registry.getHead(s.state.context.owner, s.state.context.streamId))
+      .capsuleDigest,
     prior.capsuleDigest,
   );
   const exact = s.state.enrollment!.primaryBytes;
@@ -396,7 +440,7 @@ test("session expiry, explicit close, owner and stream scope prevent signing", a
   };
   await assert.rejects(
     () =>
-      s.state.session.sign({ ...command, streamId: `0x${"cd".repeat(32)}` }),
+      s.state.writer.execute({ ...command, streamId: `0x${"cd".repeat(32)}` }),
     code("CONTEXT_MISMATCH"),
   );
   s.state.close();
@@ -404,11 +448,18 @@ test("session expiry, explicit close, owner and stream scope prevent signing", a
     () => saveCheckpoint(s.state, workspace, s.adapters),
     code("SESSION_EXPIRED"),
   );
-  const session = new ScopedOwnerSession(new Uint8Array(32).fill(7), 1);
+  let now = Date.now();
+  const session = new OwnerWriter(
+    new Uint8Array(32).fill(7),
+    LOCAL_POLICY,
+    localAdapters(),
+    () => now,
+  );
   session.bindContext({ ...s.state.context, owner: session.owner });
-  await new Promise((resolve) => setTimeout(resolve, 5));
+  session.bindManifest(s.state.manifestDigest);
+  now += 600001;
   await assert.rejects(
-    () => session.sign({ ...command, owner: session.owner }),
+    () => session.execute({ ...command, owner: session.owner }),
     code("SESSION_EXPIRED"),
   );
 });
@@ -605,7 +656,7 @@ test("expired session after async upload cannot submit a registry commit", async
   const original = s.mirrors[0].putBlob.bind(s.mirrors[0]);
   s.mirrors[0].putBlob = async (...args) => {
     await original(...args);
-    s.state.session.close();
+    s.state.writer.close();
   };
   await assert.rejects(
     () =>
@@ -617,13 +668,8 @@ test("expired session after async upload cannot submit a registry commit", async
     code("SESSION_EXPIRED"),
   );
   assert.equal(
-    (
-      await s.registry.getHead(
-        LOCAL_POLICY,
-        s.state.context.owner,
-        s.state.context.streamId,
-      )
-    ).version,
+    (await s.registry.getHead(s.state.context.owner, s.state.context.streamId))
+      .version,
     "1",
   );
   s.state.close();
@@ -640,7 +686,7 @@ test("owner signatures are bound to every fixed deployment context field", async
     expectedDigest: s.state.enrollment!.capsuleDigest,
     nextDigest: `0x${"ab".repeat(32)}` as Hex,
   };
-  const signature = await s.state.session.sign(command);
+  const signature = await captureLocalSignature(s, command);
   assert.equal(
     (
       await recoverMessageAddress({
@@ -678,14 +724,12 @@ test("owner signatures are bound to every fixed deployment context field", async
   }
   const otherPolicy = { ...LOCAL_POLICY, deploymentId: "other-local-model" };
   await assert.rejects(
-    () =>
-      new MemoryRegistry(otherPolicy).execute(otherPolicy, command, signature),
+    () => new MemoryRegistry(otherPolicy).executeLocal(command, signature),
     code("CONTEXT_MISMATCH"),
   );
   assert.equal(
-    (await s.registry.getHead(LOCAL_POLICY, command.owner, command.streamId))
-      .version,
-    "1",
+    (await s.registry.getHead(command.owner, command.streamId)).version,
+    "2",
   );
   s.state.close();
 });
@@ -702,7 +746,7 @@ test("session copies its deployment scope and rejects caller-injected signing do
     nextDigest: `0x${"ab".repeat(32)}` as Hex,
   };
   s.state.context.deploymentId = "mutated-after-binding";
-  const signature = await s.state.session.sign(command);
+  const signature = await captureLocalSignature(s, command);
   assert.equal(
     (
       await recoverMessageAddress({
@@ -714,7 +758,7 @@ test("session copies its deployment scope and rejects caller-injected signing do
   );
   await assert.rejects(
     () =>
-      s.state.session.sign({
+      s.state.writer.execute({
         ...command,
         domain: { chainId: "1" },
       } as typeof command),
@@ -749,8 +793,8 @@ test("initial enrollment snapshots caller content before manifest hashing and up
     new MemoryMirrorStore("mirror-0"),
     new MemoryMirrorStore("mirror-1"),
   ];
-  const adapters = { mirrors, registry: new MemoryRegistry() };
-  const primary = await createPrimary(LOCAL_POLICY, passkeys);
+  const adapters = localAdapters(mirrors);
+  const primary = await createPrimary(LOCAL_POLICY, passkeys, adapters);
   const backup = await prepareBackup(LOCAL_POLICY, passkeys, primary);
   const content = structuredClone(workspace);
   const pending = finalizeEnrollment(primary, backup, content, adapters);
@@ -774,8 +818,8 @@ test("concurrent identical enrollment shares one immutable cache and later retri
     new MemoryMirrorStore("mirror-0"),
     new MemoryMirrorStore("mirror-1"),
   ];
-  const adapters = { mirrors, registry: new MemoryRegistry() };
-  const primary = await createPrimary(LOCAL_POLICY, passkeys);
+  const adapters = localAdapters(mirrors);
+  const primary = await createPrimary(LOCAL_POLICY, passkeys, adapters);
   const backup = await prepareBackup(LOCAL_POLICY, passkeys, primary);
   const results = await Promise.allSettled([
     finalizeEnrollment(primary, backup, workspace, adapters),
@@ -800,7 +844,6 @@ test("concurrent identical enrollment shares one immutable cache and later retri
   assert.equal(
     (
       await adapters.registry.getHead(
-        LOCAL_POLICY,
         primary.context.owner,
         primary.context.streamId,
       )
@@ -821,7 +864,8 @@ test("concurrent differing backup enrollment is rejected before it can replace p
     ],
     registry: new MemoryRegistry(),
   };
-  const primary = await createPrimary(LOCAL_POLICY, passkeys);
+  const primaryAdapters = localAdapters(adapters.mirrors, adapters.registry);
+  const primary = await createPrimary(LOCAL_POLICY, passkeys, primaryAdapters);
   const backup = await prepareBackup(LOCAL_POLICY, passkeys, primary);
   const other = await prepareBackup(LOCAL_POLICY, passkeys, primary);
   const first = finalizeEnrollment(primary, backup, workspace, adapters);

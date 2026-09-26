@@ -1,0 +1,56 @@
+{
+  "status": "proposal-only-not-approved-no-signing-or-broadcast",
+  "network": {
+    "name": "Monad testnet",
+    "chainId": 10143,
+    "candidateRpcEndpoints": [
+      "https://testnet-rpc.monad.xyz",
+      "https://monad-testnet.drpc.org"
+    ]
+  },
+  "deployer": "0x9d9bf455f58994c17852d3241e775974cdc05281",
+  "signerProposal": "Existing physical primary.localhost test passkey, with separate deployment-only approval and executor. No new credential or key export.",
+  "nonce": "0",
+  "nonceObservedAt": "2026-09-26T14:53:31Z",
+  "predictedContractAddress": "0x3fc9997e62E56ba17225a47C32aD9406313dc98A",
+  "transaction": {
+    "type": "eip1559",
+    "chainId": 10143,
+    "from": "0x9d9bf455f58994c17852d3241e775974cdc05281",
+    "nonce": "0",
+    "value": "0",
+    "data": "0x6080604052348015600f57600080fd5b506104c38061001f6000396000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c80635abc333914610046578063665b4ba21461005b578063d91a3c33146100e8575b600080fd5b6100596100543660046103e1565b6100fb565b005b6100ad61006936600461040d565b6001600160a01b0391909116600090815260208181526040808320938352929052206001810154815460029092015467ffffffffffffffff90911680151593909190565b6040516100df94939291909315158452602084019290925267ffffffffffffffff166040830152606082015260800190565b60405180910390f35b6100596100f6366004610445565b6101f1565b826101185760405162b06aa960e11b815260040160405180910390fd5b811580610123575080155b156101415760405163506f3a1b60e01b815260040160405180910390fd5b336000908152602081815260408083208684529091529020600181015467ffffffffffffffff16156101865760405163119b4fd360e11b815260040160405180910390fd5b8281556001808201805467ffffffffffffffff191682179055600282018390556040805185815260208101929092528101839052849033907fef0a95df01f6e55ea66b664d0f8d5a9d0919bcbab1dbad72524af3b4865492699060600160405180910390a350505050565b8361020e5760405162b06aa960e11b815260040160405180910390fd5b811580610219575080155b156102375760405163506f3a1b60e01b815260040160405180910390fd5b3360009081526020818152604080832087845290915281206001810154909167ffffffffffffffff9091169003610281576040516309e4397760e11b815260040160405180910390fd5b600181015467ffffffffffffffff85811691161415806102a5575082816002015414155b156102f25760018101546002820154604051630bba79dd60e11b815267ffffffffffffffff8088166004830152909216602483015260448201859052606482015260840160405180910390fd5b806002015482036103165760405163a88ee57760e01b815260040160405180910390fd5b600181015467ffffffffffffffff1667fffffffffffffffe190161034d57604051633f947f2f60e01b815260040160405180910390fd5b6001818101805460009061036c90849067ffffffffffffffff1661048f565b82546101009290920a67ffffffffffffffff818102199093169183160217909155600283018490556001830154604080519190921681526020810185905287925033917f3398a7e2492742f11be3f76e57f170f3cd446f0f6ea2ed0951ec479a39ada3a1910160405180910390a35050505050565b6000806000606084860312156103f657600080fd5b505081359360208301359350604090920135919050565b6000806040838503121561042057600080fd5b82356001600160a01b038116811461043757600080fd5b946020939093013593505050565b6000806000806080858703121561045b57600080fd5b84359350602085013567ffffffffffffffff8116811461047a57600080fd5b93969395505050506040820135916060013590565b67ffffffffffffffff81811683821601908111156104bd57634e487b7160e01b600052601160045260246000fd5b9291505056"
+  },
+  "creationDataKeccak256": "0xffe3a0181af4fe73ac31b6ef29707b4a4ed141adccf8fbb09232f8a63b8be717",
+  "expectedRuntimeCodeHash": "0x0605a2eae3c27f4d12476d61af8b1eb53a8b7b64f145c9139b47c95f8aef9dd9",
+  "artifactSha256": "6de3c4607c9f1ae5bf5e77d7b1b2c49fea6c425dbe735cfc77114c2d595f2900",
+  "sourceSha256": "74887391e4ff46caae27a23e90f2751ec9b2de74dfcff623d5db4376c2d9ca7f",
+  "compilerSettingsSha256": "fbafc1baf9ed8751d7b4fded5ab1b274c2e89899a8ea86aaf250dac2b7547ebb",
+  "limits": {
+    "maxTransactionCount": 1,
+    "gasLimitCeiling": "1000000",
+    "maxFeePerGasWei": "200000000000",
+    "maxPriorityFeePerGasWei": "2000000000",
+    "maxTotalFeeWei": "200000000000000000",
+    "maxTotalFeeTestMon": "0.2",
+    "valueWei": "0"
+  },
+  "gasSelection": "After approval and test-only funding, obtain a native RPC estimate for these exact bytes/sender/nonce. Use ceiling(estimate*1.20) only if <= gasLimitCeiling; revalidate immediately before signing. This proposal is not a gas estimate.",
+  "fundingProposal": {
+    "source": "https://faucet.monad.xyz/",
+    "token": "test-only MON",
+    "amount": "Only the ordinary free faucet allocation, if available within separately approved terms; never buy or bridge real-value tokens.",
+    "fallback": "Stop if account connection, terms, CAPTCHA, insufficient funding or unsupported operation needs user action not already approved."
+  },
+  "pendingChecks": [
+    "Explicit user approval of existing passkey use, exact funding action, providers, one bounded deployment and its public data.",
+    "Resolve the recorded faucet/provider terms questions, including dRPC's public endpoint versus general account-registration terms, before requesting execution approval; no implicit authorization.",
+    "Before execution recheck chain, nonce zero, no deployer account code, unused predicted address and available test funding on both providers. If nonce changes, prepare a new proposal.",
+    "Recheck that the locally implemented/tested/reviewed deployment-only executor still matches its pinned source and artifact hashes; registry writer must still reject contract creation.",
+    "Native estimate and fresh fees within all stated caps.",
+    "After signing validate exact signed envelope; broadcast once; reconcile uncertain submission by locally computed hash without re-signing.",
+    "Finalized exact transaction, successful receipt at predicted address and runtime hash verified on both providers."
+  ],
+  "externalData": "Deployer address sent in read-only preflight already. Approval would publish deployer/contract addresses, contract bytes, nonce, gas and transaction hash. No passkey ID, secret, workspace content or recovery locator goes on chain.",
+  "laterSeparateApproval": "A new chain-bound A/B enrollment and bounded create/commit/recovery exercise follows deployment verification. Existing local enrollment is not migrated or rebound."
+}

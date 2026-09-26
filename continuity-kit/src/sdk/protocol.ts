@@ -1,6 +1,12 @@
 import { ContinuityError } from "./types.ts";
 import type {
   RecoveryPolicy,
+  PrimaryAdapters,
+  SaveResult,
+  WriteProof,
+  WriteTicket,
+  RegistryCommand,
+  WriteOutcome,
   Context,
   Workspace,
   PreparedBackup,
@@ -33,6 +39,8 @@ import {
   uint,
   validateHead,
   validatePolicy,
+  freezePolicy,
+  metadataFingerprint,
 } from "./policy.ts";
 import { accountFromPrf } from "./account.ts";
 import type { PrimaryAccount, PrimaryState } from "./account.ts";
@@ -73,6 +81,8 @@ function manifestFrom(value: unknown, p: RecoveryPolicy): Manifest {
 }
 function checkAdapters(p: RecoveryPolicy, a: Adapters) {
   validatePolicy(p);
+  if (metadataFingerprint(p) !== metadataFingerprint(a.registry.policy))
+    throw new ContinuityError("POLICY_INVALID", "Reader policy mismatch");
   if (a.mirrors.length !== p.mirrorUrls.length)
     throw new ContinuityError("POLICY_INVALID");
   for (const m of a.mirrors) {
@@ -89,8 +99,9 @@ export async function readHead(
   manifestDigest: Hex,
   a: Adapters,
 ): Promise<Head> {
+  checkAdapters(p, a);
   try {
-    const h = await a.registry.getHead(p, c.owner, c.streamId);
+    const h = await a.registry.getHead(c.owner, c.streamId);
     validateHead(h, p);
     if (!h.exists) throw new ContinuityError("UNREGISTERED_ENROLLMENT");
     if (h.manifestDigest !== manifestDigest)
@@ -214,9 +225,18 @@ async function upload(
         ? r.reason
         : new ContinuityError("STORAGE_FAILED");
 }
+export type EnrollmentResult =
+  | {
+      status: "prepared";
+      state: PrimaryState;
+      proof: WriteProof;
+      currentHead: Head;
+      unresolvedTicket?: WriteTicket;
+    }
+  | { status: "pending"; ticket: WriteTicket };
 const enrollmentLocks = new WeakMap<
   PrimaryAccount,
-  { intent: string; pending?: Promise<PrimaryState> }
+  { intent: string; pending?: Promise<EnrollmentResult> }
 >();
 /** Serialize enrollment per newly created primary account before any async work.
  * A failed upload may be retried, but its exact prepared bytes remain cached. */
@@ -225,8 +245,8 @@ export async function finalizeEnrollment(
   backup: PreparedBackup,
   content: Workspace,
   a: Adapters,
-): Promise<PrimaryState> {
-  primary.session.assertActive();
+): Promise<EnrollmentResult> {
+  if (!primary.writer.pendingTicket) primary.writer.assertActive();
   checkAdapters(primary.policy, a);
   validateWorkspace(content);
   const snapshot = structuredClone(backup);
@@ -270,8 +290,8 @@ async function finalizeEnrollmentOnce(
   backup: PreparedBackup,
   content: Workspace,
   a: Adapters,
-): Promise<PrimaryState> {
-  primary.session.assertActive();
+): Promise<EnrollmentResult> {
+  if (!primary.writer.pendingTicket) primary.writer.assertActive();
   const p = primary.policy;
   checkAdapters(p, a);
   validateWorkspace(content);
@@ -334,33 +354,28 @@ async function finalizeEnrollmentOnce(
     manifestDigest: backup.manifestDigest,
     initialCapsuleDigest: cached.capsuleDigest,
   };
-  try {
-    await a.registry.execute(p, command, await primary.session.sign(command));
-  } catch (error) {
-    const head = await a.registry
-      .getHead(p, command.owner, command.streamId)
-      .catch(() => null);
-    if (
-      !head?.exists ||
-      head.manifestDigest !== backup.manifestDigest ||
-      head.version !== "1" ||
-      head.capsuleDigest !== cached.capsuleDigest
-    )
-      throw error;
-  }
-  const h = await readHead(p, primary.context, backup.manifestDigest, a);
-  if (h.version !== "1" || h.capsuleDigest !== cached.capsuleDigest)
-    throw new ContinuityError("WRITE_CONFLICT");
-  return Object.assign(primary, {
+  primary.writer.bindManifest(backup.manifestDigest);
+  const result = await primary.writer.execute(command);
+  if (result.status === "unresolved")
+    return { status: "pending", ticket: result.ticket };
+  const state = Object.assign(primary, {
     manifestDigest: backup.manifestDigest,
-    writes: 1,
+    writes: Number(result.currentHead.version),
   });
+  return {
+    status: "prepared",
+    state,
+    proof: result.proof,
+    currentHead: result.currentHead,
+    unresolvedTicket: result.unresolvedTicket,
+  };
 }
 export async function discoverRecovery(
   policy: RecoveryPolicy,
   passkeys: PasskeyAdapter,
   a: Adapters,
 ): Promise<DiscoveredRecovery> {
+  policy = freezePolicy(policy);
   checkAdapters(policy, a);
   const result = await passkeys.discover(policy);
   const keys = await lookupKeys(result.prfOutput);
@@ -627,11 +642,16 @@ export async function recoverCurrent(
 export async function restorePrimary(
   policy: RecoveryPolicy,
   passkeys: PasskeyAdapter,
-  a: Adapters,
+  a: PrimaryAdapters,
 ): Promise<{ state: PrimaryState; recovered: Recovered }> {
   checkAdapters(policy, a);
   const prf = await passkeys.openPrimary(policy);
-  const primary = await accountFromPrf(policy, prf.credentialId, prf.prfOutput);
+  const primary = await accountFromPrf(
+    policy,
+    prf.credentialId,
+    prf.prfOutput,
+    a,
+  );
   const records: {
     context: Context;
     manifestDigest: Hex;
@@ -665,7 +685,7 @@ export async function restorePrimary(
           if (r.format !== "continuity-primary/v1")
             throw new ContinuityError("SCHEMA_INVALID");
           validateContext(r.context, policy);
-          if (r.context.owner !== primary.session.owner)
+          if (r.context.owner !== primary.writer.owner)
             throw new ContinuityError("CONTEXT_MISMATCH");
           hex32(r.manifestDigest);
           records.push({
@@ -689,7 +709,8 @@ export async function restorePrimary(
       throw new ContinuityError("ENROLLMENT_CONFLICT");
     const r = records[0];
     primary.context = r.context;
-    primary.session.bindContext(r.context);
+    primary.writer.bindContext(r.context, true);
+    primary.writer.bindManifest(r.manifestDigest);
     primary.dataKey.fill(0);
     primary.dataKey = new Uint8Array(r.dataKey);
     const recovered = await recoverWithKey(
@@ -711,71 +732,182 @@ export async function restorePrimary(
     records.forEach((r) => r.dataKey.fill(0));
   }
 }
+interface PendingSave {
+  command: RegistryCommand;
+  bytes: Uint8Array;
+  digest: Hex;
+  content: Workspace;
+}
+const pendingSaves = new WeakMap<PrimaryState, PendingSave>();
+const saving = new WeakSet<PrimaryState>();
 export async function saveCheckpoint(
   state: PrimaryState,
   content: Workspace,
   a: Adapters,
-): Promise<Recovered> {
-  state.session.assertActive();
+): Promise<SaveResult> {
   checkAdapters(state.policy, a);
   validateWorkspace(content);
-  content = structuredClone(content);
-  if (state.writes >= 100000)
-    throw new ContinuityError("WRITE_CONFLICT", "Data-key write bound reached");
-  const h = await readHead(
-    state.policy,
-    state.context,
-    state.manifestDigest,
-    a,
-  );
-  if (BigInt(h.version) >= 100000n)
-    throw new ContinuityError("WRITE_CONFLICT", "Data-key write bound reached");
-  const capsule = await encryptCapsule(
-    state.context,
-    state.manifestDigest,
-    state.dataKey,
-    String(BigInt(h.version) + 1n),
-    content,
-  );
-  if (capsule.bytes.length > state.policy.maxCapsuleBytes)
-    throw new ContinuityError("SCHEMA_INVALID");
-  await upload(a, "blob", capsule.digest, capsule.bytes);
-  const command = {
-    operation: "commit" as const,
-    owner: state.context.owner,
-    streamId: state.context.streamId,
-    expectedVersion: h.version,
-    expectedDigest: h.capsuleDigest,
-    nextDigest: capsule.digest,
-  };
-  await a.registry.execute(
-    state.policy,
-    command,
-    await state.session.sign(command),
-  );
-  state.writes++;
-  const final = await readHead(
-    state.policy,
-    state.context,
-    state.manifestDigest,
-    a,
-  );
-  if (
-    final.version !== String(BigInt(h.version) + 1n) ||
-    final.capsuleDigest !== capsule.digest
-  )
-    throw new ContinuityError(
-      "WRITE_CONFLICT",
-      "A later checkpoint already superseded this write",
-    );
-  return {
-    content: structuredClone(content),
+  if (saving.has(state))
+    throw new ContinuityError("WRITE_PENDING", "Another save is preparing");
+  saving.add(state);
+  try {
+    let pending = pendingSaves.get(state);
+    if (pending && canonical(pending.content) !== canonical(content))
+      throw new ContinuityError(
+        "WRITE_PENDING",
+        "Resolve retained draft before another save",
+        state.writer.pendingTicket,
+      );
+    if (!pending) {
+      state.writer.assertActive();
+      const captured = structuredClone(content);
+      if (state.writes >= 100000)
+        throw new ContinuityError(
+          "WRITE_CONFLICT",
+          "Data-key write bound reached",
+        );
+      const h = await readHead(
+        state.policy,
+        state.context,
+        state.manifestDigest,
+        a,
+      );
+      if (BigInt(h.version) >= 100000n)
+        throw new ContinuityError("WRITE_CONFLICT");
+      const capsule = await encryptCapsule(
+        state.context,
+        state.manifestDigest,
+        state.dataKey,
+        String(BigInt(h.version) + 1n),
+        captured,
+      );
+      if (capsule.bytes.length > state.policy.maxCapsuleBytes)
+        throw new ContinuityError("SCHEMA_INVALID");
+      pending = {
+        command: {
+          operation: "commit",
+          owner: state.context.owner,
+          streamId: state.context.streamId,
+          expectedVersion: h.version,
+          expectedDigest: h.capsuleDigest,
+          nextDigest: capsule.digest,
+        },
+        bytes: capsule.bytes,
+        digest: capsule.digest,
+        content: captured,
+      };
+      pendingSaves.set(state, pending);
+    }
+    if (!state.writer.pendingTicket)
+      await upload(a, "blob", pending.digest, pending.bytes);
+    const result = await state.writer.execute(pending.command);
+    return completedSave(state, pending, result);
+  } catch (e) {
+    // A definite preflight conflict can be explicitly resolved by the caller; uncertain submissions stay pinned.
+    if (
+      !state.writer.pendingTicket &&
+      e instanceof ContinuityError &&
+      ["WRITE_CONFLICT", "TRANSACTION_REVERTED"].includes(e.code)
+    )
+      pendingSaves.delete(state);
+    throw e;
+  } finally {
+    saving.delete(state);
+  }
+}
+function completedSave(
+  state: PrimaryState,
+  pending: PendingSave,
+  result: WriteOutcome,
+): SaveResult {
+  if (result.status === "unresolved")
+    return {
+      status: "pending",
+      ticket: result.ticket,
+      draft: structuredClone(pending.content),
+    };
+  if (!result.unresolvedTicket) {
+    pendingSaves.delete(state);
+    state.writes = Number(result.currentHead.version);
+  }
+  if (!result.current)
+    return {
+      status: "superseded",
+      checkpoint: result.checkpoint,
+      proof: result.proof,
+      currentHead: result.currentHead,
+      draft: structuredClone(pending.content),
+    };
+  const recovered: Recovered = {
+    content: structuredClone(pending.content),
     context: structuredClone(state.context),
     manifestDigest: state.manifestDigest,
-    version: final.version,
-    capsuleDigest: final.capsuleDigest,
-    evidence: final.evidence,
+    version: result.checkpoint.version,
+    capsuleDigest: result.checkpoint.capsuleDigest,
+    evidence: result.currentHead.evidence,
     diagnostics: [],
+  };
+  return {
+    status: "saved",
+    recovered,
+    proof: result.proof,
+    unresolvedTicket: result.unresolvedTicket,
+  };
+}
+/** Read-only status check also resolves the SDK's retained draft cache. */
+export async function reconcileCheckpoint(
+  state: PrimaryState,
+  ticket: WriteTicket,
+  a: Adapters,
+): Promise<SaveResult> {
+  checkAdapters(state.policy, a);
+  if (saving.has(state)) throw new ContinuityError("WRITE_PENDING");
+  const pending = pendingSaves.get(state);
+  if (!pending || canonical(pending.command) !== canonical(ticket.command))
+    throw new ContinuityError("CONTEXT_MISMATCH", "No matching retained draft");
+  saving.add(state);
+  try {
+    return completedSave(state, pending, await state.writer.reconcile(ticket));
+  } catch (error) {
+    if (
+      !state.writer.pendingTicket &&
+      error instanceof ContinuityError &&
+      error.code === "TRANSACTION_REVERTED"
+    )
+      pendingSaves.delete(state);
+    throw error;
+  } finally {
+    saving.delete(state);
+  }
+}
+/** Confirms an already submitted create without uploading, signing, or sending again. */
+export async function reconcileEnrollment(
+  primary: PrimaryAccount,
+  ticket: WriteTicket,
+  a: Adapters,
+): Promise<EnrollmentResult> {
+  checkAdapters(primary.policy, a);
+  if (
+    ticket.command.operation !== "create" ||
+    !primary.enrollment ||
+    ticket.command.manifestDigest !==
+      primary.enrollment.backup.manifestDigest ||
+    ticket.command.initialCapsuleDigest !== primary.enrollment.capsuleDigest
+  )
+    throw new ContinuityError("CONTEXT_MISMATCH");
+  const result = await primary.writer.reconcile(ticket);
+  if (result.status === "unresolved")
+    return { status: "pending", ticket: result.ticket };
+  const state = Object.assign(primary, {
+    manifestDigest: result.checkpoint.manifestDigest,
+    writes: Number(result.currentHead.version),
+  });
+  return {
+    status: "prepared",
+    state,
+    proof: result.proof,
+    currentHead: result.currentHead,
+    unresolvedTicket: result.unresolvedTicket,
   };
 }
 export function createLocalCopy(recovered: Recovered) {

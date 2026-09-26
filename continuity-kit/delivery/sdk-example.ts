@@ -14,19 +14,22 @@ import {
   createLocalCopy,
   exportLocalCopy,
 } from "../src/sdk/index.ts";
-import type { Adapters, Workspace } from "../src/sdk/index.ts";
+import type { PrimaryAdapters, Workspace } from "../src/sdk/index.ts";
 // Deliberately separate from the public SDK export: this is a test fixture.
 import { SyntheticWebAuthnClient } from "../src/sdk/demo-fixture.ts";
 
 const seed = "PUBLIC CONTINUITY INTEGRATOR EXAMPLE";
 const newPasskeys = () =>
   new MeraPasskeyAdapter(new SyntheticWebAuthnClient({ seed }));
-const adapters: Adapters = {
+const registry = new MemoryRegistry();
+const adapters: PrimaryAdapters = {
+  trustMode: "local-model",
+  localWriter: registry,
   mirrors: [
     new MemoryMirrorStore("mirror-0"),
     new MemoryMirrorStore("mirror-1"),
   ],
-  registry: new MemoryRegistry(),
+  registry,
 };
 const workspace: Workspace = {
   title: "Synthetic integration",
@@ -36,20 +39,26 @@ const workspace: Workspace = {
 };
 
 const passkeys = newPasskeys();
-const primary = await createPrimary(LOCAL_POLICY, passkeys);
+const primary = await createPrimary(LOCAL_POLICY, passkeys, adapters);
 let restored: Awaited<ReturnType<typeof restorePrimary>> | undefined;
 try {
   // Real browsers must run these operations at their respective RP origins,
   // using the explicit validated handoff. This fixture has no browser origin.
   const backup = await prepareBackup(LOCAL_POLICY, passkeys, primary);
-  await finalizeEnrollment(primary, backup, workspace, adapters);
+  const enrollment = await finalizeEnrollment(
+    primary,
+    backup,
+    workspace,
+    adapters,
+  );
+  if (enrollment.status !== "prepared") throw new Error("Enrollment pending");
   const originalOwner = primary.context.owner;
   primary.close();
 
   restored = await restorePrimary(LOCAL_POLICY, newPasskeys(), adapters);
   if (restored.state.context.owner !== originalOwner)
     throw new Error("Owner changed");
-  await saveCheckpoint(
+  const saved = await saveCheckpoint(
     restored.state,
     {
       ...workspace,
@@ -57,6 +66,7 @@ try {
     },
     adapters,
   );
+  if (saved.status !== "saved") throw new Error("Checkpoint not current");
   restored.state.close();
 
   // B gets only the fixture credential, fixed policy and surviving adapters.

@@ -1,16 +1,23 @@
 import { recoverMessageAddress } from "viem";
 import { bytesOf, canonical, digest, equal } from "./crypto.ts";
-import { validateHead, hex32, uint, record, LOCAL_POLICY } from "./policy.ts";
+import {
+  validateHead,
+  hex32,
+  uint,
+  record,
+  LOCAL_POLICY,
+  freezePolicy,
+} from "./policy.ts";
 import { registryDomain, registrySigningMessage } from "./registry-signing.ts";
 import { ContinuityError } from "./types.ts";
 import type {
   Hex,
   Head,
-  RecoveryPolicy,
+  LocalRecoveryPolicy,
   RegistryCommand,
   MirrorStore,
   RegistryReader,
-  OwnerRegistryWriter,
+  LocalRegistryWriteTransport,
 } from "./types.ts";
 const ZERO = `0x${"0".repeat(64)}` as Hex;
 export class MemoryMirrorStore implements MirrorStore {
@@ -57,15 +64,22 @@ export class MemoryMirrorStore implements MirrorStore {
     return this.readBlobHook ? this.readBlobHook(hash, copy) : copy;
   }
 }
-export class MemoryRegistry implements RegistryReader, OwnerRegistryWriter {
+export class MemoryRegistry
+  implements RegistryReader, LocalRegistryWriteTransport
+{
   readonly heads = new Map<string, Head>();
   offline = false;
   private block = 0n;
   readonly #domain: ReturnType<typeof registryDomain>;
-  constructor(policy: RecoveryPolicy = LOCAL_POLICY) {
+  readonly #policy: LocalRecoveryPolicy;
+  get policy() {
+    return this.#policy;
+  }
+  constructor(policy: LocalRecoveryPolicy = LOCAL_POLICY) {
+    this.#policy = freezePolicy(policy);
     this.#domain = registryDomain(policy);
   }
-  private checkDomain(policy: RecoveryPolicy) {
+  private checkDomain(policy: LocalRecoveryPolicy) {
     if (canonical(registryDomain(policy)) !== canonical(this.#domain))
       throw new ContinuityError(
         "CONTEXT_MISMATCH",
@@ -80,12 +94,7 @@ export class MemoryRegistry implements RegistryReader, OwnerRegistryWriter {
       observedAt: new Date().toISOString(),
     };
   }
-  async getHead(
-    _policy: RecoveryPolicy,
-    owner: Hex,
-    streamId: Hex,
-  ): Promise<Head> {
-    this.checkDomain(_policy);
+  async getHead(owner: Hex, streamId: Hex): Promise<Head> {
     if (this.offline) throw new ContinuityError("FRESHNESS_UNAVAILABLE");
     const head = this.heads.get(owner + streamId);
     return structuredClone(
@@ -100,12 +109,8 @@ export class MemoryRegistry implements RegistryReader, OwnerRegistryWriter {
           },
     );
   }
-  async execute(
-    p: RecoveryPolicy,
-    c: RegistryCommand,
-    signature: Hex,
-  ): Promise<Head> {
-    this.checkDomain(p);
+  async executeLocal(c: RegistryCommand, signature: Hex): Promise<Head> {
+    this.checkDomain(this.policy);
     if (this.offline) throw new ContinuityError("FRESHNESS_UNAVAILABLE");
     const signer = (
       await recoverMessageAddress({
@@ -166,7 +171,7 @@ export class MemoryRegistry implements RegistryReader, OwnerRegistryWriter {
     }
     this.block++;
     this.heads.set(key, next);
-    return this.getHead(p, c.owner, c.streamId);
+    return this.getHead(c.owner, c.streamId);
   }
 }
 export async function boundedResponse(
@@ -253,13 +258,20 @@ export class HttpMirrorStore implements MirrorStore {
     return this.put("blob", hash, bytes);
   }
 }
-export class HttpRegistry implements RegistryReader, OwnerRegistryWriter {
+export class HttpRegistry
+  implements RegistryReader, LocalRegistryWriteTransport
+{
   readonly baseUrl: string;
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl.replace(/\/$/, "");
+  readonly #policy: LocalRecoveryPolicy;
+  get policy() {
+    return this.#policy;
+  }
+  constructor(policy: LocalRecoveryPolicy = LOCAL_POLICY) {
+    this.#policy = freezePolicy(policy);
+    this.baseUrl = policy.registryUrl.replace(/\/$/, "");
   }
   private async request(
-    p: RecoveryPolicy,
+    p: LocalRecoveryPolicy,
     url: string,
     options: RequestInit = {},
   ): Promise<Head> {
@@ -294,10 +306,11 @@ export class HttpRegistry implements RegistryReader, OwnerRegistryWriter {
       throw new ContinuityError("FRESHNESS_UNAVAILABLE");
     }
   }
-  getHead(p: RecoveryPolicy, owner: Hex, streamId: Hex) {
-    return this.request(p, `/v1/registry/${owner}/${streamId}`);
+  getHead(owner: Hex, streamId: Hex) {
+    return this.request(this.policy, `/v1/registry/${owner}/${streamId}`);
   }
-  execute(p: RecoveryPolicy, command: RegistryCommand, signature: Hex) {
+  executeLocal(command: RegistryCommand, signature: Hex) {
+    const p = this.policy;
     return this.request(p, "/v1/registry", {
       method: "POST",
       headers: { "content-type": "application/json" },

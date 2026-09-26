@@ -4,7 +4,7 @@ Private application work should have a way back when its original app disappears
 
 ContinuityKit prepares a separate recovery passkey on a second origin, stores encrypted checkpoints, and checks an owner-authorized version registry before opening a copy. A valid old copy is not accepted as the current one. If the latest bytes are gone, the app says so.
 
-**Current status:** working local prototype and reviewed SDK. Physical A/B passkey enrollment and fresh B recovery of exact v2 content passed with A offline and an old copy rejected, in one local setup. Cross-environment support and prompt counts remain unverified. No Monad deployment, transaction, external integration or prize eligibility is claimed. The browser demo uses a signed local registry model. See [EVIDENCE.md](EVIDENCE.md) and [PROJECT_STATE.md](PROJECT_STATE.md).
+**Current status:** working local prototype and reviewed SDK. Physical A/B enrollment, fresh B exact-v2 recovery with A offline/stale-copy rejection, and fresh A restoration followed by signed local v3 all passed. The user reports iPhone, Chrome and in-app browser use; a controlled compatibility matrix and exact prompt counts remain unmeasured. No Monad deployment, transaction, external integration or prize eligibility is claimed. The browser demo uses a signed local registry model. See [EVIDENCE.md](EVIDENCE.md) and [PROJECT_STATE.md](PROJECT_STATE.md).
 
 ## Run the local demo
 
@@ -44,7 +44,7 @@ The service's two mirrors occupy one local process and disk. They simulate indep
 
 ## Physical test — one local recovery verified
 
-On 26 September 2026, the completed physical enrollment produced v1 and a subsequent save produced v2. With A returning HTTP 503 and its old tab closed, fresh B used the prepared recovery passkey to discover its metadata, reject the same stream's stale v1 and open the exact v2 content. The [saved receipt](evidence/physical-recovery-receipt.json) identifies the physical owner/stream and local-model evidence. This is a completed recovery in one setup, not a device compatibility matrix or a real-chain proof. Fresh physical A restoration is being checked separately.
+On 26 September 2026, the completed physical enrollment produced v1 and a subsequent save produced v2. With A returning HTTP 503 and its old tab closed, fresh B used the prepared recovery passkey to discover its metadata, reject the same stream's stale v1 and open the exact v2 content. The [saved receipt](evidence/physical-recovery-receipt.json) identifies the physical owner/stream and local-model evidence. After A was enabled again, a fresh A tab restored the exact same content and signed v3 on the same owner/stream/manifest; see the [v3 local head](evidence/physical-primary-v3-head.json). These are physical local-model results, not a controlled device matrix or real-chain proof.
 
 The user approved creating test passkeys for these two local RPs on the Mac/iPhone setup. Authentication and biometric prompts are completed by the user. Start physical mode explicitly:
 
@@ -83,7 +83,7 @@ import {
 // This policy and registry are explicitly local-model only.
 const adapters = {
   mirrors: LOCAL_POLICY.mirrorUrls.map(url => new HttpMirrorStore(url)),
-  registry: new HttpRegistry(LOCAL_POLICY.registryUrl),
+  registry: new HttpRegistry(LOCAL_POLICY),
 };
 const passkeys = new MeraPasskeyAdapter(); // No credential is created on construction.
 // Call after an explicit user gesture on the configured B origin.
@@ -92,11 +92,11 @@ const result = await recoverCurrent(discovered, passkeys, adapters);
 // result includes validated content and the exact accepted version/digest evidence.
 ```
 
-`createPrimary`, `prepareBackup`, `finalizeEnrollment`, `saveCheckpoint` and `restorePrimary` implement the A/enrollment path. `createLocalCopy` and `exportLocalCopy` preserve source evidence. The high-level protocol and format are in [SPEC.md](SPEC.md). A sample alone does not supply the required cross-origin enrollment state machine.
+`createPrimary(policy, passkeys, primaryAdapters)`, `prepareBackup`, `finalizeEnrollment`, `saveCheckpoint` and `restorePrimary` implement the A/enrollment path. A needs explicitly typed primary adapters; B needs only mirrors and a policy-bound reader. `finalizeEnrollment` returns `prepared` or `pending`. `saveCheckpoint` returns `saved`, `superseded` or `pending`; callers must inspect the status before updating the editor or claiming a successful checkpoint. `createLocalCopy` and `exportLocalCopy` preserve source evidence. The high-level protocol and format are in [SPEC.md](SPEC.md). A sample alone does not supply the required cross-origin enrollment state machine.
 
 The default Mera adapter uses browser WebAuthn. `SyntheticWebAuthnClient` is a separate, explicitly named fixture. No automatic unsupported-PRF fallback turns physical authentication into a simulation.
 
-The current integrated SDK policy rejects testnet/mainnet authority. Standalone preparations in `testnet/` do not change that. Connecting a real reader and a scoped Mera transaction writer, then obtaining actual deployment/receipt evidence, remains T1 work. Signed local-model commands are not Ethereum transactions.
+The SDK has distinct local-model and Monad-testnet policy/evidence types. `MonadRegistryReader` and `HttpTransactionTransport` require an explicit, complete deployment policy; no testnet address or live write configuration is enabled in the demo. Primary account objects expose a constrained writer, never Mera's unrestricted signer. The writer pins owner, deployment, stream, methods, zero value, expiry, transaction count and full-gas fee budget. It reconciles uncertain submissions by hash and validates finalized transaction/receipt/state evidence. These paths passed local synthetic tests and a separate bounded review; actual Monad deployment and physical chain evidence remain separate gates. See [testnet runbook](testnet/RUNBOOK.md) and [deployment proposal](testnet/DEPLOYMENT_PROPOSAL_NO.md). Signed local-model commands are not Ethereum transactions.
 
 ## Verification
 
@@ -125,3 +125,5 @@ The staged competition package is in `delivery/`. No public repository, deployme
 Mikkel is the sole planned human developer. OpenAI Codex and GPT agents assisted protocol design, implementation, tests, documentation and review. The separate reviews are AI-assisted and are not independent security audits. This isolated product source was created locally on 26 September 2026; no Delveworn or Market Dungeon source/assets were copied into this implementation. Earlier research informed its design. The published build-window and substantial-majority requirement must still be checked against the final submitted commit history.
 
 Dependencies retain their own licenses and notices. ContinuityKit's local MIT license applies to its original source; it does not relicense Mera, viem, scure or development tools. Exact dependency versions and integrity values are in package-lock.json.
+
+[Third-party notices](public/third-party-notices.txt) preserve original license texts for 22 installed dependency package/version entries. The [source inventory](delivery/DEPENDENCY_LICENSES.md) records paths and hashes and distinguishes development tooling. It is conservative dependency coverage, not a claim about exact bundled code or a completed project-rights/legal review.

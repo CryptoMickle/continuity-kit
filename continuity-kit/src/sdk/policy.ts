@@ -1,8 +1,14 @@
 import { ContinuityError } from "./types.ts";
-import type { Context, RecoveryPolicy, Workspace, Head } from "./types.ts";
+import type {
+  Context,
+  RecoveryPolicy,
+  LocalRecoveryPolicy,
+  Workspace,
+  Head,
+} from "./types.ts";
 import { canonical, unb64, wellFormed } from "./crypto.ts";
 import { parseSecretVault } from "@category-labs/mera";
-export const LOCAL_POLICY: RecoveryPolicy = Object.freeze({
+export const LOCAL_POLICY: LocalRecoveryPolicy = Object.freeze({
   protocol: "continuity-kit/v1",
   applicationId: "continuity-private-workspace",
   schemaId: "workspace/v1",
@@ -82,7 +88,25 @@ export function uint(
   )
     throw new ContinuityError("SCHEMA_INVALID", "Invalid uint64");
 }
-export function validatePolicy(p: RecoveryPolicy) {
+function validatePolicyInner(input: unknown): asserts input is RecoveryPolicy {
+  const common = [
+    ...CONTEXT_FIELDS.filter((k) => k !== "owner" && k !== "streamId"),
+    "trustMode",
+    "bootstrapNamespace",
+    "mirrorUrls",
+    "maxManifestBytes",
+    "maxCapsuleBytes",
+    "timeoutMs",
+    "maxHeadAgeMs",
+  ];
+  const mode = (input as { trustMode?: unknown } | null)?.trustMode;
+  record(input, [
+    ...common,
+    ...(mode === "local-model"
+      ? ["registryUrl"]
+      : ["rpcUrls", "finality", "maxResponseBytes"]),
+  ]);
+  const p = input as RecoveryPolicy;
   for (const field of [
     "applicationId",
     "schemaId",
@@ -100,11 +124,11 @@ export function validatePolicy(p: RecoveryPolicy) {
     /^0x0+$/.test(p.registryAddress)
   )
     throw new ContinuityError("POLICY_INVALID", "Invalid registry address");
-  if (p.trustMode !== "local-model" || p.protocol !== "continuity-kit/v1")
-    throw new ContinuityError(
-      "POLICY_INVALID",
-      "Only explicitly simulated registry deployment is implemented",
-    );
+  if (
+    !["local-model", "trusted-rpc-quorum"].includes(p.trustMode) ||
+    p.protocol !== "continuity-kit/v1"
+  )
+    throw new ContinuityError("POLICY_INVALID", "Unsupported trust mode");
   for (const [origin, rp] of [
     [p.aOrigin, p.aRpId],
     [p.bOrigin, p.bRpId],
@@ -130,8 +154,55 @@ export function validatePolicy(p: RecoveryPolicy) {
       "POLICY_INVALID",
       "Primary and recovery RPs must have disjoint scope",
     );
+  for (const v of [
+    p.maxManifestBytes,
+    p.maxCapsuleBytes,
+    p.timeoutMs,
+    p.maxHeadAgeMs,
+  ]) {
+    if (!Number.isSafeInteger(v)) throw new ContinuityError("POLICY_INVALID");
+  }
+  if (!Array.isArray(p.mirrorUrls)) throw new ContinuityError("POLICY_INVALID");
+  for (const endpoint of [
+    ...p.mirrorUrls,
+    ...(p.trustMode === "local-model" ? [p.registryUrl] : []),
+  ]) {
+    const u = new URL(endpoint);
+    if (
+      u.username ||
+      u.password ||
+      u.hash ||
+      (u.protocol !== "https:" &&
+        !(
+          u.protocol === "http:" &&
+          (u.hostname === "localhost" || u.hostname.endsWith(".localhost"))
+        ))
+    )
+      throw new ContinuityError("POLICY_INVALID", "Unapproved endpoint scheme");
+  }
+  if (p.trustMode === "trusted-rpc-quorum") {
+    if (
+      p.chainId !== "10143" ||
+      p.finality !== "finalized" ||
+      !Number.isSafeInteger(p.maxResponseBytes) ||
+      p.maxResponseBytes < 1 ||
+      p.maxResponseBytes > 1048576 ||
+      !Array.isArray(p.rpcUrls) ||
+      p.rpcUrls.length !== 2
+    )
+      throw new ContinuityError("POLICY_INVALID");
+    const urls = p.rpcUrls.map((value) => new URL(value));
+    if (
+      urls.some(
+        (u) => u.protocol !== "https:" || u.username || u.password || u.hash,
+      ) ||
+      urls[0]!.hostname === urls[1]!.hostname
+    )
+      throw new ContinuityError("POLICY_INVALID");
+  }
   if (
-    p.mirrorUrls.length < 1 ||
+    !Array.isArray(p.mirrorUrls) ||
+    p.mirrorUrls.length !== 2 ||
     p.mirrorUrls.length > 2 ||
     p.maxManifestBytes > 65536 ||
     p.maxManifestBytes < 1024 ||
@@ -222,6 +293,7 @@ export function validateVault(value: unknown) {
 export function validateHead(
   head: unknown,
   p: RecoveryPolicy,
+  now = Date.now(),
 ): asserts head is Head {
   const r = record(head, [
     "exists",
@@ -236,21 +308,95 @@ export function validateHead(
   if (r.exists) {
     hex32(r.manifestDigest);
     hex32(r.capsuleDigest);
-  }
+  } else if (
+    r.version !== "0" ||
+    r.manifestDigest !== `0x${"0".repeat(64)}` ||
+    r.capsuleDigest !== `0x${"0".repeat(64)}`
+  )
+    throw new ContinuityError("FRESHNESS_UNAVAILABLE");
   const e = record(r.evidence, [
     "trustMode",
     "blockNumber",
     "blockHash",
     "observedAt",
+    ...(p.trustMode === "trusted-rpc-quorum"
+      ? [
+          "chainId",
+          "registryAddress",
+          "registryCodeHash",
+          "blockTimestamp",
+          "finality",
+          "maxHeadAgeMs",
+        ]
+      : []),
   ]);
-  uint(e.blockNumber, true);
+  evmUint(e.blockNumber);
+  if (p.trustMode === "trusted-rpc-quorum") {
+    for (const field of [
+      "chainId",
+      "registryAddress",
+      "registryCodeHash",
+      "finality",
+      "maxHeadAgeMs",
+    ] as const)
+      if (e[field] !== p[field])
+        throw new ContinuityError("FRESHNESS_UNAVAILABLE");
+    evmUint(e.blockTimestamp);
+    const age = BigInt(now) - BigInt(e.blockTimestamp) * 1000n;
+    if (age < -5000n || age > BigInt(p.maxHeadAgeMs))
+      throw new ContinuityError("FRESHNESS_UNAVAILABLE");
+  }
   hex32(e.blockHash);
   if (e.trustMode !== p.trustMode || typeof e.observedAt !== "string")
     throw new ContinuityError("FRESHNESS_UNAVAILABLE");
-  const age = Date.now() - Date.parse(e.observedAt);
+  const age = now - Date.parse(e.observedAt);
+  if (new Date(Date.parse(e.observedAt)).toJSON() !== e.observedAt)
+    throw new ContinuityError("FRESHNESS_UNAVAILABLE");
   if (!Number.isFinite(age) || age < -5000 || age > p.maxHeadAgeMs)
     throw new ContinuityError(
       "FRESHNESS_UNAVAILABLE",
       "Registry evidence outside freshness bound",
     );
+}
+
+export function evmUint(value: unknown): asserts value is string {
+  if (
+    typeof value !== "string" ||
+    !/^(0|[1-9][0-9]*)$/.test(value) ||
+    value.length > 78 ||
+    BigInt(value) >= 1n << 256n
+  )
+    throw new ContinuityError("SCHEMA_INVALID", "Invalid EVM uint");
+}
+export function freezePolicy<T extends RecoveryPolicy>(input: T): T {
+  validatePolicy(input);
+  const copy = structuredClone(input);
+  Object.freeze(copy.mirrorUrls);
+  if (copy.trustMode === "trusted-rpc-quorum") Object.freeze(copy.rpcUrls);
+  return Object.freeze(copy);
+}
+
+/** Metadata uses JSON numbers; protocol wire bytes retain their original strict decimal-string rules. */
+export function metadataFingerprint(value: unknown): string {
+  return canonical(
+    JSON.parse(
+      JSON.stringify(value, (_key, item: unknown) =>
+        typeof item === "number" ? { $number: String(item) } : item,
+      ),
+    ),
+  );
+}
+
+export function validatePolicy(
+  input: unknown,
+): asserts input is RecoveryPolicy {
+  try {
+    validatePolicyInner(input);
+  } catch (e) {
+    if (e instanceof ContinuityError && e.code === "POLICY_INVALID") throw e;
+    throw new ContinuityError(
+      "POLICY_INVALID",
+      "Invalid explicit recovery policy",
+    );
+  }
 }
