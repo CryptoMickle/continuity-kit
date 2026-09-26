@@ -4,7 +4,7 @@ Private application work should have a way back when its original app disappears
 
 ContinuityKit prepares a separate recovery passkey on a second origin, stores encrypted checkpoints, and checks an owner-authorized version registry before opening a copy. A valid old copy is not accepted as the current one. If the latest bytes are gone, the app says so.
 
-**Current status:** working local prototype and reviewed SDK, with synthetic browser recovery evidence. The physical passkey test is in progress. No Monad deployment, transaction, external integration or prize eligibility is claimed. The browser demo uses a signed local registry model. See [EVIDENCE.md](EVIDENCE.md) and [PROJECT_STATE.md](PROJECT_STATE.md).
+**Current status:** working local prototype and reviewed SDK. Physical A/B passkey enrollment and fresh B recovery of exact v2 content passed with A offline and an old copy rejected, in one local setup. Cross-environment support and prompt counts remain unverified. No Monad deployment, transaction, external integration or prize eligibility is claimed. The browser demo uses a signed local registry model. See [EVIDENCE.md](EVIDENCE.md) and [PROJECT_STATE.md](PROJECT_STATE.md).
 
 ## Run the local demo
 
@@ -42,7 +42,9 @@ Edits in B create a local working copy. **Export local copy** deliberately downl
 
 The service's two mirrors occupy one local process and disk. They simulate independently faulty responses; they are not independent hosting providers or a durability guarantee. Controls affect this local demonstration only. The loaded A page can still display its in-memory contents after shutdown, so use a new B session and check A's HTTP 503 rather than treating a still-open tab as a server response.
 
-## Physical test — locally authorized, not yet verified
+## Physical test — one local recovery verified
+
+On 26 September 2026, the completed physical enrollment produced v1 and a subsequent save produced v2. With A returning HTTP 503 and its old tab closed, fresh B used the prepared recovery passkey to discover its metadata, reject the same stream's stale v1 and open the exact v2 content. The [saved receipt](evidence/physical-recovery-receipt.json) identifies the physical owner/stream and local-model evidence. This is a completed recovery in one setup, not a device compatibility matrix or a real-chain proof. Fresh physical A restoration is being checked separately.
 
 The user approved creating test passkeys for these two local RPs on the Mac/iPhone setup. Authentication and biometric prompts are completed by the user. Start physical mode explicitly:
 

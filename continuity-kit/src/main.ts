@@ -52,10 +52,10 @@ let localEdited = false;
 let notice = {
   tone: "neutral",
   title: isRecovery
-    ? "Your reserve is independent."
+    ? "Recovery has not been checked yet."
     : "A small workspace. A durable way back.",
   text: isRecovery
-    ? "Use the recovery credential prepared before the original app went offline."
+    ? "Use a recovery passkey only after completing reserve setup in the primary app. This screen does not confirm that a reserve exists."
     : "Prepare a reserve before your first protected checkpoint.",
 };
 let workspace: Workspace = {
@@ -91,8 +91,12 @@ const errorMessages: Record<string, [string, string]> = {
     "PRF support is required. Try the documented supported setup; no substitute key has been generated.",
   ],
   NO_RECOVERY_MATERIAL: [
-    "No matching reserve was found",
-    "The selected credential has no available reserve index. A missing copy and a different credential can look the same.",
+    isRecovery
+      ? "No matching reserve was found"
+      : "Primary passkey opened. No saved setup was found.",
+    isRecovery
+      ? "The selected credential has no available reserve index. A missing copy and a different credential can look the same."
+      : "Your passkey worked, but no saved workspace setup could be loaded. If this setup was interrupted before completion, start a new test with “Create primary passkey”. A new test creates new credentials; it does not restore missing content.",
   ],
   MANIFEST_INVALID: [
     "The reserve metadata could not be verified",

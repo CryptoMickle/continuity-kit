@@ -309,6 +309,10 @@ h1 {
   background: #fbf0e8;
   border-color: #efd7c1;
 }
+.notice.neutral {
+  background: #f4f3ed;
+  border-color: #dfdfd4;
+}
 .notice.error > span,
 .notice.error strong {
   color: #8d4b27;
