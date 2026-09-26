@@ -4,7 +4,7 @@ Private application work should have a way back when its original app disappears
 
 ContinuityKit prepares a separate recovery passkey on a second origin, stores encrypted checkpoints, and checks an owner-authorized version registry before opening a copy. A valid old copy is not accepted as the current one. If the latest bytes are gone, the app says so.
 
-**Current status:** working local prototype and reviewed SDK. Physical A/B enrollment, fresh B exact-v2 recovery with A offline/stale-copy rejection, and fresh A restoration followed by signed local v3 all passed. The user reports iPhone, Chrome and in-app browser use; a controlled compatibility matrix and exact prompt counts remain unmeasured. No Monad deployment, transaction, external integration or prize eligibility is claimed. The browser demo uses a signed local registry model. See [EVIDENCE.md](EVIDENCE.md) and [PROJECT_STATE.md](PROJECT_STATE.md).
+**Current status:** working local prototype and reviewed SDK. Physical A/B enrollment, fresh B exact-v2 recovery with A offline/stale-copy rejection, and fresh A restoration followed by signed local v3 all passed. The user reports iPhone, Chrome and in-app browser use; a controlled compatibility matrix and exact prompt counts remain unmeasured. The registry is now deployed on Monad testnet and its finalized receipt/address/runtime hash verified by both selected providers. The new chain-bound A/B enrollment and application writes/recovery are still pending; no external integration or prize eligibility is claimed. The default browser demo uses a signed local registry model; the explicitly approved runtime uses the deployed chain registry with local encrypted stores. See [EVIDENCE.md](EVIDENCE.md) and [PROJECT_STATE.md](PROJECT_STATE.md).
 
 ## Run the local demo
 
@@ -70,13 +70,13 @@ Physical protocol checklist:
 
 The localhost test does not demonstrate separately hosted HTTPS domains. That deployment needs its own concrete approval and policy.
 
-## Prepared testnet runtime — not activated
+## Explicit testnet runtime — first approved run
 
 The same clients can now use a pinned Monad testnet policy through `src/runtime.ts`. Ordinary `npm run dev` still uses the local registry. `npm run dev:testnet` without the explicit configuration and operator acknowledgment exits without starting services. The prepared candidate in `testnet/runtime-proposal.json` is not evidence that its predicted contract exists.
 
 The [bounded run proposal](testnet/TESTNET_RUN_NO.md) combines deployment, a new A/B pair and three application writes in one concrete approval request. After approval and verified deployment, the operator uses the documented launch command. Testnet forces physical passkeys regardless of query parameters; malformed configuration fails instead of falling back to simulation. Both encrypted stores remain local for this first test. Per-session signing caps do not replace the operator's aggregate run limits.
 
-The runtime and pending-confirmation UI are checked offline. The ordinary local browser flow also reopened the existing synthetic v3 after the launcher refactor. This does not establish actual RPC, physical testnet or deployment success.
+The runtime and pending-confirmation UI are checked offline. The ordinary local browser flow also reopened the existing synthetic v3 after the launcher refactor. The subsequent approved run verified one actual deployment and activated the corresponding runtime; public receipt and operation status are in [the run log](testnet/RUN_2026-09-26.md). Application enrollment and recovery on chain are not yet verified.
 
 ## SDK and trust boundaries
 
