@@ -104,7 +104,7 @@ const result = await recoverCurrent(discovered, passkeys, adapters);
 
 The default Mera adapter uses browser WebAuthn. `SyntheticWebAuthnClient` is a separate, explicitly named fixture. No automatic unsupported-PRF fallback turns physical authentication into a simulation.
 
-The SDK has distinct local-model and Monad-testnet policy/evidence types. `MonadRegistryReader` and `HttpTransactionTransport` require an explicit, complete deployment policy; no testnet address or live write configuration is enabled in the demo. Primary account objects expose a constrained writer, never Mera's unrestricted signer. The writer pins owner, deployment, stream, methods, zero value, expiry, transaction count and full-gas fee budget. It reconciles uncertain submissions by hash and validates finalized transaction/receipt/state evidence. These paths passed local synthetic tests and a separate bounded review; actual Monad deployment and physical chain evidence remain separate gates. See [testnet runbook](testnet/RUNBOOK.md) and [deployment proposal](testnet/DEPLOYMENT_PROPOSAL_NO.md). Signed local-model commands are not Ethereum transactions.
+The SDK has distinct local-model and Monad-testnet policy/evidence types. `MonadRegistryReader` and `HttpTransactionTransport` require an explicit, complete deployment policy; no testnet address or live write configuration is enabled in the demo. Primary account objects expose a constrained writer, never Mera's unrestricted signer. The writer pins owner, deployment, stream, methods, zero value, expiry, transaction count and full-gas fee budget. It reconciles uncertain submissions by hash and validates finalized transaction/receipt/state evidence. These paths passed local synthetic tests and a separate bounded review; the actual registry deployment is now verified, while physical application transactions/recovery remain a separate gate. See [testnet runbook](testnet/RUNBOOK.md) and [deployment proposal](testnet/DEPLOYMENT_PROPOSAL_NO.md). Signed local-model commands are not Ethereum transactions.
 
 ## Verification
 
@@ -126,7 +126,7 @@ The local service persists only encrypted objects and public registry metadata u
 
 Recovery requires prior enrollment, a surviving B credential and authentic index/current blob copies. It cannot recreate missing bytes, revoke a copied data key, recover A's wallet authority, or discover a user's globally newest enrollment from untrusted storage. One fresh credential pair maps to one immutable stream. Trusted delivered client code and authenticator behavior are assumptions. Browser memory cannot promise complete secret erasure. A registry/RPC view supplies a stated trust assumption, not a light-client proof.
 
-The staged competition package is in `delivery/`. No public repository, deployment, video, external message or submission has been made. Personal liability under competition terms remains a separate unresolved question; neither a nonfinancial prototype nor an MIT license removes those obligations.
+The staged competition package is in `delivery/`. No public repository, hosted app, completed video, external message or submission has been made. The approved Monad testnet registry deployment is recorded separately. Personal liability under competition terms remains a separate unresolved question; neither a nonfinancial prototype nor an MIT license removes those obligations.
 
 ## AI assistance and provenance
 
