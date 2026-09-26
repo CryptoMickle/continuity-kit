@@ -1,8 +1,8 @@
 import "./style.css";
-import { LOCAL_POLICY, validateContext } from "./sdk/policy.ts";
+import { validateContext } from "./sdk/policy.ts";
+import { createRuntime } from "./runtime.ts";
 import { MeraPasskeyAdapter } from "./sdk/passkeys.ts";
 import { SyntheticWebAuthnClient } from "./sdk/demo-fixture.ts";
-import { HttpMirrorStore, HttpRegistry } from "./sdk/stores.ts";
 import { createPrimary } from "./sdk/account.ts";
 import type { PrimaryAccount, PrimaryState } from "./sdk/account.ts";
 import {
@@ -25,24 +25,27 @@ import type {
 } from "./sdk/types.ts";
 import { HandoffChannel } from "./handoff.ts";
 
-const policy = LOCAL_POLICY;
+declare const __CONTINUITY_TESTNET_CONFIG__: unknown;
+const runtime = createRuntime(
+  typeof __CONTINUITY_TESTNET_CONFIG__ === "undefined"
+    ? undefined
+    : __CONTINUITY_TESTNET_CONFIG__,
+);
+const policy = runtime.policy;
+const chainRun = runtime.kind === "monad-testnet";
+const adapters = runtime.adapters;
 const isRecovery = location.origin === policy.bOrigin;
 const validOrigin = isRecovery || location.origin === policy.aOrigin;
 const query = new URLSearchParams(location.search);
 const physicalEnabled =
   import.meta.env.VITE_ENABLE_PHYSICAL_PASSKEYS === "true";
-const physical = physicalEnabled && query.get("mode") === "physical";
+const physical =
+  runtime.requirePhysicalPasskeys ||
+  (physicalEnabled && query.get("mode") === "physical");
 const fixture = new SyntheticWebAuthnClient({
   seed: "continuity-demo-profile-1",
 });
 const passkeys = new MeraPasskeyAdapter(physical ? undefined : fixture);
-const registry = new HttpRegistry(policy);
-const adapters = {
-  trustMode: "local-model" as const,
-  localWriter: registry,
-  mirrors: policy.mirrorUrls.map((url) => new HttpMirrorStore(url)),
-  registry,
-};
 const app = document.querySelector<HTMLDivElement>("#app")!;
 let primary: PrimaryAccount | null = null;
 let state: PrimaryState | null = null;
@@ -175,7 +178,7 @@ async function run(action: () => Promise<void>, required = false) {
   }
 }
 async function control(change: Record<string, unknown>) {
-  const response = await fetch(`${policy.registryUrl}/v1/control`, {
+  const response = await fetch(`${runtime.controlUrl}/v1/control`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(change),
@@ -188,7 +191,7 @@ async function control(change: Record<string, unknown>) {
 }
 async function refreshStatus() {
   try {
-    const response = await fetch(`${policy.registryUrl}/v1/status`, {
+    const response = await fetch(`${runtime.controlUrl}/v1/status`, {
       signal: AbortSignal.timeout(3000),
     });
     const status = await response.json();
@@ -271,6 +274,17 @@ function guideMarkup() {
     title = "Create the original app’s passkey.";
     text = `Choose Create primary passkey and save a new key for ${a}. Already completed setup? Choose Open existing workspace instead, using your existing ${a} key.`;
   }
+  if (
+    chainRun &&
+    primary &&
+    !state &&
+    !busy &&
+    !enrollmentPending &&
+    !isRecovery &&
+    notice.tone !== "error"
+  )
+    text +=
+      " First fund the test account shown above using the approved free test-token process. Completing reserve setup submits its first testnet transaction.";
   if (!physical)
     text =
       text
@@ -289,16 +303,17 @@ function render() {
     return;
   }
   app.innerHTML = `<div class="shell"><aside class="sidebar"><a class="brand" href="${policy.aOrigin}${modeQuery}"><span class="brand-mark"><i></i><i></i><i></i></span>continuity<span>kit</span></a><div class="side-caption">WORK THAT STAYS WITH YOU</div><nav><a class="${!isRecovery ? "active" : ""}" href="${policy.aOrigin}${modeQuery}"><span>▤</span> Primary workspace <small>A</small></a><a class="${isRecovery ? "active" : ""}" href="${policy.bOrigin}${modeQuery}"><span>↳</span> Recovery client <small>B</small></a></nav><div class="side-story"><div class="orbit">↳</div><h3>Apps can disappear.<br>Your work shouldn’t.</h3><p>An independent reserve.<br>A verifiable latest copy.<br>A way to keep going.</p></div><div class="side-bottom"><span class="dot"></span> ${physical ? "Physical passkeys" : "Synthetic credentials"}<br><small>Local demonstration · v0.1</small></div></aside>
-  <main><header class="topbar"><div><span class="status-dot ${primaryOnline ? "" : "offline"}"></span> Primary ${primaryOnline ? "available" : "offline"}<span class="top-separator">/</span><span>${isRecovery ? "Independent recovery origin" : "Primary origin"}</span></div><span class="mode-tag">${physical ? "PHYSICAL TEST · LOCAL REGISTRY" : "LOCAL SIMULATION"}</span></header>
+  <main><header class="topbar"><div><span class="status-dot ${primaryOnline ? "" : "offline"}"></span> Primary ${primaryOnline ? "available" : "offline"}<span class="top-separator">/</span><span>${isRecovery ? "Independent recovery origin" : "Primary origin"}</span></div><span class="mode-tag">${chainRun ? "MONAD TESTNET · LOCAL STORES" : physical ? "PHYSICAL TEST · LOCAL REGISTRY" : "LOCAL SIMULATION"}</span></header>
   <section class="hero"><div><span class="eyebrow">CONTINUITY, BY DESIGN</span><h1>${isRecovery ? "Bring your work back." : "Your work has a way back."}</h1><p>${isRecovery ? "The original app can be gone. Your prepared reserve can still open the latest surviving checkpoint." : "A private workspace with a reserve you prepare today, for the app you might lose tomorrow."}</p></div><div class="hero-badge"><span>${isRecovery ? "B" : "A"}</span><small>${isRecovery ? "RECOVER" : "CREATE"}</small></div></section>
   <div class="notice ${notice.tone}" role="status" aria-live="polite"><span>${busy ? "◌" : notice.tone === "error" ? "!" : notice.tone === "success" ? "✓" : "↳"}</span><div><strong>${escape(notice.title)}</strong><p>${escape(notice.text)}</p></div></div>
+  ${chainRun ? `<section class="boundary-card"><h3>Monad testnet · separate setup</h3><p>This run uses real testnet transactions and two encrypted copies in one local service. Create a new passkey pair for this setup; the earlier local reserve stays bound to its original registry.</p><p>Registry: <code>${escape(policy.registryAddress)}</code></p>${!isRecovery && primary ? `<p>Test account to fund before reserve setup: <code>${escape(primary.context.owner)}</code></p>` : ""}</section>` : ""}
   ${guideMarkup()}
   <section class="content-grid"><article class="document">${!isRecovery || recovered ? editorMarkup() : `<div class="recovery-empty"><div class="recovery-art"><span>▤</span><i>↳</i><b>✓</b></div><span class="eyebrow">${offer ? "PREPARE YOUR INDEPENDENT RESERVE" : "START FROM A FRESH CLIENT"}</span><h2>${offer ? "A separate key. A second way in." : "No old tab. No saved file."}</h2><p>${offer ? "This client will wrap a separate data key. It receives no primary wallet key or permission to write its history." : "Choose your prepared recovery credential. The client discovers the encrypted reserve and verifies which copy is current."}</p><button class="button dark large" id="${offer ? "enroll" : "recover"}" ${busy ? "disabled" : ""}>${offer ? (physical ? "Create recovery passkey" : "Prepare simulated reserve") : physical ? "Recover with passkey" : "Recover demo workspace"} ↗</button><small>${physical ? "Use the passkey for recovery.localhost. Your device may ask for more than one confirmation." : "Uses public test credentials. Do not put private information in this demo."}</small></div>`}</article>
   <aside class="right-stack"><section class="reserve-card"><div class="card-kicker">${isRecovery ? "RECOVERY RECEIPT" : "INDEPENDENT RESERVE"}<span>↗</span></div>${isRecovery ? proofMarkup() : `<div class="reserve-illustration"><div>A</div><span>╌╌╌<i>◈</i>╌╌╌</span><div>B</div></div><h2>${state ? "Your reserve is prepared." : "Give your work a second home."}</h2><p>${state ? "Checkpoint updates use the same reserve. Your primary signing session is scoped and expires after ten minutes." : "A separate credential protects the data key. Two encrypted copies and a version registry complete the path back."}</p><button class="button pale" id="prepare" ${busy || enrollmentPending || !!state ? "disabled" : ""}>${state ? "✓ Reserve prepared" : primary ? "Open recovery setup" : physical ? "Create primary passkey" : "Create demo account"}</button><button class="text-button" id="restore" ${busy || enrollmentPending || (!!primary && !state) ? "disabled" : ""}>Open existing workspace ↗</button>`}</section>
-  <section class="boundary-card"><span class="mini-icon">◈</span><h3>${isRecovery ? "Your copy, your next step." : "Private content stays encrypted."}</h3><p>${isRecovery ? "Read, edit locally and export. Recovery does not restore the primary wallet or authorize new registry writes." : "The stores receive ciphertext. The registry receives a version and digest. The registry in this demonstration is a local model."}</p></section></aside></section>
-  <details class="test-tools" id="test-tools" ${toolsOpen ? "open" : ""}><summary>Demonstration tools · outages and verification tests</summary><section class="demo-controls"><div><span class="eyebrow">TRY THE FAILURE, TOO</span><h2>Recovery should earn your trust.</h2><p>Change the conditions. Then run recovery in a fresh client.</p></div><div class="controls"><label>Mirror / registry condition<select id="scenario" ${busy || enrollmentPending ? "disabled" : ""}><option value="healthy">Both copies healthy</option><option value="stale-one">Mirror 1 serves an old valid copy</option><option value="stale-both">Both mirrors serve an old valid copy</option><option value="missing-current">Latest bytes unavailable</option><option value="freshness-offline">Registry unavailable</option><option value="corrupt-index">Reserve metadata corrupted</option></select></label><button class="button outline" id="outage" ${busy || enrollmentPending ? "disabled" : ""}>${primaryOnline ? "Take primary offline" : "Bring primary back"}</button><button class="text-button" id="fresh" ${busy ? "disabled" : ""}>Discard this session & reload ↻</button>${isRecovery && recovered ? `<button class="button dark" id="recover-again" ${busy ? "disabled" : ""}>Check recovery again ↗</button>` : ""}</div></section></details>
+  <section class="boundary-card"><span class="mini-icon">◈</span><h3>${isRecovery ? "Your copy, your next step." : "Private content stays encrypted."}</h3><p>${isRecovery ? "Read, edit locally and export. Recovery does not restore the primary wallet or authorize new registry writes." : chainRun ? "The local stores receive ciphertext. Monad testnet receives the version and digest. These two local copies do not demonstrate independent hosting." : "The stores receive ciphertext. The registry receives a version and digest. The registry in this demonstration is a local model."}</p></section></aside></section>
+  <details class="test-tools" id="test-tools" ${toolsOpen ? "open" : ""}><summary>Demonstration tools · outages and verification tests</summary><section class="demo-controls"><div><span class="eyebrow">TRY THE FAILURE, TOO</span><h2>Recovery should earn your trust.</h2><p>Change the conditions. Then run recovery in a fresh client.</p></div><div class="controls"><label>Mirror / registry condition<select id="scenario" ${busy || enrollmentPending ? "disabled" : ""}><option value="healthy">Both copies healthy</option><option value="stale-one">Mirror 1 serves an old valid copy</option><option value="stale-both">Both mirrors serve an old valid copy</option><option value="missing-current">Latest bytes unavailable</option>${chainRun ? "" : '<option value="freshness-offline">Registry unavailable</option>'}<option value="corrupt-index">Reserve metadata corrupted</option></select></label><button class="button outline" id="outage" ${busy || enrollmentPending ? "disabled" : ""}>${primaryOnline ? "Take primary offline" : "Bring primary back"}</button><button class="text-button" id="fresh" ${busy ? "disabled" : ""}>Discard this session & reload ↻</button>${isRecovery && recovered ? `<button class="button dark" id="recover-again" ${busy ? "disabled" : ""}>Check recovery again ↗</button>` : ""}</div></section></details>
   ${!isRecovery && pendingTicket ? '<section class="boundary-card"><h3>Transaction confirmation is unresolved.</h3><p>Your draft remains here. Checking status only reads the registry; it never submits another transaction.</p><button class="button outline" id="check-transaction">Check transaction status</button><button class="text-button" id="export-ticket">Export transaction reference</button></section>' : ""}
-  <footer><span>ContinuityKit / Experimental developer preview</span><span>${physical ? "Real authenticator · simulated registry" : "Simulated authenticator · simulated registry"} · No Monad transactions</span></footer>
+  <footer><span>ContinuityKit / Experimental developer preview</span><span>${chainRun ? "Physical passkeys · Monad testnet 10143 · local encrypted stores" : (physical ? "Real authenticator · simulated registry" : "Simulated authenticator · simulated registry") + " · No Monad transactions"}</span></footer>
   </main></div>`;
   document.querySelector("#check-transaction")?.addEventListener(
     "click",
@@ -321,6 +336,10 @@ function render() {
             return;
           }
           state = result.state;
+          notifyReserveCommitted({
+            version: result.currentHead.version,
+            capsuleDigest: result.currentHead.capsuleDigest,
+          });
           enrollmentPending = false;
           pendingTicket = result.unresolvedTicket ?? null;
           writeProof = result.proof;
@@ -379,7 +398,9 @@ function render() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
   const select = document.querySelector<HTMLSelectElement>("#scenario");
-  if (select) select.value = scenario;
+  if (select)
+    select.value =
+      chainRun && scenario === "freshness-offline" ? "healthy" : scenario;
   document
     .querySelector("#prepare")
     ?.addEventListener("click", startEnrollment);
@@ -404,7 +425,9 @@ function render() {
         notice = {
           tone: "success",
           title: "Same account. Same private workspace.",
-          text: "Recovered from the primary credential and encrypted stores, with no saved browser state. This is local-model evidence.",
+          text: chainRun
+            ? "Recovered from the primary credential and encrypted stores. The current checkpoint passed finalized Monad testnet RPC checks."
+            : "Recovered from the primary credential and encrypted stores, with no saved browser state. This is local-model evidence.",
         };
       }),
   );
@@ -547,6 +570,23 @@ function watchEnrollment(bound: HandoffChannel, peer: Window) {
     }
   }, 500);
 }
+function notifyReserveCommitted(head: {
+  version: string;
+  capsuleDigest: string;
+}) {
+  // A finalized registry result survives a closed or expired popup. Notify once;
+  // B still checks the registry itself, or can recover independently in a fresh tab.
+  const completedChannel = channel;
+  channel = null;
+  if (!completedChannel) return;
+  try {
+    completedChannel.committed(head);
+  } catch {
+    // Delivery is optional once the enrollment is independently verifiable.
+  } finally {
+    completedChannel.close();
+  }
+}
 function startEnrollment() {
   if (busy || enrollmentPending) return;
   if (!primary) {
@@ -684,7 +724,7 @@ window.addEventListener("message", (event) => {
               diagnostics: [],
             }
           : null;
-      channel.committed({
+      notifyReserveCommitted({
         version: head.version,
         capsuleDigest: head.capsuleDigest,
       });

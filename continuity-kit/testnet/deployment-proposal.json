@@ -44,7 +44,7 @@
   },
   "pendingChecks": [
     "Explicit user approval of existing passkey use, exact funding action, providers, one bounded deployment and its public data.",
-    "Resolve the recorded faucet/provider terms questions, including dRPC's public endpoint versus general account-registration terms, before requesting execution approval; no implicit authorization.",
+    "Review the recorded faucet/provider terms and uncertainties as part of concrete action/service-use approval; an organizer pre-clearance response is not mandatory and no authorization is inferred.",
     "Before execution recheck chain, nonce zero, no deployer account code, unused predicted address and available test funding on both providers. If nonce changes, prepare a new proposal.",
     "Recheck that the locally implemented/tested/reviewed deployment-only executor still matches its pinned source and artifact hashes; registry writer must still reject contract creation.",
     "Native estimate and fresh fees within all stated caps.",

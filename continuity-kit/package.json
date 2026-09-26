@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "dev:testnet": "node scripts/testnet-dev.mjs",
     "demo:seed": "node scripts/seed-demo.ts",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",

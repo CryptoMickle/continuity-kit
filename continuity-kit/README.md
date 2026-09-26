@@ -70,6 +70,14 @@ Physical protocol checklist:
 
 The localhost test does not demonstrate separately hosted HTTPS domains. That deployment needs its own concrete approval and policy.
 
+## Prepared testnet runtime — not activated
+
+The same clients can now use a pinned Monad testnet policy through `src/runtime.ts`. Ordinary `npm run dev` still uses the local registry. `npm run dev:testnet` without the explicit configuration and operator acknowledgment exits without starting services. The prepared candidate in `testnet/runtime-proposal.json` is not evidence that its predicted contract exists.
+
+The [bounded run proposal](testnet/TESTNET_RUN_NO.md) combines deployment, a new A/B pair and three application writes in one concrete approval request. After approval and verified deployment, the operator uses the documented launch command. Testnet forces physical passkeys regardless of query parameters; malformed configuration fails instead of falling back to simulation. Both encrypted stores remain local for this first test. Per-session signing caps do not replace the operator's aggregate run limits.
+
+The runtime and pending-confirmation UI are checked offline. The ordinary local browser flow also reopened the existing synthetic v3 after the launcher refactor. This does not establish actual RPC, physical testnet or deployment success.
+
 ## SDK and trust boundaries
 
 The SDK lives under `src/sdk/`; it has no UI dependency. `src/main.ts` is a small demonstration shell hosted on both origins. The B recovery path uses only the recovery credential, policy, mirrors and registry; it does not request A or receive its signer. A developer can import the recovery functions without importing this demo shell.

@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 
-export const ACK = "--acknowledge-chat-approved-deployment-and-resolved-terms";
+export const ACK = "--acknowledge-chat-approved-deployment-and-reviewed-terms";
 export const ORIGIN = "http://primary.localhost:4176";
 
 // A local operator guard, not a source of user consent. Never infer approval from JSON.
@@ -67,7 +67,7 @@ if (
 ) {
   if (process.argv.length !== 3 || process.argv[2] !== ACK) {
     process.stdout.write(
-      "Deployment panel remains dormant: concrete chat approval and resolved provider/faucet terms are required. No service started. The acknowledgment switch is for the authorized operator only; it does not grant consent.\n",
+      "Deployment panel remains dormant: concrete chat approval of the action and reviewed provider/faucet terms are required. No service started. The acknowledgment switch is for the authorized operator only; it does not grant consent.\n",
     );
   } else {
     const { createServer } = await import("vite");
