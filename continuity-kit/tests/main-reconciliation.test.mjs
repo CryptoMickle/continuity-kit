@@ -265,6 +265,9 @@ async function boot(options = {}) {
     opened,
     click,
     message,
+    nodeText(selector) {
+      return nodes.get(selector)?.textContent;
+    },
     closePeer() {
       popup.closed = true;
       for (const tick of [...intervals]) tick();
@@ -440,6 +443,9 @@ test("B waits for the exact opener and origin before offering credential creatio
     count,
     "Ready polling ends once the offer arrives",
   );
+  ui.tick(15000);
+  assert.match(ui.html, /id="enroll"/);
+  assert.match(ui.nodeText("#setup-clock"), /Setup time remaining/);
   ui.closePeer();
   assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
 });
@@ -483,4 +489,59 @@ test("B loses all setup actions and stops polling when its opener closes", async
   ui.tick();
   assert.equal(ui.sent.length, count);
   assert.deepEqual(ui.calls, ["local-status"]);
+});
+
+test("B stops misleading connection guidance when its opener never supplies an offer", async () => {
+  const ui = await boot({ recovery: true, opener: true, search: "?enroll=1" });
+  assert.match(ui.html, /Waiting for setup request: 0:15/);
+  ui.tick(14999);
+  assert.match(ui.html, /Connecting to the primary app/);
+  assert.match(ui.nodeText("#setup-clock"), /Waiting for setup request: 0:01/);
+  const ready = ui.sent.find((m) => m.kind === "ready");
+  const count = ui.sent.length;
+  ui.tick(1);
+  assert.match(ui.html, /No setup request arrived from the primary app/);
+  assert.doesNotMatch(
+    ui.html,
+    /Finish any open prompt before starting another action/,
+  );
+  assert.doesNotMatch(
+    ui.html,
+    /Connecting to the primary app|id="(?:enroll|recover|setup-clock)"/,
+  );
+  await ui.message({
+    protocol: "continuity-handoff/v1",
+    kind: "offer",
+    step: 1,
+    aNonce: "a".repeat(64),
+    bNonce: ready.bNonce,
+    payload: {
+      context: contextFor(
+        createRuntime(config()).policy,
+        "0x4444444444444444444444444444444444444444",
+        `0x${"6".repeat(64)}`,
+      ),
+      dataKey: new Uint8Array(32).fill(7),
+    },
+  });
+  ui.tick();
+  assert.equal(ui.sent.length, count);
+  assert.deepEqual(ui.calls, ["local-status"]);
+  assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
+});
+
+test("setup time is disclosed before creating a primary key and does not extend on ticks", async () => {
+  const ui = await boot();
+  assert.match(ui.html, /window expires after five minutes/);
+  await ui.click("#prepare");
+  await ui.click("#prepare");
+  assert.match(ui.html, /Setup time remaining: 5:00/);
+  ui.tick(60000);
+  assert.match(ui.nodeText("#setup-clock"), /Setup time remaining: 4:00/);
+  ui.tick(239999);
+  assert.match(ui.nodeText("#setup-clock"), /Setup time remaining: 0:01/);
+  ui.tick(1);
+  assert.match(ui.html, /Reserve preparation expired/);
+  assert.doesNotMatch(ui.html, /id="setup-clock"/);
+  assert.equal(ui.calls.filter((c) => c === "close-account").length, 1);
 });
