@@ -811,6 +811,20 @@ test("expiry before preparation and no-change/overflow commits broadcast nothing
   assert.equal(g.chain.sends, 0);
   g.writer.close();
 });
+test("owner estimates stay within the caller's gas ceiling before signing", async () => {
+  const f = writerFixture({ maxGas: 180000n });
+  const original = f.chain.estimateGas.bind(f.chain);
+  let estimates = 0;
+  f.chain.estimateGas = async (provider, call, signal) => {
+    estimates++;
+    assert.equal(call.gas, "0x2bf20");
+    return original(provider, call, signal);
+  };
+  await f.writer.execute(f.command);
+  assert.equal(estimates, 2);
+  assert.equal(f.chain.sends, 1);
+  f.writer.close();
+});
 test("HTTP estimate decodes only exact WriteConflict; historical calls take canonical decimal block numbers", async () => {
   const { encodeErrorResult, encodeFunctionData } = await import("viem"),
     { registryAbi } = await import("../src/sdk/quorum.ts");
@@ -826,6 +840,7 @@ test("HTTP estimate decodes only exact WriteConflict; historical calls take cano
   });
   const t = new HttpTransactionTransport(policy, (async (_url, options) => {
     const request = JSON.parse(String(options?.body));
+    assert.equal(request.params[0].gas, "0x493e0");
     return new Response(
       JSON.stringify({
         jsonrpc: "2.0",
@@ -841,6 +856,7 @@ test("HTTP estimate decodes only exact WriteConflict; historical calls take cano
         from: `0x${"12".repeat(20)}`,
         to: policy.registryAddress,
         value: "0x0",
+        gas: "0x493e0",
         data,
       },
       new AbortController().signal,
@@ -849,4 +865,28 @@ test("HTTP estimate decodes only exact WriteConflict; historical calls take cano
   );
   assert.throws(() => t.block(0, "finalized", new AbortController().signal));
   assert.throws(() => t.code(0, "0x1", new AbortController().signal));
+  for (const gas of [
+    300000,
+    { toString: () => "0x493e0", toJSON: () => "0x0" },
+    "0x0",
+    "0x00",
+    "0x0493e0",
+    "300000",
+    "0x" + "1".repeat(65),
+  ])
+    assert.throws(
+      () =>
+        t.estimateGas(
+          0,
+          {
+            from: `0x${"12".repeat(20)}`,
+            to: policy.registryAddress,
+            value: "0x0",
+            gas: gas as `0x${string}`,
+            data,
+          },
+          new AbortController().signal,
+        ),
+      code("CONTEXT_MISMATCH"),
+    );
 });

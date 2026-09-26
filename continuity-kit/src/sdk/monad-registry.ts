@@ -188,13 +188,15 @@ export class HttpTransactionTransport implements TransactionTransport {
   }
   estimateGas(
     provider: 0 | 1,
-    call: { from: Hex; to: Hex; data: Hex; value: "0x0" },
+    call: { from: Hex; to: Hex; data: Hex; value: "0x0"; gas: Hex },
     signal: AbortSignal,
   ) {
-    record(call, ["from", "to", "data", "value"]);
+    record(call, ["from", "to", "data", "value", "gas"]);
     if (
       call.to !== this.policy.registryAddress ||
       call.value !== "0x0" ||
+      typeof call.gas !== "string" ||
+      !/^0x[1-9a-f][0-9a-f]{0,63}$/.test(call.gas) ||
       !/^0x[0-9a-f]{40}$/.test(call.from) ||
       !/^0x[0-9a-f]{8}(?:[0-9a-f]{64}){3,4}$/.test(call.data)
     )

@@ -96,7 +96,7 @@ export class OfflineChain implements TransactionTransport {
   }
   async estimateGas(
     _provider: 0 | 1,
-    _call: { from: Hex; to: Hex; data: Hex; value: "0x0" },
+    _call: { from: Hex; to: Hex; data: Hex; value: "0x0"; gas: Hex },
     _signal: AbortSignal,
   ) {
     this.stage?.("estimate");

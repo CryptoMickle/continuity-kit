@@ -177,7 +177,7 @@ export interface TransactionTransport {
   ): Promise<unknown>;
   estimateGas(
     provider: 0 | 1,
-    call: { from: Hex; to: Hex; data: Hex; value: "0x0" },
+    call: { from: Hex; to: Hex; data: Hex; value: "0x0"; gas: Hex },
     signal: AbortSignal,
   ): Promise<unknown>;
   fees(

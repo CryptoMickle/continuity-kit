@@ -223,9 +223,14 @@ test("offline Mera signs one exact creation; two providers confirm finalized run
     assert.deepEqual(Object.keys(call.params[0] as object).sort(), [
       "data",
       "from",
+      "gas",
       "nonce",
       "value",
     ]);
+    assert.equal(
+      (call.params[0] as { gas: string }).gas,
+      q(BigInt(f.plan.gasLimitCeiling)),
+    );
   }
   const sent = f.calls.find((c) => c.method === "eth_sendRawTransaction")!;
   const parsed = parseTransaction(sent.params[0] as Hex);

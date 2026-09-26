@@ -452,6 +452,7 @@ export class OwnerWriter implements ScopedOwnerWriter {
               to: intent.to,
               data: intent.data,
               value: "0x0",
+              gas: `0x${cap.maxGas.toString(16)}`,
             },
             signal,
           ),

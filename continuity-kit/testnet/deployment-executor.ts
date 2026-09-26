@@ -445,6 +445,8 @@ export function createDeploymentExecutor(
       data: plan.creationData,
       value: "0x0",
       nonce: "0x0",
+      // Bound estimation too: provider defaults can exceed their own RPC limit.
+      gas: `0x${BigInt(plan.gasLimitCeiling).toString(16)}`,
     };
     const estimates = (await both("eth_estimateGas", [base], deadline)).map(
       quantity,
