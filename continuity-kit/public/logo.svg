@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">ContinuityKit</title>
+  <desc id="desc">Three light green pages on a dark green background.</desc>
+  <rect width="1024" height="1024" rx="210" fill="#172a20"/>
+  <circle cx="512" cy="512" r="365" fill="none" stroke="#3b5434" stroke-width="3"/>
+  <g transform="rotate(-25 512 512)" fill="#c7eea1">
+    <rect x="320" y="365" width="90" height="294" rx="22"/>
+    <rect x="467" y="295" width="90" height="434" rx="22"/>
+    <rect x="614" y="365" width="90" height="294" rx="22"/>
+  </g>
+</svg>
