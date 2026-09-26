@@ -11,12 +11,13 @@
     "dev": "node scripts/dev.mjs",
     "dev:testnet": "node scripts/testnet-dev.mjs",
     "demo:seed": "node scripts/seed-demo.ts",
+    "demo:passport": "node examples/passport-recovery/scenario.ts",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.ts tests/*.test.mjs",
     "check": "npm run typecheck && npm test && npm run build",
-    "format": "prettier --write src scripts tests testnet/*.ts delivery/sdk-example.ts index.html package.json tsconfig.json",
-    "format:check": "prettier --check src scripts tests testnet/*.ts delivery/sdk-example.ts index.html package.json tsconfig.json"
+    "format": "prettier --write src scripts tests examples testnet/*.ts delivery/sdk-example.ts index.html package.json tsconfig.json",
+    "format:check": "prettier --check src scripts tests examples testnet/*.ts delivery/sdk-example.ts index.html package.json tsconfig.json"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",
