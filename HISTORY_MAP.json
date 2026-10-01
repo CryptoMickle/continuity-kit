@@ -1,0 +1,55 @@
+{
+  "original_base": "b68bb7b2c04d1c995fad1035c7b8f84c134062ca",
+  "filter": "explicit product-file allowlist",
+  "kept_original_paths": true,
+  "commits": [
+    {
+      "original": "f31236ebfcfdc32d67ca270152ec43f4ccedff2d",
+      "filtered": "228daa8afd828c674850ccf38c8333e89c29bc75"
+    },
+    {
+      "original": "f57fe16e331652560f5338edc937c93d8c52e479",
+      "filtered": "8fb77c9cfcfe16ea18968b675ee6c3ceb09d4032"
+    },
+    {
+      "original": "3a6a3d24b89d671ed510b247a1aa8d32870c60cd",
+      "filtered": "65f3c24749d04f8f976fa7aa5443b600c48fb541"
+    },
+    {
+      "original": "25e2707c9d6f2a8bf6782da8e2539f983ccc1709",
+      "filtered": "05e7daa52cc208c21dcf1dac06cf928ece6aaff1"
+    },
+    {
+      "original": "18d55d7a9b8cf58f5eba2ded7a6ea6f66c9da0e2",
+      "filtered": "41f37b724a7472d77f22140b6418d88735f920f8"
+    },
+    {
+      "original": "ff5a2d9f50327815a6ac05987e7e04212c4bb36c",
+      "filtered": "1f00261b97371b9cf82e9fbb9122b06e46dc5d98"
+    },
+    {
+      "original": "b68bb7b2c04d1c995fad1035c7b8f84c134062ca",
+      "filtered": "faf84abed71f474d9184938f7641e45e50b8f43f"
+    },
+    {
+      "original": "0bb899c6b3e001aef5ebf47aaa60458a8557549a",
+      "filtered": "852b781ca74e910b7bf21d537aa11df7c6e064c7"
+    },
+    {
+      "original": "faa99f1bc1beb39495439e391a2eeaacd595fb74",
+      "filtered": "4f0732c9a20e7b6730ca0e191a1e44cd93b74caa"
+    },
+    {
+      "original": "b90d8d1a3acffc9a220c95dd4fbda775db16a5a1",
+      "filtered": "79e22ecc493192d68c474ce2f1d1465bb599e25b"
+    },
+    {
+      "original": "8a2c6e5d2ffc8cc2cee83a973d9d519da97f4e00",
+      "filtered": "af1ba9ec993710c3fd9cf025da2cc50164300498"
+    },
+    {
+      "original": "a0f5e8e470ae7057e36d06dafdf99f4946695a3d",
+      "filtered": "d75598edde58f69640043a106ccfb9056599aba1"
+    }
+  ]
+}

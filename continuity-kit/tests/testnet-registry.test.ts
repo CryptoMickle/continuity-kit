@@ -95,6 +95,26 @@ test("testnet reader returns explicit trusted RPC evidence and pins code/call at
     ),
   );
 });
+test("registry reads work when a provider rejects its implicit eth_call gas default", async () => {
+  const f = fixture();
+  const providerWithLimit: ReadRpc = async (url, method, params, signal) => {
+    if (method === "eth_call") {
+      const { gas } = params[0] as { gas?: string };
+      // Reproduce the public provider's failure on omitted or excessive gas.
+      if (!gas || BigInt(gas) <= 0n || BigInt(gas) > 300_000n)
+        throw new Error("user-specified gas exceeds provider limit");
+    }
+    return f.rpc(url, method, params, signal);
+  };
+  const head = await new MonadRegistryReader(
+    policy,
+    providerWithLimit,
+    () => now,
+  ).getHead(owner, id(1));
+  assert.equal(head.version, "1");
+  assert.equal(head.evidence.finality, "finalized");
+  assert.equal(f.calls.filter((c) => c.method === "eth_call").length, 2);
+});
 for (const failure of [
   "chain",
   "code",

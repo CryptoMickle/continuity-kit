@@ -1,0 +1,41 @@
+{
+  "kind": "monad-testnet",
+  "policy": {
+    "protocol": "continuity-kit/v1",
+    "applicationId": "continuity-private-workspace",
+    "schemaId": "workspace/v1",
+    "deploymentId": "monad-testnet-3fc9997e-v1",
+    "aOrigin": "http://primary.localhost:4173",
+    "bOrigin": "http://recovery.localhost:4174",
+    "aRpId": "primary.localhost",
+    "bRpId": "recovery.localhost",
+    "chainId": "10143",
+    "registryAddress": "0x3fc9997e62e56ba17225a47c32ad9406313dc98a",
+    "registryCodeHash": "0x0605a2eae3c27f4d12476d61af8b1eb53a8b7b64f145c9139b47c95f8aef9dd9",
+    "trustMode": "trusted-rpc-quorum",
+    "bootstrapNamespace": "continuity-kit/monad-testnet-3fc9997e/v1",
+    "mirrorUrls": [
+      "http://localhost:4175/v1/mirrors/0",
+      "http://localhost:4175/v1/mirrors/1"
+    ],
+    "maxManifestBytes": 65536,
+    "maxCapsuleBytes": 1048576,
+    "timeoutMs": 10000,
+    "maxHeadAgeMs": 30000,
+    "rpcUrls": [
+      "https://testnet-rpc.monad.xyz",
+      "https://rpc-testnet.monadinfra.com"
+    ],
+    "finality": "finalized",
+    "maxResponseBytes": 65536
+  },
+  "controlUrl": "http://localhost:4175",
+  "sessionLimits": {
+    "lifetimeMs": 600000,
+    "maxTransactions": 3,
+    "maxGas": "300000",
+    "maxFeePerGas": "200000000000",
+    "maxPriorityFeePerGas": "2000000000",
+    "maxTotalFeeWei": "180000000000000000"
+  }
+}

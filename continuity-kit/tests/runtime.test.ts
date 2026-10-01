@@ -119,6 +119,36 @@ test("runtime code hash matches pinned deployment artifact review", () => {
   assert.equal(TESTNET_RUNTIME_CODE_HASH, proposal.expectedRuntimeCodeHash);
 });
 
+test("explicit Foundation candidate preserves the fixed primary endpoint and rejects unreviewed pair changes", () => {
+  const candidate = JSON.parse(
+    readFileSync(
+      new URL("../testnet/runtime-candidate-foundation.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const approved = validateTestnetRuntimeConfig(candidate);
+  assert.deepEqual(approved.policy.rpcUrls, [
+    "https://testnet-rpc.monad.xyz",
+    "https://rpc-testnet.monadinfra.com",
+  ]);
+  candidate.policy.rpcUrls[1] = "https://changed.invalid";
+  assert.equal(
+    approved.policy.rpcUrls[1],
+    "https://rpc-testnet.monadinfra.com",
+  );
+  assert.ok(Object.isFrozen(approved.policy.rpcUrls));
+  for (const pair of [
+    ["https://changed.invalid", "https://rpc-testnet.monadinfra.com"],
+    ["https://testnet-rpc.monad.xyz", "https://rpc-testnet.monadinfra.com/"],
+    ["https://testnet-rpc.monad.xyz", "https://rpc.monad.xyz"],
+    ["https://testnet-rpc.monad.xyz", "https://testnet-rpc.monad.xyz"],
+    [...approved.policy.rpcUrls, "https://extra.invalid"],
+  ]) {
+    candidate.policy.rpcUrls = pair;
+    assert.throws(() => validateTestnetRuntimeConfig(candidate), invalid);
+  }
+});
+
 test("validated config is serializable, detached, frozen and does not bind local credentials", () => {
   const input = fixture();
   const copy = validateTestnetRuntimeConfig(input);

@@ -124,11 +124,12 @@ export function validateTestnetRuntimeConfig(
       policy.bootstrapNamespace === LOCAL_POLICY.bootstrapNamespace ||
       JSON.stringify(policy.mirrorUrls) !==
         JSON.stringify(LOCAL_POLICY.mirrorUrls) ||
-      JSON.stringify(policy.rpcUrls) !==
-        JSON.stringify([
-          "https://testnet-rpc.monad.xyz",
-          "https://monad-testnet.drpc.org",
-        ])
+      // Explicit reviewed pairs only; no automatic provider substitution.
+      policy.rpcUrls[0] !== "https://testnet-rpc.monad.xyz" ||
+      ![
+        "https://monad-testnet.drpc.org",
+        "https://rpc-testnet.monadinfra.com",
+      ].includes(policy.rpcUrls[1])
     )
       invalid();
     const limits = record(config.sessionLimits, [

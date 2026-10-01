@@ -1,0 +1,31 @@
+{
+  "description": "Archived public Monad testnet transaction. Offline parser regression only; no private key and no new live-chain observation.",
+  "capturedAt": "2026-09-28T10:32:14.930Z",
+  "sources": [
+    "https://testnet-rpc.monad.xyz",
+    "https://rpc-testnet.monadinfra.com"
+  ],
+  "transaction": {
+    "type": "0x2",
+    "chainId": "0x279f",
+    "nonce": "0x0",
+    "gas": "0x19fc4",
+    "maxFeePerGas": "0x17bfac7c00",
+    "maxPriorityFeePerGas": "0x77359400",
+    "to": "0x3fc9997e62e56ba17225a47c32ad9406313dc98a",
+    "value": "0x0",
+    "accessList": [],
+    "input": "0x5abc333928d885f12264b15ddede7c98d34d9fe728cb874b1bf49e447a29197a9cfc454a00552e9aa966a23265e24dcd45321937e9235e472cfba53bdfc26c91c52bb56486e4e033815d3038d400262a920d8cfbd0b58e0ff59ead160030d9271ff9e83e",
+    "r": "0xc34a72120426c21c238a6e36e0aa7ed54d6d6e0032757263e8cfe7e7dba552a5",
+    "s": "0xe799293eb8cb6f9265f0b0ee49f6f748da7584a12849cda1bbf932f36663042",
+    "yParity": "0x0",
+    "v": "0x0",
+    "hash": "0x6294425c6acffaa2b2c6ffb1028383701f4072a14ff2771baa4fc0d4882a8526",
+    "blockHash": "0xbecdd8a7dbd50357828e07183d22aba9f4a7a7805c86b1077a6ef5914383c017",
+    "blockNumber": "0x3f4f32f",
+    "transactionIndex": "0x2",
+    "from": "0x5ff3d5ff4794a7abdf7a888aa58b72a6aaff633c",
+    "gasPrice": "0x17bfac7c00",
+    "blockTimestamp": "0x6aba4145"
+  }
+}

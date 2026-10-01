@@ -1,6 +1,7 @@
 import "./style.css";
-import { validateContext } from "./sdk/policy.ts";
+import { metadataFingerprint, validateContext } from "./sdk/policy.ts";
 import { createRuntime } from "./runtime.ts";
+import { createReleaseRuntime } from "./release/runtime.ts";
 import { MeraPasskeyAdapter } from "./sdk/passkeys.ts";
 import { SyntheticWebAuthnClient } from "./sdk/demo-fixture.ts";
 import { createPrimary } from "./sdk/account.ts";
@@ -27,13 +28,23 @@ import type {
 import { HandoffChannel } from "./handoff.ts";
 
 declare const __CONTINUITY_TESTNET_CONFIG__: unknown;
-const runtime = createRuntime(
-  typeof __CONTINUITY_TESTNET_CONFIG__ === "undefined"
-    ? undefined
-    : __CONTINUITY_TESTNET_CONFIG__,
-);
+declare const __CONTINUITY_RELEASE_PROFILE__: unknown;
+const release = typeof __CONTINUITY_RELEASE_PROFILE__ !== "undefined";
+let uploadToken = ""; // Presenter capability, memory only; never sent to B or stored.
+const runtime = release
+  ? createReleaseRuntime(__CONTINUITY_RELEASE_PROFILE__, () => uploadToken)
+  : createRuntime(
+      typeof __CONTINUITY_TESTNET_CONFIG__ === "undefined"
+        ? undefined
+        : __CONTINUITY_TESTNET_CONFIG__,
+    );
 const policy = runtime.policy;
 const chainRun = runtime.kind === "monad-testnet";
+const uploadsUnlocked = () =>
+  !release ||
+  (/^[a-f0-9]{64}$/.test(uploadToken) &&
+    "profile" in runtime &&
+    Date.now() < Date.parse(runtime.profile.expiresAt));
 const adapters = runtime.adapters;
 const isRecovery = location.origin === policy.bOrigin;
 const validOrigin = isRecovery || location.origin === policy.aOrigin;
@@ -73,7 +84,7 @@ let actionTail = Promise.resolve();
 let primaryOnline = true;
 let scenario = "healthy";
 let localEdited = false;
-let notice = {
+const initialNotice = {
   tone: "neutral",
   title: isRecovery
     ? "Recovery has not been checked yet."
@@ -82,6 +93,7 @@ let notice = {
     ? "Use a recovery passkey only after completing reserve setup in the primary app. This screen does not confirm that a reserve exists."
     : "Prepare a reserve before your first protected checkpoint.",
 };
+let notice = initialNotice;
 let workspace: Workspace = {
   title: "The next expedition",
   plan: "Build a small product people can trust with work they do not want to lose.",
@@ -102,8 +114,19 @@ const escape = (value: unknown) =>
       ]!,
   );
 const short = (value: string) => `${value.slice(0, 10)}…${value.slice(-6)}`;
-const icon = (kind: string) =>
-  kind === "arrow" ? "↗" : kind === "check" ? "✓" : kind === "lock" ? "◈" : "↳";
+// Consistent decorative UI icons; actual state is always conveyed in text.
+const uiIcon = (kind: "workspace" | "recovery" | "lock" | "document") => {
+  const paths = {
+    workspace:
+      '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+    recovery:
+      '<path d="M4 11a8 8 0 1 1 2.4 6M4 5v6h6"/><path d="M12 8v5l3 2"/>',
+    lock: '<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>',
+    document:
+      '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[kind]}</svg>`;
+};
 const modeQuery = physical ? "?mode=physical" : "";
 const errorMessages: Record<string, [string, string]> = {
   AUTH_CANCELLED: [
@@ -192,6 +215,7 @@ async function run(action: () => Promise<void>, required = false) {
   }
 }
 async function control(change: Record<string, unknown>) {
+  if (release) throw new Error("Public demonstration controls are unavailable");
   const response = await fetch(`${runtime.controlUrl}/v1/control`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -204,6 +228,7 @@ async function control(change: Record<string, unknown>) {
   scenario = result.scenario;
 }
 async function refreshStatus() {
+  if (release) return;
   try {
     const response = await fetch(`${runtime.controlUrl}/v1/status`, {
       signal: AbortSignal.timeout(3000),
@@ -216,18 +241,88 @@ async function refreshStatus() {
     /* Explicit operations expose service failures. */
   }
 }
+function editStateText() {
+  if (pendingTicket) return "Transaction confirmation pending";
+  if (localEdited)
+    return isRecovery
+      ? "Local working copy · source receipt unchanged"
+      : "Unsaved local changes";
+  return recovered
+    ? `Verified checkpoint v${recovered.version}`
+    : state
+      ? "Open the saved checkpoint before saving changes"
+      : "Sample content · held in this window";
+}
+// Compare exact workspace content, not fresh encryption bytes. This is a local
+// change check against an accepted snapshot, not a fresh registry read.
+function hasCheckpointChanges() {
+  return (
+    recovered !== null &&
+    metadataFingerprint(workspace) !== metadataFingerprint(recovered.content)
+  );
+}
+function canSaveCheckpoint() {
+  return (
+    !!state &&
+    !busy &&
+    !pendingTicket &&
+    uploadsUnlocked() &&
+    hasCheckpointChanges()
+  );
+}
+function saveButtonText() {
+  return state && recovered && !pendingTicket && !hasCheckpointChanges()
+    ? "No unsaved changes"
+    : "Save checkpoint";
+}
 function editorMarkup() {
-  return `<div class="document-head"><div><span class="eyebrow">${isRecovery ? "RECOVERED WORKSPACE" : "PRIVATE WORKSPACE"}</span><h2>${isRecovery ? "Your work, returned." : "Make something worth keeping."}</h2></div><span class="document-symbol">▤</span></div>
-    <label class="field title-field">Workspace title<input id="title" maxlength="200" value="${escape(workspace.title)}" ${busy || enrollmentPending ? "disabled" : ""}></label>
+  const action = isRecovery
+    ? '<button class="button dark" id="export">Export local copy ↗</button>'
+    : `<button class="button dark" id="save" ${canSaveCheckpoint() ? "" : "disabled"}>${saveButtonText()}</button>`;
+  return `<div class="document-head"><div class="document-identity"><span>${uiIcon("document")}</span><strong>${isRecovery ? "Recovered copy" : state ? "Working copy" : "Sample workspace"}</strong></div>${action}</div>
+    <div class="document-status"><span id="edit-state">${escape(editStateText())}</span>${!state && !isRecovery ? '<span class="sample-label">EXAMPLE CONTENT</span>' : ""}</div>
+    <div class="document-body"><label class="field title-field">Workspace title<input id="title" maxlength="200" value="${escape(workspace.title)}" ${busy || enrollmentPending ? "disabled" : ""}></label>
     <label class="field">The plan<textarea id="plan" rows="2" maxlength="16000" ${busy || enrollmentPending ? "disabled" : ""}>${escape(workspace.plan)}</textarea></label>
-    <span class="field-label">Next steps</span><div class="tasks">${workspace.tasks.map((task, i) => `<label class="task"><input type="checkbox" data-task="${i}" ${busy || enrollmentPending ? "disabled" : ""} ${task.done ? "checked" : ""}><span>${escape(task.text)}</span></label>`).join("")}</div>
-    <label class="field">Working draft<textarea id="draft" rows="5" maxlength="64000" ${busy || enrollmentPending ? "disabled" : ""}>${escape(workspace.draft)}</textarea></label>
-    <div class="document-footer"><span id="edit-state">${localEdited ? "Local changes · not committed" : recovered ? `Verified checkpoint v${escape(recovered.version)}` : "Sample content · held in this window"}</span>${isRecovery ? '<button class="button dark" id="export">Export local copy ↗</button>' : `<button class="button dark" id="save" ${!state || busy ? "disabled" : ""}>Save checkpoint ${icon("arrow")}</button>`}</div>`;
+    <div class="task-section"><span class="field-label">Next steps</span><div class="tasks">${workspace.tasks.map((task, i) => `<label class="task"><input type="checkbox" data-task="${i}" ${busy || enrollmentPending ? "disabled" : ""} ${task.done ? "checked" : ""}><span>${escape(task.text)}</span></label>`).join("")}</div></div>
+    <label class="field draft-field">Working draft<textarea id="draft" rows="7" maxlength="64000" ${busy || enrollmentPending ? "disabled" : ""}>${escape(workspace.draft)}</textarea></label></div>
+    <div class="document-footer">${uiIcon("lock")}<span>${isRecovery ? "Edits affect this local copy. Export to keep them." : "Changes stay in this tab until you save a checkpoint."}</span></div>`;
+}
+function primaryStatusMarkup() {
+  const rows = [
+    [
+      "Workspace",
+      state
+        ? "Open in this session"
+        : primary
+          ? "Primary key ready"
+          : "Not opened",
+      !!state,
+    ],
+    [
+      "Encrypted reserve",
+      state
+        ? "Prepared"
+        : enrollmentPending
+          ? "Setup in progress"
+          : "Not checked",
+      !!state,
+    ],
+    [
+      "Checkpoint",
+      pendingTicket
+        ? "Confirmation pending"
+        : recovered
+          ? `Version ${recovered.version} verified`
+          : "Not checked",
+      !!recovered && !pendingTicket,
+    ],
+  ] as const;
+  return `<ol class="protection-steps">${rows.map(([name, detail, complete], i) => `<li data-complete="${complete}"><span class="step-marker" aria-hidden="true">${complete ? "✓" : String(i + 1).padStart(2, "0")}</span><div><strong>${name}</strong><span>${escape(detail)}</span></div></li>`).join("")}</ol><p class="inspector-note">${state ? "Your reserve is prepared. Open the recovery client with its separate key when you need your saved work." : "A reserve must be prepared before it can recover your work. Opening a workspace checks its existing setup."}</p>`;
 }
 function proofMarkup() {
   if (!recovered)
-    return '<div class="empty-proof"><span class="proof-ring">◎</span><p>A successful recovery comes with a receipt.</p><small>The selected version, digest and source checks appear here.</small></div>';
-  return `<div class="verified-label">✓ ${recovered.evidence.trustMode === "local-model" ? "VERIFIED IN LOCAL MODEL" : "VERIFIED THROUGH FINALIZED RPC QUORUM"}</div><div class="version-number">v${escape(recovered.version)}<span>current at the accepted read</span></div><dl><dt>Owner</dt><dd title="${escape(recovered.context.owner)}">${short(recovered.context.owner)}</dd><dt>Checkpoint</dt><dd title="${escape(recovered.capsuleDigest)}">${short(recovered.capsuleDigest)}</dd><dt>${recovered.evidence.trustMode === "local-model" ? "Model" : "Finalized"} block</dt><dd>${escape(recovered.evidence.blockNumber)}</dd><dt>Checked</dt><dd>${new Date(recovered.evidence.observedAt).toLocaleTimeString()}</dd></dl>${recovered.diagnostics.length ? `<div class="mirror-warning">${recovered.diagnostics.length} invalid or unavailable mirror response(s) rejected. A valid copy passed all checks.</div>` : '<p class="proof-footnote">The exact stored bytes match the owner-approved digest.</p>'}<details><summary>Inspect verification receipt</summary><pre>${escape(JSON.stringify({ ...recovered, content: undefined, writeProof }, null, 2))}</pre></details>`;
+    return '<div class="empty-proof"><span class="empty-state-label">NOT CHECKED</span><p>No recovery verified in this session.</p><small>Open your saved work to see its version and verification details here.</small></div>';
+  return `<div class="verified-label">✓ ${recovered.evidence.trustMode === "local-model" ? "VERIFIED IN LOCAL MODEL" : "VERIFIED THROUGH FINALIZED RPC QUORUM"}</div><div class="version-number"><span>Verified checkpoint</span><strong>v${escape(recovered.version)}</strong><small>Current at the accepted read</small></div><dl><dt>Owner</dt><dd title="${escape(recovered.context.owner)}">${short(recovered.context.owner)}</dd><dt>Checkpoint</dt><dd title="${escape(recovered.capsuleDigest)}">${short(recovered.capsuleDigest)}</dd><dt>${recovered.evidence.trustMode === "local-model" ? "Model" : "Finalized"} block</dt><dd>${escape(recovered.evidence.blockNumber)}</dd><dt>Checked</dt><dd>${new Date(recovered.evidence.observedAt).toLocaleTimeString()}</dd></dl>${recovered.diagnostics.length ? `<div class="mirror-warning">${recovered.diagnostics.length} invalid or unavailable mirror response(s) rejected. A valid copy passed all checks.</div>` : '<p class="proof-footnote">The exact stored bytes match the owner-approved digest.</p>'}<details><summary>Inspect verification receipt</summary><pre>${escape(JSON.stringify({ ...recovered, content: undefined, writeProof }, null, 2))}</pre></details>`;
 }
 function setupTimeText() {
   if (enrollmentStartedAt === null) return "";
@@ -240,6 +335,24 @@ function setupTimeText() {
   const time = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   return `${connecting ? "Waiting for setup request" : "Setup time remaining"}: ${time}. Keep both windows open; do not reload during setup.`;
 }
+function guideActionsMarkup() {
+  if (!isRecovery) {
+    const restore = `<button class="button ${primary ? "outline" : "dark"}" id="restore" ${busy || pendingTicket || enrollmentPending || (!!primary && !state) ? "disabled" : ""}>Open existing workspace ↗</button>`;
+    if (pendingTicket)
+      return `<div class="guide-actions"><button class="button dark" id="check-transaction" ${busy ? "disabled" : ""}>Check transaction status</button><button class="text-button" id="export-ticket" ${busy ? "disabled" : ""}>Export transaction reference</button></div><details class="guide-details"><summary>Other workspace actions</summary>${restore}<p>Opening a workspace is unavailable until this transaction is resolved.</p></details>`;
+    if (state && !recovered)
+      return `<div class="guide-actions">${restore}</div><p>Opening the saved version replaces this draft. Keep a copy of any unsaved text first.</p>`;
+    if (state)
+      return `<div class="guide-actions"><a class="text-button" href="#workspace">Go to workspace ↓</a></div><details class="guide-details"><summary>Reopen the saved workspace</summary><p>Opening the saved version replaces the draft in this window. Keep a copy of any unsaved text first.</p>${restore}</details>`;
+    const prepare = `<button class="button ${primary ? "dark" : "outline"}" id="prepare" ${busy || !uploadsUnlocked() || enrollmentPending || (enrollmentAborted && !setupDraft?.paused) || pageEnded ? "disabled" : ""}>${setupDraft?.paused ? "Continue setup with passkey" : enrollmentAborted ? "Setup ended" : primary ? "Open recovery setup" : physical ? "Create primary passkey" : "Create demo account"}</button>`;
+    return `<div class="guide-actions">${primary ? prepare : restore + prepare}${setupDraft?.resumable && !setupDraft.paused && !busy ? '<button class="text-button" id="pause-setup">Pause setup</button>' : ""}${primary ? restore : ""}</div>`;
+  }
+  if (recovered)
+    return '<div class="guide-actions"><a class="text-button" href="#workspace">Read or export your work ↓</a></div>';
+  if (recoveryEnrollment && !offer && !reserveConfirmed) return "";
+  if (offer && backupAttempted) return "";
+  return `<div class="guide-actions"><button class="button dark" id="${offer ? "enroll" : "recover"}" ${busy ? "disabled" : ""}>${offer ? (physical ? "Create recovery passkey" : "Prepare simulated reserve") : physical ? "Recover with passkey" : "Recover demo workspace"} ↗</button></div>`;
+}
 function guideMarkup() {
   const a = new URL(policy.aOrigin).hostname;
   const b = new URL(policy.bOrigin).hostname;
@@ -250,6 +363,11 @@ function guideMarkup() {
     text = physical
       ? "Follow any device prompt already open, then wait for the result here. Your device may ask for more than one confirmation. Do not start another action yet."
       : "The simulated action is running. No device confirmation is needed; wait for the result here.";
+  } else if (pendingTicket) {
+    label = "WAITING FOR CONFIRMATION";
+    title = "Check the existing transaction.";
+    text =
+      "Check its status here. This only reads the result; it does not sign or send another transaction. Keep this tab open until confirmation finishes.";
   } else if (setupDraft?.paused) {
     label = "SETUP PAUSED";
     title = "Continue with the same primary key.";
@@ -257,14 +375,9 @@ function guideMarkup() {
       "This tab retains an encrypted setup draft. Continue setup with passkey reopens the same account and reserve plan. Keep this primary tab open; closing or reloading it loses the unfinished setup.";
   } else if (notice.tone === "error") {
     label = "ACTION NEEDS ATTENTION";
-    title = "Check the message above before continuing.";
+    title = "The last action needs attention.";
     text =
-      "The last action did not finish successfully. Keep your existing passkeys; creating another key will not recover missing work.";
-  } else if (pendingTicket) {
-    label = "WAITING FOR CONFIRMATION";
-    title = "Check the existing transaction.";
-    text =
-      "Use Check transaction status below. This reads the result without signing or sending another transaction.";
+      "Read the error message below. Keep your existing passkeys; creating a new key will not recover missing work.";
   } else if (isRecovery && recovered) {
     label = "WORK RECOVERED";
     title = "Your saved work is open.";
@@ -277,7 +390,7 @@ function guideMarkup() {
   } else if (isRecovery && offer) {
     label = "SETUP · STEP 2 OF 2";
     title = "Create the reserve app’s passkey.";
-    text = `Choose Create recovery passkey below and save a new key for ${b}. It is separate from your ${a} key. Wait for “Reserve prepared and independently checked”.`;
+    text = `Save a new key for ${b}. It is separate from your ${a} key. Wait for “Reserve prepared and independently checked”.`;
   } else if (enrollmentPending && isRecovery && !offer && !backup) {
     label = "CONNECTING";
     title = "Waiting for the primary app.";
@@ -293,11 +406,20 @@ function guideMarkup() {
       : `In the ${b} window, choose Create recovery passkey. Keep this window open until both apps confirm the reserve is ready.`;
   } else if (isRecovery) {
     label = "OPEN EXISTING WORK";
-    title = "Use your reserve app’s passkey.";
-    text = `Choose Recover with passkey below, then use the existing key for ${b}. If your device says no key is saved, check the device or password manager used during setup; do not create another key to recover this work.`;
+    title = physical
+      ? "Use your reserve app’s passkey."
+      : "Open your prepared demo reserve.";
+    text = physical
+      ? `Use the existing key for ${b}. If your device says no key is saved, check the device or password manager used during setup; do not create another key to recover this work.`
+      : "Use the public test credential to open the saved demo workspace. The client checks its version before showing the content.";
+  } else if (state && !recovered) {
+    label = "OPEN THE CONFIRMED CHECKPOINT";
+    title = "Check the saved version before continuing.";
+    text =
+      "The reserve is registered, but this draft has not been compared with its saved content. Open the existing workspace before saving another checkpoint.";
   } else if (state) {
     label = "RESERVE READY";
-    title = "Save changes as you work.";
+    title = "Workspace open.";
     text =
       "Use Save checkpoint to protect the latest changes. Unsaved edits are held only in this window.";
   } else if (primary) {
@@ -305,9 +427,11 @@ function guideMarkup() {
     title = "Open the reserve app.";
     text = `Your original app key is ready. Choose Open recovery setup to prepare a separate key for ${b}. Your reserve is not ready yet. The reserve window expires after five minutes. Before recovery-key creation starts, an interruption pauses setup in this primary tab.`;
   } else {
-    label = "SETUP · STEP 1 OF 2";
-    title = "Create the original app’s passkey.";
-    text = `Choose Create primary passkey and save a new key for ${a}. Already completed setup? Choose Open existing workspace instead, using your existing ${a} key. Keep this primary tab open until setup finishes. You can pause before recovery-key creation starts.`;
+    label = "START HERE";
+    title = "Open your workspace.";
+    text = physical
+      ? `Use your existing ${a} key. For a new workspace, create a primary key and then a separate recovery key. Keep this tab open during setup. You can pause before recovery-key creation starts.`
+      : "Use the existing demo account, or create a new one to try the two-step reserve setup.";
   }
   if (
     chainRun &&
@@ -319,15 +443,15 @@ function guideMarkup() {
     notice.tone !== "error"
   )
     text +=
-      " First fund the test account shown above using the approved free test-token process. Completing reserve setup submits its first testnet transaction.";
+      " First fund the test account shown below using the approved free test-token process. Completing reserve setup submits its first testnet transaction.";
   if (!physical)
-    text =
-      text
-        .replaceAll("Create primary passkey", "Create demo account")
-        .replaceAll("Create recovery passkey", "Prepare simulated reserve")
-        .replaceAll("Recover with passkey", "Recover demo workspace") +
-      " This simulation uses public test credentials.";
-  return `<section class="step-guide" aria-label="Your next step"><span class="eyebrow">${escape(label)}</span><h2>${escape(title)}</h2><p>${escape(text)}</p>${enrollmentPending ? `<p id="setup-clock" role="timer">${escape(setupTimeText())}</p>` : ""}${physical && !enrollmentAborted && !recovered && !reserveConfirmed && !state ? "<small>Your device may ask for more than one confirmation. Finish any open prompt before starting another action.</small>" : ""}</section>`;
+    text = text
+      .replaceAll("Create primary passkey", "Create demo account")
+      .replaceAll("Create recovery passkey", "Prepare simulated reserve")
+      .replaceAll("Recover with passkey", "Recover demo workspace");
+  const ready =
+    (state || recovered) && !busy && !pendingTicket && notice.tone !== "error";
+  return `<section class="step-guide" data-phase="${ready ? "ready" : pendingTicket ? "pending" : "setup"}" aria-label="Your next step"><div class="guide-copy"><span class="eyebrow">${escape(label)}</span><h2>${escape(title)}</h2><p>${escape(text)}</p></div><div class="guide-controls">${guideActionsMarkup()}</div>${enrollmentPending && !pendingTicket ? `<p id="setup-clock" role="timer">${escape(setupTimeText())}</p>` : ""}${physical && !enrollmentAborted && !recovered && !reserveConfirmed && !state ? '<small class="prompt-hint">Your device may ask for more than one confirmation. Finish any open prompt before starting another action.</small>' : ""}</section>`;
 }
 function recoveryStartMarkup() {
   // An enrollment URL must never silently become a recovery prompt. A bound
@@ -336,29 +460,77 @@ function recoveryStartMarkup() {
     return `<div class="recovery-empty"><span class="eyebrow">RESERVE SETUP</span><h2>${enrollmentAborted ? "Setup could not continue." : backup ? "Waiting for the first checkpoint." : "Connecting to the primary app."}</h2><p>${enrollmentAborted ? "No reserve was confirmed in this window. Keep any existing passkeys. Return to the primary app and check its setup status." : backup ? "Your recovery passkey is ready. Keep both windows open while the primary app finishes saving and the reserve checks the result." : "Keep both windows open. The option to create your recovery passkey appears after the apps establish their connection."}</p></div>`;
   if (offer && backupAttempted && !busy)
     return '<div class="recovery-empty"><h2>Setup needs review.</h2><p>Recovery-key creation was attempted. A cancelled or incomplete prompt may still have created a key. Keep existing keys; this setup will not create another.</p></div>';
-  return `<div class="recovery-empty"><div class="recovery-art"><span>▤</span><i>↳</i><b>✓</b></div><span class="eyebrow">${offer ? "PREPARE YOUR INDEPENDENT RESERVE" : "START FROM A FRESH CLIENT"}</span><h2>${offer ? "A separate key. A second way in." : "No old tab. No saved file."}</h2><p>${offer ? "This client will wrap a separate data key. It receives no primary wallet key or permission to write its history." : "Choose your prepared recovery credential. The client discovers the encrypted reserve and verifies which copy is current."}</p><button class="button dark large" id="${offer ? "enroll" : "recover"}" ${busy ? "disabled" : ""}>${offer ? (physical ? "Create recovery passkey" : "Prepare simulated reserve") : physical ? "Recover with passkey" : "Recover demo workspace"} ↗</button><small>${physical ? "Use the passkey for recovery.localhost. Your device may ask for more than one confirmation." : "Uses public test credentials. Do not put private information in this demo."}</small></div>`;
+  return `<div class="recovery-empty"><div class="empty-icon">${uiIcon("recovery")}</div><h2>${offer ? "Prepare a separate recovery key" : "Open work from your reserve"}</h2><p>${offer ? "The recovery key opens your encrypted copy. It does not receive your primary signing key." : "The recovery client checks the saved version before opening your content."}</p><dl class="recovery-explainer"><dt>Use</dt><dd>${physical ? "Your existing recovery passkey" : "The prepared demo credential"}</dd><dt>Get back</dt><dd>Your latest verified checkpoint</dd><dt>Continue with</dt><dd>A local copy you can edit and export</dd></dl></div>`;
+}
+function releaseAccessMarkup() {
+  if (!release) return "";
+  if (isRecovery)
+    return `<section class="boundary-card"><h3>Limited demonstration · example data only</h3><p>Access to this demo ends at ${escape("profile" in runtime ? runtime.profile.expiresAt : "")}. Export any recovered example work you want to keep. This deadline does not erase stored copies.</p></section>`;
+  return `<section class="boundary-card"><h3>Presenter demonstration · example data only</h3><p>${uploadsUnlocked() ? "Upload access is held in this tab only. The store checks it on each write." : "New setup and uploads require the presenter’s demo code. Existing recovery needs only its prepared passkey."}</p>${!uploadsUnlocked() ? '<label class="field">Demo upload code<input id="upload-code" type="password" autocomplete="off" maxlength="64" spellcheck="false"></label><button class="button outline" id="unlock-uploads">Use code for this session</button>' : ""}<p>This limited demo expires at ${escape("profile" in runtime ? runtime.profile.expiresAt : "")}.</p></section>`;
 }
 function render() {
   const tools = document.querySelector<HTMLDetailsElement>("#test-tools");
   if (tools) toolsOpen = tools.open;
   if (!validOrigin) {
-    app.innerHTML =
-      '<main style="padding:60px"><h1>Open the configured client</h1><p>This origin is not part of the recovery policy.</p><a href="http://primary.localhost:4173">Open primary.localhost</a></main>';
+    app.innerHTML = `<main><h1>Open the configured client</h1><p>This origin is not part of the recovery policy.</p><a href="${escape(policy.aOrigin)}">Open primary workspace</a></main>`;
     return;
   }
-  app.innerHTML = `<div class="shell"><aside class="sidebar"><a class="brand" href="${policy.aOrigin}${modeQuery}"><span class="brand-mark"><i></i><i></i><i></i></span>continuity<span>kit</span></a><div class="side-caption">WORK THAT STAYS WITH YOU</div><nav><a class="${!isRecovery ? "active" : ""}" href="${policy.aOrigin}${modeQuery}"><span>▤</span> Primary workspace <small>A</small></a><a class="${isRecovery ? "active" : ""}" href="${policy.bOrigin}${modeQuery}"><span>↳</span> Recovery client <small>B</small></a></nav><div class="side-story"><div class="orbit">↳</div><h3>Apps can disappear.<br>Your work shouldn’t.</h3><p>An independent reserve.<br>A verifiable latest copy.<br>A way to keep going.</p></div><div class="side-bottom"><span class="dot"></span> ${physical ? "Physical passkeys" : "Synthetic credentials"}<br><small>Local demonstration · v0.1</small></div></aside>
-  <main><header class="topbar"><div><span class="status-dot ${primaryOnline ? "" : "offline"}"></span> Primary ${primaryOnline ? "available" : "offline"}<span class="top-separator">/</span><span>${isRecovery ? "Independent recovery origin" : "Primary origin"}</span></div><span class="mode-tag">${chainRun ? "MONAD TESTNET · LOCAL STORES" : physical ? "PHYSICAL TEST · LOCAL REGISTRY" : "LOCAL SIMULATION"}</span></header>
-  <section class="hero"><div><span class="eyebrow">CONTINUITY, BY DESIGN</span><h1>${isRecovery ? "Bring your work back." : "Your work has a way back."}</h1><p>${isRecovery ? "The original app can be gone. Your prepared reserve can still open the latest surviving checkpoint." : "A private workspace with a reserve you prepare today, for the app you might lose tomorrow."}</p></div><div class="hero-badge"><span>${isRecovery ? "B" : "A"}</span><small>${isRecovery ? "RECOVER" : "CREATE"}</small></div></section>
-  <div class="notice ${notice.tone}" role="status" aria-live="polite"><span>${busy ? "◌" : notice.tone === "error" ? "!" : notice.tone === "success" ? "✓" : "↳"}</span><div><strong>${escape(notice.title)}</strong><p>${escape(notice.text)}</p></div></div>
-  ${chainRun ? `<section class="boundary-card"><h3>Monad testnet · separate setup</h3><p>This run uses real testnet transactions and two encrypted copies in one local service. The earlier local reserve stays bound to its original registry.</p><p>Registry: <code>${escape(policy.registryAddress)}</code></p>${!isRecovery && primary ? `<p>${enrollmentAborted ? "Test account" : "Test account to fund before reserve setup"}: <code>${escape(primary.context.owner)}</code></p>` : ""}</section>` : ""}
+  app.innerHTML = `<div class="shell"><aside class="sidebar"><a class="brand" href="${policy.aOrigin}${modeQuery}"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>continuity<span>kit</span></a><div class="nav-label">WORKSPACE</div><nav aria-label="Workspace navigation"><a class="${!isRecovery ? "active" : ""}" ${!isRecovery ? 'aria-current="page"' : ""} href="${policy.aOrigin}${modeQuery}"><span class="nav-icon">${uiIcon("workspace")}</span> Primary workspace <small>A</small></a><a class="${isRecovery ? "active" : ""}" ${isRecovery ? 'aria-current="page"' : ""} href="${policy.bOrigin}${modeQuery}"><span class="nav-icon">${uiIcon("recovery")}</span> Recovery client <small>B</small></a></nav><div class="session-panel"><span class="nav-label">THIS SESSION</span><div class="session-workspace">${uiIcon("document")}<span>${state || recovered ? escape(workspace.title) : "No workspace open"}</span></div><p>${state || recovered ? "Workspace open in this session." : "Open your work to see its saved state."}</p></div><div class="sidebar-bottom"><span class="local-badge"><i></i> ${chainRun ? "Testnet preview" : "Local preview"}</span><p>${physical ? "Physical passkeys" : "Public test credentials"}<br>Experimental · v0.1</p></div></aside>
+  <main><header class="topbar"><div class="breadcrumbs"><span>ContinuityKit</span><span>/</span><strong>${isRecovery ? "Recovery" : "Workspace"}</strong></div><div class="topbar-status"><span class="status-dot ${primaryOnline ? "" : "offline"}"></span>${release ? "Independent version check" : `Primary ${primaryOnline ? "available" : "offline"}`}<span class="mode-tag">${chainRun ? "MONAD TESTNET" : physical ? "PHYSICAL TEST" : "LOCAL SIMULATION"}</span></div></header>
+  <div class="main-content"><section class="page-heading"><div><h1>${isRecovery ? "Recovery" : "Your workspace"}</h1><p>${isRecovery ? "Open and verify the copy you prepared in advance." : "Write, save a checkpoint, and keep a way back to your work."}</p></div><span class="origin-label">${isRecovery ? "INDEPENDENT CLIENT" : "PRIMARY CLIENT"}</span></section>
+  ${releaseAccessMarkup()}
   ${guideMarkup()}
-  <section class="content-grid"><article class="document">${!isRecovery || recovered ? editorMarkup() : recoveryStartMarkup()}</article>
-  <aside class="right-stack"><section class="reserve-card"><div class="card-kicker">${isRecovery ? "RECOVERY RECEIPT" : "INDEPENDENT RESERVE"}<span>↗</span></div>${isRecovery ? proofMarkup() : `<div class="reserve-illustration"><div>A</div><span>╌╌╌<i>◈</i>╌╌╌</span><div>B</div></div><h2>${state ? "Your reserve is prepared." : "Give your work a second home."}</h2><p>${state ? "Checkpoint updates use the same reserve. Your primary signing session is scoped and expires after ten minutes." : "A separate credential protects the data key. Two encrypted copies and a version registry complete the path back."}</p><button class="button pale" id="prepare" ${busy || enrollmentPending || (enrollmentAborted && !setupDraft?.paused) || !!state || pageEnded ? "disabled" : ""}>${state ? "✓ Reserve prepared" : setupDraft?.paused ? "Continue setup with passkey" : enrollmentAborted ? "Setup ended" : primary ? "Open recovery setup" : physical ? "Create primary passkey" : "Create demo account"}</button>${setupDraft?.resumable && !setupDraft.paused && !busy ? '<button class="text-button" id="pause-setup">Pause setup</button>' : ""}<button class="text-button" id="restore" ${busy || enrollmentPending || (!!primary && !state) ? "disabled" : ""}>Open existing workspace ↗</button>`}</section>
-  <section class="boundary-card"><span class="mini-icon">◈</span><h3>${isRecovery ? "Your copy, your next step." : "Private content stays encrypted."}</h3><p>${isRecovery ? "Read, edit locally and export. Recovery does not restore the primary wallet or authorize new registry writes." : chainRun ? "The local stores receive ciphertext. Monad testnet receives the version and digest. These two local copies do not demonstrate independent hosting." : "The stores receive ciphertext. The registry receives a version and digest. The registry in this demonstration is a local model."}</p></section></aside></section>
-  <details class="test-tools" id="test-tools" ${toolsOpen ? "open" : ""}><summary>Demonstration tools · outages and verification tests</summary><section class="demo-controls"><div><span class="eyebrow">TRY THE FAILURE, TOO</span><h2>Recovery should earn your trust.</h2><p>Change the conditions. Then run recovery in a fresh client.</p></div><div class="controls"><label>Mirror / registry condition<select id="scenario" ${busy || enrollmentPending ? "disabled" : ""}><option value="healthy">Both copies healthy</option><option value="stale-one">Mirror 1 serves an old valid copy</option><option value="stale-both">Both mirrors serve an old valid copy</option><option value="missing-current">Latest bytes unavailable</option>${chainRun ? "" : '<option value="freshness-offline">Registry unavailable</option>'}<option value="corrupt-index">Reserve metadata corrupted</option></select></label><button class="button outline" id="outage" ${busy || enrollmentPending ? "disabled" : ""}>${primaryOnline ? "Take primary offline" : "Bring primary back"}</button><button class="text-button" id="fresh" ${busy ? "disabled" : ""}>Discard this session & reload ↻</button>${isRecovery && recovered ? `<button class="button dark" id="recover-again" ${busy ? "disabled" : ""}>Check recovery again ↗</button>` : ""}</div></section></details>
-  ${!isRecovery && pendingTicket ? '<section class="boundary-card"><h3>Transaction confirmation is unresolved.</h3><p>Your draft remains here. Checking status only reads the registry; it never submits another transaction.</p><button class="button outline" id="check-transaction">Check transaction status</button><button class="text-button" id="export-ticket">Export transaction reference</button></section>' : ""}
-  <footer><span>ContinuityKit / Experimental developer preview</span><span>${chainRun ? "Physical passkeys · Monad testnet 10143 · local encrypted stores" : (physical ? "Real authenticator · simulated registry" : "Simulated authenticator · simulated registry") + " · No Monad transactions"}</span></footer>
-  </main></div>`;
+  ${notice !== initialNotice || busy ? `<div class="notice ${notice.tone}" role="status" aria-live="polite"><span>${busy ? "◌" : notice.tone === "error" ? "!" : notice.tone === "success" ? "✓" : "↳"}</span>${notice.tone === "success" && !busy ? `<details><summary><strong>${escape(notice.title)}</strong></summary><p>${escape(notice.text)}</p></details>` : `<div><strong>${escape(notice.title)}</strong><p>${escape(notice.text)}</p></div>`}</div>` : ""}
+  ${chainRun ? `<section class="boundary-card"><h3>${release ? "Monad testnet · bounded demonstration" : "Monad testnet · separate setup"}</h3><p>${release ? "This demonstration uses Monad testnet and two encrypted copies under one operator. It is not a production backup service." : "This run uses real testnet transactions and two encrypted copies in one local service."} Existing local credentials and reserves remain bound to their original setup.</p><p>Registry: <code>${escape(policy.registryAddress)}</code></p>${!isRecovery && primary ? `<p>${enrollmentAborted || state ? "Test account" : "Test account to fund before reserve setup"}: <code>${escape(primary.context.owner)}</code></p>` : ""}</section>` : ""}
+  <section class="content-grid"><article class="document" id="workspace" aria-label="${isRecovery ? "Recovered workspace" : "Workspace editor"}">${!isRecovery || recovered ? editorMarkup() : recoveryStartMarkup()}</article>
+  <aside class="right-stack" aria-label="Workspace protection"><section class="reserve-card" id="protection"><div class="inspector-heading"><span>${uiIcon(isRecovery ? "recovery" : "lock")}</span><h2>${isRecovery ? "Verification" : "Reserve status"}</h2></div>${isRecovery ? proofMarkup() : primaryStatusMarkup()}</section>
+  <section class="boundary-card"><h3>${isRecovery ? "About this copy" : "How recovery works"}</h3><p>${isRecovery ? "You can edit and export this copy. It cannot sign transactions or change the saved checkpoint." : "A separate key opens your encrypted reserve when the original app is unavailable."}</p><details><summary>Storage &amp; privacy</summary><p>${chainRun ? (release ? "Encrypted content stays in the demo store. Monad testnet receives a version and digest. Both copies share one operator and database." : "The stores receive encrypted content. Monad testnet receives the version and digest. Both stores still run in one local service.") : "The stores receive encrypted content. Version checks use a local registry in this demonstration. Both copies share one local service."}</p></details></section></aside></section>
+  ${release ? "" : `<details class="test-tools" id="test-tools" ${toolsOpen ? "open" : ""}><summary>Demonstration tools · outages and verification tests</summary><section class="demo-controls"><div><span class="eyebrow">TRY THE FAILURE, TOO</span><h2>Recovery should earn your trust.</h2><p>Change the conditions. Then run recovery in a fresh client.</p></div><div class="controls"><label>Mirror / registry condition<select id="scenario" ${busy || enrollmentPending ? "disabled" : ""}><option value="healthy">Both copies healthy</option><option value="stale-one">Mirror 1 serves an old valid copy</option><option value="stale-both">Both mirrors serve an old valid copy</option><option value="missing-current">Latest bytes unavailable</option>${chainRun ? "" : '<option value="freshness-offline">Registry unavailable</option>'}<option value="corrupt-index">Reserve metadata corrupted</option></select></label><button class="button outline" id="outage" ${busy || enrollmentPending ? "disabled" : ""}>${primaryOnline ? "Take primary offline" : "Bring primary back"}</button><button class="text-button" id="fresh" ${busy || pendingTicket ? "disabled" : ""}>Discard this session & reload ↻</button>${isRecovery && recovered ? `<button class="button dark" id="recover-again" ${busy ? "disabled" : ""}>Check recovery again ↗</button>` : ""}</div></section></details>`}
+  <footer><span>ContinuityKit / Experimental developer preview</span><span>${chainRun ? (release ? "Physical passkeys · Monad testnet 10143 · limited demonstration" : "Physical passkeys · Monad testnet 10143 · local encrypted stores") : (physical ? "Real authenticator · simulated registry" : "Simulated authenticator · simulated registry") + " · No Monad transactions"}</span></footer>
+  </div></main></div>`;
+  document.querySelector("#unlock-uploads")?.addEventListener("click", () => {
+    const input = document.querySelector<HTMLInputElement>("#upload-code");
+    if (!input) return;
+    if (!/^[a-f0-9]{64}$/.test(input.value)) {
+      notice = {
+        tone: "error",
+        title: "The demo code is incomplete or invalid.",
+        text: "Copy the full presenter code and try again. No passkey was created.",
+      };
+      input.value = "";
+      render();
+      return;
+    }
+    const candidate = input.value;
+    input.value = "";
+    void run(async () => {
+      if (!("profile" in runtime)) return;
+      const response = await fetch(
+        `${runtime.profile.storeOrigin}/v1/presenter-access`,
+        {
+          headers: { authorization: `Bearer ${candidate}` },
+          cache: "no-store",
+          redirect: "error",
+          signal: AbortSignal.timeout(5000),
+        },
+      );
+      if (pageEnded) return;
+      if (response.status !== 204) {
+        notice = {
+          tone: "error",
+          title: "Demo access was not accepted.",
+          text: "Check the presenter code and demo availability before starting setup. No passkey was created.",
+        };
+        return;
+      }
+      uploadToken = candidate;
+      notice = {
+        tone: "neutral",
+        title: "Presenter access checked.",
+        text: "Use example content only. Setup uses real passkeys and Monad testnet.",
+      };
+    });
+  });
   document.querySelector("#check-transaction")?.addEventListener(
     "click",
     () =>
@@ -415,7 +587,13 @@ function render() {
         writeProof = result.proof;
         pendingTicket =
           result.status === "saved" ? (result.unresolvedTicket ?? null) : null;
-        if (result.status === "saved") recovered = result.recovered;
+        if (result.status === "saved") {
+          recovered = result.recovered;
+          // Confirmation must not overwrite edits made after the submitted save.
+          localEdited =
+            metadataFingerprint(workspace) !==
+            metadataFingerprint(recovered.content);
+        }
         notice = {
           tone: pendingTicket ? "neutral" : "success",
           title: pendingTicket
@@ -462,6 +640,7 @@ function render() {
     "click",
     () =>
       void run(async () => {
+        if (pendingTicket) return;
         primary?.close();
         const restored = await restorePrimary(policy, passkeys, adapters);
         if (pageEnded) {
@@ -484,7 +663,13 @@ function render() {
     "click",
     () =>
       void run(async () => {
-        if (!state) return;
+        if (
+          !state ||
+          pendingTicket ||
+          !uploadsUnlocked() ||
+          !hasCheckpointChanges()
+        )
+          return;
         const next = await saveCheckpoint(state, workspace, adapters);
         if (next.status === "pending") {
           pendingTicket = next.ticket;
@@ -549,6 +734,7 @@ function render() {
       }),
   );
   document.querySelector("#fresh")?.addEventListener("click", () => {
+    if (busy || pendingTicket) return;
     setupDraft?.close();
     primary?.close();
     channel?.close();
@@ -570,12 +756,16 @@ function render() {
   );
 }
 function markEdited() {
-  localEdited = true;
+  localEdited =
+    !recovered ||
+    metadataFingerprint(workspace) !== metadataFingerprint(recovered.content);
   const el = document.querySelector("#edit-state");
-  if (el)
-    el.textContent = isRecovery
-      ? "Local working copy · source receipt unchanged"
-      : "Unsaved local changes";
+  if (el) el.textContent = editStateText();
+  const save = document.querySelector<HTMLButtonElement>("#save");
+  if (save) {
+    save.disabled = !canSaveCheckpoint();
+    save.textContent = saveButtonText();
+  }
 }
 function setRecovered(value: Recovered) {
   recovered = value;
@@ -690,7 +880,8 @@ function notifyReserveCommitted(head: {
   }
 }
 function startEnrollment() {
-  if (busy || enrollmentPending || pageEnded) return;
+  if (!uploadsUnlocked()) return;
+  if (busy || enrollmentPending || pendingTicket || state || pageEnded) return;
   if (setupDraft?.paused) {
     void run(async () => {
       primary = await setupDraft!.resume(policy, passkeys, adapters);
@@ -920,6 +1111,7 @@ window.addEventListener("message", (event) => {
               diagnostics: [],
             }
           : null;
+      if (recovered) localEdited = false;
       notifyReserveCommitted({
         version: head.version,
         capsuleDigest: head.capsuleDigest,
@@ -935,7 +1127,7 @@ window.addEventListener("message", (event) => {
             ? "A newer checkpoint has already replaced the enrollment draft. Restore or recover to read its verified content."
             : pendingTicket
               ? "The finalized registry confirms the reserve. Check transaction status before saving another checkpoint."
-              : "Edit the workspace and save v2. Then take the primary offline and open a fresh recovery client.",
+              : "Your first checkpoint is protected. Edit the workspace and save your changes when ready.",
       };
     }, true);
   if (delivery.kind === "committed" && isRecovery)
@@ -1029,6 +1221,7 @@ if (recoveryEnrollment) {
 }
 window.addEventListener("pagehide", () => {
   pageEnded = true;
+  uploadToken = "";
   setupDraft?.close();
   primary?.close();
   channel?.close();

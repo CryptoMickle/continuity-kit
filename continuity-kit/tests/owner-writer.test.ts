@@ -171,6 +171,32 @@ test("Mera transaction roundtrip, copied policy/command scope and ten-minute bud
   assert.equal(f.chain.sends, 1);
   f.writer.close();
 });
+test("closed writer reconciles quantity-encoded signature scalars without resending", async () => {
+  const f = writerFixture();
+  // This synthetic signed envelope has an s scalar with a leading zero nibble.
+  f.chain.gasEstimate = "0x186a1";
+  f.chain.broadcastMode = "timeout";
+  const pending = await f.writer.execute(f.command);
+  assert.equal(pending.status, "unresolved");
+  if (pending.status !== "unresolved") return;
+  f.writer.close();
+  let shortened = false;
+  f.chain.alterTransaction = (tx) => {
+    for (const key of ["r", "s"] as const) {
+      const original = tx[key] as string;
+      tx[key] = `0x${BigInt(original).toString(16)}`;
+      shortened ||= (tx[key] as string).length < original.length;
+    }
+  };
+  const result = await f.writer.reconcile(pending.ticket);
+  assert.equal(shortened, true);
+  assert.equal(result.status, "confirmed");
+  if (result.status !== "confirmed") return;
+  assert.equal(result.proof.kind, "finalized-receipt");
+  assert.equal(result.checkpoint.version, "1");
+  assert.equal(f.writer.pendingTicket, undefined);
+  assert.equal(f.chain.sends, 1);
+});
 for (const mutation of [
   "owner",
   "stream",
@@ -345,6 +371,7 @@ for (const attack of [
   "chainId",
   "gas",
   "r",
+  "s",
   "authorizationList",
 ]) {
   test(`retrieved transaction rejects altered ${attack}`, async () => {
@@ -357,7 +384,7 @@ for (const attack of [
             ? `0x${"ff".repeat(20)}`
             : attack === "input"
               ? "0x"
-              : attack === "r"
+              : attack === "r" || attack === "s"
                 ? id(8)
                 : "0x1";
     };
@@ -504,6 +531,34 @@ test("strict policy and head mode separation, absent-state shape, timestamp fres
   mutable.rpcUrls[0] = "https://attacker.invalid";
   assert.equal(reader.policy.rpcUrls[0], policy.rpcUrls[0]);
   assert.ok(Object.isFrozen(reader.policy.rpcUrls));
+});
+test("HTTP transport calls a receiver-sensitive browser fetch as a standalone function", async () => {
+  const calls: string[] = [];
+  // Arrow-function mocks and Node fetch accept the transport as `this`, hiding
+  // the illegal invocation produced by a Window WebIDL function in a browser.
+  const fetcher = async function (
+    this: unknown,
+    _url: string | URL | Request,
+    options?: RequestInit,
+  ) {
+    if (this !== undefined) throw new TypeError("Illegal invocation");
+    const body = JSON.parse(String(options?.body));
+    calls.push(body.method);
+    return new Response(
+      JSON.stringify({ jsonrpc: "2.0", id: body.id, result: "0x0" }),
+    );
+  };
+  const transport = new HttpTransactionTransport(policy, fetcher);
+  const signal = new AbortController().signal;
+  for (const provider of [0, 1] as const)
+    assert.equal(
+      await transport.pendingNonce(provider, `0x${"12".repeat(20)}`, signal),
+      "0x0",
+    );
+  assert.deepEqual(calls, [
+    "eth_getTransactionCount",
+    "eth_getTransactionCount",
+  ]);
 });
 test("dormant HTTP transport bounds bytes, rejects redirects and invalid envelopes, and exposes no generic RPC", async () => {
   const controller = new AbortController();

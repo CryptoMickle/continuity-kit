@@ -1,0 +1,78 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "a67800a7-6513-46a4-a544-9b70f60581db",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "ck_demo_objects": {
+      "name": "ck_demo_objects",
+      "columns": {
+        "slot": {
+          "name": "slot",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "object_key": {
+          "name": "object_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bytes": {
+          "name": "bytes",
+          "type": "blob",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "ck_demo_objects_slot_kind_object_key_pk": {
+          "columns": [
+            "slot",
+            "kind",
+            "object_key"
+          ],
+          "name": "ck_demo_objects_slot_kind_object_key_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_demo_slot": {
+          "name": "ck_demo_slot",
+          "value": "\"ck_demo_objects\".\"slot\" IN (0,1)"
+        },
+        "ck_demo_kind": {
+          "name": "ck_demo_kind",
+          "value": "\"ck_demo_objects\".\"kind\" IN ('index','blob')"
+        },
+        "ck_demo_bytes": {
+          "name": "ck_demo_bytes",
+          "value": "length(\"ck_demo_objects\".\"bytes\") > 0 AND length(\"ck_demo_objects\".\"bytes\") <= 1048576"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

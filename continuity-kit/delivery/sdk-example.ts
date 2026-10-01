@@ -14,7 +14,11 @@ import {
   createLocalCopy,
   exportLocalCopy,
 } from "../src/sdk/index.ts";
-import type { PrimaryAdapters, Workspace } from "../src/sdk/index.ts";
+import type {
+  PrimaryAdapters,
+  RecoveryAdapters,
+  Workspace,
+} from "../src/sdk/index.ts";
 // Deliberately separate from the public SDK export: this is a test fixture.
 import { SyntheticWebAuthnClient } from "../src/sdk/demo-fixture.ts";
 
@@ -70,9 +74,20 @@ try {
   restored.state.close();
 
   // B gets only the fixture credential, fixed policy and surviving adapters.
+  const recoveryAdapters: RecoveryAdapters = {
+    mirrors: adapters.mirrors,
+    registry: {
+      policy: LOCAL_POLICY,
+      getHead: (owner, stream) => registry.getHead(owner, stream),
+    },
+  };
   const freshB = newPasskeys();
-  const discovered = await discoverRecovery(LOCAL_POLICY, freshB, adapters);
-  const recovered = await recoverCurrent(discovered, freshB, adapters);
+  const discovered = await discoverRecovery(
+    LOCAL_POLICY,
+    freshB,
+    recoveryAdapters,
+  );
+  const recovered = await recoverCurrent(discovered, freshB, recoveryAdapters);
   if (
     recovered.version !== "2" ||
     recovered.content.draft !== "Version two: public sample content."

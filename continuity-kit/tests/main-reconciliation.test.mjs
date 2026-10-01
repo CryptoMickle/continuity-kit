@@ -3,10 +3,13 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import test from "node:test";
 import ts from "typescript";
+import { createReleaseRuntime } from "../src/release/runtime.ts";
+import { releasePolicy } from "../src/release/profile.ts";
 import { HandoffChannel } from "../src/handoff.ts";
 import {
   contextFor,
   LOCAL_POLICY,
+  metadataFingerprint,
   validateContext,
 } from "../src/sdk/policy.ts";
 import {
@@ -69,6 +72,9 @@ async function boot(options = {}) {
   const explicitConfig = Object.hasOwn(options, "explicitConfig")
     ? options.explicitConfig
     : config();
+  const uiPolicy = options.releaseConfig
+    ? releasePolicy(options.releaseConfig)
+    : LOCAL_POLICY;
   const nodes = new Map();
   const listeners = new Map();
   const intervals = new Set();
@@ -78,10 +84,7 @@ async function boot(options = {}) {
   const popup = {
     closed: false,
     postMessage(data, origin) {
-      assert.equal(
-        origin,
-        recovery ? LOCAL_POLICY.aOrigin : LOCAL_POLICY.bOrigin,
-      );
+      assert.equal(origin, recovery ? uiPolicy.aOrigin : uiPolicy.bOrigin);
       sent.push(data);
     },
   };
@@ -89,6 +92,8 @@ async function boot(options = {}) {
   let html = "";
   let passkeyClient;
   let outcome;
+  let readFailure;
+  let saveFailure;
   const ticket = { command: { operation: "create" } };
   const capsuleDigest = `0x${"3".repeat(64)}`;
   const account = {
@@ -116,8 +121,12 @@ async function boot(options = {}) {
     set innerHTML(value) {
       html = value;
       nodes.clear();
-      for (const [, id] of value.matchAll(/\bid="([^"]+)"/g)) {
+      for (const [tag, id] of value.matchAll(
+        /<[a-z][^>]*\bid="([^"]+)"[^>]*>/g,
+      )) {
+        assert.ok(!nodes.has(`#${id}`), `Duplicate action/element id: ${id}`);
         nodes.set(`#${id}`, {
+          disabled: /\sdisabled(?:\s|>)/.test(tag),
           handlers: new Map(),
           addEventListener(event, fn) {
             this.handlers.set(event, fn);
@@ -146,6 +155,20 @@ async function boot(options = {}) {
   );
   const stubs = {
     "./style.css": {},
+    "./release/runtime.ts": {
+      createReleaseRuntime(input, token) {
+        const runtime = createReleaseRuntime(input, token);
+        return {
+          ...runtime,
+          adapters: {
+            ...runtime.adapters,
+            registry: blockedAdapter,
+            transactions: blockedAdapter,
+            mirrors: [blockedAdapter, blockedAdapter],
+          },
+        };
+      },
+    },
     "./runtime.ts": {
       createRuntime(input) {
         const runtime = createRuntime(input);
@@ -161,7 +184,7 @@ async function boot(options = {}) {
         };
       },
     },
-    "./sdk/policy.ts": { validateContext },
+    "./sdk/policy.ts": { validateContext, metadataFingerprint },
     "./sdk/passkeys.ts": {
       MeraPasskeyAdapter: class {
         constructor(client) {
@@ -230,6 +253,24 @@ async function boot(options = {}) {
       async reconcileEnrollment() {
         return sdkResult("reconcile-enrollment");
       },
+      async saveCheckpoint() {
+        if (saveFailure) {
+          const error = saveFailure;
+          saveFailure = undefined;
+          calls.push("save-conflict");
+          throw error;
+        }
+        return sdkResult("save-checkpoint");
+      },
+      async reconcileCheckpoint() {
+        if (readFailure) {
+          const error = readFailure;
+          readFailure = undefined;
+          calls.push("failed-status-read");
+          throw error;
+        }
+        return sdkResult("reconcile-checkpoint");
+      },
     },
     "./handoff.ts": {
       HandoffChannel: class extends HandoffChannel {
@@ -246,10 +287,14 @@ async function boot(options = {}) {
       return stubs[path];
     },
     __CONTINUITY_TESTNET_CONFIG__: explicitConfig,
+    __CONTINUITY_RELEASE_PROFILE__: options.releaseConfig,
     physicalEnv: "false",
     location: {
-      origin: recovery ? LOCAL_POLICY.bOrigin : LOCAL_POLICY.aOrigin,
+      origin: recovery ? uiPolicy.bOrigin : uiPolicy.aOrigin,
       search,
+      replace() {
+        calls.push("replace-page");
+      },
     },
     URLSearchParams,
     URL,
@@ -279,6 +324,13 @@ async function boot(options = {}) {
       querySelectorAll: () => [],
     },
     async fetch(url) {
+      if (
+        options.releaseConfig &&
+        url === `${options.releaseConfig.storeOrigin}/v1/presenter-access`
+      ) {
+        calls.push("presenter-access");
+        return { status: options.rejectPresenter ? 401 : 204 };
+      }
       assert.equal(url, `${CONTROL_URL}/v1/status`);
       calls.push("local-status");
       return {
@@ -296,7 +348,7 @@ async function boot(options = {}) {
   });
   vm.runInContext(compiled, context);
   await settle();
-  assert.deepEqual(calls, ["local-status"]);
+  assert.deepEqual(calls, options.releaseConfig ? [] : ["local-status"]);
   const click = async (selector) => {
     const handler = nodes.get(selector)?.handlers.get("click");
     assert.ok(handler, `${selector} must be visible and wired`);
@@ -305,7 +357,7 @@ async function boot(options = {}) {
   };
   const message = async (data, overrides = {}) => {
     listeners.get("message")({
-      origin: recovery ? LOCAL_POLICY.aOrigin : LOCAL_POLICY.bOrigin,
+      origin: recovery ? uiPolicy.aOrigin : uiPolicy.bOrigin,
       source: popup,
       data,
       ...overrides,
@@ -317,6 +369,14 @@ async function boot(options = {}) {
     sent,
     opened,
     click,
+    setValue(selector, value) {
+      nodes.get(selector).value = value;
+    },
+    input(selector, value) {
+      const handler = nodes.get(selector)?.handlers.get("input");
+      assert.ok(handler);
+      handler({ target: { value } });
+    },
     message,
     pagehide() {
       listeners.get("pagehide")();
@@ -326,6 +386,10 @@ async function boot(options = {}) {
     },
     nodeText(selector) {
       return nodes.get(selector)?.textContent;
+    },
+    disabled(selector) {
+      assert.ok(nodes.has(selector));
+      return nodes.get(selector).disabled;
     },
     closePeer() {
       popup.closed = true;
@@ -339,8 +403,27 @@ async function boot(options = {}) {
       return html;
     },
     synthetic: passkeyClient instanceof FixtureClient,
-    pending() {
+    pending(operation = "create") {
+      ticket.command.operation = operation;
       outcome = { status: "pending", ticket };
+    },
+    failNextRead() {
+      readFailure = Object.assign(new Error("Synthetic read outage"), {
+        code: "FRESHNESS_UNAVAILABLE",
+      });
+    },
+    failNextSave() {
+      saveFailure = Object.assign(new Error("Synthetic competing write"), {
+        code: "WRITE_CONFLICT",
+      });
+    },
+    saved(content, unresolved = false) {
+      outcome = {
+        status: "saved",
+        recovered: { content: structuredClone(content), version: "2" },
+        proof: { kind: unresolved ? "finalized-state" : "finalized-receipt" },
+        ...(unresolved ? { unresolvedTicket: ticket } : {}),
+      };
     },
     prepared(unresolved = false) {
       outcome = {
@@ -746,4 +829,261 @@ test("primary restoration finishing after pagehide closes its new signer instead
     /Same account\. Same private workspace|Must not be installed/,
   );
   assert.match(ui.html, /This page session has ended/);
+});
+
+const checkpointFixture = {
+  title: "SYNTHETIC reconciliation draft",
+  plan: "No physical credentials or real chain calls",
+  tasks: [],
+  draft: "v1",
+};
+async function openCheckpoint() {
+  const ui = await boot({
+    restoreResult: (account) => ({
+      state: account,
+      recovered: { content: structuredClone(checkpointFixture), version: "1" },
+    }),
+  });
+  await ui.click("#restore");
+  return ui;
+}
+test("unchanged restored content and edit-then-revert never call the writer", async () => {
+  const ui = await openCheckpoint();
+  assert.equal(ui.disabled("#save"), true);
+  assert.match(ui.html, /No unsaved changes/);
+  const before = [...ui.calls];
+  // Deliberately invoke the disabled handler: markup alone is not the guard.
+  await ui.click("#save");
+  for (const field of ["title", "plan", "draft"]) {
+    ui.input(`#${field}`, `${checkpointFixture[field]} `);
+    assert.equal(ui.disabled("#save"), false, "Whitespace is content here");
+    assert.equal(ui.nodeText("#save"), "Save checkpoint");
+    ui.input(`#${field}`, checkpointFixture[field]);
+    assert.equal(ui.disabled("#save"), true);
+    assert.equal(ui.nodeText("#save"), "No unsaved changes");
+    await ui.click("#save");
+  }
+  assert.deepEqual(ui.calls, before);
+});
+test("changed content saves once and its confirmed snapshot blocks a duplicate", async () => {
+  const ui = await openCheckpoint();
+  ui.input("#draft", "v1 ");
+  ui.saved({ ...checkpointFixture, draft: "v1 " });
+  await ui.click("#save");
+  assert.match(ui.html, /Verified checkpoint v2/);
+  assert.equal(ui.disabled("#save"), true);
+  await ui.click("#save");
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 1);
+});
+test("enrollment reconciliation requires verified content before another save", async () => {
+  const ui = await boot();
+  ui.pending();
+  await ui.enroll();
+  ui.prepared();
+  await ui.check();
+  assert.match(nextStep(ui.html), /Open the confirmed checkpoint/i);
+  assert.match(nextStep(ui.html), /id="restore"/);
+  ui.input("#draft", "Unverified local draft after enrollment");
+  assert.equal(ui.disabled("#save"), true);
+  await ui.click("#save");
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 0);
+  assert.match(ui.html, /Unverified local draft after enrollment/);
+});
+test("confirmed initial enrollment accepts the edited setup snapshot without a duplicate save", async () => {
+  const ui = await boot();
+  ui.input("#draft", "Synthetic edited first checkpoint");
+  ui.prepared();
+  await ui.enroll();
+  assert.match(ui.html, /Synthetic edited first checkpoint/);
+  assert.match(ui.html, /Verified checkpoint v1/);
+  assert.doesNotMatch(ui.html, /Unsaved local changes/);
+  assert.equal(ui.disabled("#save"), true);
+  await ui.click("#save");
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 0);
+});
+test("a conflicting changed save preserves the draft without retrying", async () => {
+  const ui = await openCheckpoint();
+  ui.input("#draft", "Local work after a competing save");
+  ui.failNextSave();
+  await ui.click("#save");
+  assert.match(ui.html, /WRITE_CONFLICT/);
+  assert.match(ui.html, /Local work after a competing save/);
+  assert.match(ui.html, /Unsaved local changes/);
+  assert.equal(ui.calls.filter((c) => c === "save-conflict").length, 1);
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 0);
+});
+async function pendingCheckpoint() {
+  const ui = await boot({
+    restoreResult: (account) => ({
+      state: account,
+      recovered: { content: structuredClone(checkpointFixture), version: "1" },
+    }),
+  });
+  await ui.click("#restore");
+  ui.input("#draft", "saved v2");
+  ui.pending("commit");
+  await ui.click("#save");
+  return ui;
+}
+
+test("confirmed checkpoint marks the matching draft saved without another write", async () => {
+  const ui = await pendingCheckpoint();
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  await ui.check();
+  assert.match(ui.html, /id="edit-state">Verified checkpoint v2</);
+  assert.doesNotMatch(
+    ui.html,
+    /Local changes · not committed|Unsaved local changes/,
+  );
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 1);
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 1);
+  assert.equal(ui.disabled("#save"), true);
+  await ui.click("#save");
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 1);
+});
+
+test("receipt confirmation preserves and labels edits made after the pending save", async () => {
+  const ui = await pendingCheckpoint();
+  ui.input("#draft", "saved v2 plus later unsaved work");
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  await ui.check();
+  assert.match(ui.html, /saved v2 plus later unsaved work/);
+  assert.match(ui.html, /id="edit-state">Unsaved local changes</);
+  assert.doesNotMatch(ui.html, /id="edit-state">Verified checkpoint/);
+  assert.equal(ui.disabled("#save"), false);
+});
+
+test("pending confirmation blocks save, restore and reset without losing its ticket", async () => {
+  const ui = await pendingCheckpoint();
+  for (const id of ["save", "restore", "fresh"]) {
+    assert.match(ui.html, new RegExp(`id="${id}" disabled`));
+  }
+  assert.match(ui.html, /id="edit-state">Transaction confirmation pending</);
+  const callsBefore = [...ui.calls];
+  // Invoke even the disabled handlers to check their guards, not just markup.
+  for (const id of ["save", "restore", "fresh"]) await ui.click(`#${id}`);
+  assert.deepEqual(ui.calls, callsBefore);
+  ui.saved({ ...checkpointFixture, draft: "saved v2" }, true);
+  await ui.check();
+  assert.match(ui.html, /id="check-transaction"/);
+  assert.match(ui.html, /id="save" disabled/);
+  assert.match(ui.html, /Transaction confirmation pending/);
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  await ui.check();
+  assert.doesNotMatch(ui.html, /id="check-transaction"/);
+  assert.match(ui.html, /id="edit-state">Verified checkpoint v2</);
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 1);
+});
+
+function nextStep(html) {
+  const guide = html.match(
+    /<section class="step-guide"[^>]*>([\s\S]*?)<\/section>/,
+  )?.[1];
+  assert.ok(guide, "The next-step region must exist");
+  assert.ok(
+    html.indexOf('class="step-guide"') < html.indexOf('class="content-grid"'),
+  );
+  return guide;
+}
+
+test("existing-workspace action is discoverable before the editor and never creates a key", async () => {
+  const ui = await boot({
+    restoreResult: (account) => ({
+      state: account,
+      recovered: { content: structuredClone(checkpointFixture), version: "1" },
+    }),
+  });
+  assert.match(nextStep(ui.html), /id="restore"/);
+  assert.match(nextStep(ui.html), /id="prepare"/);
+  await ui.click("#restore");
+  assert.equal(ui.calls.filter((call) => call === "restore-primary").length, 1);
+  assert.equal(ui.calls.filter((call) => call === "create-primary").length, 0);
+  assert.equal(ui.opened.length, 0);
+  assert.doesNotMatch(nextStep(ui.html), /id="prepare"/);
+  assert.match(nextStep(ui.html), /href="#workspace"/);
+});
+
+test("recovery setup exposes its action beside guidance only while its bound offer is usable", async () => {
+  const ui = await boot({ recovery: true, opener: true, search: "?enroll=1" });
+  assert.doesNotMatch(nextStep(ui.html), /id="(?:enroll|recover)"/);
+  await recoveryOffer(ui);
+  assert.match(nextStep(ui.html), /id="enroll"/);
+  assert.doesNotMatch(nextStep(ui.html), /id="recover"/);
+  ui.closePeer();
+  assert.doesNotMatch(ui.html, /id="(?:enroll|recover)"/);
+  assert.deepEqual(ui.calls, ["local-status"]);
+  const existing = await boot({ recovery: true });
+  assert.match(nextStep(existing.html), /id="recover"/);
+  assert.doesNotMatch(existing.html, /id="enroll"/);
+});
+
+test("a failed status read retains a prominent read-only action and never reopens enrollment", async () => {
+  const ui = await pendingCheckpoint();
+  ui.failNextRead();
+  await ui.check();
+  assert.match(ui.html, /FRESHNESS_UNAVAILABLE/);
+  assert.match(nextStep(ui.html), /WAITING FOR CONFIRMATION/);
+  assert.match(nextStep(ui.html), /id="check-transaction"/);
+  assert.doesNotMatch(ui.html, /id="prepare"/);
+  assert.match(ui.html, /id="save" disabled/);
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  await ui.check();
+  assert.match(ui.html, /Transaction confirmed/);
+  assert.equal(ui.calls.filter((call) => call === "save-checkpoint").length, 1);
+  assert.equal(
+    ui.calls.filter((call) => call === "reconcile-checkpoint").length,
+    1,
+  );
+  assert.equal(ui.calls.filter((call) => call === "create-primary").length, 0);
+});
+
+const publicProfile = {
+  format: "continuity-demo-release/v1",
+  deploymentId: "public-demo-ui-fixture",
+  aOrigin: "https://a.fixture.invalid",
+  bOrigin: "https://b.fixture.invalid",
+  storeOrigin: "https://store.fixture.invalid",
+  expiresAt: "2099-01-01T00:00:00.000Z",
+};
+test("release client forces physical mode, reads no local controls and locks enrollment without a capability", async () => {
+  const ui = await boot({ releaseConfig: publicProfile });
+  assert.equal(ui.synthetic, false);
+  assert.deepEqual(ui.calls, []);
+  assert.doesNotMatch(ui.html, /id="(?:outage|scenario|test-tools)"/);
+  assert.match(ui.html, /Demo upload code/);
+  assert.equal(ui.disabled("#prepare"), true);
+  await ui.click("#prepare");
+  assert.deepEqual(ui.calls, []);
+  ui.setValue("#upload-code", "a".repeat(64));
+  await ui.click("#unlock-uploads");
+  assert.equal(ui.disabled("#prepare"), false);
+  assert.doesNotMatch(ui.html, /a{64}/);
+  assert.deepEqual(ui.calls, ["presenter-access"]);
+});
+test("release recovery has no upload code or primary availability claim and makes no initial request", async () => {
+  const ui = await boot({ releaseConfig: publicProfile, recovery: true });
+  assert.deepEqual(ui.calls, []);
+  assert.doesNotMatch(
+    ui.html,
+    /id="(?:upload-code|unlock-uploads|prepare|outage|scenario)"/,
+  );
+  assert.doesNotMatch(ui.html, /Primary available/);
+  assert.match(ui.html, /id="recover"/);
+});
+
+test("invalid presenter capability cannot trigger native enrollment", async () => {
+  const ui = await boot({
+    releaseConfig: publicProfile,
+    rejectPresenter: true,
+  });
+  ui.setValue("#upload-code", "incomplete");
+  await ui.click("#unlock-uploads");
+  assert.match(ui.html, /The demo code is incomplete or invalid/);
+  assert.deepEqual(ui.calls, []);
+  ui.setValue("#upload-code", "a".repeat(64));
+  await ui.click("#unlock-uploads");
+  assert.match(ui.html, /Demo access was not accepted/);
+  assert.equal(ui.disabled("#prepare"), true);
+  await ui.click("#prepare");
+  assert.deepEqual(ui.calls, ["presenter-access"]);
 });

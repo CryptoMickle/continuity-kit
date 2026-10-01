@@ -209,13 +209,20 @@ export class HttpMirrorStore implements MirrorStore {
   readonly id: string;
   readonly baseUrl: string;
   private readonly timeoutMs: number;
-  constructor(baseUrl: string, slot?: 0 | 1, timeoutMs = 10000) {
+  private readonly writeHeaders: () => Record<string, string>;
+  constructor(
+    baseUrl: string,
+    slot?: 0 | 1,
+    timeoutMs = 10000,
+    writeHeaders: () => Record<string, string> = () => ({}),
+  ) {
     this.baseUrl =
       slot === undefined
         ? baseUrl.replace(/\/$/, "")
         : `${baseUrl.replace(/\/$/, "")}/v1/mirrors/${slot}`;
     this.id = this.baseUrl;
     this.timeoutMs = timeoutMs;
+    this.writeHeaders = writeHeaders;
   }
   private async get(kind: string, id: string, max: number) {
     const response = await fetch(
@@ -235,7 +242,10 @@ export class HttpMirrorStore implements MirrorStore {
       `${this.baseUrl}/${kind}/${encodeURIComponent(id)}`,
       {
         method: "PUT",
-        headers: { "content-type": "application/octet-stream" },
+        headers: {
+          ...this.writeHeaders(),
+          "content-type": "application/octet-stream",
+        },
         body: new Uint8Array(bytes),
         signal: AbortSignal.timeout(this.timeoutMs),
         redirect: "error",

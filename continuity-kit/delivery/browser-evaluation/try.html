@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f3f5fa" />
+    <title>Try ContinuityKit · Local simulation</title>
+    <link rel="icon" href="/logo.svg" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          15px/1.7 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: #242834;
+        background:
+          radial-gradient(ellipse at 100% 0, #cceaff, transparent 60%),
+          radial-gradient(ellipse at 0 80%, #ffe2da, transparent 60%), #f3f5fa;
+      }
+      main {
+        max-width: 920px;
+        margin: auto;
+        padding: 44px 24px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 45px;
+      }
+      .brand {
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: -0.8px;
+      }
+      .badge {
+        background: #ffffffe0;
+        border: 1px solid white;
+        border-radius: 99px;
+        padding: 7px 12px;
+        font-size: 11px;
+        color: #505f76;
+      }
+      h1 {
+        font-size: clamp(32px, 6vw, 49px);
+        letter-spacing: -1.7px;
+        line-height: 1.13;
+        max-width: 650px;
+        margin: 12px 0 19px;
+      }
+      h2 {
+        font-size: 19px;
+        line-height: 1.35;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 0 0 16px;
+        color: #596578;
+      }
+      .lead {
+        font-size: 17px;
+        max-width: 680px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 27px 0;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 10px 20px;
+        border-radius: 99px;
+        background: #0866d8;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px #1265c626;
+      }
+      .secondary {
+        background: #fff;
+        color: #0866d8;
+        border: 1px solid #e1e8f1;
+        box-shadow: 0 3px 10px #2546630c;
+      }
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid #0866d8;
+        outline-offset: 4px;
+      }
+      .boundary {
+        padding: 16px 21px;
+        border: 1px solid #fff;
+        background: #ffffffb0;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #536176;
+        margin-bottom: 26px;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 25px;
+      }
+      .steps li {
+        padding: 24px;
+        background: #ffffffed;
+        border: 1px solid white;
+        border-radius: 27px;
+        box-shadow: 0 8px 24px #28497409;
+      }
+      .number {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        background: #e8f1fe;
+        color: #0962ca;
+        font-weight: 650;
+        margin-bottom: 19px;
+      }
+      .steps li:nth-child(2) .number {
+        color: #a24c21;
+        background: #fff0df;
+      }
+      .steps li:nth-child(3) .number {
+        color: #247449;
+        background: #e7f5ec;
+      }
+      .steps p {
+        font-size: 13px;
+        margin-bottom: 0;
+      }
+      details {
+        padding: 19px 22px;
+        background: #ffffffb0;
+        border: 1px solid white;
+        border-radius: 22px;
+        margin: 14px 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      details p,
+      details ol {
+        font-size: 14px;
+        margin-top: 15px;
+      }
+      li {
+        padding-left: 2px;
+      }
+      code {
+        font-size: 12px;
+      }
+      footer {
+        font-size: 12px;
+        color: #657186;
+        margin-top: 29px;
+      }
+      .eyebrow {
+        color: #556e8d;
+        font-size: 11px;
+        letter-spacing: 1.2px;
+        font-weight: 650;
+      }
+      .links {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .links a {
+        color: #0866d8;
+      }
+      @media (max-width: 680px) {
+        main {
+          padding: 25px 18px;
+        }
+        .steps {
+          grid-template-columns: 1fr;
+        }
+        .steps li {
+          padding: 21px;
+        }
+        .number {
+          float: left;
+          margin: 0 15px 15px 0;
+        }
+        header {
+          margin-bottom: 30px;
+        }
+        .actions .button {
+          flex: 1 1 210px;
+        }
+        .badge {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand">continuitykit</div>
+        <span class="badge">LOCAL SIMULATION · PUBLIC SAMPLE DATA</span>
+      </header>
+      <span class="eyebrow">A SHORT PRODUCT TRIAL</span>
+      <h1>Your app can disappear.<br />Your work can have a way back.</h1>
+      <p class="lead">
+        Change a note, take the original app offline, then recover the exact
+        saved correction from a separate client.
+      </p>
+      <div class="actions">
+        <a
+          class="button"
+          href="http://trial-primary.localhost:4373/"
+          target="_blank"
+          rel="noopener"
+          >1. Open the workspace ↗</a
+        ><a
+          class="button secondary"
+          href="http://trial-recovery.localhost:4374/"
+          target="_blank"
+          rel="noopener"
+          >Open recovery client ↗</a
+        >
+      </div>
+      <p class="boundary">
+        This launcher prepares a public demo checkpoint. No wallet, real passkey
+        or blockchain transaction is involved. Use invented text only. Stopping
+        the launcher erases this trial.
+      </p>
+      <ol class="steps">
+        <li>
+          <span class="number">1</span>
+          <h2>Make a correction.</h2>
+          <p>
+            In the workspace choose <strong>Open existing workspace</strong>.
+            Change Working draft, then <strong>Save checkpoint</strong>. Look
+            for verified v2.
+          </p>
+        </li>
+        <li>
+          <span class="number">2</span>
+          <h2>Lose the original app.</h2>
+          <p>
+            Expand Demonstration tools. Choose
+            <strong>Mirror 1 serves an old valid copy</strong>, then
+            <strong>Take primary offline</strong>. Close the workspace tab.
+          </p>
+        </li>
+        <li>
+          <span class="number">3</span>
+          <h2>Bring the note back.</h2>
+          <p>
+            Open the recovery client fresh. Choose
+            <strong>Recover demo workspace</strong>. Check for your exact
+            correction, verified v2 and rejection of the old copy.
+          </p>
+        </li>
+      </ol>
+      <details>
+        <summary>Try a failure, too</summary>
+        <ol>
+          <li>
+            In the recovery client's Demonstration tools choose
+            <strong>Both mirrors serve an old valid copy</strong>.
+          </li>
+          <li>
+            Choose <strong>Discard this session &amp; reload</strong>, then
+            recover again. The old version must not be presented as current.
+          </li>
+          <li>
+            Repeat with <strong>Registry unavailable</strong>. The app should
+            report that it cannot check freshness.
+          </li>
+          <li>
+            Restore <strong>Both copies healthy</strong> and
+            <strong>Bring primary back</strong>, or restart the launcher for a
+            fresh trial.
+          </li>
+        </ol>
+      </details>
+      <details>
+        <summary>What is worth evaluating?</summary>
+        <p>
+          Would this protect work you change regularly? Would an independent
+          encrypted export already be enough? Is the extra recovery setup and
+          version check worth it?
+        </p>
+        <p>
+          Both encrypted copies still share one local service. This demo does
+          not establish independent hosting, real device compatibility, demand
+          or an integration with another product. An old valid copy is not
+          automatically the current one; the version check depends on a trusted
+          registry being available.
+        </p>
+      </details>
+      <details>
+        <summary>Setup and troubleshooting</summary>
+        <p>
+          Run <code>npm ci --ignore-scripts --no-audit --no-fund</code>, then
+          <code>npm start</code> in the extracted package using Node.js 24+.
+          Keep the terminal running. Ports 4373–4375 must be free. The package
+          accepts no physical/testnet flags and reads no .env file.
+        </p>
+        <p>
+          This trial uses ordinary desktop browser tabs. If the hostname does
+          not resolve to loopback in your environment, note the environment and
+          stop; changing to another origin changes the recovery policy. Read
+          README.md for the full steps and EVALUATION_NOTES.md for feedback.
+        </p>
+      </details>
+      <footer>
+        Experimental developer trial · current client design · seeded synthetic
+        setup<br />Local registry and public test credentials. Separate physical
+        Monad evidence is documented in the project; this trial does not
+        generate it.
+      </footer>
+    </main>
+  </body>
+</html>

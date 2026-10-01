@@ -275,7 +275,8 @@ export class MonadRegistryReader {
             args: [owner, streamId],
           });
           const raw = await this.#call(url, "eth_call", [
-            { to: policy.registryAddress, data },
+            // Bound read-only execution: provider defaults may exceed their own cap.
+            { to: policy.registryAddress, data, gas: "0x493e0" },
             tag,
           ]);
           if (typeof raw !== "string" || !/^0x[0-9a-f]{256}$/.test(raw))

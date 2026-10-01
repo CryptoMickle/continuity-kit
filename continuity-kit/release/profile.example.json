@@ -1,0 +1,8 @@
+{
+  "format": "continuity-demo-release/v1",
+  "deploymentId": "public-demo-candidate-2026-09",
+  "aOrigin": "https://primary.continuity.invalid",
+  "bOrigin": "https://recovery.continuity.invalid",
+  "storeOrigin": "https://store.continuity.invalid",
+  "expiresAt": "2026-11-10T00:00:00.000Z"
+}

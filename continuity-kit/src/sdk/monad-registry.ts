@@ -107,7 +107,9 @@ export class HttpTransactionTransport implements TransactionTransport {
     signal: AbortSignal,
   ): Promise<unknown> {
     const id = ++this.#id;
-    const response = await this.#fetch(this.policy.rpcUrls[provider], {
+    // Window.fetch must not receive this transport as its WebIDL receiver.
+    const fetcher = this.#fetch;
+    const response = await fetcher(this.policy.rpcUrls[provider], {
       method: "POST",
       redirect: "error",
       signal: AbortSignal.any([

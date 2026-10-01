@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ContinuityKit · Fullfør lagret oppsett</title>
+    <style>
+      body {
+        font: 17px/1.6 system-ui;
+        background: #f5f7ef;
+        color: #203429;
+        max-width: 48rem;
+        margin: 3rem auto;
+        padding: 0 1.2rem;
+      }
+      h1 {
+        line-height: 1.15;
+      }
+      button {
+        font: inherit;
+        background: #203f2b;
+        color: white;
+        border: 0;
+        border-radius: 8px;
+        padding: 0.9rem 1.2rem;
+        margin: 0.4rem 0.4rem 0.4rem 0;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      section {
+        background: white;
+        border: 1px solid #d8decd;
+        border-radius: 12px;
+        padding: 1.4rem;
+        margin: 1rem 0;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 0.83rem;
+      }
+      #status {
+        border-left: 4px solid #73974d;
+        padding: 1rem;
+        background: #e8efdb;
+      }
+      label {
+        display: block;
+        margin: 0.8rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p>CONTINUITYKIT · LOKAL TESTNET-REPARASJON</p>
+    <h1>Fullfør oppsettet du allerede startet.</h1>
+    <p>
+      De gamle appfanene kan stå åpne. Denne siden bruker den eksisterende
+      primærnøkkelen fra i dag og kontrollerer de lagrede kopiene.
+    </p>
+    <section>
+      <h2>1. Kontroller den eksisterende nøkkelen</h2>
+      <p>
+        Velg dagens nyeste nøkkel for <strong>primary.localhost</strong>. Feil
+        nøkkel avvises. Dette trinnet leser og kontrollerer data; det sender
+        ingen transaksjon.
+      </p>
+      <button id="open" disabled>Bruk eksisterende nøkkel og kontroller</button>
+      <p id="preview">Innholdet er ikke åpnet eller kontrollert ennå.</p>
+    </section>
+    <section>
+      <h2>2. Fullfør første registrering</h2>
+      <p>
+        Denne handlingen sender den tidligere godkjente v1-transaksjonen på
+        Monad testnet. Den bruker samme konto, arbeidsområde og krypterte
+        versjon. Verdi: 0. Gebyrtak for denne ene handlingen: 0,06 test-MON,
+        innen det samlede appgebyrtaket på 0,18 test-MON.
+      </p>
+      <button id="complete" disabled>
+        Fullfør denne testnet-registreringen én gang
+      </button>
+      <button id="reconcile" disabled>Kontroller sendt transaksjon</button>
+      <p>
+        Ved uklar status: la denne siden stå åpen. Ikke start et nytt forsøk.
+        Reserveappen må etterpå bekrefte gjenoppretting med sin eksisterende
+        nøkkel.
+      </p>
+    </section>
+    <p id="status" role="status">
+      Klargjort; ingen nøkkelbruk eller kjedehandling er startet.
+    </p>
+    <details>
+      <summary>Eksakt testoppsett</summary>
+      <pre id="pin"></pre>
+    </details>
+    <pre id="proof"></pre>
+    <script type="module" src="/src/prepared-completion-panel.ts"></script>
+  </body>
+</html>

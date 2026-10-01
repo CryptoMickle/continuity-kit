@@ -59,6 +59,20 @@ export function rpcQuantity(value: unknown): bigint {
     invalid("Invalid RPC quantity");
   return BigInt(value);
 }
+/** RPCs can encode r/s as quantities or fixed-width data. Preserve the scalar. */
+export function rpcSignatureScalar(value: unknown): Hex {
+  if (
+    typeof value !== "string" ||
+    !/^0x(?:[0-9a-f]{64}|[1-9a-f][0-9a-f]{0,63})$/.test(value)
+  )
+    invalid("Invalid transaction signature scalar encoding");
+  const scalar = BigInt(value);
+  const order =
+    0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+  if (scalar === 0n || scalar >= order)
+    invalid("Transaction signature scalar outside secp256k1 range");
+  return `0x${scalar.toString(16).padStart(64, "0")}`;
+}
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) invalid();
   return value as Record<string, unknown>;
@@ -708,18 +722,11 @@ export class OwnerWriter implements ScopedOwnerWriter {
       tx.blobVersionedHashes !== undefined
     )
       invalid("Retrieved transaction outside intent");
-    if (
-      typeof tx.r !== "string" ||
-      !/^0x[0-9a-f]{64}$/.test(tx.r) ||
-      typeof tx.s !== "string" ||
-      !/^0x[0-9a-f]{64}$/.test(tx.s)
-    )
-      invalid("Missing transaction signature");
     const parity = rpcQuantity(tx.yParity ?? tx.v);
     if (parity > 1n) invalid();
     const raw = serializeTransaction(envelope, {
-      r: tx.r as Hex,
-      s: tx.s as Hex,
+      r: rpcSignatureScalar(tx.r),
+      s: rpcSignatureScalar(tx.s),
       yParity: Number(parity),
     });
     if (keccak256(raw) !== ticket.transactionHash)
