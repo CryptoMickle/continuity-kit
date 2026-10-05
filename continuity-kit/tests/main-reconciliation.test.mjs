@@ -78,6 +78,7 @@ async function boot(options = {}) {
   const nodes = new Map();
   const listeners = new Map();
   const intervals = new Set();
+  const timeouts = new Map();
   const calls = [];
   const sent = [];
   const opened = [];
@@ -94,6 +95,8 @@ async function boot(options = {}) {
   let outcome;
   let readFailure;
   let saveFailure;
+  let deferredRead;
+  let writerClosed = false;
   const ticket = { command: { operation: "create" } };
   const capsuleDigest = `0x${"3".repeat(64)}`;
   const account = {
@@ -107,10 +110,15 @@ async function boot(options = {}) {
       pendingTicket: undefined,
       expiresAt: 601000,
       assertActive() {
-        if (now >= this.expiresAt) throw new Error("Expired");
+        if (writerClosed || now >= this.expiresAt) throw new Error("Expired");
+      },
+      close() {
+        writerClosed = true;
+        calls.push("close-writer");
       },
     },
     close() {
+      writerClosed = true;
       calls.push("close-account");
     },
   };
@@ -135,12 +143,33 @@ async function boot(options = {}) {
       }
     },
   };
-  const sdkResult = (action) => {
+  const sdkResult = async (action) => {
     calls.push(action);
+    if (action.startsWith("reconcile") && deferredRead) {
+      const wait = deferredRead;
+      deferredRead = undefined;
+      await wait;
+    }
     assert.ok(outcome, "A synthetic SDK outcome must be supplied");
-    account.writer.pendingTicket =
-      outcome.status === "pending" ? ticket : outcome.unresolvedTicket;
-    return outcome;
+    const result = options.cloneTickets
+      ? {
+          ...outcome,
+          ...(outcome.ticket
+            ? { ticket: structuredClone(outcome.ticket) }
+            : {}),
+          ...(outcome.unresolvedTicket
+            ? { unresolvedTicket: structuredClone(outcome.unresolvedTicket) }
+            : {}),
+        }
+      : outcome;
+    account.writer.pendingTicket = options.cloneTickets
+      ? structuredClone(
+          result.status === "pending" ? result.ticket : result.unresolvedTicket,
+        )
+      : result.status === "pending"
+        ? ticket
+        : result.unresolvedTicket;
+    return result;
   };
   class FixtureClient {}
   const blockedAdapter = new Proxy(
@@ -221,6 +250,7 @@ async function boot(options = {}) {
           assert.equal(this.phase, "paused");
           calls.push("resume-primary");
           this.phase = "ready";
+          writerClosed = false;
           account.writer.expiresAt = now + 600000;
           return account;
         }
@@ -248,6 +278,7 @@ async function boot(options = {}) {
         );
       },
       async finalizeEnrollment() {
+        if (options.beforeFinalize) await options.beforeFinalize(account);
         return sdkResult("finalize-enrollment");
       },
       async reconcileEnrollment() {
@@ -337,7 +368,14 @@ async function boot(options = {}) {
         json: async () => ({ primaryOnline: true, scenario: "healthy" }),
       };
     },
-    setTimeout() {},
+    setTimeout(fn, delay) {
+      const timer = {};
+      timeouts.set(timer, { fn, at: now + delay });
+      return timer;
+    },
+    clearTimeout(timer) {
+      timeouts.delete(timer);
+    },
     setInterval(fn) {
       intervals.add(fn);
       return fn;
@@ -398,6 +436,11 @@ async function boot(options = {}) {
     tick(ms = 500) {
       now += ms;
       for (const tick of [...intervals]) tick();
+      for (const [timer, item] of [...timeouts]) {
+        if (item.at > now || !timeouts.has(timer)) continue;
+        timeouts.delete(timer);
+        item.fn();
+      }
     },
     get html() {
       return html;
@@ -407,9 +450,16 @@ async function boot(options = {}) {
       ticket.command.operation = operation;
       outcome = { status: "pending", ticket };
     },
-    failNextRead() {
-      readFailure = Object.assign(new Error("Synthetic read outage"), {
-        code: "FRESHNESS_UNAVAILABLE",
+    deferNextRead() {
+      let resolve;
+      deferredRead = new Promise((done) => {
+        resolve = done;
+      });
+      return resolve;
+    },
+    failNextRead(code = "FRESHNESS_UNAVAILABLE") {
+      readFailure = Object.assign(new Error("Synthetic read failure"), {
+        code,
       });
     },
     failNextSave() {
@@ -526,7 +576,8 @@ test("expired enrollment popup cannot invalidate a later confirmed registry resu
   ui.pending();
   await ui.enroll();
   ui.expire();
-  assert.match(ui.html, /Reserve preparation expired\./);
+  assert.match(ui.html, /Setup connection ended; confirmation is pending\./);
+  assert.doesNotMatch(ui.html, /Reserve preparation expired/);
   ui.prepared();
   await ui.check();
   ui.confirmed();
@@ -1086,4 +1137,262 @@ test("invalid presenter capability cannot trigger native enrollment", async () =
   assert.equal(ui.disabled("#prepare"), true);
   await ui.click("#prepare");
   assert.deepEqual(ui.calls, ["presenter-access"]);
+});
+
+// These checks execute the real UI scheduler with a controlled clock and SDK
+// outcomes. They make no network requests and never create native credentials.
+test("automatic enrollment checks resolve the existing ticket once without signing again", async () => {
+  const ui = await boot();
+  ui.pending();
+  await ui.enroll();
+  assert.match(nextStep(ui.html), /checks confirmation automatically/);
+  ui.tick(1999);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-enrollment").length, 0);
+  ui.tick(1);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-enrollment").length, 1);
+  ui.prepared();
+  ui.tick(5000);
+  await settle();
+  ui.confirmed();
+  assert.equal(ui.sent.filter((m) => m.kind === "committed").length, 1);
+  ui.tick(300000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-enrollment").length, 2);
+  assert.equal(ui.calls.filter((c) => c === "create-primary").length, 1);
+});
+
+test("automatic checkpoint checks preserve later edits and perform no second save", async () => {
+  const ui = await pendingCheckpoint();
+  ui.input("#draft", "Saved v2 plus a later edit");
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  ui.tick(2000);
+  await settle();
+  assert.match(ui.html, /Saved v2 plus a later edit/);
+  assert.match(ui.html, /id="edit-state">Unsaved local changes</);
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 1);
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 1);
+  ui.tick(300000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 1);
+});
+
+test("five bounded automatic checks stop honestly and leave manual status and export available", async () => {
+  const ui = await pendingCheckpoint();
+  for (const delay of [2000, 5000, 10000, 20000, 30000]) {
+    ui.tick(delay);
+    await settle();
+  }
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 5);
+  assert.match(ui.html, /Confirmation is taking longer than expected/);
+  assert.match(ui.html, /Automatic checks have stopped/);
+  assert.match(ui.html, /id="check-transaction"/);
+  assert.match(ui.html, /id="export-ticket"/);
+  assert.doesNotMatch(ui.html, /Transaction confirmed\./);
+  ui.tick(300000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 5);
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  await ui.check();
+  assert.match(ui.html, /Transaction confirmed\./);
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 1);
+});
+
+test("a background-tab delay past the two-minute window makes no overdue network check", async () => {
+  const ui = await pendingCheckpoint();
+  ui.tick(120001);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 0);
+  assert.match(ui.html, /Automatic checks have stopped/);
+  assert.match(ui.html, /id="export-ticket"/);
+});
+
+test("a failed automatic status read stops its retries and keeps the exact pending action", async () => {
+  const ui = await pendingCheckpoint();
+  ui.failNextRead();
+  ui.tick(2000);
+  await settle();
+  assert.match(ui.html, /FRESHNESS_UNAVAILABLE/);
+  assert.match(nextStep(ui.html), /Check the existing transaction/);
+  assert.match(ui.html, /id="check-transaction"/);
+  assert.match(ui.html, /id="save" disabled/);
+  ui.tick(10000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "failed-status-read").length, 1);
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 0);
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  await ui.check();
+  assert.match(ui.html, /Transaction confirmed\./);
+});
+
+test("a manual status check takes over from scheduled checks without restarting their budget", async () => {
+  const ui = await pendingCheckpoint();
+  await ui.check();
+  ui.tick(10000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 1);
+  assert.match(ui.html, /id="export-ticket"/);
+});
+
+test("an in-flight automatic check cannot overlap manual checks or publish a late pagehide result", async () => {
+  const ui = await pendingCheckpoint();
+  const finish = ui.deferNextRead();
+  ui.tick(2000);
+  await settle();
+  assert.match(nextStep(ui.html), /Checking the existing transaction/);
+  assert.doesNotMatch(nextStep(ui.html), /Follow any device prompt/);
+  assert.equal(ui.disabled("#check-transaction"), true);
+  await ui.check(); // Deliberately invoke a disabled handler to test its guard.
+  ui.tick(30000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 1);
+  ui.pagehide();
+  ui.pageshow();
+  ui.saved({ ...checkpointFixture, draft: "saved v2" });
+  finish();
+  await settle();
+  ui.tick(30000);
+  await settle();
+  assert.match(ui.html, /This page session has ended/);
+  assert.doesNotMatch(ui.html, /Transaction confirmed\./);
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 1);
+});
+
+test("expiry waits for an in-flight enrollment status read and cannot overwrite a confirmed result", async () => {
+  const ui = await boot();
+  ui.pending();
+  await ui.enroll();
+  const finish = ui.deferNextRead();
+  ui.tick(2000);
+  await settle();
+  ui.expire();
+  assert.equal(ui.calls.filter((c) => c === "close-account").length, 0);
+  ui.prepared();
+  finish();
+  await settle();
+  ui.confirmed();
+  assert.equal(ui.calls.filter((c) => c === "close-account").length, 0);
+  assert.equal(ui.sent.filter((m) => m.kind === "committed").length, 0);
+  assert.doesNotMatch(ui.html, /Reserve preparation expired/);
+});
+
+test("a wrapped B with an expired channel offers fresh existing-key recovery without claiming success", async () => {
+  const ui = await boot({
+    recovery: true,
+    opener: true,
+    search: "?enroll=1&mode=physical",
+    backupResult: () => ({ synthetic: true }),
+  });
+  const offer = await recoveryOffer(ui);
+  await ui.click("#enroll");
+  await ui.message({
+    ...offer,
+    kind: "grant",
+    step: 3,
+    payload: { ...offer.payload, dataKey: new Uint8Array(32).fill(7) },
+  });
+  assert.match(ui.html, /Reserve wrapped/);
+  ui.expire();
+  await settle();
+  assert.match(nextStep(ui.html), /The setup connection ended/);
+  assert.match(nextStep(ui.html), /id="fresh-recovery"/);
+  assert.match(
+    nextStep(ui.html),
+    /href="http:\/\/recovery.localhost:4174\/\?mode=physical" target="_blank" rel="noopener noreferrer"/,
+  );
+  assert.doesNotMatch(
+    ui.html,
+    /id="(?:enroll|recover)"|Reserve preparation expired|Reserve prepared and independently checked/,
+  );
+  const before = ui.sent.length;
+  await ui.message({ ...offer, kind: "committed", step: 5, payload: {} });
+  ui.tick();
+  assert.equal(ui.sent.length, before, "Expired handoff remains closed");
+  assert.equal(ui.calls.filter((c) => c === "create-backup").length, 1);
+});
+
+test("cloned unresolved tickets and a finalized head share the original automatic retry budget", async () => {
+  const ui = await boot({ cloneTickets: true });
+  ui.pending();
+  await ui.enroll();
+  ui.tick(2000);
+  await settle();
+  ui.prepared(true);
+  for (const delay of [5000, 10000, 20000, 30000]) {
+    ui.tick(delay);
+    await settle();
+  }
+  assert.equal(ui.calls.filter((c) => c === "reconcile-enrollment").length, 5);
+  assert.equal(ui.sent.filter((m) => m.kind === "committed").length, 1);
+  assert.match(ui.html, /Automatic checks have stopped/);
+  assert.match(ui.html, /id="check-transaction"/);
+  ui.tick(300000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "reconcile-enrollment").length, 5);
+  ui.prepared();
+  await ui.check();
+  ui.confirmed();
+});
+
+test("a reverted transaction halts automatic checking and never resends the save", async () => {
+  const ui = await pendingCheckpoint();
+  ui.failNextRead("TRANSACTION_REVERTED");
+  ui.tick(2000);
+  await settle();
+  assert.match(ui.html, /The transaction reverted/);
+  assert.match(ui.html, /This transaction did not save the checkpoint/);
+  assert.match(ui.html, /Automatic checks have stopped/);
+  assert.match(nextStep(ui.html), /TRANSACTION REVERTED/);
+  assert.match(nextStep(ui.html), /This checkpoint was not saved/);
+  assert.doesNotMatch(
+    nextStep(ui.html),
+    /WAITING FOR CONFIRMATION|Check the existing transaction/,
+  );
+  assert.doesNotMatch(ui.html, /id="check-transaction"/);
+  assert.match(
+    ui.html,
+    /id="edit-state">Transaction reverted · draft not saved</,
+  );
+  assert.match(ui.html, /id="export-ticket"/);
+  assert.equal(ui.disabled("#save"), true);
+  assert.equal(ui.disabled("#restore"), true);
+  assert.match(ui.html, /saved v2/);
+  ui.tick(300000);
+  await settle();
+  assert.equal(ui.calls.filter((c) => c === "failed-status-read").length, 1);
+  assert.equal(ui.calls.filter((c) => c === "reconcile-checkpoint").length, 0);
+  assert.equal(ui.calls.filter((c) => c === "save-checkpoint").length, 1);
+});
+
+test("handoff expiry revokes signing while finalize is still uploading, before its result can queue", async () => {
+  let finishUpload;
+  let signingAttempts = 0;
+  const ui = await boot({
+    beforeFinalize: async (account) => {
+      await new Promise((resolve) => {
+        finishUpload = resolve;
+      });
+      account.writer.assertActive();
+      signingAttempts++;
+    },
+  });
+  ui.pending();
+  await ui.enroll();
+  assert.equal(signingAttempts, 0);
+  ui.expire();
+  assert.equal(ui.calls.filter((c) => c === "close-writer").length, 1);
+  finishUpload();
+  await settle();
+  assert.equal(
+    signingAttempts,
+    0,
+    "Expiry cannot extend authority through an awaited upload",
+  );
+  assert.equal(ui.calls.filter((c) => c === "finalize-enrollment").length, 0);
+  assert.equal(ui.sent.filter((m) => m.kind === "committed").length, 0);
+  assert.doesNotMatch(
+    ui.html,
+    /id="check-transaction"|Reserve prepared and transaction confirmed/,
+  );
 });

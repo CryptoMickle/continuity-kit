@@ -81,6 +81,17 @@ let enrollmentStartedAt: number | null = null;
 let reserveConfirmed = false;
 let toolsOpen = false;
 let actionTail = Promise.resolve();
+let checkingTransaction = false;
+let revertedTicketKey: string | null = null;
+const confirmationDelays = [2000, 5000, 10000, 20000, 30000] as const;
+const confirmationWindowMs = 120000;
+let confirmationTimer: ReturnType<typeof setTimeout> | null = null;
+let confirmationWatch: {
+  ticketKey: string;
+  startedAt: number;
+  attempts: number;
+  stopped: boolean;
+} | null = null;
 let primaryOnline = true;
 let scenario = "healthy";
 let localEdited = false;
@@ -169,6 +180,10 @@ const errorMessages: Record<string, [string, string]> = {
     "Your signing session has ended",
     "Restore the primary account to start another scoped session. Your current text remains in this window.",
   ],
+  TRANSACTION_REVERTED: [
+    "The transaction reverted",
+    "This transaction did not save the checkpoint. Your draft and transaction reference remain here. Automatic checks have stopped; do not repeat setup or send this transaction again.",
+  ],
   HEAD_MOVED: [
     "The checkpoint kept changing",
     "Recovery stopped rather than label an outdated read current. Try again when saves have settled.",
@@ -189,8 +204,13 @@ function fail(error: unknown) {
     text: `${message[1]} (${code})`,
   };
 }
-async function run(action: () => Promise<void>, required = false) {
+async function run(
+  action: () => Promise<void>,
+  required = false,
+  automatic = false,
+) {
   if (pageEnded || (busy && !required)) return;
+  if (!required && !automatic) stopConfirmationChecks();
   const previous = actionTail;
   let finish!: () => void;
   actionTail = new Promise<void>((resolve) => {
@@ -206,13 +226,98 @@ async function run(action: () => Promise<void>, required = false) {
   try {
     await action();
   } catch (error) {
-    pendingTicket = (state ?? primary)?.writer.pendingTicket ?? pendingTicket;
-    fail(error);
+    if (!pageEnded) {
+      pendingTicket = (state ?? primary)?.writer.pendingTicket ?? pendingTicket;
+      if (
+        pendingTicket &&
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "TRANSACTION_REVERTED"
+      ) {
+        revertedTicketKey = metadataFingerprint(pendingTicket);
+        stopConfirmationChecks();
+      }
+      if (automatic) stopConfirmationChecks();
+      fail(error);
+    }
   } finally {
     busy = false;
     finish();
-    render();
+    if (!pageEnded) {
+      scheduleConfirmationCheck();
+      render();
+    }
   }
+}
+function stopConfirmationChecks() {
+  if (confirmationTimer !== null) clearTimeout(confirmationTimer);
+  confirmationTimer = null;
+  if (confirmationWatch) confirmationWatch.stopped = true;
+}
+function transactionReverted() {
+  return (
+    !!pendingTicket && revertedTicketKey === metadataFingerprint(pendingTicket)
+  );
+}
+function scheduleConfirmationCheck() {
+  if (pageEnded || isRecovery || !pendingTicket) {
+    stopConfirmationChecks();
+    confirmationWatch = null;
+    return;
+  }
+  const ticketKey = metadataFingerprint(pendingTicket);
+  if (confirmationWatch?.ticketKey !== ticketKey) {
+    stopConfirmationChecks();
+    confirmationWatch = {
+      ticketKey,
+      startedAt: Date.now(),
+      attempts: 0,
+      stopped: false,
+    };
+  }
+  const watch = confirmationWatch;
+  if (transactionReverted()) watch.stopped = true;
+  if (busy || watch.stopped || confirmationTimer !== null) return;
+  if (
+    watch.attempts >= confirmationDelays.length ||
+    Date.now() >= watch.startedAt + confirmationWindowMs
+  ) {
+    watch.stopped = true;
+    notice = {
+      tone: "neutral",
+      title: "Confirmation is taking longer than expected.",
+      text: "Automatic checks have stopped. Your draft and transaction reference remain here. Check transaction status when ready; do not send this save again.",
+    };
+    return;
+  }
+  confirmationTimer = setTimeout(() => {
+    confirmationTimer = null;
+    if (pageEnded || watch !== confirmationWatch || watch.stopped) return;
+    if (Date.now() >= watch.startedAt + confirmationWindowMs) {
+      scheduleConfirmationCheck();
+      render();
+      return;
+    }
+    // run() is the same action queue used by manual checks and handoff results.
+    // A busy action will schedule the next check when it leaves that queue.
+    if (busy) return;
+    void run(
+      async () => {
+        if (
+          watch !== confirmationWatch ||
+          watch.stopped ||
+          !pendingTicket ||
+          metadataFingerprint(pendingTicket) !== ticketKey
+        )
+          return;
+        watch.attempts++;
+        await checkPendingTransaction();
+      },
+      false,
+      true,
+    );
+  }, confirmationDelays[watch.attempts]!);
 }
 async function control(change: Record<string, unknown>) {
   if (release) throw new Error("Public demonstration controls are unavailable");
@@ -242,6 +347,7 @@ async function refreshStatus() {
   }
 }
 function editStateText() {
+  if (transactionReverted()) return "Transaction reverted · draft not saved";
   if (pendingTicket) return "Transaction confirmation pending";
   if (localEdited)
     return isRecovery
@@ -309,11 +415,13 @@ function primaryStatusMarkup() {
     ],
     [
       "Checkpoint",
-      pendingTicket
-        ? "Confirmation pending"
-        : recovered
-          ? `Version ${recovered.version} verified`
-          : "Not checked",
+      transactionReverted()
+        ? "Transaction reverted"
+        : pendingTicket
+          ? "Confirmation pending"
+          : recovered
+            ? `Version ${recovered.version} verified`
+            : "Not checked",
       !!recovered && !pendingTicket,
     ],
   ] as const;
@@ -337,9 +445,9 @@ function setupTimeText() {
 }
 function guideActionsMarkup() {
   if (!isRecovery) {
-    const restore = `<button class="button ${primary ? "outline" : "dark"}" id="restore" ${busy || pendingTicket || enrollmentPending || (!!primary && !state) ? "disabled" : ""}>Open existing workspace ↗</button>`;
+    const restore = `<button class="button ${primary ? "outline" : "dark"}" id="restore" ${busy || pendingTicket || enrollmentPending || (!!primary && !state && !(enrollmentAborted && backup)) ? "disabled" : ""}>Open existing workspace ↗</button>`;
     if (pendingTicket)
-      return `<div class="guide-actions"><button class="button dark" id="check-transaction" ${busy ? "disabled" : ""}>Check transaction status</button><button class="text-button" id="export-ticket" ${busy ? "disabled" : ""}>Export transaction reference</button></div><details class="guide-details"><summary>Other workspace actions</summary>${restore}<p>Opening a workspace is unavailable until this transaction is resolved.</p></details>`;
+      return `<div class="guide-actions">${transactionReverted() ? "" : `<button class="button dark" id="check-transaction" ${busy ? "disabled" : ""}>Check transaction status</button>`}<button class="text-button" id="export-ticket" ${busy ? "disabled" : ""}>Export transaction reference</button></div><details class="guide-details"><summary>Other workspace actions</summary>${restore}<p>${transactionReverted() ? "This save did not complete. Keep the reference and your draft for review before continuing." : "Opening a workspace is unavailable until this transaction is resolved."}</p></details>`;
     if (state && !recovered)
       return `<div class="guide-actions">${restore}</div><p>Opening the saved version replaces this draft. Keep a copy of any unsaved text first.</p>`;
     if (state)
@@ -349,6 +457,8 @@ function guideActionsMarkup() {
   }
   if (recovered)
     return '<div class="guide-actions"><a class="text-button" href="#workspace">Read or export your work ↓</a></div>';
+  if (recoveryEnrollment && enrollmentAborted && backup && !reserveConfirmed)
+    return `<div class="guide-actions"><a class="button dark" id="fresh-recovery" href="${escape(policy.bOrigin + "/" + modeQuery)}" target="_blank" rel="noopener noreferrer">Open fresh recovery ↗</a></div><p>After the primary app confirms the first checkpoint, use your existing recovery passkey in the new tab. This link does not create a key.</p>`;
   if (recoveryEnrollment && !offer && !reserveConfirmed) return "";
   if (offer && backupAttempted) return "";
   return `<div class="guide-actions"><button class="button dark" id="${offer ? "enroll" : "recover"}" ${busy ? "disabled" : ""}>${offer ? (physical ? "Create recovery passkey" : "Prepare simulated reserve") : physical ? "Recover with passkey" : "Recover demo workspace"} ↗</button></div>`;
@@ -357,22 +467,42 @@ function guideMarkup() {
   const a = new URL(policy.aOrigin).hostname;
   const b = new URL(policy.bOrigin).hostname;
   let label: string, title: string, text: string;
-  if (busy) {
+  if (busy && checkingTransaction) {
+    label = "CHECKING CONFIRMATION";
+    title = "Checking the existing transaction.";
+    text =
+      "This reads the submitted transaction and finalized registry. No passkey confirmation or new transaction is needed. Your draft stays here.";
+  } else if (busy) {
     label = "IN PROGRESS";
     title = "Finish the current action.";
     text = physical
       ? "Follow any device prompt already open, then wait for the result here. Your device may ask for more than one confirmation. Do not start another action yet."
       : "The simulated action is running. No device confirmation is needed; wait for the result here.";
+  } else if (transactionReverted()) {
+    label = "TRANSACTION REVERTED";
+    title = "This checkpoint was not saved.";
+    text =
+      "The existing transaction reverted. Automatic checks have stopped. Keep your draft and export the transaction reference; do not repeat setup or send the transaction again.";
   } else if (pendingTicket) {
     label = "WAITING FOR CONFIRMATION";
-    title = "Check the existing transaction.";
+    title =
+      confirmationWatch && !confirmationWatch.stopped
+        ? "Your save is being checked."
+        : "Check the existing transaction.";
     text =
-      "Check its status here. This only reads the result; it does not sign or send another transaction. Keep this tab open until confirmation finishes.";
+      confirmationWatch && !confirmationWatch.stopped
+        ? "This tab checks confirmation automatically for up to two minutes. No new transaction is sent. Keep it open; you can also check now or export the transaction reference."
+        : "Check its status here. This only reads the result; it does not sign or send another transaction. Keep this tab open until confirmation finishes.";
   } else if (setupDraft?.paused) {
     label = "SETUP PAUSED";
     title = "Continue with the same primary key.";
     text =
       "This tab retains an encrypted setup draft. Continue setup with passkey reopens the same account and reserve plan. Keep this primary tab open; closing or reloading it loses the unfinished setup.";
+  } else if (isRecovery && enrollmentAborted && backup && !reserveConfirmed) {
+    label = "CHECK EXISTING SETUP";
+    title = "The setup connection ended.";
+    text =
+      "Your recovery key was prepared, but this window did not confirm the first checkpoint. A timeout does not establish that the save failed. Check the primary app's transaction status, then open fresh recovery with the same key.";
   } else if (notice.tone === "error") {
     label = "ACTION NEEDS ATTENTION";
     title = "The last action needs attention.";
@@ -457,7 +587,7 @@ function recoveryStartMarkup() {
   // An enrollment URL must never silently become a recovery prompt. A bound
   // offer from this window's actual opener is required before creating B.
   if (recoveryEnrollment && !offer && !reserveConfirmed)
-    return `<div class="recovery-empty"><span class="eyebrow">RESERVE SETUP</span><h2>${enrollmentAborted ? "Setup could not continue." : backup ? "Waiting for the first checkpoint." : "Connecting to the primary app."}</h2><p>${enrollmentAborted ? "No reserve was confirmed in this window. Keep any existing passkeys. Return to the primary app and check its setup status." : backup ? "Your recovery passkey is ready. Keep both windows open while the primary app finishes saving and the reserve checks the result." : "Keep both windows open. The option to create your recovery passkey appears after the apps establish their connection."}</p></div>`;
+    return `<div class="recovery-empty"><span class="eyebrow">RESERVE SETUP</span><h2>${enrollmentAborted ? (backup ? "Check your existing reserve." : "Setup could not continue.") : backup ? "Waiting for the first checkpoint." : "Connecting to the primary app."}</h2><p>${enrollmentAborted ? (backup ? "The setup connection has ended. Your existing recovery key can check saved work in a fresh tab once the primary app confirms registration. No successful save is being claimed here." : "No reserve was confirmed in this window. Keep any existing passkeys. Return to the primary app and check its setup status.") : backup ? "Your recovery passkey is ready. Keep both windows open while the primary app finishes saving and the reserve checks the result." : "Keep both windows open. The option to create your recovery passkey appears after the apps establish their connection."}</p></div>`;
   if (offer && backupAttempted && !busy)
     return '<div class="recovery-empty"><h2>Setup needs review.</h2><p>Recovery-key creation was attempted. A cancelled or incomplete prompt may still have created a key. Keep existing keys; this setup will not create another.</p></div>';
   return `<div class="recovery-empty"><div class="empty-icon">${uiIcon("recovery")}</div><h2>${offer ? "Prepare a separate recovery key" : "Open work from your reserve"}</h2><p>${offer ? "The recovery key opens your encrypted copy. It does not receive your primary signing key." : "The recovery client checks the saved version before opening your content."}</p><dl class="recovery-explainer"><dt>Use</dt><dd>${physical ? "Your existing recovery passkey" : "The prepared demo credential"}</dd><dt>Get back</dt><dd>Your latest verified checkpoint</dd><dt>Continue with</dt><dd>A local copy you can edit and export</dd></dl></div>`;
@@ -531,81 +661,9 @@ function render() {
       };
     });
   });
-  document.querySelector("#check-transaction")?.addEventListener(
-    "click",
-    () =>
-      void run(async () => {
-        const account = state ?? primary;
-        if (!account || !pendingTicket) return;
-        if (pendingTicket.command.operation === "create") {
-          const result = await reconcileEnrollment(
-            account,
-            pendingTicket,
-            adapters,
-          );
-          if (result.status === "pending") {
-            notice = {
-              tone: "neutral",
-              title: "Reserve confirmation is still pending.",
-              text: "Your enrollment and transaction reference remain unchanged.",
-            };
-            return;
-          }
-          state = result.state;
-          notifyReserveCommitted({
-            version: result.currentHead.version,
-            capsuleDigest: result.currentHead.capsuleDigest,
-          });
-          enrollmentPending = false;
-          pendingTicket = result.unresolvedTicket ?? null;
-          writeProof = result.proof;
-          // Keep the draft; a status check never treats it as newly recovered current content.
-          recovered = null;
-          notice = {
-            tone: pendingTicket ? "neutral" : "success",
-            title: pendingTicket
-              ? "Reserve prepared; transaction attribution remains unresolved."
-              : "Reserve prepared and transaction confirmed.",
-            text: "Your draft remains here. Restore or recover to open the verified current checkpoint.",
-          };
-          return;
-        }
-        if (!state) return;
-        const result = await reconcileCheckpoint(
-          state,
-          pendingTicket,
-          adapters,
-        );
-        if (result.status === "pending") {
-          notice = {
-            tone: "neutral",
-            title: "Checkpoint confirmation is still pending.",
-            text: "Your draft and transaction reference remain here. No new transaction was sent.",
-          };
-          return;
-        }
-        writeProof = result.proof;
-        pendingTicket =
-          result.status === "saved" ? (result.unresolvedTicket ?? null) : null;
-        if (result.status === "saved") {
-          recovered = result.recovered;
-          // Confirmation must not overwrite edits made after the submitted save.
-          localEdited =
-            metadataFingerprint(workspace) !==
-            metadataFingerprint(recovered.content);
-        }
-        notice = {
-          tone: pendingTicket ? "neutral" : "success",
-          title: pendingTicket
-            ? "Checkpoint found; transaction attribution remains unresolved."
-            : "Transaction confirmed.",
-          text:
-            result.status === "saved"
-              ? "The exact checkpoint is current at the accepted read. Your text in this window remains unchanged."
-              : "A newer checkpoint is current. Your draft remains here; restore or recover to read the latest content.",
-        };
-      }),
-  );
+  document
+    .querySelector("#check-transaction")
+    ?.addEventListener("click", () => void run(checkPendingTransaction));
   document.querySelector("#export-ticket")?.addEventListener("click", () => {
     if (!pendingTicket) return;
     const url = URL.createObjectURL(
@@ -671,12 +729,13 @@ function render() {
         )
           return;
         const next = await saveCheckpoint(state, workspace, adapters);
+        if (pageEnded) return;
         if (next.status === "pending") {
           pendingTicket = next.ticket;
           notice = {
             tone: "neutral",
             title: "Checkpoint confirmation is pending.",
-            text: "Your draft remains here. Check transaction status before saving again.",
+            text: "Your draft remains here while this tab checks the existing transaction automatically. No additional transaction is sent.",
           };
           return;
         }
@@ -735,6 +794,7 @@ function render() {
   );
   document.querySelector("#fresh")?.addEventListener("click", () => {
     if (busy || pendingTicket) return;
+    stopConfirmationChecks();
     setupDraft?.close();
     primary?.close();
     channel?.close();
@@ -754,6 +814,79 @@ function render() {
       markEdited();
     }),
   );
+}
+async function checkPendingTransaction() {
+  if (transactionReverted()) return;
+  checkingTransaction = true;
+  render();
+  try {
+    const account = state ?? primary;
+    const ticket = pendingTicket;
+    if (!account || !ticket) return;
+    if (ticket.command.operation === "create") {
+      const result = await reconcileEnrollment(account, ticket, adapters);
+      if (pageEnded || pendingTicket !== ticket) return;
+      if (result.status === "pending") {
+        notice = {
+          tone: "neutral",
+          title: "Reserve confirmation is still pending.",
+          text: "Your enrollment and transaction reference remain unchanged.",
+        };
+        return;
+      }
+      state = result.state;
+      notifyReserveCommitted({
+        version: result.currentHead.version,
+        capsuleDigest: result.currentHead.capsuleDigest,
+      });
+      enrollmentPending = false;
+      pendingTicket = result.unresolvedTicket ?? null;
+      writeProof = result.proof;
+      // Keep the draft; a status check never treats it as newly recovered current content.
+      recovered = null;
+      notice = {
+        tone: pendingTicket ? "neutral" : "success",
+        title: pendingTicket
+          ? "Reserve prepared; transaction attribution remains unresolved."
+          : "Reserve prepared and transaction confirmed.",
+        text: "Your draft remains here. Restore or recover to open the verified current checkpoint.",
+      };
+      return;
+    }
+    if (!state) return;
+    const result = await reconcileCheckpoint(state, ticket, adapters);
+    if (pageEnded || pendingTicket !== ticket) return;
+    if (result.status === "pending") {
+      notice = {
+        tone: "neutral",
+        title: "Checkpoint confirmation is still pending.",
+        text: "Your draft and transaction reference remain here. No new transaction was sent.",
+      };
+      return;
+    }
+    writeProof = result.proof;
+    pendingTicket =
+      result.status === "saved" ? (result.unresolvedTicket ?? null) : null;
+    if (result.status === "saved") {
+      recovered = result.recovered;
+      // Confirmation must not overwrite edits made after the submitted save.
+      localEdited =
+        metadataFingerprint(workspace) !==
+        metadataFingerprint(recovered.content);
+    }
+    notice = {
+      tone: pendingTicket ? "neutral" : "success",
+      title: pendingTicket
+        ? "Checkpoint found; transaction attribution remains unresolved."
+        : "Transaction confirmed.",
+      text:
+        result.status === "saved"
+          ? "The exact checkpoint is current at the accepted read. Your text in this window remains unchanged."
+          : "A newer checkpoint is current. Your draft remains here; restore or recover to read the latest content.",
+    };
+  } finally {
+    checkingTransaction = false;
+  }
 }
 function markEdited() {
   localEdited =
@@ -775,7 +908,9 @@ function setRecovered(value: Recovered) {
 async function recover() {
   recovered = null;
   const discovered = await discoverRecovery(policy, passkeys, adapters);
+  if (pageEnded) return;
   const result = await recoverCurrent(discovered, passkeys, adapters);
+  if (pageEnded) return;
   setRecovered(result);
   notice = {
     tone: "success",
@@ -786,7 +921,8 @@ async function recover() {
   };
 }
 function pauseSetup() {
-  if (pageEnded || !setupDraft?.pause()) return;
+  if (pageEnded || busy || !setupDraft?.pause()) return;
+  stopConfirmationChecks();
   channel?.close();
   channel = null;
   enrollmentPending = false;
@@ -829,33 +965,60 @@ function watchEnrollment(bound: HandoffChannel, peer: Window) {
       isRecovery && !offer && !backup && elapsed >= 15000;
     if (peer.closed || elapsed >= 300000 || connectionTimedOut) {
       clearInterval(timer);
-      enrollmentPending = false;
-      enrollmentAborted = true;
+      // End the security-sensitive channel immediately. The in-flight SDK
+      // operation is serialized below; expiry is not a transaction result.
       channel = null;
       bound.close();
+      // Do not let an in-flight upload/finalize acquire signing authority after
+      // this boundary. Closing the writer is safe for a submitted ticket:
+      // reconciliation is read-only and remains available on a closed writer.
+      if (!state) primary?.writer.close();
       grant?.dataKey.fill(0);
       grant = null;
       grantWaiter?.reject(new Error("Setup connection ended"));
       grantWaiter = null;
       offer = null;
-      const paused = !isRecovery && !state && setupDraft?.pause();
-      if (!state && !paused) primary?.close();
-      notice = {
-        tone: paused ? "neutral" : "error",
-        title: paused
-          ? "Setup paused. Keep this primary tab open."
-          : peer.closed
-            ? "The other enrollment window closed."
-            : connectionTimedOut
-              ? "No setup request arrived from the primary app."
-              : "Reserve preparation expired.",
-        text: paused
-          ? "No recovery-key creation was granted. Continue with your existing primary passkey to reopen this same setup. Reloading or closing this tab loses the unfinished setup."
-          : connectionTimedOut
-            ? "The primary setup may have expired, or this window may have been reloaded. There is no recovery-passkey button to use. Check the primary app's status; keep existing passkeys."
-            : "The setup window has closed and its passkey action is unavailable. Preparation has not been confirmed here. Keep existing passkeys and check the primary app before planning another setup.",
+      const finishExpiredSetup = async () => {
+        enrollmentPending = false;
+        enrollmentAborted = true;
+        // A result accepted before expiry remains independently verifiable.
+        if (reserveConfirmed || (state && !pendingTicket)) return;
+        const paused = !isRecovery && !state && setupDraft?.pause();
+        if (!state && !paused) primary?.close();
+        notice = pendingTicket
+          ? {
+              tone: "neutral",
+              title: "Setup connection ended; confirmation is pending.",
+              text: "The setup window has closed, but the submitted transaction can still confirm. Keep this primary tab open and check its status. No new passkey or transaction is needed.",
+            }
+          : backup
+            ? {
+                tone: "neutral",
+                title: "Setup connection ended. Check the saved result.",
+                text: "A recovery key was prepared, but this window has not confirmed registration. Check the primary app's transaction status. After confirmation, open fresh recovery with the existing key.",
+              }
+            : {
+                tone: paused ? "neutral" : "error",
+                title: paused
+                  ? "Setup paused. Keep this primary tab open."
+                  : peer.closed
+                    ? "The other enrollment window closed."
+                    : connectionTimedOut
+                      ? "No setup request arrived from the primary app."
+                      : "Reserve preparation expired.",
+                text: paused
+                  ? "No recovery-key creation was granted. Continue with your existing primary passkey to reopen this same setup. Reloading or closing this tab loses the unfinished setup."
+                  : connectionTimedOut
+                    ? "The primary setup may have expired, or this window may have been reloaded. There is no recovery-passkey button to use. Check the primary app's status; keep existing passkeys."
+                    : "The setup window has closed and its passkey action is unavailable. Preparation has not been confirmed here. Keep existing passkeys and check the primary app before planning another setup.",
+              };
       };
-      render();
+      if (busy) void run(finishExpiredSetup, true);
+      else {
+        // With no asynchronous SDK action active this update is immediate.
+        void finishExpiredSetup();
+        render();
+      }
       return;
     }
     const clock = document.querySelector("#setup-clock");
@@ -1084,12 +1247,13 @@ window.addEventListener("message", (event) => {
         workspace,
         adapters,
       );
+      if (pageEnded) return;
       if (result.status === "pending") {
         pendingTicket = result.ticket;
         notice = {
           tone: "neutral",
           title: "Reserve confirmation is pending.",
-          text: "Preparation has not been confirmed. Your enrollment bytes remain unchanged.",
+          text: "This tab checks the existing transaction automatically. Keep both windows open. Your enrollment bytes remain unchanged; no additional transaction is sent.",
         };
         return;
       }
@@ -1137,6 +1301,7 @@ window.addEventListener("message", (event) => {
         backup.manifest.context.owner,
         backup.manifest.context.streamId,
       );
+      if (pageEnded) return;
       const committed = delivery.payload as {
         version: string;
         capsuleDigest: string;
@@ -1221,6 +1386,7 @@ if (recoveryEnrollment) {
 }
 window.addEventListener("pagehide", () => {
   pageEnded = true;
+  stopConfirmationChecks();
   uploadToken = "";
   setupDraft?.close();
   primary?.close();

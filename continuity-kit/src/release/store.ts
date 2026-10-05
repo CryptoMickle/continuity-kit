@@ -1,5 +1,6 @@
 import { validateReleaseProfile } from "./profile.ts";
 import type { ReleaseProfile } from "./profile.ts";
+import type { DemoObjectStore } from "./object-store.ts";
 
 // Minimal compatible D1 surface. Tests run the same SQL against local SQLite.
 export interface DemoDatabase {
@@ -14,6 +15,10 @@ export interface DemoStoreEnv {
   DB: DemoDatabase;
   CONTINUITY_UPLOAD_TOKEN?: string;
 }
+export interface ObjectStoreEnv {
+  OBJECTS: DemoObjectStore;
+  CONTINUITY_UPLOAD_TOKEN?: string;
+}
 const fixedHeaders = {
   "cache-control": "no-store",
   "x-content-type-options": "nosniff",
@@ -24,6 +29,46 @@ const objectQuery =
   "SELECT bytes FROM ck_demo_objects WHERE slot=? AND kind=? AND object_key=?";
 const same = (a: Uint8Array, b: Uint8Array) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
+// Retain the existing D1 path and its generated quota migrations unchanged.
+// New providers implement the byte interface, not the D1 SQL surface.
+export function createD1ObjectStore(db: DemoDatabase): DemoObjectStore {
+  const read: DemoObjectStore["read"] = async (slot, kind, key) => {
+    const row = await db
+      .prepare(objectQuery)
+      .bind(slot, kind, key)
+      .first<{ bytes: ArrayBuffer | number[] }>();
+    return row ? new Uint8Array(row.bytes) : null;
+  };
+  return {
+    read,
+    async putImmutable(slot, kind, key, bytes) {
+      const previous = await read(slot, kind, key);
+      if (previous) return same(previous, bytes) ? "stored" : "conflict";
+      try {
+        await db
+          .prepare(
+            "INSERT INTO ck_demo_objects(slot,kind,object_key,bytes) VALUES(?,?,?,?) ON CONFLICT(slot,kind,object_key) DO NOTHING",
+          )
+          .bind(slot, kind, key, new Uint8Array(bytes).buffer)
+          .run();
+      } catch {
+        // A concurrent identical request may have won at the quota boundary.
+        const winner = await read(slot, kind, key);
+        return winner
+          ? same(winner, bytes)
+            ? "stored"
+            : "conflict"
+          : "unavailable";
+      }
+      const stored = await read(slot, kind, key);
+      return stored
+        ? same(stored, bytes)
+          ? "stored"
+          : "conflict"
+        : "unavailable";
+    },
+  };
+}
 async function boundedBody(req: Request, max: number) {
   if (
     req.headers.has("content-length") &&
@@ -84,7 +129,10 @@ async function authorized(header: string | null, expected: string | undefined) {
 }
 export function createDemoStore(input: ReleaseProfile) {
   const profile = validateReleaseProfile(input);
-  return async (req: Request, env: DemoStoreEnv): Promise<Response> => {
+  return async (
+    req: Request,
+    env: DemoStoreEnv | ObjectStoreEnv,
+  ): Promise<Response> => {
     const u = new URL(req.url);
     const origin = req.headers.get("origin");
     const headers: Record<string, string> = { ...fixedHeaders, vary: "Origin" };
@@ -164,16 +212,14 @@ export function createDemoStore(input: ReleaseProfile) {
         )))
     )
       return answer(401);
-    const load = () =>
-      env.DB.prepare(objectQuery)
-        .bind(slot, kind, key)
-        .first<{ bytes: ArrayBuffer | number[] }>();
     try {
+      const objects =
+        "OBJECTS" in env ? env.OBJECTS : createD1ObjectStore(env.DB);
       if (req.method === "GET") {
-        const stored = await load();
+        const stored = await objects.read(slot, kind, key!);
         if (!stored) return answer(404);
         headers["content-type"] = "application/octet-stream";
-        return answer(200, new Uint8Array(stored.bytes));
+        return answer(200, stored);
       }
       if (req.headers.get("content-type") !== "application/octet-stream")
         return answer(415);
@@ -188,26 +234,10 @@ export function createDemoStore(input: ReleaseProfile) {
           ).join("");
         if (hash !== key) return answer(422);
       }
-      const previous = await load();
-      if (previous)
-        return answer(same(new Uint8Array(previous.bytes), bytes) ? 204 : 409);
-      try {
-        await env.DB.prepare(
-          "INSERT INTO ck_demo_objects(slot,kind,object_key,bytes) VALUES(?,?,?,?) ON CONFLICT(slot,kind,object_key) DO NOTHING",
-        )
-          .bind(slot, kind, key, bytes.buffer)
-          .run();
-      } catch {
-        // A concurrent identical request can win at the quota boundary.
-        const winner = await load();
-        if (winner)
-          return answer(same(new Uint8Array(winner.bytes), bytes) ? 204 : 409);
-        // Backend failure vs quota intentionally indistinguishable; never claim stored.
-        return answer(503);
-      }
-      const stored = await load();
+      const result = await objects.putImmutable(slot, kind, key!, bytes);
+      // Quota and provider failures are intentionally indistinguishable.
       return answer(
-        stored && same(new Uint8Array(stored.bytes), bytes) ? 204 : 409,
+        result === "stored" ? 204 : result === "conflict" ? 409 : 503,
       );
     } catch (error) {
       const code = error instanceof Error ? error.message : "";

@@ -1,0 +1,20 @@
+{
+  "name": "continuity-kit-standalone-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node index.ts",
+    "typecheck": "tsc --noEmit --strict --skipLibCheck --target ES2023 --module NodeNext --moduleResolution NodeNext --lib ES2023,DOM,DOM.Iterable,ESNext.Disposable --types node index.ts typecheck.ts"
+  },
+  "dependencies": {
+    "continuity-kit": "file:../../delivery/local-export/sdk/continuity-kit-0.1.0.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3"
+  }
+}

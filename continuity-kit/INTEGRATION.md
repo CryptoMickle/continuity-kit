@@ -1,6 +1,10 @@
 # Integrate one meaningful checkpoint
 
-The experimental SDK is imported from [src/sdk/index.ts](src/sdk/index.ts); there is no published npm package. It currently accepts the validated `Workspace` shape: `{ title, plan, tasks, draft }`. The [passport adapter](examples/passport-recovery/adapter.ts) demonstrates a small versioned payload in `draft`, not an existing integration or a generic byte-storage API.
+The experimental SDK has a private, locally installable JavaScript/TypeScript package; it is not published to npm. Start with [the standalone consumer](examples/standalone-consumer/README.md) and [package instructions](delivery/SDK_PACKAGE.md). The consumer imports `continuity-kit`, without reaching into this repository. Source reviewers can inspect [the SDK exports](src/sdk/index.ts).
+
+The first example is a project journal: correct an approved decision, save one new checkpoint, close primary state and recover the correction with a newly constructed recovery client. One stale storage response is rejected; when neither copy is current, recovery fails explicitly. This internal synthetic scenario checks the package boundary and a concrete save policy, not external adoption or actual blockchain usage.
+
+The SDK currently accepts the validated `Workspace` shape: `{ title, plan, tasks, draft }`. The earlier [passport adapter](examples/passport-recovery/adapter.ts) demonstrates a small versioned payload in `draft`, not an existing integration or a generic byte-storage API.
 
 The host selects plaintext from an already opened workspace, decides when a meaningful change deserves a checkpoint, and passes it to ContinuityKit for encryption. Copying only another application's ciphertext will not help if that application's key disappears too. Current setup creates separate Continuity primary and recovery credentials; it does not reuse the host's login automatically.
 

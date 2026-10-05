@@ -1,0 +1,401 @@
+[
+  {
+    "source": ".gitignore"
+  },
+  {
+    "source": "LICENSE"
+  },
+  {
+    "source": "SPEC.md"
+  },
+  {
+    "source": "contracts/abi/ContinuityRegistry.json"
+  },
+  {
+    "source": "contracts/foundry.toml"
+  },
+  {
+    "source": "contracts/src/ContinuityRegistry.sol"
+  },
+  {
+    "source": "contracts/test/ContinuityRegistry.invariant.t.sol"
+  },
+  {
+    "source": "contracts/test/ContinuityRegistry.t.sol"
+  },
+  {
+    "source": "delivery/DEPENDENCY_LICENSES.md"
+  },
+  {
+    "source": "delivery/browser-evaluation/EVALUATION_NOTES.md"
+  },
+  {
+    "source": "delivery/browser-evaluation/README.md"
+  },
+  {
+    "source": "delivery/browser-evaluation/build-package.py"
+  },
+  {
+    "source": "delivery/browser-evaluation/build.mjs"
+  },
+  {
+    "source": "delivery/browser-evaluation/start.mjs"
+  },
+  {
+    "source": "delivery/browser-evaluation/try.html"
+  },
+  {
+    "source": "delivery/sdk-example.ts"
+  },
+  {
+    "source": "delivery/source-candidate/verify.mjs"
+  },
+  {
+    "source": "examples/passport-recovery/adapter.ts"
+  },
+  {
+    "source": "examples/passport-recovery/scenario.ts"
+  },
+  {
+    "source": "index.html"
+  },
+  {
+    "source": "migrations/0001_demo_objects.sql"
+  },
+  {
+    "source": "package-lock.json"
+  },
+  {
+    "source": "package.json"
+  },
+  {
+    "source": "prepared-completion.html"
+  },
+  {
+    "source": "public/logo.png"
+  },
+  {
+    "source": "public/logo.svg"
+  },
+  {
+    "source": "public/third-party-notices.txt"
+  },
+  {
+    "source": "release/database/README.md"
+  },
+  {
+    "source": "release/database/db/schema.ts"
+  },
+  {
+    "source": "release/database/drizzle.config.ts"
+  },
+  {
+    "source": "release/database/drizzle/0000_demo_objects.sql"
+  },
+  {
+    "source": "release/database/drizzle/0001_demo_quota.sql"
+  },
+  {
+    "source": "release/database/drizzle/meta/0000_snapshot.json"
+  },
+  {
+    "source": "release/database/drizzle/meta/0001_snapshot.json"
+  },
+  {
+    "source": "release/database/drizzle/meta/_journal.json"
+  },
+  {
+    "source": "release/database/package-lock.json"
+  },
+  {
+    "source": "release/database/package.json"
+  },
+  {
+    "source": "release/profile.example.json"
+  },
+  {
+    "source": "release/validation/README.md"
+  },
+  {
+    "source": "release/validation/check-runtime.mjs"
+  },
+  {
+    "source": "release/validation/package-lock.json"
+  },
+  {
+    "source": "release/validation/package.json"
+  },
+  {
+    "source": "scripts/build-prepared-completion.mjs"
+  },
+  {
+    "source": "scripts/build-release.mjs"
+  },
+  {
+    "source": "scripts/build-testnet-continuation.mjs"
+  },
+  {
+    "source": "scripts/check-release-hosts.mjs"
+  },
+  {
+    "source": "scripts/deployment-panel.mjs"
+  },
+  {
+    "source": "scripts/dev.mjs"
+  },
+  {
+    "source": "scripts/seed-demo.ts"
+  },
+  {
+    "source": "scripts/service.mjs"
+  },
+  {
+    "source": "scripts/start-demo.mjs"
+  },
+  {
+    "source": "scripts/testnet-dev.mjs"
+  },
+  {
+    "source": "src/deployment-panel.ts"
+  },
+  {
+    "source": "src/handoff.ts"
+  },
+  {
+    "source": "src/main.ts"
+  },
+  {
+    "source": "src/prepared-completion-panel.ts"
+  },
+  {
+    "source": "src/release/client-host.ts"
+  },
+  {
+    "source": "src/release/client-worker.ts"
+  },
+  {
+    "source": "src/release/profile.ts"
+  },
+  {
+    "source": "src/release/runtime.ts"
+  },
+  {
+    "source": "src/release/store.ts"
+  },
+  {
+    "source": "src/release/worker.ts"
+  },
+  {
+    "source": "src/runtime.ts"
+  },
+  {
+    "source": "src/sdk/account.ts"
+  },
+  {
+    "source": "src/sdk/crypto.ts"
+  },
+  {
+    "source": "src/sdk/demo-fixture.ts"
+  },
+  {
+    "source": "src/sdk/index.ts"
+  },
+  {
+    "source": "src/sdk/monad-registry.ts"
+  },
+  {
+    "source": "src/sdk/owner-writer.ts"
+  },
+  {
+    "source": "src/sdk/passkeys.ts"
+  },
+  {
+    "source": "src/sdk/policy.ts"
+  },
+  {
+    "source": "src/sdk/protocol.ts"
+  },
+  {
+    "source": "src/sdk/quorum.ts"
+  },
+  {
+    "source": "src/sdk/registry-signing.ts"
+  },
+  {
+    "source": "src/sdk/setup-draft.ts"
+  },
+  {
+    "source": "src/sdk/stores.ts"
+  },
+  {
+    "source": "src/sdk/types.ts"
+  },
+  {
+    "source": "src/style.css"
+  },
+  {
+    "source": "src/vite-env.d.ts"
+  },
+  {
+    "source": "testnet-deploy.html"
+  },
+  {
+    "source": "testnet/complete-prepared.ts"
+  },
+  {
+    "source": "testnet/deployment-executor.ts"
+  },
+  {
+    "source": "testnet/deployment-proposal.json"
+  },
+  {
+    "source": "testnet/prepare-deployment.ts"
+  },
+  {
+    "source": "testnet/registry.ts"
+  },
+  {
+    "source": "testnet/runtime-candidate-foundation.json"
+  },
+  {
+    "source": "tests/client-host.test.ts"
+  },
+  {
+    "source": "tests/complete-prepared.test.ts"
+  },
+  {
+    "source": "tests/deployment-executor.test.ts"
+  },
+  {
+    "source": "tests/deployment-panel.test.mjs"
+  },
+  {
+    "source": "tests/fixtures/monad-v1-public-transaction.json"
+  },
+  {
+    "source": "tests/fixtures/offline-chain.ts"
+  },
+  {
+    "source": "tests/handoff.test.ts"
+  },
+  {
+    "source": "tests/main-reconciliation.test.mjs"
+  },
+  {
+    "source": "tests/owner-writer.test.ts"
+  },
+  {
+    "source": "tests/passport-example.test.ts"
+  },
+  {
+    "source": "tests/prepared-completion-panel.test.mjs"
+  },
+  {
+    "source": "tests/release-migrations.test.ts"
+  },
+  {
+    "source": "tests/release-profile.test.ts"
+  },
+  {
+    "source": "tests/release-store.test.ts"
+  },
+  {
+    "source": "tests/rpc-signature.test.ts"
+  },
+  {
+    "source": "tests/runtime.test.ts"
+  },
+  {
+    "source": "tests/sdk-protocol.test.ts"
+  },
+  {
+    "source": "tests/service.test.mjs"
+  },
+  {
+    "source": "tests/setup-draft.test.ts"
+  },
+  {
+    "source": "tests/testnet-launcher.test.mjs"
+  },
+  {
+    "source": "tests/testnet-registry.test.ts"
+  },
+  {
+    "source": "tsconfig.json"
+  },
+  {
+    "source": "delivery/source-candidate/README.md",
+    "target": "README.md"
+  },
+  {
+    "source": "delivery/reviewer/INTEGRATION.md",
+    "target": "INTEGRATION.md"
+  },
+  {
+    "source": "delivery/evaluation/BACKUP_COMPARISON.md",
+    "target": "BACKUP_COMPARISON.md"
+  },
+  {
+    "source": "src/release/object-store.ts"
+  },
+  {
+    "source": "src/release/redis-handler.ts"
+  },
+  {
+    "source": "src/release/redis-store.ts"
+  },
+  {
+    "source": "src/release/redis-worker.ts"
+  },
+  {
+    "source": "tests/redis-fixture.ts"
+  },
+  {
+    "source": "tests/release-object-store.test.ts"
+  },
+  {
+    "source": "tests/release-redis-http.test.ts"
+  },
+  {
+    "source": "tests/release-redis-store.test.ts"
+  },
+  {
+    "source": "scripts/measure-redis-cost.ts"
+  },
+  {
+    "source": "examples/passport-recovery/README.md"
+  },
+  {
+    "source": "delivery/source-candidate/build.py"
+  },
+  {
+    "source": "delivery/source-candidate/files.json"
+  },
+  {
+    "source": "tsconfig.sdk.json"
+  },
+  {
+    "source": "scripts/build-sdk.mjs"
+  },
+  {
+    "source": "scripts/verify-sdk-package.mjs"
+  },
+  {
+    "source": "delivery/SDK_PACKAGE.md"
+  },
+  {
+    "source": "examples/standalone-consumer/index.ts"
+  },
+  {
+    "source": "examples/standalone-consumer/typecheck.ts"
+  },
+  {
+    "source": "examples/standalone-consumer/package.json"
+  },
+  {
+    "source": "examples/standalone-consumer/README.md"
+  },
+  {
+    "source": "delivery/SDK_INTEGRATION_CONTRACT.md"
+  }
+]

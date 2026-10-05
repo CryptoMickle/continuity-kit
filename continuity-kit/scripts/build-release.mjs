@@ -7,13 +7,17 @@ import { build } from "vite";
 import { validateReleaseProfile } from "../src/release/profile.ts";
 const root = fileURLToPath(new URL("..", import.meta.url));
 if (
-  process.argv.length !== 6 ||
+  ![6, 8].includes(process.argv.length) ||
   process.argv[2] !== "--profile" ||
-  process.argv[4] !== "--out"
+  process.argv[4] !== "--out" ||
+  (process.argv.length === 8 &&
+    (process.argv[6] !== "--storage" ||
+      !["d1", "upstash"].includes(process.argv[7])))
 )
   throw new Error(
-    "Use --profile <reviewed JSON> --out <new directory inside delivery/local-export>",
+    "Use --profile <reviewed JSON> --out <new directory inside delivery/local-export> [--storage d1|upstash]",
   );
+const storage = process.argv[7] ?? "d1";
 const profilePath = resolve(process.argv[3]);
 const out = resolve(process.argv[5]);
 const area = join(root, "delivery/local-export");
@@ -47,17 +51,24 @@ await build({
     emptyOutDir: false,
     sourcemap: false,
     lib: {
-      entry: join(root, "src/release/worker.ts"),
+      entry: join(
+        root,
+        storage === "d1"
+          ? "src/release/worker.ts"
+          : "src/release/redis-worker.ts",
+      ),
       formats: ["es"],
       fileName: () => "index.js",
     },
   },
 });
-await mkdir(join(out, "store/migrations"));
-await cp(
-  join(root, "migrations/0001_demo_objects.sql"),
-  join(out, "store/migrations/0001_demo_objects.sql"),
-);
+if (storage === "d1") {
+  await mkdir(join(out, "store/migrations"));
+  await cp(
+    join(root, "migrations/0001_demo_objects.sql"),
+    join(out, "store/migrations/0001_demo_objects.sql"),
+  );
+}
 // Embed the reviewed static output in small Worker entrypoints so security
 // headers do not depend on whether the host supports a static _headers file.
 const assets = {};
@@ -119,18 +130,20 @@ await cp(
   join(out, "hosts/store/dist/server/index.js"),
 );
 // Exact source/migration allowlist; never copy installed tooling or secrets.
-for (const file of [
-  "package.json",
-  "package-lock.json",
-  "drizzle.config.ts",
-  "db/schema.ts",
-  "drizzle/0000_demo_objects.sql",
-  "drizzle/0001_demo_quota.sql",
-  "drizzle/meta/_journal.json",
-  "drizzle/meta/0000_snapshot.json",
-  "drizzle/meta/0001_snapshot.json",
-  "README.md",
-]) {
+for (const file of storage === "d1"
+  ? [
+      "package.json",
+      "package-lock.json",
+      "drizzle.config.ts",
+      "db/schema.ts",
+      "drizzle/0000_demo_objects.sql",
+      "drizzle/0001_demo_quota.sql",
+      "drizzle/meta/_journal.json",
+      "drizzle/meta/0000_snapshot.json",
+      "drizzle/meta/0001_snapshot.json",
+      "README.md",
+    ]
+  : []) {
   const destination = join(out, "hosts/store", file);
   await mkdir(join(destination, ".."), { recursive: true });
   await cp(join(root, "release/database", file), destination);
@@ -161,6 +174,7 @@ await visit(out);
 const manifest = {
   format: 1,
   scope: "local-public-demo-candidate",
+  storage,
   createdAt: new Date().toISOString(),
   profile,
   placeholderOrigins: [
@@ -172,8 +186,16 @@ const manifest = {
   files,
   remaining: [
     "actual provider origins and access mode",
-    "store capability secret and runtime DB binding",
-    "Sites project identities, source preparation and platform validation of generated D1 migrations",
+    ...(storage === "d1"
+      ? [
+          "store capability secret and runtime DB binding",
+          "Sites project identities, source preparation and platform validation of generated D1 migrations",
+        ]
+      : [
+          "separate approved Upstash database, verified plan/capacity and eviction disabled",
+          "server-only CONTINUITY_UPLOAD_TOKEN, CONTINUITY_REDIS_REST_URL and CONTINUITY_REDIS_REST_TOKEN",
+          "reviewed hosting destination; do not replace failed Sites D1 history with this independent candidate",
+        ]),
     "verification of actual hosted headers, CORS, opener and cost limits",
     "physical/native interoperability",
     "actual judge links and supervised demonstration; method accepted by organizer 30 September",
