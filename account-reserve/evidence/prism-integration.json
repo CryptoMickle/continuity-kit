@@ -1,0 +1,73 @@
+{
+  "checkedAt": "2026-10-08T09:40:11.187777+00:00",
+  "scope": "Selected Prism integrated into working local reference app and generated developer starter",
+  "files": {
+    "app.mjs": "7f6efecfa1d2ad2dfa8e66c91b1429e9858b3ad91979497a07b724495587241c",
+    "style.css": "9f7e4b4035d1eae9faf0233fc3bb81a0743f71b539b4fb595c70edd38f35736a",
+    "starter/main.mjs": "83f97d5da833f338158542622c0b2b0dc7cf87d0047bb595eda3cd341a8dc234",
+    "starter/style.css": "3630940ff1b007a62870cfb76bf279ad7a3c3f4dd82d15d0d04fe3993cbe509f",
+    "starter/prism-art.mjs": "be5f25415351cf7763dad35b1cee6d64a1120e90ae76ea16deb444c2140d4052",
+    "starter/prism-art.css": "badd717dea78cee9f3aeadfd4e74067396ed09390345dcdd916999915303f9e6"
+  },
+  "runtimeLogic": "app.mjs after function stage and starter/main.mjs after environment report exactly match previous source candidate; presentation only",
+  "packageCheck": {
+    "test": "tests/starter-package.mjs",
+    "passed": true,
+    "cleanOfflineInstall": true,
+    "typecheck": true,
+    "build": true,
+    "freshRecoveryWithoutHints": true,
+    "originalRequestsDuringRecovery": 0,
+    "signerClosed": true
+  },
+  "browserStarter": {
+    "origin": "http://reserve-demo-recovery.localhost:4674/",
+    "freshTab": true,
+    "primaryOffline": true,
+    "sameOwnerVerified": true,
+    "signerClosed": true,
+    "newCredentialsCreated": 0,
+    "newStoreWrites": 0,
+    "newTransactions": 0,
+    "primaryRestoredOnline": true
+  },
+  "browserReference": {
+    "origin": "http://continuity-reserve.localhost:4574/?model=iris",
+    "createdExample": true,
+    "independentReserveCheck": true,
+    "freshRecoveryWithPrimaryOffline": true,
+    "sameOwner": "0x012bddec32c9b27035e734543ff92896d75d43e7",
+    "localPaymentConfirmed": true,
+    "amount": "0.001 valueless local test units",
+    "transaction": "0xde16fd13bdf272ea09fea38823dcf421b2a6e549c2b1d9ae2ecf63fb8a6f44d8",
+    "rpcWrites": 1,
+    "signerClosed": true,
+    "primaryRestoredOnline": true,
+    "unpreparedModelErrorChecked": true
+  },
+  "presentation": {
+    "desktopInspected": true,
+    "requestedMobileWidths": [
+      320,
+      390
+    ],
+    "observedMobileClientAndScrollWidths": [
+      305,
+      375
+    ],
+    "horizontalOverflow": false,
+    "controlsBeforeArtOnMobile": true,
+    "confirmationAndErrorStatesInspected": true,
+    "unexpectedConsoleErrors": [],
+    "desktopCardPlacementAdjusted": true
+  },
+  "boundaries": {
+    "publicDeployment": false,
+    "mainnet": false,
+    "realFunds": false,
+    "physicalPasskeys": false,
+    "realDeviceTesting": false,
+    "serversRestarted": false
+  },
+  "screenshots": "Inspected with browser tools; no saved screenshot artifact."
+}

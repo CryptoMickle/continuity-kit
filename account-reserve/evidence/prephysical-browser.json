@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-10-08T10:26:36.856594+00:00",
+  "scope": "synthetic browser test on disposable local chain 31337",
+  "origins": [
+    "http://continuity-primary.localhost:4973",
+    "http://continuity-reserve.localhost:4974"
+  ],
+  "model": "iris",
+  "owner": "0xdc8092badf8168c5c67cf8f626ad09f24c85b493",
+  "transactionHash": "0xf2ab9cdf95d1dcf587834c546effb496e13425981c0e0ef07d4b4a31343fc5b5",
+  "checks": {
+    "closeSetupBeforeCredentialThenReopenSamePrimary": true,
+    "prepareAndIndependentlyReopen": true,
+    "repeatSetupWithExistingReserveCredentialNoExtraWrite": true,
+    "primaryConfigHttpStatusWhileOffline": 503,
+    "allOriginalAndSetupTabsClosedBeforeFreshRecovery": true,
+    "freshReserveSameOwnerAndPayment": true,
+    "paymentReceiptAfterPrimaryOutage": true,
+    "reloadShowsCheckExistingOnlyNoSecondClaim": true,
+    "receiptHashMatchesAfterReload": true,
+    "signerClosedAfterReceipt": true,
+    "observedConsoleErrors": []
+  },
+  "finalMetrics": {
+    "syntheticCreates": 2,
+    "syntheticAssertions": 14,
+    "storeReads": 7,
+    "storeWrites": 1,
+    "rpcReads": 21,
+    "rpcWrites": 1
+  },
+  "ciphertextRecords": 1,
+  "screenshot": "Viewed in browser tool; no filesystem screenshot artifact saved.",
+  "limits": {
+    "nativeCredentials": false,
+    "physicalDevice": false,
+    "publicMonad": false,
+    "externalIntegration": false,
+    "crossBrowserProfile": false
+  },
+  "sourceEvidence": "verification.json",
+  "snapshotEvidence": "physical-preparation.json"
+}

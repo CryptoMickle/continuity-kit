@@ -1,0 +1,48 @@
+{
+  "format": "account-reserve-native-observation/v1",
+  "status": "native-fresh-recovery-local-claim-verified",
+  "observedAt": "2026-10-08T10:50:59.192360+00:00",
+  "scope": "Native passkeys in Codex in-app browser on Mac; fresh tab after closing primary/enrollment tabs; separate browser profile and direct iPhone webpage not established",
+  "originalAppOffline": true,
+  "freshClientSameAccount": true,
+  "nativePasskeys": true,
+  "setupConfirmations": [
+    {
+      "scope": "reserve preparation",
+      "count": 5,
+      "source": "user report in direct reply to reserve setup step",
+      "device": null,
+      "notInferredFromApiCounts": true
+    }
+  ],
+  "localPayment": {
+    "transactionHash": "0xd21509a6ff6add908abfed256c69a0f50f896e36ab7c77bea47f1305793ce1c6",
+    "owner": "0x64bdd24a06ea0a70fc6ea7cba8901bc5b8fc2e95",
+    "amount": "0.001 local TEST",
+    "ui": "Payment collected; Local payment confirmed; signing session closed",
+    "action": "Agent clicked the approved local-only Collect 0.001 test units once",
+    "receiptIndependentlyChecked": true,
+    "checkedAt": "2026-10-08T10:51:04.426Z",
+    "chainId": 31337,
+    "contract": "0x43Fe7ec669c946342E7848e2D0ED13cf2132f852",
+    "function": "claim(1)",
+    "transactionValue": "0",
+    "receiptStatus": "0x1",
+    "blockNumber": 3,
+    "blockHash": "0x349b69bd103259f25a093a564969f8575b66ecf1ea4b4c2bdd09052b21725b29",
+    "gasUsed": 57255,
+    "rightId": "1",
+    "beneficiary": "0x64bdd24a06ea0a70fc6ea7cba8901bc5b8fc2e95",
+    "amountBaseUnits": "1000000000000000",
+    "claimed": true,
+    "matchingRightClaimedEvent": true
+  },
+  "notProved": [
+    "direct iPhone webpage recovery",
+    "separate browser profile recovery",
+    "public Monad execution",
+    "native recovery prompt count",
+    "native reload-and-reopen after this claim"
+  ],
+  "source": "Locally retained native run record; operational paths/session/tab IDs omitted from public summary."
+}

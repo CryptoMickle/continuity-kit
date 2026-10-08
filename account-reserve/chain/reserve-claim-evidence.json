@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "executedAt": "2026-10-08T19:47:35.621Z",
+  "scope": "Independent source-inspected derivation fixtures; synthetic RAM authenticator; real Mera 0.2.0 and scure APIs; disposable local Anvil EVM and owned funded native escrow fixture",
+  "chainId": 31337,
+  "publicBlockchain": false,
+  "realFunds": false,
+  "physicalPasskeyTest": false,
+  "externalAppIntegration": false,
+  "securityAudit": false,
+  "cases": [
+    {
+      "status": "passed",
+      "adapter": "iris",
+      "derivationEvidence": {
+        "source": "https://github.com/vmlechko/Iris/blob/3a1244c418c0f8308ec95a56383c2509965ebb70/lib/account.ts",
+        "derivation": "iris.account.v1:sha256-salt:prf-output-as-secp256k1-key",
+        "description": "SHA256(iris.account.v1) PRF salt; namespace output is EOA leaf key.",
+        "execution": "source-inspected independent fixture; NOT unmodified app or integration",
+        "scure": null
+      },
+      "owner": "0x4E77FF348534F7673654527D1AF7445810b4E8b1",
+      "contractAddress": "0x8FaD6056e35ceC261440Aa7946a327d029d96D9B",
+      "rightId": "1",
+      "amount": "1000000000000000",
+      "amountUnit": "synthetic local native base units; 18 decimals; no economic value",
+      "transactionHash": "0x5523cb39bc3df0c5d0c5898559bcdf57e48145c58bf57fdabc10c7133cfa483f",
+      "originalSignerClosed": true,
+      "originalDomainRestoreRejected": true,
+      "originalCredentialRequestsDuringRecovery": 0,
+      "freshRecoveryInputFields": [
+        "config",
+        "webAuthnClient",
+        "readOnlyEncryptedStore"
+      ],
+      "rightDiscoveredFromRecoveredOwner": true,
+      "sameOriginalRight": true,
+      "unrelatedPreparedRecoveryRejected": true,
+      "wrongOwnerRevert": "WrongBeneficiary",
+      "receiptStatus": "success",
+      "exactNativePaymentAfterGasVerified": true,
+      "duplicateRevert": "AlreadyClaimed",
+      "recoveredSessionClosed": true
+    },
+    {
+      "status": "passed",
+      "adapter": "accrue",
+      "derivationEvidence": {
+        "source": "https://github.com/pauleke65/accrue/blob/ab1d8580f339addaa02ea118e89ba4b89627e926/lib/mera-account.ts",
+        "derivation": "accrue-v1:mera-default-prf:bip39-en:bip32:m/44'/60'/0'/0/1:role-worker",
+        "description": "Mera default PRF salt; English BIP39; BIP32 worker leaf m/44'/60'/0'/0/1.",
+        "execution": "source-inspected independent fixture; NOT unmodified app or integration",
+        "scure": "2.4.0"
+      },
+      "owner": "0x657A35d7D832FD73f54663932968A0716A5d0366",
+      "contractAddress": "0x6E240e0d5b079385c7B3982ceb0629c7a427ddED",
+      "rightId": "1",
+      "amount": "1000000000000000",
+      "amountUnit": "synthetic local native base units; 18 decimals; no economic value",
+      "transactionHash": "0xd64aa50d8e9c45b27f61ced6d72e99c84916d0cdfde4e196ae7afc906a39db6f",
+      "originalSignerClosed": true,
+      "originalDomainRestoreRejected": true,
+      "originalCredentialRequestsDuringRecovery": 0,
+      "freshRecoveryInputFields": [
+        "config",
+        "webAuthnClient",
+        "readOnlyEncryptedStore"
+      ],
+      "rightDiscoveredFromRecoveredOwner": true,
+      "sameOriginalRight": true,
+      "unrelatedPreparedRecoveryRejected": true,
+      "wrongOwnerRevert": "WrongBeneficiary",
+      "receiptStatus": "success",
+      "exactNativePaymentAfterGasVerified": true,
+      "duplicateRevert": "AlreadyClaimed",
+      "recoveredSessionClosed": true
+    }
+  ]
+}

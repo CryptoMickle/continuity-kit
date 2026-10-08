@@ -1,0 +1,42 @@
+{
+  "observedAt": "2026-10-08T08:26:21.211459+00:00",
+  "scope": "local developer starter presentation refresh",
+  "sourceHashes": {
+    "starter/main.mjs": "e8ab8208638a25bf7e2b2432adcb4d4cbf503aab20be69eba01fd7a7d99d8ccf",
+    "starter/style.css": "a0f07b665c562a4a47363dca9bd5da30276aa4d5e503585a7354db5e481cd744",
+    "starter/README.md": "d49828a3603af9b0139dbdf1cf15c43da46a64532373c603fb9ad53d262e76b0"
+  },
+  "previewSourceMatches": true,
+  "url": "http://reserve-demo-recovery.localhost:4674/",
+  "presentation": [
+    "warm off-white and ink palette with cobalt reserve illustration",
+    "shorter action copy and one task panel",
+    "collapsed technical details with blocking failures expanded",
+    "success copy reflects completed verification and closed signing session"
+  ],
+  "browser": "Codex in-app browser",
+  "recoveredAccount": "0xc497b5a411c09a7f5374836e046c71cdc253eb32",
+  "challengeVerified": true,
+  "signerClosed": true,
+  "consoleWarningsOrErrors": [],
+  "responsive": [
+    {
+      "viewport": 390,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "initialRecoveryButtonBottom": 597.109375
+    },
+    {
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305
+    }
+  ],
+  "desktop": "Default desktop viewport visually inspected; override reset.",
+  "screenshots": "Visually inspected in browser; no saved screenshot artifact.",
+  "priorOutageEvidence": "onboarding-browser.json remains the earlier complete outage walkthrough; only presentation changed afterwards.",
+  "physicalPasskeys": false,
+  "publicDeployment": false,
+  "transactionsSent": false,
+  "limitation": "Synthetic existing-reserve recovery, not a new physical test or proof of production usability."
+}

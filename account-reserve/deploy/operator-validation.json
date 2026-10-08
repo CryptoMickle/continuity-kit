@@ -1,0 +1,46 @@
+{
+  "status": "passed-local-operator-setup",
+  "executedAt": "2026-10-08T19:47:57.641Z",
+  "scope": "Disposable owned loopback Anvil, Paris hardfork, numeric chain 10143; NOT public Monad",
+  "implementation": "deploy/operator.mjs through injected loopback adapters and durable file journal",
+  "publicRpcRequests": 0,
+  "publicTransactions": 0,
+  "realFunds": false,
+  "physicalPasskeys": false,
+  "publicRunnerInvoked": false,
+  "independentPublicProvidersVerified": false,
+  "proposalHash": "6950a251f8feb0af7cadf70debbbf94a86f85606f970cffe39e89de0b39f8f84",
+  "artifactSha256": "a53bf271aea4715490a6e0d0ed78e6fd396a1b15061a3c80c796e967e03acf06",
+  "issuer": "0x314970b0f78e15A8294E09bd147709dAE511f851",
+  "beneficiary": "0x799A163dcdAAF1E60B24C9bB6255C6Ce6A9A0588",
+  "contractAddress": "0xa4F8A23D25003885EE455b10c8Afc06b3569576b",
+  "signingCalls": 3,
+  "broadcastCalls": 3,
+  "durableReservationBeforeEachSignature": true,
+  "exactSignedHashPersistedBeforeEachBroadcast": true,
+  "restartedReadOnlyReconciliationVerified": true,
+  "transactions": [
+    {
+      "role": "deploy",
+      "hash": "0x2d74f7a10fc9f045dbf5cbe60d1f87835ad911d64ce5efc3831cfe8fb866f3b3",
+      "selectedLocalGas": "443860",
+      "localGasUsed": "369883",
+      "finalized": true
+    },
+    {
+      "role": "fund-beneficiary-gas",
+      "hash": "0x1ae3472290fb81f2f101bf5936fc97f63c442536af13ef3e5b3a08b9ff8c7e20",
+      "selectedLocalGas": "25202",
+      "localGasUsed": "21000",
+      "finalized": true
+    },
+    {
+      "role": "issue-fixed-right",
+      "hash": "0x13f68a2e4ade499a7d61d53dd18fb91ad2a622704a09eb82c1e67e29c8850060",
+      "selectedLocalGas": "117354",
+      "localGasUsed": "97795",
+      "finalized": true
+    }
+  ],
+  "limitation": "Two clients use one disposable local Anvil. Public transport factory is separately unit-tested; no live Monad, physical passkey, hosting or public execution evidence is implied."
+}

@@ -1,0 +1,187 @@
+{
+  "format": "account-reserve-public-proof/v1",
+  "scope": "Sanitized historical observations; not a fresh network check or independent audit.",
+  "assembledAt": "2026-10-08T19:31:56.827Z",
+  "network": {
+    "name": "Monad testnet",
+    "chainId": 10143
+  },
+  "nativeRun": {
+    "recordedAt": "2026-10-08T15:09:55.137Z",
+    "versions": {
+      "primary": 3,
+      "reserve": 2
+    },
+    "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+    "observations": {
+      "nativeEnrollmentVerified": true,
+      "primaryWasOffline": true,
+      "primaryHttpStatus": 503,
+      "oldSetupTabsClosed": true,
+      "freshReserveDocument": true,
+      "sameOriginalBeneficiary": true,
+      "existingReservePasskeyUsed": true,
+      "newCredentialDuringRecovery": false,
+      "claimButtonClicks": 1,
+      "signingSessionClosed": true
+    },
+    "browserBoundary": "Fresh tab in the same browser; separate browser profile and direct iPhone webpage not tested.",
+    "exactVisiblePromptCount": null,
+    "primaryRestoration": {
+      "observedAt": "2026-10-08T15:08:15.913Z",
+      "restored": true,
+      "checks": [
+        {
+          "path": "/",
+          "status": 200
+        },
+        {
+          "path": "/api/config",
+          "status": 200
+        }
+      ]
+    }
+  },
+  "claim": {
+    "observedAt": "2026-10-08T15:07:59.173Z",
+    "hash": "0x4e0598a6b6faa3774e7da445257b61fe10357395c93ae7c7d220ae2b507487a5",
+    "contract": "0x738F3a0E2376a8e9AFf6A4440B0dBC77c22e6B4A",
+    "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+    "rightId": "1",
+    "amountWei": "100000000000000000",
+    "transactionValueWei": "0",
+    "calldata": "0x379607f50000000000000000000000000000000000000000000000000000000000000001",
+    "status": "success",
+    "finalizedBlock": "69286156",
+    "blockHash": "0x811e48d8a20be620fc73b7eee476e0db67bfc17c238d101f473db60db1b24cdc",
+    "actualFeeWei": "7339716000000000",
+    "runtimeCodeHash": "0x20b0b1b0905194e6806bcc8585da04c793bf6c46b682814c76631392f3616f23",
+    "rpcObservations": [
+      {
+        "rpc": "https://testnet-rpc.monad.xyz",
+        "chainId": 10143,
+        "transactionHash": "0x4e0598a6b6faa3774e7da445257b61fe10357395c93ae7c7d220ae2b507487a5",
+        "receiptStatus": "success",
+        "receiptBlock": "69286156",
+        "receiptBlockHash": "0x811e48d8a20be620fc73b7eee476e0db67bfc17c238d101f473db60db1b24cdc",
+        "canonicalBlockHash": "0x811e48d8a20be620fc73b7eee476e0db67bfc17c238d101f473db60db1b24cdc",
+        "finalizedHead": "69286593",
+        "event": {
+          "name": "RightClaimed",
+          "id": "1",
+          "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+          "amountWei": "100000000000000000"
+        },
+        "right": {
+          "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+          "amountWei": "100000000000000000",
+          "claimed": true
+        },
+        "signatureAndHashVerified": true
+      },
+      {
+        "rpc": "https://rpc-testnet.monadinfra.com",
+        "chainId": 10143,
+        "transactionHash": "0x4e0598a6b6faa3774e7da445257b61fe10357395c93ae7c7d220ae2b507487a5",
+        "receiptStatus": "success",
+        "receiptBlock": "69286156",
+        "receiptBlockHash": "0x811e48d8a20be620fc73b7eee476e0db67bfc17c238d101f473db60db1b24cdc",
+        "canonicalBlockHash": "0x811e48d8a20be620fc73b7eee476e0db67bfc17c238d101f473db60db1b24cdc",
+        "finalizedHead": "69286606",
+        "event": {
+          "name": "RightClaimed",
+          "id": "1",
+          "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+          "amountWei": "100000000000000000"
+        },
+        "right": {
+          "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+          "amountWei": "100000000000000000",
+          "claimed": true
+        },
+        "signatureAndHashVerified": true
+      }
+    ],
+    "verificationBoundary": "Matching observations from two configured RPCs, not a light-client proof. Native outage and passkey evidence are recorded separately."
+  },
+  "publishedEnrollmentUpdate": {
+    "recordedAt": "2026-10-08T19:21:09.699Z",
+    "sites": [
+      {
+        "role": "primary",
+        "url": "https://continuitykit-account-primary.cryptomickle.chatgpt.site",
+        "version": 4,
+        "sourceCommit": "b0d29fda812348698ed2e8906935d398b2b22dae",
+        "status": "succeeded",
+        "publishedAt": "2026-10-08T19:18:56.258923+00:00"
+      },
+      {
+        "role": "reserve",
+        "url": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site",
+        "version": 3,
+        "sourceCommit": "07989371b6dcb1e41aa028c81f1d06701f83dd26",
+        "status": "succeeded",
+        "publishedAt": "2026-10-08T19:20:14.299569+00:00"
+      }
+    ],
+    "localValidation": {
+      "testCount": 318,
+      "stageCount": 6,
+      "allStagesPassed": true,
+      "networkBoundary": "OS-enforced loopback only"
+    },
+    "apiCallCounts": {
+      "directCreation": {
+        "before": {
+          "creates": 1,
+          "assertions": 4
+        },
+        "after": {
+          "creates": 1,
+          "assertions": 3
+        }
+      },
+      "creationFallback": {
+        "before": {
+          "creates": 1,
+          "assertions": 5
+        },
+        "after": {
+          "creates": 1,
+          "assertions": 4
+        }
+      },
+      "freshRecovery": {
+        "before": {
+          "creates": 0,
+          "assertions": 2
+        },
+        "after": {
+          "creates": 0,
+          "assertions": 2
+        }
+      }
+    },
+    "physicalOptimizedPathTested": false,
+    "visiblePromptCountMeasured": false,
+    "extraTransactions": false,
+    "newPasskeys": false
+  },
+  "limitations": [
+    "The native proof belongs to Primary version 3 / Reserve version 2, not the later optimized enrollment path.",
+    "Visible system prompts are not equivalent to WebAuthn API-call counts; the optimized path has no physical prompt measurement.",
+    "Two configured RPC observations are not a light-client consensus proof.",
+    "The original app was deliberately unavailable; hosting and encrypted storage remain under one operator.",
+    "The live demonstration needs its existing reserve credential. The payment was already collected once; visitors cannot repeat that claim.",
+    "The reserve restores full EOA authority. It does not revoke the original key or recover safely from an already-compromised key.",
+    "This evidence does not establish external users, third-party integration, demand, production security, legal immunity or prize eligibility."
+  ],
+  "sourceDigests": {
+    "native": "c1bcc3d595bc0e99f14b9541e0cd499431da79dbee035a2edb8d08295fffc97f",
+    "claim": "e35eadb3aced7021ffde37def3a50d0fdc0e734f1ec4ae7c935c840fcfb9316c",
+    "publication": "705723c60c1e4aee9a42db47dcba835b6fb60c4d08f52fdd9eaa9e29562904fe",
+    "optimization": "381db232f0c681ce1a1bd0cd62a4ae3f51d6cd95ad24c745d896378b044ae03b",
+    "restoration": "ee1b771e6b91943fb9156ee8357ac6670b159aaa1ba34988793a230e92d33496"
+  },
+  "provenance": "Selected fields from retained local records; source digests identify originals without distributing operational logs, approvals, credentials or workstation paths."
+}

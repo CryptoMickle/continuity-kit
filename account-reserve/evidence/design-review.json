@@ -1,0 +1,53 @@
+{
+  "observedOn": "2026-10-08 Europe/Oslo",
+  "scope": "local synthetic demonstration; desktop browser viewport emulation, not physical iPhone",
+  "design": "Light working surface, cobalt reserve panel, A/B account diagram, rounded controls, state-specific task copy",
+  "responsive": [
+    {
+      "width": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "initialActionBottom": 691.8125
+    },
+    {
+      "width": 390,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "initialActionBottom": 673.640625
+    },
+    {
+      "width": 1280,
+      "clientWidth": 1265,
+      "scrollWidth": 1265
+    }
+  ],
+  "flow": {
+    "model": "iris reference fixture",
+    "preparedAndIndependentlyChecked": true,
+    "primaryOfflineAndClosed": true,
+    "freshReserveOpened": true,
+    "owner": "0xda826fa41e55cfa0c88ad9c593bbdbe9fe721905",
+    "receipt": "0x76b3c3284e7de56c39c64b3e994953b5fc811a879b784a5e921f2eabf994852f",
+    "result": "Payment collected; signing session closed",
+    "primaryRestoredAfterCheck": true
+  },
+  "consoleWarningsAndErrorsFinal": [],
+  "otherChecks": [
+    "Demo controls disclosure and outage controls usable",
+    "Existing account and transaction hashes wrap at 320 px",
+    "Passkey failure renders a failure state and no success",
+    "Initial mobile CTA is visible without scrolling",
+    "Viewport override reset after testing",
+    "Primary button white text contrast >=4.68 against gradient endpoints"
+  ],
+  "limitations": [
+    "No public deployment",
+    "No native passkey test",
+    "No physical-device accessibility audit",
+    "Screenshots observed through browser tool, not archived image files"
+  ],
+  "sourceHashes": {
+    "app.mjs": "21e8a9eb7f5bccbe1df1f1d8e2351158cbe90ba0a4eb2f21fc3c0f73e7f38304",
+    "style.css": "760a9558e16be34dc37a048914d2649cd70d159148580d2237adc4afc5534226"
+  }
+}

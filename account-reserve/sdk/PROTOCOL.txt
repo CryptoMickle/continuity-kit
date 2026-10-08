@@ -1,0 +1,91 @@
+EXPERIMENTAL account-continuity/reserve-v1
+
+This is a NEW signer-authority protocol. It is not the published ContinuityKit
+data-recovery protocol and must not silently replace that protocol or its consent.
+
+API:
+createReserveCredential({ config, user, webAuthnClient?, signal?, timeoutMs? })
+  -> { credentialId, transports?, close() }
+prepareReserve({ privateKey, policy, recoveryCredential, webAuthnClient, store,
+                 signal? }) -> { status:'ready', owner, locator,
+                                independentlyVerified:true, protocol }
+recoverReserve({ config, webAuthnClient, store, signal? })
+  -> { session, account, owner, policy, locator, close() }
+
+config is fixed trusted client configuration, EXACTLY:
+  { appId, originalRpId, recoveryRpId, derivation }
+policy, only at preparation, adds expectedOwner (lowercase EVM address).
+Fresh recovery MUST NOT receive expectedOwner, a locator, credential ID or capsule.
+The selected B credential authenticates that binding via the encrypted manifest.
+Store API:
+  get(locator) -> Uint8Array | undefined
+  putIfAbsent(locator, bytes) -> true if created, false if already exists
+Store bytes must be copied by adapters, not mutated in place. Timeout/write errors
+mean unknown outcome; the caller must NOT automatically repeat setup with a key.
+
+Discovery:
+B uses discoverable assertion at SHA256(protocol + '/bootstrap\0' + appId).
+Standard HKDF-SHA256 derives separate locator and manifest-AES-GCM purposes.
+The hash of the locator material is an opaque retrieval key, NOT authorization.
+Manifest AEAD authenticates appId, configured B RP and locator as AAD; plaintext
+contains full config, approved owner, B credential ID and the actual Mera vault.
+The manifest vault uses Mera's fresh-salt AES-GCM secret-vault APIs and contains
+a binary frame (uint32 header length, public canonical JSON header, raw32 leaf).
+Header repeats config, owner and B credential ID. The decrypted leaf's computed
+EOA must match the manifest owner before a signer is returned.
+
+All JSON is canonical sorted-key UTF-8. Duplicate/unknown outer, manifest and
+payload fields, invalid encodings, malformed keys and oversized objects reject.
+No storage-selected URL, RP, RPC, contract, code or schema is followed.
+
+Readiness:
+After conditional storage creation, read back exact encrypted bytes. Then call
+the public fresh discovery/recovery path without expectedOwner, verify a newly
+random challenge signature, close that signer, and only then return ready.
+Recovery uses TWO WebAuthn assertions (discovery + vault unlock). Preparation
+with ordinary credential metadata uses four assertions including the independent
+two-assertion check. A new credential made by createReserveCredential uses the
+same bootstrap salt at creation. Its PRF result immediately derives the locator
+and nonextractable manifest key; raw PRF bytes are cleared. The exact returned
+object privately holds one-use derived setup material, bound to full config and
+credential ID. It expires within five minutes and closes on cancellation. It
+must be passed unchanged to prepareReserve and closed if setup is abandoned.
+An issued object that is closed, expired, consumed or mismatched rejects; it does
+not fall back to another credential operation. Ordinary metadata retains the
+original assertion path. No reusable discovery state is accepted by recovery.
+
+With that creation helper, complete new setup uses one credential creation and
+three assertions, or four if the authenticator needs a post-creation PRF fallback.
+The fallback must return the newly created credential. Fresh-salt vault creation,
+exact stored-byte readback, independent recovery and challenge checking remain.
+Stored bytes and the reserve-v1 protocol are unchanged.
+These are API-call counts, NOT Face ID/prompt/device claims. The supplied user
+verification client may produce other platform interactions.
+
+Immutability limitation:
+ONE newly dedicated B credential + app namespace means ONE immutable enrollment.
+No migration/rebinding/rotation/update API. Existing record and duplicate local
+attempts reject. Conditional create is a store contract, not cryptographic proof
+that a credential has never been used elsewhere. A malicious store can hide old
+entries. After missing/failed recovery do not reuse that credential for a new
+account. Fresh clients cannot discover a globally newest enrollment if an app
+violates the one-enrollment rule. The product must enforce new dedicated B
+creation at preparation and disclose this restriction.
+
+Trust and limits:
+Trusted client/configuration, browser/authenticator, crypto libraries and original
+enrollment consent establish authority. Attacker-controlled storage can withhold
+or corrupt bytes; it cannot forge a valid B-authenticated account binding without
+key material. Compromised delivered B code can steal/misuse full EOA authority.
+This is not signer rotation or cancellation of A. Deleting a reserve cannot
+revoke copied keys. Missing bytes/B key/B RP/client access can prevent recovery.
+The returned signer is unrestricted; a product must wrap it in a fixed-purpose,
+short-lived executor and not expose arbitrary signing as public UX.
+Mutable buffers are cleared best effort, not a guarantee of JavaScript erasure.
+
+Provenance:
+Binary leaf envelope, owner checking and Mera signer setup adapt small logic from
+metropolis-lab/mera-account-exit/index.mjs in this workspace. That source was an
+independently composed synthetic feasibility experiment. No upstream application
+source is copied. SDK imports only published Mera0.2.0 and viem dependencies plus
+browser-standard Web Crypto. No dependency on the old lab exists in this module.

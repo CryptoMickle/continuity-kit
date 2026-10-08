@@ -1,0 +1,26 @@
+{
+  "createdAt": "2026-10-08T19:30:39.151Z",
+  "asset": "delivery/assets/continuitykit-logo.png",
+  "format": "png",
+  "width": 1024,
+  "height": 1024,
+  "pixels": 1048576,
+  "bytes": 249425,
+  "sha256": "a893e0d22048ddff3ce579258547b8d0ad6eec6cb1f72ecb193a13735e9ed651",
+  "source": {
+    "markMarkup": "app.mjs:66",
+    "markRules": "style.css:21-23",
+    "markRulesSha256": "30bbbdfb26c88157606ab29f8afb88d7dbd4ce27d42cffcfbf8ac3348601e318",
+    "renderSource": "delivery/assets/continuitykit-logo-source.html",
+    "renderSourceSha256": "ba36b1a3f074f6866b8244a3c144ae8b37a7fb7fd28416e30048cc8d3e860f50",
+    "background": "#f3f6fb",
+    "note": "Existing app mark rendered unchanged at 20x CSS scale. No new brand artwork."
+  },
+  "validation": {
+    "minimum500px": true,
+    "maximum4MillionPixels": true,
+    "under2MB": true,
+    "visualInspection": "Verified via view_image: centered three-stroke blue ContinuityKit mark, complete edges and clear background."
+  },
+  "externalActions": "None. Local asset only; not uploaded or published."
+}

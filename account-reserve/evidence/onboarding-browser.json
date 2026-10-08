@@ -1,0 +1,68 @@
+{
+  "observedAt": "2026-10-08T07:59:40.986986+00:00",
+  "scope": "synthetic-local-only",
+  "previewSourceMatchesCurrentSdkAndStarter": true,
+  "sourceHashes": {
+    "sdk/browser-flow.mjs": "f46252fe055f5fef0e5562295dcbb47e55fbbddc9b330c0824d89bfa411aab42",
+    "sdk/preflight.mjs": "a8667522a27153d5c291f501f4543eec4a43a419dec38861734cda112a2f9587",
+    "sdk/index.mjs": "80ba2f979a1f83bb0d6876393df2cc40053bc100395ce05d37454f0e6ab074f1",
+    "sdk/http-store.mjs": "4ecc5ddcbdde26995e3f7f14e2c3cb580f18e49c2be2a9545e42c664c8ec30c7",
+    "sdk/http-store.d.ts": "32d9dad6f76169ee27f6b98743471ded93d29078a5848c8b005326498267b237",
+    "sdk/browser-flow.d.ts": "5ae44a6089834b239ab6604116ebca4766616c5eef85a323eded1748259cb25c",
+    "sdk/index.d.ts": "23e4568b70ec261c1f1c6347dc4e50ca81c14148b7249fb7b862e764f93704ef",
+    "sdk/preflight.d.ts": "fc76985a543b6ac8aa56691b3b9524ed07d45190cc0a3f9f7ff37d71534e85f3",
+    "starter/smoke.mjs": "831807c56a0cbcb054bbe18fd350f3c64ce3aac27c1d938f25fc777b3fbb9b0d",
+    "starter/synthetic-client.mjs": "629c3b753050a15ad716f5941e6638e41b8a283eaf82ebb6c50cf9baee175462",
+    "starter/index.html": "ec1f51c69527769a2b87191abdaad56dff9da844bde59952ada6cd7090676d35",
+    "starter/vite.config.mjs": "15278ca80f3616858cd79eb1950d68d100067701ead630fd8c5529f44fdd56f3",
+    "starter/integration-types.ts": "0521c510de02a89ca4bef3463692ef9cdf1cd37e404addf7052642d72abfa031",
+    "starter/loopback-fetch.mjs": "2848df330844add4bc234d400316ce0b400ab733df9e2ccc4cb9b9ed99c5aef2",
+    "starter/README.md": "5e7aaecaf6f29822e74947778e1972a2540cc3711e575bb062526e7cb5ee4ddc",
+    "starter/style.css": "e7af0fc376a1b9c80b90b71fb031342d7f7d608756df31e1a47383e23b13acfb",
+    "starter/main.mjs": "696cb6ab4e14b1120bff4d954120e01bfb565bc6bf48b1b7691cb171fd21c85c",
+    "starter/server.mjs": "562853870185a4d778b3968c204c5d87c86dd409acfa0b217d3fbe7c5a7bf432",
+    "starter/tsconfig.json": "0c60214b21de8ceb1c8f13e12e9c2a424c6078494a99544cf247a053f90c8f82",
+    "starter/doctor.mjs": "7eb41bb5f0f5ca282840de42df732ada0f6bdf4fad82d249d195212682a3c5fb",
+    "starter/config.mjs": "92a7ed58a47434ce9d916f9dd8f9bbc48798d37b70c4839ba73ad0416250a725"
+  },
+  "browser": "Codex in-app browser",
+  "originalAccount": "0xc497b5a411c09a7f5374836e046c71cdc253eb32",
+  "recoveredAccount": "0xc497b5a411c09a7f5374836e046c71cdc253eb32",
+  "preparedIndependently": true,
+  "primaryOfflineControlObserved": true,
+  "primaryTabClosed": true,
+  "freshRecovery": true,
+  "challengeVerified": true,
+  "signerClosed": true,
+  "primaryRestoredOnline": true,
+  "consoleWarningsOrErrors": [],
+  "responsive": [
+    {
+      "viewport": 320,
+      "clientWidth": 305,
+      "scrollWidth": 305
+    },
+    {
+      "viewport": 390,
+      "clientWidth": 375,
+      "scrollWidth": 375
+    },
+    {
+      "viewport": 1280,
+      "clientWidth": 1265,
+      "scrollWidth": 1265
+    }
+  ],
+  "screenshots": "visually inspected in browser; no saved screenshot artifact",
+  "doctor": {
+    "primary": 200,
+    "recovery": 200,
+    "physicalPasskey": "unverified",
+    "durability": "RAM only"
+  },
+  "physicalPasskeys": false,
+  "publicDeployment": false,
+  "publicMonad": false,
+  "externalIntegrations": false,
+  "limitation": "One-machine browser/source integration evidence, not independent hosting, physical usability or production security."
+}
