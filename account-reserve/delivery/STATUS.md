@@ -1,3 +1,20 @@
+# Native self-service acceptance — 9 October 2026
+
+The isolated public [self-service A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/)
+and [reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/) now let a judge
+prepare their own fictional snapshot without an operator code or wallet. The published
+Safari correction passed 149 automated checks. The builder has confirmed setup, fresh-page
+recovery with the existing passkey and edited TXT export on iPhone. Server logs corroborate
+successful upload and subsequent reads; the device screen and exported bytes were not
+independently inspected. This is not an independent participant trial, second-device proof
+for this new credential or an A-service outage test.
+
+Evidence: `evidence/self-service-iphone-setup-report-2026-10-09.json`.
+The judge guide now starts with this native self-service flow. Video and final submission
+remain explicitly deferred. Earlier dated records below retain their original scope.
+
+---
+
 # Developer and judge update — 9 October 2026
 
 The public [playground](https://continuitykit-playground.cryptomickle.chatgpt.site/) is deployed,

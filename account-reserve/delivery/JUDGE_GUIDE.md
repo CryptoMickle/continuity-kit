@@ -6,11 +6,24 @@ The example contains a fictional design brief and an unfinished checkout deliver
 
 ## Start here
 
-1. Start with the published [interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/). It offers the edit → prepare → recover → finish → export sequence without a setup code, wallet or native passkey. It runs real Work encryption with fictional, browser-local credentials; it does not simulate a physical authentication success or prove an HTTP outage.
-2. Inspect [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site), then read their recorded physical result below. Public page access does not grant the existing reserve passkey or a new setup code. The local examples below provide repeatable checks without those credentials.
-3. For the required Monad live product, inspect [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris) and its [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). Their separate testnet result demonstrates preserved account authority. The recorded payment is already claimed. The Work flow itself sends no blockchain transactions.
+1. Try the public [native self-service workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/). Edit the fictional brief, start an unfunded example account and prepare it in B with a new reserve passkey. No operator code or wallet is needed. Once ready, close A and reopen [reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/) with that same passkey, continue editing and export. Use fictional data only. See [limits and instructions](../self-service/README.md): 64 snapshots, 256 lifetime upload permissions and access ending 10 November 2026 at 00:00 UTC. This new passkey is separate from the older demonstrations.
+2. For a quick preview, use the published [interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/). It offers the edit → prepare → recover → finish → export sequence without a setup code, wallet or native passkey. It runs real Work encryption with fictional, browser-local credentials; it does not simulate a physical authentication success or prove an HTTP outage.
+3. Inspect [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site), then read their recorded physical result below. Public page access does not grant the existing reserve passkey or a new setup code. The local examples below provide repeatable checks without those credentials.
+4. For the required Monad live product, inspect [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris) and its [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). Their separate testnet result demonstrates preserved account authority. The recorded payment is already claimed. The Work flow itself sends no blockchain transactions.
 
 **Source status:** the core Work Reserve implementation, tests, portable physical proof and finished fictional exports are [published at commit `3e309345`](https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve). The public archive was anonymously downloaded and all 183 selected publication files matched. The playground, Textarea consumer, recovery drill and combined local entitlement example are included in this updated source tree. Their commands apply to this revision, not that earlier commit. The [8 October commit `fdfd817`](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve) remains the earlier Account Reserve snapshot. The competition draft was saved and verified after reload on 9 October; videos and final submission remain deferred.
+
+## Native self-service acceptance
+
+On 9 October, after the published Safari correction, the builder reported completing setup,
+fresh-page recovery using the same passkey, continued editing and TXT export in Safari on
+iPhone. Server logs corroborate admission, upload and later reserve reads (HTTP 201/200).
+The physical screen and exported bytes were not independently inspected. This is a
+builder-run acceptance test, not outside adoption, second-device recovery or an HTTP
+outage of A. The older separate native outage/second-device results retain their scope below.
+Evidence: [`self-service-iphone-setup-report-2026-10-09.json`](../evidence/self-service-iphone-setup-report-2026-10-09.json).
+The self-service correction passed 149 automated checks and is published at
+[commit `e528f14`](https://github.com/CryptoMickle/continuity-kit/commit/e528f14fdffe0b176ad8f2b8a24d065b753fab3f).
 
 ## Inspect a real editor integration
 

@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-09T19:04:32.913761+00:00",
+  "type": "user-reported-self-service-setup",
+  "userMessage": "Funket",
+  "context": "Reply to instructions for a fresh Safari-on-iPhone setup after the published correction",
+  "device": "iPhone Safari according to ongoing test context",
+  "setupResult": "user-reported success",
+  "exactFinalScreen": "not directly observed",
+  "freshPageRecovery": "user-confirmed success",
+  "editedExportReadback": "user-confirmed success in reply to the complete test instructions",
+  "passkeyPromptCount": "not reported",
+  "newTransactions": 0,
+  "scope": "New self-service try-primary/try-reserve Sites only; no inferred success for other environments",
+  "serverObservation": {
+    "client": "iPhone user agent",
+    "eventsUTC": [
+      [
+        "2026-10-09T19:02:49.915Z",
+        "admission POST",
+        201
+      ],
+      [
+        "2026-10-09T19:03:02.665Z",
+        "reserve pre-upload GET",
+        404
+      ],
+      [
+        "2026-10-09T19:03:05.938Z",
+        "reserve PUT",
+        201
+      ],
+      [
+        "2026-10-09T19:03:11.021Z",
+        "reserve readback GET",
+        200
+      ],
+      [
+        "2026-10-09T19:06:21.291Z",
+        "later iPhone reserve GET",
+        200
+      ]
+    ],
+    "meaning": "Admission, upload and later reserve reads succeeded. Logs cannot establish decryption, page freshness, closed A or export; those remain user-reported.",
+    "locatorsStored": false
+  },
+  "completionReport": {
+    "recordedAt": "2026-10-09T19:09:53.739477+00:00",
+    "userMessage": "gjenopprettet og eksportert",
+    "context": "Reply to closing A/B after readiness, opening a fresh B Safari page with the existing passkey, checking content, editing one line, exporting TXT and opening the file to check the edit",
+    "evidenceLevel": "user-confirmed; device screen and downloaded file not independently inspected"
+  },
+  "notEstablished": [
+    "HTTP outage of A in this self-service test",
+    "cross-device recovery for this new passkey",
+    "independent participant adoption",
+    "independently inspected physical screen or export bytes"
+  ]
+}
