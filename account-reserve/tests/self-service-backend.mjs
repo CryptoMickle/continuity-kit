@@ -55,11 +55,46 @@ test('public issuance stores only a random capability hash, pins the release and
   const response = await w.fetch(enroll(), { DB: db });
   assert.equal(response.status, 201); assert.equal(response.headers.get('cache-control'), 'no-store');
   const value = await response.json(); assert.match(value.enrollmentToken, /^[A-Za-z0-9_-]{43}$/);
+  assert.deepEqual(Object.keys(value).sort(), ['enrollmentToken', 'expiresAt', 'serverNow']);
+  assert.equal(new Date(value.serverNow).toISOString(), value.serverNow);
+  assert.ok(Date.parse(value.expiresAt) - Date.parse(value.serverNow) > 0 && Date.parse(value.expiresAt) - Date.parse(value.serverNow) <= LIMITS.capabilityTtlMs);
   assert.ok(Date.parse(value.expiresAt) > Date.now() && Date.parse(value.expiresAt) <= Date.now() + LIMITS.capabilityTtlMs);
   const saved = await snapshot(db); assert.equal(saved.ss_records.length, 0); assert.equal(saved.ss_capabilities.length, 1);
   assert.equal(saved.ss_capabilities[0].capability_hash, await enrollmentTicketHash(value.enrollmentToken));
   assert.equal(JSON.stringify(saved).includes(value.enrollmentToken), false);
   assert.equal(saved.ss_release[0].namespace, namespace(p)); assert.equal(saved.ss_release[0].schema, SELF_SERVICE_SCHEMA);
+});
+
+test('admission timestamps use the D1 clock even when the injected host clock is two minutes behind', async () => {
+  const db = await database(), p = profile(), before = Date.now();
+  const w = worker(p, 'recovery', { now: () => Date.now() - 120000 });
+  const response = await w.fetch(enroll(), { DB: db }); assert.equal(response.status, 201);
+  const value = await response.json(), serverNow = Date.parse(value.serverNow), expiry = Date.parse(value.expiresAt);
+  assert.ok(serverNow >= before - 1000 && serverNow <= Date.now() + 1000, 'server time follows actual database time, not the stale application clock');
+  assert.ok(serverNow - (Date.now() - 120000) >= 119000);
+  assert.ok(expiry - serverNow > 0 && expiry - serverNow <= LIMITS.capabilityTtlMs);
+  assert.equal((await snapshot(db)).ss_capabilities[0].expires_ms, expiry);
+});
+
+test('near release expiry, database-clock admission duration is clamped to the fixed deadline', async () => {
+  const db = await database(), p = profile(5000), response = await worker(p).fetch(enroll(), { DB: db });
+  assert.equal(response.status, 201); const value = await response.json();
+  assert.equal(value.expiresAt, p.expiresAt);
+  const lifetime = Date.parse(value.expiresAt) - Date.parse(value.serverNow);
+  assert.ok(lifetime > 0 && lifetime <= 5000);
+  assert.deepEqual(Object.keys(value).sort(), ['enrollmentToken', 'expiresAt', 'serverNow']);
+});
+
+test('unsafe or incoherent database clock metadata yields unknown once without retrying issuance', async () => {
+  for (const bad of [undefined, '1791568800000', Number.NaN, 1.5, -1, Number.MAX_SAFE_INTEGER]) {
+    const db = await database(), p = profile(); let batches = 0;
+    const corrupted = { prepare: sql => db.prepare(sql), batch: async statements => {
+      batches++; const result = await db.batch(statements); result[2].results[0].server_now_ms = bad; return result;
+    } };
+    const response = await worker(p).fetch(enroll(), { DB: corrupted });
+    assert.equal(response.status, 503); assert.deepEqual(await response.json(), { error: 'ENROLLMENT_ISSUE_UNKNOWN' });
+    assert.equal(batches, 1); assert.equal((await snapshot(db)).ss_capabilities.length, 1);
+  }
 });
 
 test('D1 atomic admission reserves at most 64 live record slots even across concurrent issuers', async () => {

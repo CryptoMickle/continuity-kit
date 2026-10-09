@@ -9,6 +9,12 @@ Public addresses from `profile.json`:
 
 These are new Sites with a separate recovery relying-party domain and a dedicated D1 database. Passkeys and snapshots from earlier demos remain associated with their original B site; they do not migrate to this one. Prepare a new fictional snapshot and reserve passkey for this B site.
 
+## Safari setup correction, 9 October 2026
+
+An iPhone attempt stopped before any passkey request or snapshot upload. Its exact transport failure could not be confirmed from Worker logs. The correction sends an origin-only referrer for same-origin POST/PUT while keeping exact-origin validation, and uses D1 time plus conservative monotonic timing for the five-minute admission budget. Error messages distinguish network, timeout, HTTP and response-validation failures. Uncertain admission and upload results are never retried automatically.
+
+Use fresh A and B pages after this update; older loaded clients do not understand the added server timing field. 149 automated UI, database, timing and SDK regression checks passed. This does not establish iPhone or physical-passkey acceptance.
+
 ## Try the public flow
 
 1. Open A and edit the fictional project, client, brief, draft and next step. Use no personal, confidential or valuable content.
@@ -35,7 +41,7 @@ From the repository root, with Node.js 24 or later and dependencies installed:
 
 ```sh
 npm ci
-node --test tests/self-service-ui.mjs tests/self-service-backend.mjs
+node --test tests/self-service-ui.mjs tests/self-service-backend.mjs tests/self-service-capability-clock.mjs
 node --test tests/work-reserve.mjs tests/work-browser.mjs tests/native-cancellation.mjs
 ```
 

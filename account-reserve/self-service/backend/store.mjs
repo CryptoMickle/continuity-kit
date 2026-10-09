@@ -16,7 +16,7 @@ const ISSUE = `INSERT INTO ss_capabilities(namespace,capability_hash,expires_ms)
   RETURNING capability_hash,expires_ms`;
 const ISSUE_STATE = `SELECT CASE WHEN ?3<=${NOW} THEN 'expired' WHEN ${INVALID} THEN 'invalid'
   WHEN EXISTS(SELECT 1 FROM ss_capabilities WHERE namespace=?1 AND capability_hash=?4) THEN 'issued'
-  WHEN ${RECORDS}+${PENDING}>=${LIMITS.maxRecords} OR ${ISSUED}>=${LIMITS.maxIssuedCapabilities} THEN 'limit' ELSE 'invalid' END AS state`;
+  WHEN ${RECORDS}+${PENDING}>=${LIMITS.maxRecords} OR ${ISSUED}>=${LIMITS.maxIssuedCapabilities} THEN 'limit' ELSE 'invalid' END AS state, ${NOW} AS server_now_ms`;
 const LIVE_CAPABILITY = `EXISTS(SELECT 1 FROM ss_capabilities WHERE namespace=?1 AND capability_hash=?5 AND expires_ms>${NOW})`;
 const INSERT = `INSERT INTO ss_records(namespace,locator,capability_hash,ciphertext)
   SELECT ?1,?4,?5,?6 WHERE ?3>${NOW} AND ${HEADER} AND ${LIVE_CAPABILITY}
@@ -42,8 +42,15 @@ export function createSelfServiceStore({ db, profile }) {
       if (!hashValid(hash)) throw fail('ENROLLMENT_DENIED');
       const result = await db.batch([stmt(PIN), stmt(ISSUE, hash), stmt(ISSUE_STATE, hash)]);
       if (!Array.isArray(result) || result.length !== 3) throw fail('ENROLLMENT_ISSUE_UNKNOWN');
-      rows(result[0]); const created = rows(result[1]), state = one(result[2]).state;
-      if (created.length === 1 && created[0].capability_hash === hash && Number.isSafeInteger(created[0].expires_ms) && created[0].expires_ms <= profile.expires && ['issued', 'expired'].includes(state)) return Object.freeze({ state: 'issued', expiresAt: new Date(created[0].expires_ms).toISOString() });
+      rows(result[0]); const created = rows(result[1]), status = one(result[2]), state = status.state, serverNow = status.server_now_ms;
+      if (!Number.isSafeInteger(serverNow) || serverNow <= 0 || !Number.isFinite(new Date(serverNow).getTime())) throw fail('ENROLLMENT_ISSUE_UNKNOWN');
+      if (created.length === 1 && created[0].capability_hash === hash && Number.isSafeInteger(created[0].expires_ms) && created[0].expires_ms > 0 && created[0].expires_ms <= profile.expires) {
+        // Return the database clock from the final statement, not an application or device clock.
+        // A record inserted just before the release ends must not advertise an already-dead grant.
+        if (state === 'expired' && profile.expires <= serverNow) return Object.freeze({ state: 'expired' });
+        const lifetime = created[0].expires_ms - serverNow;
+        if (state === 'issued' && lifetime > 0 && lifetime <= LIMITS.capabilityTtlMs) return Object.freeze({ state: 'issued', expiresAt: new Date(created[0].expires_ms).toISOString(), serverNow: new Date(serverNow).toISOString() });
+      }
       if (created.length === 0 && ['expired', 'limit'].includes(state)) return Object.freeze({ state });
       throw fail('ENROLLMENT_ISSUE_UNKNOWN');
     },

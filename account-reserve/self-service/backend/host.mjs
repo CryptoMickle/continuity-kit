@@ -114,7 +114,7 @@ export function createSelfServiceHostedClient({ profile: supplied, role, assets 
           const issued = await bounded(() => store(env, trusted).issue(hash));
           if (issued.state === 'expired' || ended()) return error(410, 'DEMONSTRATION_ENDED');
           if (issued.state === 'limit') return error(429, 'ENROLLMENT_LIMIT');
-          return reply(201, { enrollmentToken: token, expiresAt: issued.expiresAt });
+          return reply(201, { enrollmentToken: token, expiresAt: issued.expiresAt, serverNow: issued.serverNow });
         } catch { return error(503, 'ENROLLMENT_ISSUE_UNKNOWN'); }
       }
       if (role === 'recovery' && url.pathname.startsWith('/api/reserve/')) {

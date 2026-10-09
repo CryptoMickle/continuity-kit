@@ -67,16 +67,16 @@ function environment(now, role = 'recovery') {
     limits: { maxRecords: 64, maxRecordBytes: 65536, maxIssuedCapabilities: 256, capabilityTtlMs: 300000 },
   };
 }
-async function fixture(t, { primary = false, enrolling = !primary, delayedResponse = false, delayedBody = false, capacityStatus = 201, popupBlocked = false } = {}) {
+async function fixture(t, { primary = false, enrolling = !primary, delayedResponse = false, delayedBody = false, capacityStatus = 201, networkFailure = false, malformedResponse = false, popupBlocked = false } = {}) {
   const time = clock(), document = documentFixture(), events = new Map();
   const pendingResponse = deferred(), pendingBody = deferred(), preparation = deferred(), recovery = deferred(), handoff = deferred();
   const env = environment(time.Date.now(), primary ? 'primary' : 'recovery');
   const counts = { issues: 0, prepares: 0, recovered: 0, writeStores: 0, cleared: 0, disposed: 0, contextsClosed: 0, signers: 0, sessions: 0, sessionsEnded: 0, setups: 0 };
   const blobs = [], copies = [];
-  let onState, keyInput, setupOptions;
+  let onState, keyInput, setupOptions, storeFetch;
   class FixtureURL extends URL { static createObjectURL(blob) { blobs.push(blob); return 'blob:example'; } static revokeObjectURL() {} }
-  const capability = { enrollmentToken: 'A'.repeat(43), expiresAt: new time.Date(time.Date.now() + 300000).toISOString() };
-  const issueResponse = { status: capacityStatus, text: () => delayedBody ? pendingBody.promise : Promise.resolve(JSON.stringify(capability)) };
+  const capability = { enrollmentToken: 'A'.repeat(43), expiresAt: new time.Date(time.Date.now() + 300000).toISOString(), serverNow: new time.Date(time.Date.now()).toISOString() };
+  const issueResponse = { status: capacityStatus, text: () => delayedBody ? pendingBody.promise : Promise.resolve(malformedResponse ? '{' : JSON.stringify(capability)) };
   const window = {
     location: new URL((primary ? env.originalOrigin : env.recoveryOrigin) + '/'),
     addEventListener(name, callback) { if (!events.has(name)) events.set(name, []); events.get(name).push(callback); },
@@ -86,7 +86,7 @@ async function fixture(t, { primary = false, enrolling = !primary, delayedRespon
     navigator: { clipboard: { async writeText(text) { copies.push(text); } } },
     crypto: { getRandomValues(bytes) { bytes.fill(7); return bytes; } },
     prismBackdrop: '', prismSculpture: '', WORK_SCHEMA: 'continuity-work/brief-v1', MAX_WORK_BYTES: 16384,
-    validateEnvironment, validateCapability: (value, until) => validateCapability(value, until, time.Date.now()),
+    validateEnvironment, validateCapability, performance: { now: () => time.Date.now() - Date.UTC(2026, 9, 9) },
     validateWork(value) { assert.ok(['title', 'client', 'brief', 'deliverable', 'nextStep'].every(key => typeof value[key] === 'string' && value[key].length)); return Object.freeze({ ...value }); },
     createSecp256k1SigningSession({ privateKey }) { counts.sessions++; assert.ok(privateKey.some(value => value)); return { end() { counts.sessionsEnded++; } }; },
     toViemAccount() { return { address: '0x' + '1'.repeat(40) }; },
@@ -101,15 +101,19 @@ async function fixture(t, { primary = false, enrolling = !primary, delayedRespon
       return { isEnrollment: enrolling, prepare() { counts.prepares++; onState({ state: 'creating-credential' }); return preparation.promise; }, dispose() { counts.disposed++; } };
     },
     createReserveHttpStore(options) {
+      storeFetch = options.fetcher;
       const writing = Boolean(options.enrollmentToken); if (writing) { counts.writeStores++; assert.equal(options.enrollmentToken, capability.enrollmentToken); }
       return { clearEnrollmentCapability() { if (writing) counts.cleared++; } };
     },
     recoverWorkReserve() { counts.recovered++; return recovery.promise; },
     async fetch(url, options) {
       if (url === '/api/config') return { ok: true, json: async () => env };
+      assert.equal(options.referrerPolicy, 'origin');
+      if (url === '/api/reserve/' + 'A'.repeat(43)) { assert.equal(options.method, 'PUT'); assert.equal(options.mode, 'same-origin'); assert.equal(options.redirect, 'error'); return { status: 403 }; }
       assert.equal(url, '/api/enrollment/start'); assert.equal(options.method, 'POST'); assert.equal(options.body, '{}');
       assert.equal(options.credentials, 'omit'); assert.equal(options.mode, 'same-origin'); assert.equal(options.headers.authorization, undefined);
-      counts.issues++; return delayedResponse ? pendingResponse.promise : issueResponse;
+      counts.issues++; if (networkFailure) throw new TypeError('Load failed');
+      return delayedResponse ? pendingResponse.promise : issueResponse;
     },
   });
   new Script(runnable, { filename: 'self-service/client/app.mjs' }).runInContext(context);
@@ -122,7 +126,7 @@ async function fixture(t, { primary = false, enrolling = !primary, delayedRespon
   t.after(() => { emit('pagehide'); preparation.resolve({ owner: '0x' + '1'.repeat(40) }); handoff.resolve({ owner: '0x' + '1'.repeat(40) }); });
   return {
     time, counts, env, element, actions, control, blobs, copies, emit, document,
-    keyInput: () => keyInput, setupOptions: () => setupOptions,
+    keyInput: () => keyInput, setupOptions: () => setupOptions, storeFetch: (...args) => storeFetch(...args),
     stop: () => onState({ state: 'failed', code: 'SETUP_EXPIRED' }),
     resolveResponse: () => pendingResponse.resolve(issueResponse), resolveBody: () => pendingBody.resolve(JSON.stringify(capability)),
     rejectPreparation: () => preparation.reject(Object.assign(new Error('STORE_WRITE_UNKNOWN'), { code: 'STORE_WRITE_UNKNOWN', recordMayExist: true })),
@@ -138,10 +142,11 @@ test('native-only environment and capability checks reject altered bounds and ma
   for (const patch of [{ synthetic: true }, { selfService: false }, { fictionalOnly: false }, { enrollmentToken: 'A'.repeat(43) }, { limits: { ...env.limits, maxRecords: 65 } }]) {
     assert.throws(() => validateEnvironment({ ...env, ...patch }, env.recoveryOrigin + '/', now));
   }
-  const capability = { enrollmentToken: 'A'.repeat(43), expiresAt: new Date(now + 300000).toISOString() };
-  assert.equal(validateCapability(capability, now + 86400000, now).token, capability.enrollmentToken);
-  assert.throws(() => validateCapability({ ...capability, enrollmentToken: 'A'.repeat(42) + 'B' }, now + 86400000, now));
-  assert.throws(() => validateCapability(capability, now + 86400000, now + 300000));
+  const capability = { enrollmentToken: 'A'.repeat(43), expiresAt: new Date(now + 300000).toISOString(), serverNow: new Date(now).toISOString() };
+  const timing = { requestStartedMs: 0, responseReceivedMs: 10 };
+  assert.equal(validateCapability(capability, now + 86400000, timing).token, capability.enrollmentToken);
+  assert.throws(() => validateCapability({ ...capability, enrollmentToken: 'A'.repeat(42) + 'B' }, now + 86400000, timing));
+  assert.throws(() => validateCapability(capability, now + 86400000, { requestStartedMs: 0, responseReceivedMs: 300000 }));
 });
 test('published source imports actual SDK, never exposes account opening or a simulated adapter', () => {
   assert.match(source, /from '\.\.\/\.\.\/sdk\/work-reserve\.mjs'/);
@@ -279,3 +284,17 @@ test('unconfirmed capability issuance describes no native attempt without an aut
   assert.match(ui.element('status').textContent, /will not retry automatically/);
   assert.equal(ui.counts.prepares, 0); assert.equal(ui.counts.issues, 1);
 });
+
+test('same-origin SDK writes retain strict transport and send public origin only', async t => {
+  const ui = await fixture(t, { enrolling: false });
+  await ui.storeFetch('/api/reserve/' + 'A'.repeat(43), { method: 'PUT', mode: 'same-origin', credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer' });
+  assert.equal(ui.counts.issues, 0);
+});
+for (const [options, code] of [[{ networkFailure: true }, 'CAPABILITY_NETWORK'], [{ capacityStatus: 403 }, 'CAPABILITY_HTTP_403'], [{ capacityStatus: 503 }, 'CAPABILITY_HTTP_503'], [{ malformedResponse: true }, 'CAPABILITY_RESPONSE_JSON']]) {
+  test('admission failure distinguishes ' + code + ' without retry or native action', async t => {
+    const ui = await fixture(t, options);
+    assert.match(ui.element('status').textContent, new RegExp(code));
+    assert.equal(ui.counts.issues, 1); assert.equal(ui.counts.prepares, 0);
+    assert.doesNotMatch(ui.element('status').textContent, /AAAA|enrollmentToken/);
+  });
+}

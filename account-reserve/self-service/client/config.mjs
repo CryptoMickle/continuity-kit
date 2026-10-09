@@ -32,13 +32,22 @@ export function validateEnvironment(env, href, now = Date.now()) {
     && env.limits.maxIssuedCapabilities === 256 && env.limits.capabilityTtlMs === 300000);
   return Object.freeze({ primary: env.role === 'primary', expiresAtMs });
 }
-export function validateCapability(value, demoExpiresAtMs, now = Date.now()) {
-  if (!exact(value, ['enrollmentToken', 'expiresAt']) || typeof value.enrollmentToken !== 'string'
+export function validateCapability(value, demoExpiresAtMs, { requestStartedMs, responseReceivedMs } = {}) {
+  if (!exact(value, ['enrollmentToken', 'expiresAt', 'serverNow']) || typeof value.enrollmentToken !== 'string'
     || !/^[A-Za-z0-9_-]{43}$/.test(value.enrollmentToken) || typeof value.expiresAt !== 'string') fail('CAPABILITY_INVALID');
   let bytes;
   try { bytes = atob(value.enrollmentToken.replaceAll('-', '+').replaceAll('_', '/') + '='); } catch { fail('CAPABILITY_INVALID'); }
   if (bytes.length !== 32 || btoa(bytes).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '') !== value.enrollmentToken) fail('CAPABILITY_INVALID');
-  const until = Date.parse(value.expiresAt);
-  if (!Number.isFinite(until) || new Date(until).toISOString() !== value.expiresAt || until <= now || until > demoExpiresAtMs || until - now > 5 * 60000) fail('CAPABILITY_INVALID');
+  const expiry = Date.parse(value.expiresAt), serverNow = Date.parse(value.serverNow);
+  if (!Number.isFinite(expiry) || !Number.isFinite(serverNow) || !Number.isFinite(demoExpiresAtMs)
+    || new Date(expiry).toISOString() !== value.expiresAt || new Date(serverNow).toISOString() !== value.serverNow
+    || expiry > demoExpiresAtMs || expiry <= serverNow || expiry - serverNow > 5 * 60000) fail('CAPABILITY_LIFETIME_INVALID');
+  // D1 enforces the actual expiry. Subtract the entire request/body round trip
+  // conservatively; a device's wall clock must not invalidate a fresh grant.
+  if (!Number.isFinite(requestStartedMs) || !Number.isFinite(responseReceivedMs)
+    || requestStartedMs < 0 || responseReceivedMs < requestStartedMs) fail('CAPABILITY_LIFETIME_INVALID');
+  const until = requestStartedMs + (expiry - serverNow);
+  if (!Number.isFinite(until)) fail('CAPABILITY_LIFETIME_INVALID');
+  if (until <= responseReceivedMs) fail('CAPABILITY_EXPIRED');
   return Object.freeze({ token: value.enrollmentToken, until });
 }

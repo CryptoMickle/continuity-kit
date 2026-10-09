@@ -51,7 +51,11 @@ async function main() {
       if (signal.aborted) { abort(); break; }
       signal.addEventListener('abort', abort, { once: true });
     }
-    return fetch(url, { ...init, signal: controller.signal });
+    // Fetch serializes Origin as null for same-origin POST/PUT with no-referrer.
+    // Send only the public origin, never a path/query, and keep strict server
+    // Origin validation and the SDK's same-origin/no-redirect transport policy.
+    const mutation = ['POST', 'PUT'].includes(init.method?.toUpperCase());
+    return fetch(url, { ...init, ...(mutation ? { referrerPolicy: 'origin' } : {}), signal: controller.signal });
   }
   const readStore = createReserveHttpStore({ fetcher: scopedFetch });
   function status(text, kind = '') {
@@ -182,7 +186,7 @@ async function main() {
   function setupActive() { active(); if (stopped) throw fail('SETUP_CLOSED'); }
   function deadline() {
     if (!setupDeadline || stopped || demoExpired) { $('deadline').hidden = true; return; }
-    const seconds = Math.max(0, Math.ceil((setupDeadline - Date.now()) / 1000));
+    const seconds = Math.max(0, Math.ceil((setupDeadline - performance.now()) / 1000));
     $('deadline').hidden = false;
     $('deadline').textContent = `Complete setup within ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}. Device prompts and independent checks are included.`;
   }
@@ -292,7 +296,7 @@ async function main() {
     // The SDK opens B synchronously during this deliberate click. If the popup
     // is blocked, it throws before the caller relinquishes its key.
     setup = startWorkReserveSetup({ config: env.config, recoveryUrl: env.recoveryOrigin + '/', privateKey, expectedOwner: originalOwner, work: workFromEditor(), signal: lifetime.signal, onState: state });
-    clearKey(); step(2); setDeadline(Math.min(expiresAtMs, Date.now() + SESSION_MS));
+    clearKey(); step(2); setDeadline(performance.now() + Math.min(expiresAtMs - Date.now(), SESSION_MS));
     editable(false); $('actions').replaceChildren(); cancelButton();
     try {
       const result = await setup.completion;
@@ -303,35 +307,39 @@ async function main() {
   async function requestCapability() {
     setupActive();
     capRequest = new AbortController();
-    const timeout = setTimeout(() => capRequest?.abort(), 10000);
-    let payload;
+    let timedOut = false;
+    const timeout = setTimeout(() => { timedOut = true; capRequest?.abort(); }, 10000);
+    const requestStartedMs = performance.now();
+    let payload, phase = 'CAPABILITY_NETWORK';
     try {
       const response = await scopedFetch('/api/enrollment/start', { method: 'POST', mode: 'same-origin', credentials: 'omit', cache: 'no-store', redirect: 'error', referrerPolicy: 'no-referrer', headers: { 'content-type': 'application/json' }, body: '{}', signal: capRequest.signal });
       setupActive();
       if (response.status === 410) { expireDemo(); return; }
-      if (response.status !== 201) throw fail(response.status === 429 ? 'CAPACITY_UNAVAILABLE' : 'CAPABILITY_UNCONFIRMED');
+      if (response.status !== 201) throw fail(response.status === 429 ? 'CAPACITY_UNAVAILABLE' : `CAPABILITY_HTTP_${response.status}`);
+      phase = 'CAPABILITY_RESPONSE_BODY';
       const text = await response.text();
       setupActive();
       if (text.length > 256) throw fail('CAPABILITY_INVALID');
-      try { payload = JSON.parse(text); } catch { throw fail('CAPABILITY_INVALID'); }
-      const checked = validateCapability(payload, expiresAtMs);
+      try { payload = JSON.parse(text); } catch { throw fail('CAPABILITY_RESPONSE_JSON'); }
+      const checked = validateCapability(payload, expiresAtMs, { requestStartedMs, responseReceivedMs: performance.now() });
       setupActive(); token = checked.token; tokenUntil = checked.until; payload = undefined;
       setDeadline(Math.min(setupDeadline, tokenUntil));
-      capTimer = setTimeout(() => stopSetup('CAPABILITY_EXPIRED'), Math.max(0, tokenUntil - Date.now()));
+      capTimer = setTimeout(() => stopSetup('CAPABILITY_EXPIRED'), Math.max(0, tokenUntil - performance.now()));
       $('actions').replaceChildren(); button('Create reserve passkey', prepareReceiver); cancelButton();
       scene('Ready to create your passkey.', 'A short-lived upload permission is ready. Create the reserve passkey, then follow any further prompts while the snapshot is protected and checked.', 'Keep both windows open. Native passkey creation begins only when you press the button below.');
       status('Setup is available. Save the passkey with your chosen provider; keep it even if a later check is interrupted.', 'success');
     } catch (error) {
       if (leaving || demoExpired || stopped) return;
-      const code = errorCode(error); stopSetup(code);
+      const caught = errorCode(error), code = timedOut ? 'CAPABILITY_TIMEOUT' : caught === 'ACTION_STOPPED' ? phase : caught;
+      stopSetup(code);
       status(code === 'CAPACITY_UNAVAILABLE'
         ? 'This public demonstration is full or temporarily rate limited. No passkey was requested. Export your draft from A and try a fresh setup later.'
-        : 'Upload permission could not be confirmed. No passkey was requested. This page will not retry automatically. Export your draft from A; existing reserves can still be checked.', 'error');
+        : `Upload permission could not be confirmed (${code}). No passkey was requested. This page will not retry automatically. Export your draft from A; existing reserves can still be checked.`, 'error');
     } finally { clearTimeout(timeout); capRequest = undefined; payload = undefined; }
   }
   async function prepareReceiver() {
     setupActive();
-    if (setupAttempted || !token || Date.now() >= tokenUntil) { stopSetup('CAPABILITY_EXPIRED'); return; }
+    if (setupAttempted || !token || performance.now() >= tokenUntil) { stopSetup('CAPABILITY_EXPIRED'); return; }
     setupAttempted = true;
     writingStore = createReserveHttpStore({ enrollmentToken: token, fetcher: scopedFetch });
     token = undefined;
@@ -398,7 +406,7 @@ async function main() {
     catch { $('reserve-url').focus(); $('reserve-url').select(); status('Copy is unavailable in this browser. The public link is selected; copy it manually.'); }
   };
   if (primary) button('Start my example account', createAccount);
-  else if (enrolling) { setDeadline(Math.min(expiresAtMs, Date.now() + SESSION_MS)); cancelButton(); void requestCapability(); }
+  else if (enrolling) { setDeadline(performance.now() + Math.min(expiresAtMs - Date.now(), SESSION_MS)); cancelButton(); void requestCapability(); }
   else button('Open my existing reserve', recover);
   demoTimer = setInterval(() => { if (Date.now() >= expiresAtMs) expireDemo(); }, 1000);
   window.addEventListener('pagehide', () => {
