@@ -1,0 +1,16 @@
+{
+  "runtimeCommit": "55321fa53f389d6772c699deb382bbfe9c0328e3",
+  "runtimeTree": "90d26afe2ddc47710b21c1f6ec1fc999dd1d51fe",
+  "parent": "3deffddc29fcbcff08c53563e6fb563a84e4a80c",
+  "correctedDocumentationCommit": "27df242f16dc96f9752f5e6b0bd918c85ca60467",
+  "correctedArchiveSha256": "34f30b05378853fad24b97e002322ed8c4c5f620b75ae5e55ece39bd279179af",
+  "initialArchiveSha256": "9455de914d414e88f2feac3f0b4136fa65880d9d511c47f4a6d1ce727c33ec6b",
+  "verifiedChangedFiles": 59,
+  "verifiedPublicArchiveBlobs": 450,
+  "unrelatedBlobsPreserved": 391,
+  "unexpectedTreeChanges": 0,
+  "cleanPublicInstall": "passed after published README command-order correction",
+  "cleanReport": "text-public-install-2026-10-09.json",
+  "nativeTextAcceptance": "pending",
+  "videoAndFinalSubmission": "deferred"
+}

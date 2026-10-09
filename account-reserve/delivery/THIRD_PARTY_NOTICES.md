@@ -1,3 +1,16 @@
+# Text integration addition — 9 October 2026
+
+The separate account-free adapter uses Anton Medvedev's Textarea at pinned commit
+`8aa2247e4d92d963059e8788624e0c0d1be8d6a3`. Original HTML and its MIT license are retained
+under `integrations/textarea-text/upstream/`; exact source hashes and build changes are
+recorded in that integration's `provenance.json` and README. It is a project-authored
+adapter, not upstream adoption. The existing `integrations/textarea/` copy remains
+unchanged. The new text SDK uses the already pinned Mera dependency; no production
+package dependency was added. The historical account-bundle inventory below does
+not claim to measure the new text bundle.
+
+---
+
 # Third-party notices — ContinuityKit Account Reserve
 
 Local attribution inventory prepared on 2026-10-08 for `@continuitykit/account-reserve@0.0.1-experimental`. This document records installed dependency licenses and the modules retained by a local browser build. It is not a legal-compliance conclusion, an exhaustive chain-of-title audit, or a license selection for ContinuityKit's own source.

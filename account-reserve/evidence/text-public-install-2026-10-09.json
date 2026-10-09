@@ -1,0 +1,318 @@
+{
+  "status": "PASS_CURRENT_PUBLIC_DOCUMENTED_ORDER",
+  "commit": "27df242f16dc96f9752f5e6b0bd918c85ca60467",
+  "source_url": "https://github.com/CryptoMickle/continuity-kit/tree/27df242f16dc96f9752f5e6b0bd918c85ca60467",
+  "archive_url": "https://codeload.github.com/CryptoMickle/continuity-kit/tar.gz/27df242f16dc96f9752f5e6b0bd918c85ca60467",
+  "archive_path": "/tmp/continuity-public-corrected.FvHXDC/public-source.tar.gz",
+  "archive_sha256": "34f30b05378853fad24b97e002322ed8c4c5f620b75ae5e55ece39bd279179af",
+  "source_path": "/tmp/continuity-public-corrected.FvHXDC/source/continuity-kit-27df242f16dc96f9752f5e6b0bd918c85ca60467",
+  "sdk_source_path": "/tmp/continuity-public-corrected.FvHXDC/source/continuity-kit-27df242f16dc96f9752f5e6b0bd918c85ca60467/account-reserve",
+  "consumer_path": "/tmp/continuity-public-corrected.FvHXDC/consumer",
+  "safe_extraction": {
+    "archive_sha256": "34f30b05378853fad24b97e002322ed8c4c5f620b75ae5e55ece39bd279179af",
+    "members": 514,
+    "source_path": "/tmp/continuity-public-corrected.FvHXDC/source/continuity-kit-27df242f16dc96f9752f5e6b0bd918c85ca60467",
+    "symlinks_or_special_members": 0,
+    "path_traversal_members": 0
+  },
+  "source_integrity": {
+    "archive_files_compared": 451,
+    "modified_archived_source_files": []
+  },
+  "independence": {
+    "development_project_read": false,
+    "development_project_imported": false,
+    "source_files_edited": false,
+    "consumer_outside_repository": true,
+    "sdk_installed_from_public_source_tarball": true,
+    "public_registry_dependencies_only": true,
+    "runtime_network": "127.0.0.1 only"
+  },
+  "runtime": {
+    "node": "v24.19.0",
+    "npm": "11.17.0",
+    "requested_node": "/opt/homebrew/opt/node@24/bin/node",
+    "actual_child_node": "/opt/homebrew/Cellar/node@24/24.19.0/bin/node"
+  },
+  "commands": [
+    {
+      "cwd": "/tmp/continuity-public-corrected.FvHXDC",
+      "command": "curl --fail --location --proto '=https' --tlsv1.2 'https://codeload.github.com/CryptoMickle/continuity-kit/tar.gz/27df242f16dc96f9752f5e6b0bd918c85ca60467' --output /tmp/continuity-public-corrected.FvHXDC/public-source.tar.gz",
+      "exit": 0,
+      "sandbox_escalation": true
+    },
+    {
+      "cwd": "/tmp/continuity-public-corrected.FvHXDC/source/continuity-kit-27df242f16dc96f9752f5e6b0bd918c85ca60467/account-reserve",
+      "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm ci --ignore-scripts --no-audit --no-fund --offline --cache /tmp/continuity-reserve-npm",
+      "exit": 0,
+      "packages_added": 86
+    },
+    {
+      "cwd": "/tmp/continuity-public-corrected.FvHXDC/source/continuity-kit-27df242f16dc96f9752f5e6b0bd918c85ca60467/account-reserve",
+      "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH node integrations/textarea-text/create.mjs /tmp/continuity-public-corrected.FvHXDC/consumer",
+      "exit": 0
+    },
+    {
+      "cwd": "/tmp/continuity-public-corrected.FvHXDC/consumer",
+      "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm ci --ignore-scripts --no-audit --no-fund --offline --cache /tmp/continuity-reserve-npm",
+      "exit": 0,
+      "packages_added": 80
+    },
+    {
+      "cwd": "/tmp/continuity-public-corrected.FvHXDC/consumer",
+      "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm run build",
+      "exit": 0,
+      "modules_transformed": 45,
+      "files": [
+        "dist/index.html",
+        "dist/assets/index-dpf_Gcz6.css",
+        "dist/assets/index-Byoewx5t.js"
+      ]
+    },
+    {
+      "cwd": "/tmp/continuity-public-corrected.FvHXDC/consumer",
+      "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH NODE_OPTIONS='--import=/tmp/continuity-public-corrected.FvHXDC/observe-test.mjs' npm test",
+      "exit": 0,
+      "sandbox_escalation": true,
+      "passive_observer": true
+    }
+  ],
+  "friction": [
+    {
+      "kind": "documentation_defect",
+      "finding": "account-reserve/README.md tells a fresh consumer to run npm test before npm run build; test requires dist and fails HTTP 400 !== 200. integrations/textarea-text/README.md already has the correct build-then-test order.",
+      "workaround": "npm run build, then npm test; no source edits",
+      "resolution": "Corrected publicly at 27df242f16dc96f9752f5e6b0bd918c85ca60467; new archive and fresh separate consumer passed the documented build-then-test order."
+    },
+    {
+      "kind": "environment",
+      "finding": "Shared offline cache lacked youch-core@0.3.3 required by the full source install; public-registry npm ci succeeded. Consumer install then succeeded offline.",
+      "resolution": "Corrected-revision source and consumer installations both passed offline with the now-warmed cache."
+    },
+    {
+      "kind": "environment",
+      "finding": "Sandbox restricted DNS and loopback listen. Public archive/dependency download and localhost-only tests succeeded after targeted escalation."
+    },
+    {
+      "kind": "dependency_warning",
+      "finding": "Source npm ci warned that @esbuild-kit/esm-loader@2.6.5 and @esbuild-kit/core-utils@3.3.2 are deprecated; install still passed."
+    }
+  ],
+  "sdk_package": {
+    "name": "@continuitykit/account-reserve",
+    "version": "0.0.1-experimental",
+    "integrity": "sha512-gGX4QoAc6KCQKm7rbnMvF12C5p1kvmGkLhLzaLn4Qq3tJPsOyVoN233BuDvA0DFVbpzZ+cVwviO12X6o5hwPDg==",
+    "shasum": "49095b99ad0deb46014a54b89e471ddf0c5205ba",
+    "filename": "continuitykit-account-reserve-0.0.1-experimental.tgz"
+  },
+  "observed": {
+    "fresh_recovery_processes": 2,
+    "parent_pid": 45421,
+    "child_pids": [
+      45423,
+      45424
+    ],
+    "child_input": "Each child argv contained only smoke.mjs, --fresh-recovery and B origin; no document, locator, credential ID or setup object.",
+    "child_exit_codes": [
+      0,
+      0
+    ],
+    "before_recovery": {
+      "primaryOnline": false,
+      "records": 1,
+      "counts": {
+        "primary": 2,
+        "recovery": 9,
+        "creates": 1,
+        "assertions": 1,
+        "writes": 1
+      },
+      "synthetic": true
+    },
+    "after_first_recovery": {
+      "primaryOnline": false,
+      "records": 1,
+      "counts": {
+        "primary": 2,
+        "recovery": 13,
+        "creates": 1,
+        "assertions": 2,
+        "writes": 1
+      },
+      "synthetic": true
+    },
+    "records": 1,
+    "credential_creations": 1,
+    "writes": 1,
+    "preparation_assertions": 1,
+    "recovery_assertions_each": 1,
+    "recovery_assertions_total": 2,
+    "assertion_evidence": "First child increments server assertion counter from 1 to 2; each child issues exactly one successful /api/synthetic POST.",
+    "primary_http_statuses": [
+      503,
+      503
+    ],
+    "primary_requests_during_both_recoveries": 0,
+    "recovery_page_final_http_status": 200,
+    "export_file_readbacks": 4,
+    "txt_exports_identical_across_children": true,
+    "json_exports_identical_across_children": true,
+    "immutable_snapshot_matches_across_children": true,
+    "plaintext_url_writes": 0,
+    "service_worker_requests": 0,
+    "upstream_txt_menu_executed": true,
+    "upstream_editor_executed_in_jsdom": true,
+    "paste_undo_linebreak_unicode_select_all_regressions": "passed by consumer smoke assertions",
+    "recovered_text_exact": "# Client note — ÆØÅ\n\nThis change was made before the snapshot.\n\n**Actual upstream editor** keeps markup and Unicode 📝.\n",
+    "exports_exact": [
+      {
+        "extension": "txt",
+        "utf8_bytes": 172,
+        "sha256": "bb611bf4786dbdc483a44eb2246611cb82bda7de0d6ca1da87142471d76c8194",
+        "content": "# Client note — ÆØÅ\n\nThis change was made before the snapshot.\n\n**Actual upstream editor** keeps markup and Unicode 📝.\n\n\nRecovered editor: final sentence completed."
+      },
+      {
+        "extension": "json",
+        "utf8_bytes": 196,
+        "sha256": "649237d3d1c6d9cb49c1f7f5edff094be4a757467577737e6c0ce81d28986c6c",
+        "content": "{\n  \"text\": \"# Client note — ÆØÅ\\n\\nThis change was made before the snapshot.\\n\\n**Actual upstream editor** keeps markup and Unicode 📝.\\n\\n\\nRecovered editor: final sentence completed.\"\n}\n"
+      }
+    ],
+    "evidence_jsonl": "/tmp/continuity-public-corrected.FvHXDC/observed-test.jsonl",
+    "passive_observer_path": "/tmp/continuity-public-corrected.FvHXDC/observe-test.mjs",
+    "observer_scope": "Outside source and consumer; passively records child starts/exits, loopback response status/counts and bytes returned by actual export-file readFile. It changes no application return values or public source. Original temporary export files are deleted by the unchanged test."
+  },
+  "public_module_resolution": {
+    "base": "/tmp/continuity-public-corrected.FvHXDC/consumer/node_modules/@continuitykit/account-reserve/sdk",
+    "text-reserve": [
+      "MAX_TEXT_BYTES",
+      "TEXT_PROTOCOL",
+      "TextReserveError",
+      "createTextReserveCredential",
+      "prepareTextReserve",
+      "recoverTextReserve",
+      "validateText"
+    ],
+    "text-browser": [
+      "createTextReserveReceiver",
+      "startTextReserveSetup"
+    ],
+    "http-store": [
+      "createReserveHttpStore"
+    ],
+    "verification": "Same SDK code as initial revision; installed tarballs differ only in package/README.md. Current consumer imports these installed public modules and passes."
+  },
+  "native": false,
+  "physical_browser": false,
+  "native_passkeys": false,
+  "publication_performed": false,
+  "adoption_claim": false,
+  "demand_claim": false,
+  "upstream_endorsement_claim": false,
+  "external_human_integrator_claim": false,
+  "limitations": [
+    "Synthetic credential and RAM server; JSDOM DOM tests, not native browser or physical passkey validation.",
+    "Independent agent replay of published source; not external-user adoption or human onboarding-time evidence.",
+    "Only this one consumer scenario was run; no full-project test total is claimed.",
+    "Interactive npm run dev/browser flow was not exercised; requested validation was dependency installation, production build and consumer smoke test."
+  ],
+  "previous_revision": {
+    "commit": "55321fa53f389d6772c699deb382bbfe9c0328e3",
+    "status": "PASS_AFTER_DOCUMENTED_COMMAND_ORDER_CORRECTION",
+    "archive_path": "/tmp/continuity-public-install.yikSYF/public-source.tar.gz",
+    "archive_sha256": "9455de914d414e88f2feac3f0b4136fa65880d9d511c47f4a6d1ce727c33ec6b",
+    "source_path": "/tmp/continuity-public-install.yikSYF/source/continuity-kit-55321fa53f389d6772c699deb382bbfe9c0328e3",
+    "consumer_path": "/tmp/continuity-public-install.yikSYF/consumer",
+    "full_report": "/tmp/continuity-public-install.yikSYF/report.json",
+    "commands": [
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF",
+        "command": "curl --fail --location --proto '=https' --tlsv1.2 'https://codeload.github.com/CryptoMickle/continuity-kit/tar.gz/55321fa53f389d6772c699deb382bbfe9c0328e3' --output /tmp/continuity-public-install.yikSYF/public-source.tar.gz",
+        "initial_exit": 6,
+        "retry_exit": 0,
+        "retry_sandbox_escalation": true
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/source/continuity-kit-55321fa53f389d6772c699deb382bbfe9c0328e3/account-reserve",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm ci --ignore-scripts --no-audit --no-fund --offline --cache /tmp/continuity-reserve-npm",
+        "exit": 1,
+        "error": "ENOTCACHED youch-core@0.3.3"
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/source/continuity-kit-55321fa53f389d6772c699deb382bbfe9c0328e3/account-reserve",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm ci --ignore-scripts --no-audit --no-fund --cache /tmp/continuity-reserve-npm",
+        "exit": 0,
+        "sandbox_escalation": true,
+        "packages_added": 86
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/source/continuity-kit-55321fa53f389d6772c699deb382bbfe9c0328e3/account-reserve",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH node integrations/textarea-text/create.mjs /tmp/continuity-public-install.yikSYF/consumer",
+        "exit": 0
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/consumer",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm ci --ignore-scripts --no-audit --no-fund --offline --cache /tmp/continuity-reserve-npm",
+        "exit": 0,
+        "packages_added": 80
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/consumer",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm test",
+        "exit": 1,
+        "error": "Sandbox listen EPERM at 127.0.0.1:5673"
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/consumer",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm test",
+        "exit": 1,
+        "sandbox_escalation": true,
+        "error": "Before build, smoke.mjs:128 sees recovery page HTTP 400 rather than expected 200"
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/consumer",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH npm run build",
+        "exit": 0,
+        "modules_transformed": 45,
+        "files": [
+          "dist/index.html",
+          "dist/assets/index-dpf_Gcz6.css",
+          "dist/assets/index-Byoewx5t.js"
+        ]
+      },
+      {
+        "cwd": "/tmp/continuity-public-install.yikSYF/consumer",
+        "command": "PATH=/opt/homebrew/opt/node@24/bin:$PATH NODE_OPTIONS='--import=/tmp/continuity-public-install.yikSYF/observe-test.mjs' npm test",
+        "exit": 0,
+        "sandbox_escalation": true,
+        "passive_observer": true
+      }
+    ]
+  },
+  "correction_verified": {
+    "root_readme_build_before_test": true,
+    "integration_readme_build_before_test": true,
+    "runtime_source_unchanged_from_initial_revision": true,
+    "all_public_source_file_differences": {
+      "added": [
+        "account-reserve/evidence/portal-text-draft-saved-2026-10-09.json"
+      ],
+      "removed": [],
+      "changed": [
+        "account-reserve/README.md",
+        "account-reserve/delivery/ENTRY_DRAFT.md",
+        "account-reserve/delivery/JUDGE_GUIDE.md",
+        "account-reserve/delivery/STATUS.md"
+      ],
+      "unchanged_files": 446
+    },
+    "packed_sdk_differences": {
+      "added": [],
+      "removed": [],
+      "changed": [
+        "package/README.md"
+      ],
+      "unchanged_files": 52
+    }
+  }
+}

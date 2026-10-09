@@ -17,9 +17,16 @@ results do not establish this new protocol's physical-device support.
 asset matches. This verifies the deployed pages/assets, not native recovery.
 
 
+The [public-source clean-install report](../evidence/text-public-install-2026-10-09.json)
+reproduced corrected revision `27df242` from a fresh anonymous archive and separate
+consumer, including two fresh-process recoveries and exact exported-file readback.
+An initial build/test ordering error was fixed and retested from published source.
+This is agent evaluation, not outside adoption or native-device proof.
+
 Current text runtime and integration source: [commit `55321fa`](https://github.com/CryptoMickle/continuity-kit/tree/55321fa53f389d6772c699deb382bbfe9c0328e3/account-reserve).
 The text entry was saved to the competition portal and verified after reload at
-21:52 UTC on 9 October. Native text acceptance, videos and final submission remain pending.
+21:52 UTC on 9 October; the clean-install result was added and rechecked at 21:58 UTC.
+Native text acceptance, videos and final submission remain pending.
 
 ## Start here
 

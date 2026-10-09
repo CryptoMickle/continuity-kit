@@ -9,5 +9,12 @@
   "videos": "missing; intentionally deferred",
   "finalSubmitted": false,
   "sourceCommit": "55321fa53f389d6772c699deb382bbfe9c0328e3",
-  "nativeTextAcceptance": "pending"
+  "nativeTextAcceptance": "pending",
+  "followUpSavedAt": "2026-10-09T21:58:00Z",
+  "followUp": "Added verified clean public-source installation to judge instructions",
+  "followUpReadback": {
+    "all13FieldsChecked": true,
+    "all5UpdatedValuesMatch": true,
+    "otherFieldsPreserved": true
+  }
 }

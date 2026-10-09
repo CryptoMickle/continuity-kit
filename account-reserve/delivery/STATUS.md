@@ -28,6 +28,13 @@ established by JSDOM. This is agent-built integration, not upstream endorsement,
 external adoption or measured maintainer demand. The older account-bound Textarea
 adapter and Work encrypted-export drill remain separate evidence.
 
+The [clean public-source installation](../evidence/text-public-install-2026-10-09.json)
+now passed at commit `27df242f16dc96f9752f5e6b0bd918c85ca60467` in a fresh downloaded
+checkout and separate consumer. It caught and verified the repair of a README
+build/test-order error. Two fresh recovery processes returned identical TXT/JSON
+bytes without A requests. No development checkout was used. This agent replay does
+not establish native passkey behavior or external adoption.
+
 The new [text-v1 encrypted-file comparison](../evidence/text-drill-2026-10-09.json)
 passed six conditions on both paths, using 12 fresh recovery processes and actual
 A=503 checks before/after. The same text and credential protect both copies; the
@@ -46,7 +53,8 @@ Expiry is not proof of deletion or cleanup execution.
 The judge guide and saved portal entry lead with published text-v1 pages and mark
 the native gap. Runtime source is published at commit `55321fa53f389d6772c699deb382bbfe9c0328e3`.
 At 21:52 UTC on 9 October, five changed portal fields were saved and all 13 fields
-read back after reload. The other fields were preserved. The checklist remains 5/6.
+read back after reload. The other fields were preserved. A follow-up at 21:58 UTC added the clean-public-install
+result to judge instructions; all 13 fields were checked again. The checklist remains 5/6.
 [Portal save evidence](../evidence/portal-text-draft-saved-2026-10-09.json).
 Video and final submission remain deferred. Older dated records below are historical.
 

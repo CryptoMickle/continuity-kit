@@ -1,3 +1,43 @@
+# Text Reserve security scope
+
+The account-free `/text-reserve` and `/text-browser` APIs protect one immutable UTF-8
+text document. They do not create, receive, store or recover an EOA/private account
+key. Recovery returns text and integrity metadata, never a signer. The older account
+protocol described below remains separate and unchanged.
+
+Text Reserve trusts the configured A and B clients, the browser/authenticator, a
+surviving compatible B passkey and the configured B origin/RP. A transfers the selected
+text only through an exact origin/window/nonce-bound channel. B necessarily handles
+plaintext while preparing or editing. Intentional TXT/JSON exports are plaintext.
+JavaScript strings, editor history and browser memory cannot be guaranteed erased.
+
+The text PRF input salt is protocol-wide. HKDF salt binds the canonical protocol,
+configuration and selected credential ID; distinct purpose labels separate lookup,
+manifest encryption and text encryption. See [TEXT_PROTOCOL.txt](sdk/TEXT_PROTOCOL.txt)
+for the exact byte-level construction. Application separation is not an app-specific
+PRF input-salt claim. Authenticated decryption validates configuration, credential,
+text digest, encoding and capacity before releasing text. A malicious trusted client
+can still exfiltrate plaintext or PRF-derived material; encryption is not protection
+against the code the user actively trusts with the passkey operation.
+
+Ready means one immutable write, exact byte readback and a fresh discoverable
+assertion/decryption of the same text. Cancellation or timeout can happen after the
+server accepted a write; uncertain results never silently create another credential
+or repeat the write. The user checks the existing reserve. Neither a malicious store
+hiding an existing record nor loss of B/storage/provider is solved by this protocol.
+There is no latest-version registry, synchronization, credential rotation or lost-key
+recovery in this format. A retained encrypted export is a competent alternative.
+
+The hosted `/text/` candidate shares the older self-service Work database, schema,
+64-record limit, 256-admission lifetime limit and 10 November 2026 access deadline.
+PRF/record namespaces stay separate; old reserves are not migrated. Both Sites and
+storage have one operator. Native text-v1 and same-passkey second-device acceptance
+remain pending; prior Work and Account results do not establish them. Synthetic
+consumer servers and authenticators are loopback-only teaching fixtures and must
+never be deployed as production services. No independent audit is claimed.
+
+---
+
 # Experimental authority and trust model
 
 This is not an audited custody, wallet recovery or production payment service. It wraps one already-derived EOA key in a separately versioned reserve protocol. It does not rotate or revoke the original signer. A malicious or compromised reserve client can use the full underlying EOA authority, even though the reference UI exposes only one bounded test action.

@@ -2,7 +2,8 @@
 
 **Saved to the portal and verified after reload at 21:52 UTC, 9 October 2026.**
 Five changed fields matched this draft; all 13 text fields were read back, with the
-other fields preserved. Checklist remains 5/6 because demo/pitch videos are deliberately
+other fields preserved. A follow-up at 21:58 UTC added the successful clean public-source
+installation to judge instructions, then all 13 fields were checked again. Checklist remains 5/6 because demo/pitch videos are deliberately
 absent. Final submission has not been performed. Evidence:
 `evidence/portal-text-draft-saved-2026-10-09.json`.
 
@@ -124,7 +125,8 @@ browser-local credentials/outage. This older preview is not text-v1 native proof
 
 SOURCE AND LOCAL DEVELOPER CHECKS
 https://github.com/CryptoMickle/continuity-kit/tree/main/account-reserve
-Commands refer to this current source tree. Read delivery/JUDGE_GUIDE.md. integrations/textarea-text/
+A separate agent downloaded revision 27df242f16dc96f9752f5e6b0bd918c85ca60467 into a fresh checkout and passed the documented install, build and consumer test. Two fresh recovery processes returned identical TXT/JSON bytes with zero requests to A. See evidence/text-public-install-2026-10-09.json. This is automated evaluation, not outside adoption or native-device proof.
+Read delivery/JUDGE_GUIDE.md. integrations/textarea-text/
 contains the account-free real-editor adapter. integrations/textarea/ retains the
 older account-bound example. scripts/text-recovery-drill.mjs reproduces the current
 text encrypted-file comparison; the older Work drill remains supplemental evidence.

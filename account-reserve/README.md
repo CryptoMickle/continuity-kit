@@ -52,6 +52,14 @@ processes with zero A requests, native-editor paste/undo behavior and exact TXT/
 readback. These are reproducible software checks, not physical-device evidence or measured
 human onboarding time. [Protocol specification](sdk/TEXT_PROTOCOL.txt).
 
+A separate agent downloaded [public commit `27df242`](https://github.com/CryptoMickle/continuity-kit/tree/27df242f16dc96f9752f5e6b0bd918c85ca60467/account-reserve)
+into a new directory and completed the documented build/test order in another empty
+consumer. It used no local development files. Two fresh recovery processes returned
+matching text and real TXT/JSON file bytes with zero requests to A. The first replay
+caught a build-before-test documentation defect, now corrected and replayed from
+public source. [Full scoped report](evidence/text-public-install-2026-10-09.json).
+This is independent agent replay, not independent human adoption or native validation.
+
 ## Evaluate the evidence
 
 - [Judge guide](delivery/JUDGE_GUIDE.md): current entry and precisely scoped proofs.
@@ -238,6 +246,6 @@ Mikkel / CryptoMickle is the sole human builder. OpenAI Codex and GPT agents ass
 
 The current Work Reserve direction extends the account-reserve work developed during the 2026 Metropolis build period. It adds encrypted unfinished work and a work-only recovery path; account unlock remains separate. The earlier ContinuityKit data-recovery experiment uses an on-chain version registry and is a different protocol. Its product name and presentation direction are reused, but its tests are not counted as proof of Work Reserve. The current source export is a snapshot, not a Git commit history. The source release preserves the existing repository history and adds this snapshot with its actual commit date; it does not reconstruct earlier development commits.
 
-The local fixtures follow the account patterns identified in [Iris](https://github.com/vmlechko/Iris/blob/main/lib/account.ts) and [Accrue at a pinned revision](https://github.com/pauleke65/accrue/blob/ab1d8580f339addaa02ea118e89ba4b89627e926/lib/mera-account.ts). No upstream app source or assets are vendored. The protocol uses unmodified published Mera 0.2.0 APIs, viem 2.56.9, Web Crypto and scure BIP39/BIP32. Existing local experiments are recorded in `../mera-account-exit/`; that directory is not a runtime SDK dependency.
+The local fixtures follow the account patterns identified in [Iris](https://github.com/vmlechko/Iris/blob/main/lib/account.ts) and [Accrue at a pinned revision](https://github.com/pauleke65/accrue/blob/ab1d8580f339addaa02ea118e89ba4b89627e926/lib/mera-account.ts). No Iris or Accrue source or assets are vendored; the separately identified Textarea integration retains its pinned MIT upstream source. The protocol uses unmodified published Mera 0.2.0 APIs, viem 2.56.9, Web Crypto and scure BIP39/BIP32. Existing local experiments are recorded in `../mera-account-exit/`; that directory is not a runtime SDK dependency.
 
 Dependency and artwork provenance are recorded in [third-party notices](delivery/THIRD_PARTY_NOTICES.md). This Account Reserve source is licensed under [MIT](LICENSE). Dependencies retain their own license terms and notices. The [submission requirements](delivery/REQUIREMENTS_2026-10-08.md) distinguish the prepared materials from the remaining competition submission steps.
