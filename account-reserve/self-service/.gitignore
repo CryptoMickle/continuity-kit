@@ -1,0 +1,11 @@
+# Local Site checkouts contain hosting metadata and runtime state.
+sites/
+.openai/
+.sites/
+.sites-checkout/
+.wrangler/
+.env
+.env.*
+node_modules/
+dist/
+artifacts/

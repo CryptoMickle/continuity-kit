@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "enabled": true,
+  "releaseId": "3c00edf85a8ebb53cc01b975d261c7c6",
+  "primaryOrigin": "https://continuitykit-try-primary.cryptomickle.chatgpt.site",
+  "recoveryOrigin": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site",
+  "expiresAt": "2026-11-10T00:00:00.000Z"
+}

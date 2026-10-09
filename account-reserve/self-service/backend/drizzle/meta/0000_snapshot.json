@@ -1,0 +1,230 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "36ae399c-594d-40fd-ab1c-6e632cfa497b",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "ss_capabilities": {
+      "name": "ss_capabilities",
+      "columns": {
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "capability_hash": {
+          "name": "capability_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_ms": {
+          "name": "expires_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ss_capabilities_namespace_ss_release_namespace_fk": {
+          "name": "ss_capabilities_namespace_ss_release_namespace_fk",
+          "tableFrom": "ss_capabilities",
+          "tableTo": "ss_release",
+          "columnsFrom": [
+            "namespace"
+          ],
+          "columnsTo": [
+            "namespace"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ss_capabilities_namespace_capability_hash_pk": {
+          "columns": [
+            "namespace",
+            "capability_hash"
+          ],
+          "name": "ss_capabilities_namespace_capability_hash_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ss_capability_hash": {
+          "name": "ss_capability_hash",
+          "value": "length(\"ss_capabilities\".\"capability_hash\") = 64 AND \"ss_capabilities\".\"capability_hash\" NOT GLOB '*[^0-9a-f]*'"
+        },
+        "ss_capability_expiry": {
+          "name": "ss_capability_expiry",
+          "value": "typeof(\"ss_capabilities\".\"expires_ms\") = 'integer' AND \"ss_capabilities\".\"expires_ms\" > 0"
+        }
+      }
+    },
+    "ss_records": {
+      "name": "ss_records",
+      "columns": {
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "locator": {
+          "name": "locator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "capability_hash": {
+          "name": "capability_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ciphertext": {
+          "name": "ciphertext",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ss_record_capability_unique": {
+          "name": "ss_record_capability_unique",
+          "columns": [
+            "namespace",
+            "capability_hash"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "ss_records_namespace_capability_hash_ss_capabilities_namespace_capability_hash_fk": {
+          "name": "ss_records_namespace_capability_hash_ss_capabilities_namespace_capability_hash_fk",
+          "tableFrom": "ss_records",
+          "tableTo": "ss_capabilities",
+          "columnsFrom": [
+            "namespace",
+            "capability_hash"
+          ],
+          "columnsTo": [
+            "namespace",
+            "capability_hash"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ss_records_namespace_locator_pk": {
+          "columns": [
+            "namespace",
+            "locator"
+          ],
+          "name": "ss_records_namespace_locator_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ss_record_locator": {
+          "name": "ss_record_locator",
+          "value": "length(\"ss_records\".\"locator\") = 43 AND \"ss_records\".\"locator\" NOT GLOB '*[^A-Za-z0-9_-]*'"
+        },
+        "ss_record_bytes": {
+          "name": "ss_record_bytes",
+          "value": "length(\"ss_records\".\"ciphertext\") BETWEEN 2 AND 87382 AND \"ss_records\".\"ciphertext\" NOT GLOB '*[^A-Za-z0-9_-]*'"
+        }
+      }
+    },
+    "ss_release": {
+      "name": "ss_release",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "schema": {
+          "name": "schema",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_ms": {
+          "name": "expires_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "purged_ms": {
+          "name": "purged_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "ss_release_namespace_unique": {
+          "name": "ss_release_namespace_unique",
+          "columns": [
+            "namespace"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ss_release_singleton": {
+          "name": "ss_release_singleton",
+          "value": "\"ss_release\".\"id\" = 1"
+        },
+        "ss_release_schema": {
+          "name": "ss_release_schema",
+          "value": "\"ss_release\".\"schema\" = 'continuity-judge-ciphertext/v1'"
+        },
+        "ss_release_expiry": {
+          "name": "ss_release_expiry",
+          "value": "typeof(\"ss_release\".\"expires_ms\") = 'integer' AND \"ss_release\".\"expires_ms\" > 0"
+        },
+        "ss_release_purge": {
+          "name": "ss_release_purge",
+          "value": "\"ss_release\".\"purged_ms\" IS NULL OR (typeof(\"ss_release\".\"purged_ms\") = 'integer' AND \"ss_release\".\"purged_ms\" >= \"ss_release\".\"expires_ms\")"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}
