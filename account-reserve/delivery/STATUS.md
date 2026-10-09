@@ -1,4 +1,56 @@
-# Native self-service acceptance — 9 October 2026
+# Account-free text pages published — 9 October 2026
+
+The preferred new entry is [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)
+and [text reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/).
+Both Sites version 3 deployments succeeded and `/text/` was observed on A and B.
+A rendered at 390-pixel width; unique edited text was downloaded as TXT and JSON
+and both files matched exactly. A-to-B admission reached **Create reserve passkey**.
+Cancellation before native creation closed setup with the no-passkey status; fresh
+B offered **Open my existing reserve**. **No native ceremony was called in these
+checks. Text-v1 setup and Mac-to-iPhone recovery/export remain pending.** Earlier Work/Account
+physical results below retain their scope and are not text-v1 acceptance.
+
+[Public HTTP verification](../evidence/text-public-http-2026-10-09.json) passed
+22/22 checks for configuration, preserved old routes and exact compiled assets.
+
+Implemented locally: a separate immutable text protocol and typed public APIs,
+origin/source/nonce-bound browser handoff, exact UTF-8 text recovery, one write with
+byte readback and independent passkey-based decryption before readiness. It creates
+no EOA, account vault or signer. Its protocol-wide PRF salt is fixed; HKDF binds the
+app ID, recovery origin/RP and credential ID, with separate lookup/manifest/text
+purposes. [Protocol details](../sdk/TEXT_PROTOCOL.txt).
+
+The real-editor integration in [integrations/textarea-text/](../integrations/textarea-text/README.md)
+uses only the upstream Textarea document. Its clean SDK-package install/build and
+synthetic/JSDOM tests passed, including A frontend/API 503, fresh-process recovery,
+continued editing and TXT/JSON file readback. Browser/native passkey behavior is not
+established by JSDOM. This is agent-built integration, not upstream endorsement,
+external adoption or measured maintainer demand. The older account-bound Textarea
+adapter and Work encrypted-export drill remain separate evidence.
+
+The new [text-v1 encrypted-file comparison](../evidence/text-drill-2026-10-09.json)
+passed six conditions on both paths, using 12 fresh recovery processes and actual
+A=503 checks before/after. The same text and credential protect both copies; the
+baseline file is retained and independently imported before outage. Healthy recovery
+uses one assertion each, with one HTTP read for reserve and none for the file.
+Both edited TXT/JSON results were written/read back exactly. Four regression tests
+passed. This is synthetic loopback evidence, not native acceptance or demand.
+
+The new path reuses the existing self-service store and release: **64 records and
+256 lifetime admissions shared across Work and text**, with at most 64 KiB per
+record and access ending **10 November 2026, 00:00 UTC**. There is no second quota,
+database schema change or migration of old reserves. Limits do not cap request
+traffic or bills. Same operator and recovery-domain dependencies remain.
+Expiry is not proof of deletion or cleanup execution.
+
+The judge guide and local entry draft now lead with published text-v1 pages and mark
+the native gap. Source commands refer to this current tree; no new public commit
+hash is inferred here. **The portal has not been updated with this text draft.**
+Video and final submission remain deferred. Older dated records below are historical.
+
+---
+
+# Earlier self-service Work acceptance — 9 October 2026
 
 The isolated public [self-service A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/)
 and [reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/) now let a judge
@@ -10,8 +62,9 @@ independently inspected. This is not an independent participant trial, second-de
 for this new credential or an A-service outage test.
 
 Evidence: `evidence/self-service-iphone-setup-report-2026-10-09.json`.
-The judge guide now starts with this native self-service flow. Video and final submission
-remain explicitly deferred. Earlier dated records below retain their original scope.
+At that checkpoint the judge guide started with this Work self-service flow. Its
+native result does not establish the later text-v1 candidate. Video and final
+submission remain explicitly deferred. Earlier dated records retain their original scope.
 
 ---
 
@@ -28,8 +81,17 @@ for reproducible commands and individually scoped reports. The drill passed 10 c
 9 regression tests; the local payment example passed 6 tests, including signing rejection
 after closure. Public testnet and existing native Work services are unchanged.
 
-Video and final submission remain deferred. New source/portal publication results are recorded
-separately when complete; prior publication and portal records below remain historical.
+Source publication completed at [commit `2e66b91a`](https://github.com/CryptoMickle/continuity-kit/tree/2e66b91a0e93db5cc513e82cc13f03b7f4e27739/account-reserve).
+One anonymous archive check matched all 378 public blobs and all 240 staged files. The update
+added 57 files and changed 7; 314 earlier blobs remained unchanged and none were deleted.
+Evidence: `evidence/judge-source-publication-2026-10-09.json`.
+
+The three prepared portal text fields were saved at 15:46 UTC on 9 October and checked after
+reload. All 13 text fields matched; the Trust track, Mera selection and Monad live-product link
+were retained. Checklist: **5/6; demo and pitch videos remain**. Evidence:
+`evidence/portal-developer-update-saved-2026-10-09.json` and its PNG screenshot.
+Video and final submission remain deferred. These completion records were written after the
+source commit; the prior publication and portal records below remain historical.
 
 ---
 

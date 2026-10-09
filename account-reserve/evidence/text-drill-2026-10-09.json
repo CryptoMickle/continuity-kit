@@ -1,0 +1,295 @@
+{
+  "format": "continuity-text-drill/v1",
+  "status": "passed",
+  "synthetic": true,
+  "protocol": "account-continuity/text-reserve-v1",
+  "recoveryIsolation": "A new Node child process for every path and fault case; config and synthetic credential only, plus an encrypted file path for file import. No plaintext, locator or writable token.",
+  "encryptedFileStorage": "Written, byte-readback checked and independently imported in a fresh process before the outage; every import child reads the actual file. The missing-file case observes ENOENT.",
+  "originalServiceOutage": "Real loopback HTTP 503 before and after every recovery attempt.",
+  "fixture": {
+    "textBytes": 95,
+    "textSha256": "4a3b373b72fc494ad5482633fdff4efc464c6816019972ffea11519e14c6aeab",
+    "sameTextAndCredential": true,
+    "dynamicMarker": true
+  },
+  "operations": {
+    "sharedCredentialCreation": {
+      "creates": 1,
+      "assertions": 0
+    },
+    "reservePreparation": {
+      "creates": 0,
+      "assertions": 1
+    },
+    "encryptedFilePreparation": {
+      "creates": 0,
+      "assertions": 2
+    },
+    "totalHttp": {
+      "primary": 25,
+      "storeReads": 8,
+      "storeWrites": 1
+    },
+    "nativePromptsMeasured": false,
+    "humanStepsMeasured": false,
+    "signups": 0,
+    "signingActions": 0
+  },
+  "comparison": [
+    {
+      "id": "both-retained",
+      "textReserve": {
+        "status": "recovered",
+        "textDigest": "4a3b373b72fc494ad5482633fdff4efc464c6816019972ffea11519e14c6aeab",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 1,
+        "noSigningSurface": true,
+        "exactTextAndDigestMatch": true,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 1,
+          "storeWrites": 0
+        }
+      },
+      "encryptedFile": {
+        "status": "recovered",
+        "textDigest": "4a3b373b72fc494ad5482633fdff4efc464c6816019972ffea11519e14c6aeab",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 0,
+        "noSigningSurface": true,
+        "exactTextAndDigestMatch": true,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 0,
+          "storeWrites": 0
+        }
+      }
+    },
+    {
+      "id": "encrypted-file-missing",
+      "textReserve": {
+        "status": "recovered",
+        "textDigest": "4a3b373b72fc494ad5482633fdff4efc464c6816019972ffea11519e14c6aeab",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 1,
+        "noSigningSurface": true,
+        "exactTextAndDigestMatch": true,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 1,
+          "storeWrites": 0
+        }
+      },
+      "encryptedFile": {
+        "status": "BASELINE_FILE_MISSING",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 0
+        },
+        "httpRequests": 0,
+        "exactTextAndDigestMatch": null,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 0,
+          "storeWrites": 0
+        }
+      }
+    },
+    {
+      "id": "reserve-record-missing",
+      "textReserve": {
+        "status": "RESERVE_MISSING",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 1,
+        "exactTextAndDigestMatch": null,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 1,
+          "storeWrites": 0
+        }
+      },
+      "encryptedFile": {
+        "status": "recovered",
+        "textDigest": "4a3b373b72fc494ad5482633fdff4efc464c6816019972ffea11519e14c6aeab",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 0,
+        "noSigningSurface": true,
+        "exactTextAndDigestMatch": true,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 0,
+          "storeWrites": 0
+        }
+      }
+    },
+    {
+      "id": "reserve-service-unavailable",
+      "textReserve": {
+        "status": "STORE_UNAVAILABLE",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 1,
+        "exactTextAndDigestMatch": null,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 1,
+          "storeWrites": 0
+        }
+      },
+      "encryptedFile": {
+        "status": "recovered",
+        "textDigest": "4a3b373b72fc494ad5482633fdff4efc464c6816019972ffea11519e14c6aeab",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 0,
+        "noSigningSurface": true,
+        "exactTextAndDigestMatch": true,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 0,
+          "storeWrites": 0
+        }
+      }
+    },
+    {
+      "id": "both-ciphertexts-altered",
+      "textReserve": {
+        "status": "MANIFEST_AUTH_FAILED",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 1,
+        "exactTextAndDigestMatch": null,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 1,
+          "storeWrites": 0
+        }
+      },
+      "encryptedFile": {
+        "status": "BASELINE_AUTH_FAILED",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 0,
+        "exactTextAndDigestMatch": null,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 0,
+          "storeWrites": 0
+        }
+      }
+    },
+    {
+      "id": "credential-unavailable",
+      "textReserve": {
+        "status": "PASSKEY_OPERATION_FAILED",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 0,
+        "exactTextAndDigestMatch": null,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 0,
+          "storeWrites": 0
+        }
+      },
+      "encryptedFile": {
+        "status": "BASELINE_KEY_UNAVAILABLE",
+        "credentialApiCalls": {
+          "creates": 0,
+          "assertions": 1
+        },
+        "httpRequests": 0,
+        "exactTextAndDigestMatch": null,
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "httpDelta": {
+          "primary": 0,
+          "storeReads": 0,
+          "storeWrites": 0
+        }
+      }
+    }
+  ],
+  "exports": {
+    "equalEditedText": true,
+    "equalEditedJson": true,
+    "textSha256": "d4ba51b2051ed9535872d8d4078525ff0a88d266d3ff7be089ab440dc2cc7979",
+    "jsonSha256": "1df74836ceccee2fb4398608fe587e0ee33a809aeb70771d6712a961b13db21c",
+    "writtenAndReadBack": true
+  },
+  "limits": [
+    "Synthetic HMAC WebAuthn adapter; no native browser, physical passkey or prompt-count proof.",
+    "Both stores are local test services under one operator; no provider or operator independence claim.",
+    "Both methods recover when their encrypted artifact and credential survive; the file also works without reserve HTTP.",
+    "Both preparations independently import before the outage. Reserve preparation reuses create-time PRF material; the file uses a separate random PRF salt. API counts are not native prompt counts or a universal efficiency ranking.",
+    "The reserve helps when the export file is absent; losing the credential prevents both methods.",
+    "No account, signing, chain, signup, developer adoption or human onboarding measurement.",
+    "The encrypted-file format is a comparison fixture, not a supported production backup format."
+  ],
+  "verification": {
+    "recordedAt": "2026-10-09T21:48:45.382Z",
+    "command": "node scripts/text-recovery-drill.mjs --out=2026-10-09-verified-file",
+    "testCommand": "node --test tests/text-recovery-drill.mjs",
+    "tests": {
+      "passed": 4,
+      "failed": 0
+    },
+    "localLoopbackPermissionRequired": true,
+    "outputDirectory": "drill/text-evidence/2026-10-09-verified-file",
+    "sourceSha256": {
+      "sdk/text-reserve.mjs": "e1ba2c96deaf2fa6191e210f1bb81ef8aaf400cbf3fd96c850b4615b31490ad8",
+      "sdk/text-reserve.d.ts": "9389c50c8bcaeb956cb6c29e66c0f36ba8b63453a4d1a27a57b89fa8e9497a02",
+      "sdk/TEXT_PROTOCOL.txt": "a066f95834510a146d00efc46e5a5476730e80f93e193b0fecd0e1826287056c",
+      "drill/text-drill.mjs": "290e32a978b8bcf0cb4c3b61bcf37228fbc78b75fdeff99af7982e88e78a0c28",
+      "scripts/text-recovery-drill.mjs": "cf23e62c59dcc1572695024498bae65a3de283e1858909629cbbb0bfa6654ea9",
+      "tests/text-recovery-drill.mjs": "12113d1788443322148dbcbb8f84c7bf0b6c51ad33845bf36aca779ef1a8c8e0"
+    }
+  }
+}

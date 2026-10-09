@@ -1,0 +1,13 @@
+{
+  "recordedAt": "2026-10-09T21:32:43.239Z",
+  "files": {
+    "sdk/work-reserve.mjs": "a52505ec92b588bbf5da82af6b05a940991326683047ab03e314cb596b14abd7",
+    "sdk/work-reserve.d.ts": "7ea6a4b025cef1e1b81ab7beddfa099420820bb9dca04576316cd65e0bf0981a",
+    "sdk/work-browser.mjs": "a0d805144f12a52a5897181eedc24ab4d9b347e5d7e2a55a47364ade947b11f2",
+    "sdk/index.mjs": "5d66b0236d13f41305c322bfdebde6e7cd98e53625f314e1a8c62f04b746f9b3",
+    "self-service/client/app.mjs": "98bace51eed1d026a05ebc073608cbb4d3e87a83b7fd4239084c312ad5c5b0dc",
+    "self-service/profile.json": "2d0582c4c7f9c193c8664ff02b482c87e02480883bed3c71d55fbae578ef3dc7",
+    "self-service/backend/store.mjs": "8727ce06da3c9c83e919126ca6c4e37e0675ef5039949a9e76100b6e5600a9f2",
+    "self-service/backend/drizzle/0000_self_service_judge.sql": "a3fff4ef5bdef582885f8317df5d1ac6d4c2e37efdee00c269b50e9569c4d9a2"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-09T21:48:15.927Z",
+  "kind": "text-candidate-publication-and-ui",
+  "protocol": "account-continuity/text-reserve-v1",
+  "sites": [
+    {
+      "role": "primary",
+      "version": 3,
+      "sourceCommit": "2215b54bde236bd8e778be4dfa7ea42e352ca946",
+      "deploymentId": "appgdep_6ac9604d19a08191a3a47555ffa7955b",
+      "status": "succeeded",
+      "url": "https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/"
+    },
+    {
+      "role": "recovery",
+      "version": 3,
+      "sourceCommit": "6c14b564682b44d0f74b466dac56afb37c414464",
+      "deploymentId": "appgdep_6ac96033ebd88191b3da01759419935f",
+      "status": "succeeded",
+      "url": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/"
+    }
+  ],
+  "audience": "existing public audience preserved",
+  "v1Preserved": true,
+  "databaseSchemaChanged": false,
+  "quotas": {
+    "sharedRecords": 64,
+    "sharedAdmissions": 256
+  },
+  "browser": {
+    "browser": "Codex integrated browser on Mac",
+    "mobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "desktop": true,
+    "editedUnicodeText": true,
+    "actualTxtDownloadExact": true,
+    "actualJsonDownloadExact": true,
+    "admissionReachedNativeButton": true,
+    "cancelBeforeNative": true,
+    "freshBRecoveryEntry": true,
+    "nativeCallsMade": 0,
+    "nativeSuccessClaim": false,
+    "physicalIPhoneClaim": false
+  },
+  "nativeAcceptance": {
+    "status": "pending",
+    "requested": "Mac Safari preparation then same-passkey Safari iPhone recovery, edit and TXT inspection"
+  },
+  "tests": {
+    "textCoreBrowserUi": 66,
+    "oldWorkPackageAndNativeCancellation": 56,
+    "existingUiPlusTextUi": 39,
+    "d1HostAndCapabilityClock": 43,
+    "countsOverlap": true
+  },
+  "limits": [
+    "No native or second-device acceptance of text-v1 yet",
+    "No outside developer adoption",
+    "No production security audit",
+    "Video and final entry not submitted"
+  ]
+}

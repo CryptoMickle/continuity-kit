@@ -30,6 +30,14 @@
     "./work-browser": {
       "types": "./sdk/work-browser.d.ts",
       "import": "./sdk/work-browser.mjs"
+    },
+    "./text-reserve": {
+      "types": "./sdk/text-reserve.d.ts",
+      "import": "./sdk/text-reserve.mjs"
+    },
+    "./text-browser": {
+      "types": "./sdk/text-browser.d.ts",
+      "import": "./sdk/text-browser.mjs"
     }
   },
   "files": [
@@ -69,7 +77,9 @@
     "test:drill": "node --test tests/work-recovery-drill.mjs",
     "test:work-entitlement": "node --test tests/work-entitlement.mjs",
     "demo:work-entitlement": "node examples/work-entitlement/run.mjs",
-    "test:oss-work": "node --test tests/oss-work-integration.mjs"
+    "test:oss-work": "node --test tests/oss-work-integration.mjs",
+    "test:text": "node --test tests/text-reserve.mjs tests/text-browser.mjs",
+    "test:oss-text": "node --test tests/oss-text-integration.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

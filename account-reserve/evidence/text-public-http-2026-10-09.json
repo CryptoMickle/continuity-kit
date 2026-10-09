@@ -1,0 +1,97 @@
+{
+  "observedAt": "2026-10-09T21:47:33.477118+00:00",
+  "nativePasskeysCreated": false,
+  "mutatingHttpRequests": 0,
+  "checks": [
+    {
+      "check": "primary text page",
+      "passed": true
+    },
+    {
+      "check": "primary same-origin CSP",
+      "passed": true
+    },
+    {
+      "check": "primary no-referrer",
+      "passed": true
+    },
+    {
+      "check": "primary /text/assets/index-C0034Kgq.js",
+      "passed": true
+    },
+    {
+      "check": "primary /text/assets/index-aLiV89t7.css",
+      "passed": true
+    },
+    {
+      "check": "primary account-free config",
+      "passed": true
+    },
+    {
+      "check": "primary limits preserved",
+      "passed": true
+    },
+    {
+      "check": "primary old config preserved",
+      "passed": true
+    },
+    {
+      "check": "primary old page available",
+      "passed": true
+    },
+    {
+      "check": "primary old /assets/index-D0OJJDdg.js",
+      "passed": true
+    },
+    {
+      "check": "primary old /assets/index-TDfijqCo.css",
+      "passed": true
+    },
+    {
+      "check": "recovery text page",
+      "passed": true
+    },
+    {
+      "check": "recovery same-origin CSP",
+      "passed": true
+    },
+    {
+      "check": "recovery no-referrer",
+      "passed": true
+    },
+    {
+      "check": "recovery /text/assets/index-C0034Kgq.js",
+      "passed": true
+    },
+    {
+      "check": "recovery /text/assets/index-aLiV89t7.css",
+      "passed": true
+    },
+    {
+      "check": "recovery account-free config",
+      "passed": true
+    },
+    {
+      "check": "recovery limits preserved",
+      "passed": true
+    },
+    {
+      "check": "recovery old config preserved",
+      "passed": true
+    },
+    {
+      "check": "recovery old page available",
+      "passed": true
+    },
+    {
+      "check": "recovery old /assets/index-D0OJJDdg.js",
+      "passed": true
+    },
+    {
+      "check": "recovery old /assets/index-TDfijqCo.css",
+      "passed": true
+    }
+  ],
+  "passed": 22,
+  "scope": "Anonymous HTTP and exact bundled-asset comparison; not native recovery or provider independence"
+}

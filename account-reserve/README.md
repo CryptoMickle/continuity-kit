@@ -1,40 +1,73 @@
-# ContinuityKit — Work Reserve
+# ContinuityKit — a prepared way back to your work
 
-Recover prepared private work when its original app is unavailable. Open the brief,
-finish the draft and export a usable copy with an existing recovery passkey. The
-account can stay locked throughout that task.
+Prepare an encrypted text snapshot while the original app is available. Reopen it
+from a separate client with its reserve passkey, continue writing and export the result.
+The text API needs one document and three configuration fields. No wallet, account key,
+signing action or invented project fields are required.
 
-Work Reserve is an experimental developer toolkit and reference app. It stores one
-immutable encrypted snapshot, discoverable from a prepared credential without a
-pasted address or saved export file. It does not automatically back up later edits.
-Account access is a separate explicit action; the existing Account Reserve protocol
-and its Monad testnet proof remain available as supporting, separately attributed work.
+This is an experimental developer toolkit, not automatic backup. It keeps one immutable
+snapshot. Later edits must be exported. A competent encrypted export also protects work;
+the narrower benefit here is finding and opening a prepared copy without retaining that
+export file. The reserve service and compatible passkey must still be available.
 
-## Try it without credentials
+## Try the account-free text candidate
 
-[Open the interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/).
-Change a line, prepare a snapshot, discard the original, recover and export. It runs the
-real Work SDK with a simulated credential, entirely inside the browser. It is not native
-passkey, HTTP-outage or physical-device evidence.
+[Open original workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)
+→ edit fictional text → prepare in B → reopen
+[reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/) with the same
+passkey → continue and export. No operator code is needed. Keep both windows open until
+the independent check finishes. The device may require several confirmations.
 
-## Developer checks in this source update
+The candidate's native Safari and same-passkey second-device acceptance are **pending**.
+Earlier physical Work tests below are different protocols and do not establish this
+candidate's success. The public Sites retain the old Work flow at `/`; existing records,
+credentials, database schema and limits are preserved. Text mode has a separate format
+and PRF domain. Both modes share 64 snapshots and 256 lifetime upload permissions.
+Access ends 10 November 2026 at 00:00 UTC. [Instructions and limits](self-service/README.md).
 
-- [Textarea integration](integrations/textarea/README.md): an isolated adapter into Anton
-  Medvedev's pinned MIT editor, consuming the packaged SDK. This is project-authored
-  integration work, not upstream adoption or endorsement.
-- [Recovery drill and encrypted-export comparison](drill/README.md): `npm run drill:work`
-  executes ten checks with real encryption and loopback HTTP failure injection. Both
-  approaches recover when their copies survive. Retained files also work without reserve
-  storage; Work can recover without the file. [Measured report](evidence/work-drill-2026-10-09.json).
-- [Work and existing payment](examples/work-entitlement/README.md): one local fictional
-  job recovers its work with signing locked, then optionally unlocks the same account to
-  claim a pre-issued right. Local chain only; completing the draft does not earn payment.
-- [Playground source](judge-playground/README.md): standalone build with the unchanged SDK.
+## Integrate an actual editor
 
-These additions improve reproducibility and evaluation. They do not establish customer
-demand, willingness to pay or production security. Video and final entry submission remain deferred.
+The [Textarea text adapter](integrations/textarea-text/README.md) executes Anton
+Medvedev's pinned MIT editor and consumes only the packaged public text SDK. It adds no
+example account and no fabricated work fields. The upstream source and license are
+preserved, with privacy-related URL sharing disabled in the generated consumer.
+This is an agent-built integration, not upstream adoption or endorsement.
 
-## Start with the work
+From this source tree, with Node 24+ and npm, choose an empty destination:
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+node integrations/textarea-text/create.mjs /absolute/path/to/textarea-text-demo
+cd /absolute/path/to/textarea-text-demo
+npm ci --ignore-scripts --no-audit --no-fund
+npm test
+npm run build
+npm run dev
+```
+
+Open <http://textarea-text-primary.localhost:5473/>. This local consumer uses a synthetic
+credential and disposable storage. Its automated check covers a clean package install,
+the real upstream editor in JSDOM, A's frontend/API returning 503, two fresh recovery
+processes with zero A requests, native-editor paste/undo behavior and exact TXT/JSON file
+readback. These are reproducible software checks, not physical-device evidence or measured
+human onboarding time. [Protocol specification](sdk/TEXT_PROTOCOL.txt).
+
+## Evaluate the evidence
+
+- [Judge guide](delivery/JUDGE_GUIDE.md): current entry and precisely scoped proofs.
+- [Export comparison](delivery/EXPORT_COMPARISON.md): both approaches' failure modes.
+- [Adoption and operating plan](delivery/ADOPTION_PLAN.md): narrow target, pilot criteria,
+  cost assumptions and unmet demand evidence.
+- [Earlier playground](https://continuitykit-playground.cryptomickle.chatgpt.site/):
+  browser-local Work simulation, not the text candidate or native passkey proof.
+- [Separate Monad proof](evidence/public-proof.json): an existing account's pre-issued
+  testnet payment was claimed once after recovery. Text recovery sends no transaction.
+
+The text API improves integration fit. It does not establish demand, production security
+or a competitive advantage over a retained encrypted export. Videos and final submission
+remain deferred. Older references below are retained for reproducibility and attribution.
+
+## Earlier five-field Work reference
 
 With Node 24+ and npm installed, from this source package:
 
@@ -50,7 +83,7 @@ messages and export. No database account, wallet, chain or funds are needed for 
 local run. It uses a synthetic authenticator and RAM storage; restarting the server
 loses the example. [Run and integration guide](work/README.md).
 
-## Public demonstration and evidence
+## Earlier Work demonstration and scoped physical evidence
 
 - [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site/)
 - [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site/)
@@ -114,7 +147,7 @@ explicit separate test; default mode is synthetic. The teaching server is
 loopback-only and loses its data on restart. Do not deploy it.
 
 Public entry points include the core package, `/browser`, `/http-store`,
-`/preflight`, `/work-reserve` and `/work-browser`. `npm run test:onboarding` generates an empty consumer, installs the
+`/preflight`, `/work-reserve`, `/work-browser`, `/text-reserve` and `/text-browser`. `npm run test:onboarding` generates an empty consumer, installs the
 tarball offline, checks its types/build and verifies fresh recovery through its
 own HTTP server with A unavailable. This is internal integration evidence, not
 external adoption or a measured human onboarding time. The experimental SDK source is MIT-licensed and remains unpublished on npm.

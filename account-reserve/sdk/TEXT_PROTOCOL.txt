@@ -1,0 +1,120 @@
+ContinuityKit text reserve v1 (experimental)
+
+This is a separate immutable text protocol. It has no account key, owner,
+chain configuration, vault, signing session, transaction or migration path.
+It does not read or reinterpret Account Reserve or Work Reserve records.
+Mera 0.2.0 supplies discoverable, user-verified WebAuthn PRF ceremonies.
+The existing cancellation scope forwards cancellation at the native boundary.
+
+Configuration and input
+-----------------------
+Config has exactly appId, recoveryOrigin, recoveryRpId as own data properties.
+appId is 1–96 ASCII letters/digits/dot/underscore/hyphen, beginning alphanumeric.
+recoveryOrigin is an exact canonical HTTPS origin, without path, credentials,
+query or fragment. HTTP is permitted only for localhost, *.localhost and
+127.0.0.1 development. recoveryRpId is exactly that origin's hostname, not a
+parent RP. A browser operation also requires location.origin to match exactly.
+Custom non-browser WebAuthn adapters are trusted platform boundaries, not proof
+that a native browser ceremony or user verification actually occurred.
+
+Text is an unchanged JavaScript string encoding to at most 16384 UTF-8 bytes.
+Empty text is valid. Malformed surrogate sequences are rejected. No Unicode or
+newline normalization occurs; initial U+FEFF, CRLF and null characters survive.
+The protocol neither renders nor executes the text. Consumers must render it as
+text, not trusted HTML. Digest is lowercase unprefixed hex SHA-256 of raw UTF-8.
+
+Canonical encoding and domain separation
+----------------------------------------
+J(x) is UTF-8 JSON.stringify(x) with object keys recursively sorted. Parsers
+require exact byte-equivalent canonical serialization, bounded to 65536 bytes.
+Base64url is canonical, unpadded. Every AEAD nonce is 12 fresh random bytes;
+AES-256-GCM uses 128-bit tags. CryptoKey objects are non-extractable.
+
+P = account-continuity/text-reserve-v1
+PRF salt = SHA-256(UTF-8(P + '/prf'))
+         = 20b9d60bc82e9d394a6e32b02bfb225927685add7cc924188fb8b7117e034d12
+This public constant is embedded so create/get reaches native WebAuthn before
+any asynchronous hash work; no await is inserted before the native request.
+Mera creates random 32-byte challenges and user handles. Creation requests
+required discoverability and user verification; a missing create-time PRF
+output may require a second, allowlisted assertion. Prompt counts are device
+dependent. Raw outputs and temporary PRF buffers are wiped after use.
+
+M = imported HKDF key from the 32-byte PRF result
+S = SHA-256(J({format:P+'/hkdf', config, credentialId}))
+L = HKDF-SHA256(M, S, UTF-8(P+'/locator'), 32 bytes)
+locator = base64url(SHA-256(L))
+manifestKey = HKDF-SHA256(M, S, UTF-8(P+'/manifest-aes-gcm'), AES-256-GCM)
+textKey = HKDF-SHA256(M, S, UTF-8(P+'/text-aes-gcm'), AES-256-GCM)
+Thus appId, exact recovery origin, RP ID, protocol and selected credential bind
+all three independent derivations. Bootstrap PRF alone is not used as a key.
+
+Record
+------
+Outer record is J({format:P+'/index', nonce, ciphertext}). The manifest is
+AES-GCM encrypted with manifestKey and AAD:
+  J({format:P+'/index', config, locator, credentialId})
+Manifest is exactly:
+  {format:P+'/manifest', config, credentialId, textDigest,
+   textEnvelope:{nonce,ciphertext}}
+textEnvelope encrypts raw UTF-8 text with textKey and AAD:
+  J({format:P+'/text', config, locator, credentialId, textDigest})
+Only format, nonce and ciphertext appear unencrypted in storage. Recovery
+checks exact fields, canonical encodings, policy, credential, AEAD tags, text
+length/UTF-8 and digest before returning plaintext. Wrong policy/credential
+normally selects a different locator; a substituted record fails authentication.
+AEAD authenticates consistency under the passkey-derived key, not authorship to
+an external party. Anyone controlling the passkey and trusted recovery origin
+can derive that key. A malicious same-origin script remains in the trust base.
+
+Operation lifecycle
+-------------------
+createTextReserveCredential validates config/user before native creation and
+returns a frozen, unforgeable-by-copy, in-memory one-use handle. Its deadline
+is at most five minutes. close() cancels outstanding work and drops key refs;
+it cannot delete the system passkey. Failed enrollment may leave a passkey.
+
+prepareTextReserve requires that exact handle from the same module instance.
+It captures validated immutable inputs and bound store functions, consumes the
+handle, checks absence, dispatches at most one atomic putIfAbsent, compares an
+independent byte-for-byte readback and then calls recoverTextReserve with a
+fresh discoverable PRF assertion. Readiness requires equal text, digest and
+locator from that independent read. No create-time derived key is supplied to
+the independent read. Typical storage counts: one write and three reads.
+
+putIfAbsent must be truly atomic and immutable; a storage interface promise
+cannot enforce that on a dishonest provider. A local attempted-locator guard
+prevents concurrent/repeated attempts in one module instance. It is not a
+durable server authorization or global security boundary. The server must
+provide its own bounded admission and immutable write policy.
+
+After write dispatch, rejection, timeout or cancellation can leave a committed
+record. Errors carry recordMayExist=true conservatively. Never automatically
+retry enrollment or request another passkey after that result. Recover/check
+the existing reserve. A late operation cannot turn a failed call into ready.
+Read/write calls have a 10-second local timeout; native operations have an
+overall five-minute bound and native cancellation. A custom adapter or store
+may ignore cancellation; late PRF output is wiped and not accepted. No claim
+is made that abort cancels an already dispatched remote write.
+
+recoverTextReserve performs one discoverable assertion and one record read,
+with no caller-provided credential, locator, data key or account session.
+Returns only frozen protocol, text, textDigest and locator. It retains no live
+cryptographic context, so there is no close/unlock method. Temporary plaintext
+byte buffers are wiped; JavaScript strings and WebCrypto internals cannot be
+reliably zeroized by this library. Callers control returned plaintext lifetime.
+Progress observers receive stage names only and cannot replace security checks.
+
+Availability and proof boundaries
+---------------------------------
+A surviving credential, recovery RP/origin and encrypted record are required.
+Encrypted storage can be copied without changing its contents, but changing
+the RP or exact origin changes the cryptographic domain and requires a fresh
+reserve. This does not provide domain migration or infrastructure independence.
+Losing the credential or record can make recovery impossible. The storage
+provider observes opaque locators, sizes and request metadata. A plaintext text
+digest returned to the client is not secret; do not publish it for sensitive
+guessable text. There is no permanent retention promise in this protocol.
+
+Synthetic tests verify protocol behavior, not physical passkey support,
+independent developer adoption, production security or a completed audit.

@@ -1,19 +1,48 @@
-# Inspect ContinuityKit Work Reserve
+# Inspect ContinuityKit Text Reserve
 
-**Recover the draft, finish the work, leave account signing locked.** Work Reserve prepares an encrypted copy that a separate client can discover with an existing recovery passkey when the original application is unavailable.
+**Recover the draft and finish the work, without an account key.** The preferred
+text path prepares one encrypted document that a separate client can discover
+with its recovery passkey. It creates no wallet, EOA, account vault or signing session.
 
-The example contains a fictional design brief and an unfinished checkout deliverable for **Studio North**. Its useful outcome is an editable, exportable draft. No payment or account-unlock action is needed for that task.
+**Release boundary:** both `/text/` pages are published as Sites version 3 and were
+observed live. A rendered at 390-pixel mobile width; edited text was downloaded as
+TXT and JSON and matched exactly. The A-to-B admission reached **Create reserve
+passkey**; cancellation before that action closed setup without calling native
+WebAuthn. Fresh B offered **Open my existing reserve**. Native text-v1 preparation
+and Mac-to-iPhone recovery/export remain pending. Earlier Work/Account native
+results do not establish this new protocol's physical-device support.
+
+[Public HTTP verification](../evidence/text-public-http-2026-10-09.json) passed
+22/22 checks, including configuration, preserved older routes and exact compiled
+asset matches. This verifies the deployed pages/assets, not native recovery.
 
 ## Start here
 
-1. Try the public [native self-service workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/). Edit the fictional brief, start an unfunded example account and prepare it in B with a new reserve passkey. No operator code or wallet is needed. Once ready, close A and reopen [reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/) with that same passkey, continue editing and export. Use fictional data only. See [limits and instructions](../self-service/README.md): 64 snapshots, 256 lifetime upload permissions and access ending 10 November 2026 at 00:00 UTC. This new passkey is separate from the older demonstrations.
+1. Preferred published entry: [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/) and [text reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/). Write fictional text, choose **Prepare this text in B**, then explicitly create the reserve passkey in B. Wait for independent verification, close or discard A's window state, reopen a fresh B page and recover, edit and export TXT/JSON. This native sequence still needs acceptance evidence. Closing A does not prove an HTTP outage. This text namespace does not migrate earlier Work reserves.
 2. For a quick preview, use the published [interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/). It offers the edit → prepare → recover → finish → export sequence without a setup code, wallet or native passkey. It runs real Work encryption with fictional, browser-local credentials; it does not simulate a physical authentication success or prove an HTTP outage.
-3. Inspect [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site), then read their recorded physical result below. Public page access does not grant the existing reserve passkey or a new setup code. The local examples below provide repeatable checks without those credentials.
-4. For the required Monad live product, inspect [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris) and its [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). Their separate testnet result demonstrates preserved account authority. The recorded payment is already claimed. The Work flow itself sends no blockchain transactions.
+3. Earlier account-bound paths remain separate: the [self-service Work A homepage](https://continuitykit-try-primary.cryptomickle.chatgpt.site/) and [Work B homepage](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/) still use an unfunded example account. The older [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site) require their existing passkey or operator-issued enrollment code. Their recorded native results appear below.
+4. For the Monad live product, inspect [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris) and its [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). Their separate testnet result demonstrates preserved account authority. The recorded payment is already claimed. Text recovery sends no blockchain transaction.
 
-**Source status:** the core Work Reserve implementation, tests, portable physical proof and finished fictional exports are [published at commit `3e309345`](https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve). The public archive was anonymously downloaded and all 183 selected publication files matched. The playground, Textarea consumer, recovery drill and combined local entitlement example are included in this updated source tree. Their commands apply to this revision, not that earlier commit. The [8 October commit `fdfd817`](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve) remains the earlier Account Reserve snapshot. The competition draft was saved and verified after reload on 9 October; videos and final submission remain deferred.
+The text path and earlier self-service Work flow share **one 64-record / 256-lifetime-
+admission allowance**, not a separate quota per mode. Each encrypted record is at most
+64 KiB; accepted text is at most 16 KiB UTF-8. Access ends **10 November 2026 at
+00:00 UTC**. Expiry does not itself delete records. Both sites and storage have one
+operator; the quota is not a traffic or billing cap. See [operating bounds](ADOPTION_PLAN.md).
 
-## Native self-service acceptance
+**Source status:** this revision contains text-v1, `integrations/textarea-text/` and
+the new text recovery/export drill. Its publication record is separate from the
+live Sites deployment. The earlier core Work implementation and physical
+proof are [published at commit `3e309345`](https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve);
+the [8 October commit `fdfd817`](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve)
+is the earlier Account snapshot. New commands apply to this current revision, not
+those immutable commits. The saved portal draft predates the text candidate; this
+documentation update does not change it. Videos and final submission remain deferred.
+
+Live page views: [desktop A](../evidence/text-public-primary-2026-10-09.png) and
+[390-pixel A](../evidence/text-public-mobile-2026-10-09.png). These images show the
+published interface, not a completed passkey recovery.
+
+## Earlier self-service Work acceptance — separate from text-v1
 
 On 9 October, after the published Safari correction, the builder reported completing setup,
 fresh-page recovery using the same passkey, continued editing and TXT export in Safari on
@@ -27,62 +56,84 @@ The self-service correction passed 149 automated checks and is published at
 
 ## Inspect a real editor integration
 
-`integrations/textarea/` adapts [Anton Medvedev's Textarea](https://github.com/antonmedv/textarea)
+`integrations/textarea-text/` adapts [Anton Medvedev's Textarea](https://github.com/antonmedv/textarea)
 at pinned commit `8aa2247e4d92d963059e8788624e0c0d1be8d6a3`. It executes the original
 contenteditable editor and Markdown highlighter. Its unchanged upstream source and MIT
 license have matching GitHub blob hashes and recorded SHA-256 digests. This is an
 agent-built adapter to independently authored software, **not upstream adoption,
 endorsement or external developer feedback**.
 
-Textarea has one document and no account model. Its text becomes `deliverable`; the
-adapter adds an explicit four-field envelope and a disposable unfunded example account.
-It does not invent an upstream account to claim to preserve. The generated consumer
-installs a local SDK tarball using a dependency lock and imports public SDK entry points.
-No source-checkout or internal fixture import is needed by that consumer.
+Textarea has one document and no account model. The new adapter supplies only that
+text: no invented project fields, disposable account or signing key. The generated
+consumer installs a local SDK tarball using a dependency lock and imports public
+`/text-reserve`, `/text-browser` and `/http-store` entry points. No source-checkout or
+internal fixture import is needed. The earlier account-bound adapter remains in
+`integrations/textarea/` as a separate reference.
 
 From the updated source tree, with Node 24+ and npm, choose an empty destination:
 
 ```sh
-node integrations/textarea/create.mjs /absolute/path/to/textarea-work-demo
-cd /absolute/path/to/textarea-work-demo
+node integrations/textarea-text/create.mjs /absolute/path/to/textarea-text-demo
+cd /absolute/path/to/textarea-text-demo
 npm ci --ignore-scripts --no-audit --no-fund
 npm run build
 npm test
 npm run dev
 ```
 
-Open <http://textarea-primary.localhost:5373/>. Edit the actual document, select
-**Prepare work reserve**, and confirm **Prepare received snapshot** in B. After its
+Open <http://textarea-text-primary.localhost:5473/>. Edit the actual document, select
+**Prepare text reserve**, and confirm **Prepare received text** in B. After its
 independent check, use B's **Take original app offline** control, close A, then open a
 fresh reserve. Recover and continue the document. Textarea's **Save as txt** preserves
-the document; **Export all five fields as JSON** preserves the complete Work envelope.
+the document; JSON export preserves the current text.
 Reopening a fresh reserve returns the original snapshot, not the later edit.
 
 The automated check builds a clean installed consumer, runs the upstream editor in
 JSDOM, verifies A's frontend/API return HTTP 503, and recovers in two fresh Node processes
-given only B's origin. It verifies all five fields, the bound owner, no requests to A
-during recovery, one immutable write and no account unlock. The edited export check is
-a JSON roundtrip. JSDOM does not verify browser popups, native typing, layout or downloads.
+given only B's origin. It verifies exact text, no requests to A during recovery, one
+immutable write and no account result. It invokes the upstream TXT handler with an
+emulated file picker and writes/reads the TXT and JSON bytes. JSDOM does not verify
+browser popups, native typing, layout or physical browser downloads.
 The server and credential are synthetic and memory-backed; this remains **local only**.
 The build removes upstream's document-in-URL subscriptions and service worker, preserving
 the editor itself. Its first-line tab title remains and may appear in browser history.
-See `integrations/textarea/README.md` for every modification and limit.
+See [the text integration instructions](../integrations/textarea-text/README.md) for
+every modification and limit. These local synthetic checks passed; native text-v1
+setup, recovery and export remain pending.
+
+## What Mera does for the text
+
+Mera 0.2.0 supplies the discoverable, user-verified passkey PRF ceremonies. Text-v1
+uses a fixed **protocol-wide** PRF salt, SHA-256 of
+`account-continuity/text-reserve-v1/prf`. Application separation happens in HKDF:
+its salt hashes the canonical protocol label, full configuration and credential ID;
+distinct purpose labels derive lookup material, manifest encryption and text encryption.
+The configuration includes the app ID, exact recovery origin and recovery RP ID.
+The PRF salt itself is not app-specific. [Protocol details](../sdk/TEXT_PROTOCOL.txt)
+
+Preparation writes once, compares the readback bytes, then independently discovers
+and decrypts using a new assertion before returning ready. Recovery returns text and
+integrity metadata only. There is no account leaf, account vault or signing session
+to unlock. Both editors necessarily see plaintext; intentional exports are plaintext.
 
 ## Measure the tradeoff against encrypted export
+
+The [new text-v1 report](../evidence/text-drill-2026-10-09.json) compares the same text
+and synthetic credential against a functional encrypted file. Six conditions run
+through both paths in **12 fresh recovery processes**, with real loopback A=503
+checks before and after each attempt. The file is actually retained on disk and
+independently imported before the outage. Four regression tests passed. See the
+[complete comparison and limits](EXPORT_COMPARISON.md).
 
 From the updated project root:
 
 ```sh
 npm ci --ignore-scripts
-npm run drill:work
-npm run test:drill
+node scripts/text-recovery-drill.mjs
+node --test tests/text-recovery-drill.mjs
 ```
 
-This drill executes real Work SDK and Mera encryption with a synthetic credential and
-two disposable local HTTP hosts. Its encrypted-file baseline protects the same work and
-owner annotation with the same available credential, then actually imports that file.
-
-| Controlled condition | Work Reserve | Encrypted file |
+| Controlled condition | Text Reserve | Encrypted file |
 | --- | --- | --- |
 | A unavailable; both copies retained | Recovers | Recovers |
 | File missing; hosted record retained | Recovers without file | Fails: file missing |
@@ -90,18 +141,19 @@ owner annotation with the same available credential, then actually imports that 
 | Ciphertext altered | Rejects | Rejects |
 | Credential unavailable | Fails | Fails |
 
-The reviewed run passed ten checks, including a fresh SDK recovery bracketed by A=503,
-all-field/owner equality, signing locked, continued edit/export readback and the unchanged
-original snapshot. Read `evidence/work-drill-2026-10-09.json` or
-`evidence/work-drill-2026-10-09.txt`. The new run writes its own report and fictional
-artifacts under `drill/evidence/`; only the reviewed report/summary are portable evidence.
+Healthy text recovery and file import each used one assertion. Reserve recovery
+made one HTTP read; file recovery needed no HTTP request. After the shared creation,
+reserve preparation/verification used one assertion and the file used two: the
+reserve reused creation-time PRF output, while the file evaluated its separate salt
+and then performed an independent import. These are API calls, not native prompt
+counts or a measured human-effort advantage. Both edited TXT/JSON outputs were
+written and read back with exact equality. No account or signer was involved.
 
-Healthy Work recovery and file import each used one credential assertion. Preparation
-is reported separately: the Work path also verifies its optional account vault, while
-the file baseline contains private work only. These measured API/storage operations are
-not device prompt counts, human onboarding time or an equal-feature account benchmark.
-This comparison establishes where each dependency model fails; it does not prove that
-people prefer Work Reserve or that ordinary backup is generally inadequate.
+New runs write under `drill/text-evidence/`. The file format is a comparison fixture,
+not a supported production backup API. Neither method recovers a lost passkey;
+the retained file wins when reserve storage is unavailable. The earlier
+[Work v1 drill](../evidence/work-drill-2026-10-09.json) remains supplemental evidence
+with different account-vault setup requirements. Neither report establishes demand.
 
 ## Optional existing payment, through the same recovered account
 
@@ -172,25 +224,25 @@ The local service keeps simulated credentials and encrypted records in memory. R
 
 For a physical run against the hosted demonstration, new preparation requires an operator-issued single-use code and native passkey confirmation. Existing recovery needs the prepared passkey, not the setup code. The site cannot itself prove another site's outage; the recorded physical test uses separate network checks. Do not create replacement credentials to recover an existing snapshot.
 
-## Inspect the implementation
+## Inspect the text implementation
 
 | Question | Source to inspect |
 | --- | --- |
-| How is work recovered without a saved file or account address? | `sdk/work-reserve.mjs`: app-specific PRF bootstrap and opaque locator derivation |
-| Are encryption and lookup purposes separate? | Distinct HKDF purposes for locator, manifest AES-GCM and work AES-GCM in `sdk/work-reserve.mjs` |
-| Can work open without account signing? | Work-only recovery and explicit `openAccount` boundary; `tests/work-reserve.mjs` |
-| Is the received snapshot the intended one? | Configuration, credential, owner and work bindings; readback and independent opening tests |
-| Does the two-origin handoff expire and reject stale events? | `sdk/work-browser.mjs`, `tests/work-browser.mjs`, `tests/work-ui-lifecycle.mjs` |
-| What is stored publicly? | Encrypted record bytes, opaque locator and used enrollment-code hash; `work-release/d1-store.mjs` and `work-release/db/` |
-| Are stored copies immutable and bounded? | `tests/work-d1.mjs`, `tests/work-d1-boundaries.mjs`, release HTTP tests |
-| Does exported work preserve edited fields? | `work/app.mjs` export handler, plus the recorded physical downloaded-file comparison |
+| How is text recovered without a saved file or locator? | `sdk/text-reserve.mjs`: discoverable PRF, configuration-bound HKDF and opaque locator |
+| Are encryption and lookup purposes separate? | Distinct locator, manifest AES-GCM and text AES-GCM labels; `sdk/TEXT_PROTOCOL.txt` |
+| Is there an account key? | No account/vault/signer API in text-v1; `tests/text-reserve.mjs` |
+| Is the received snapshot the intended one? | Configuration, credential and text-digest bindings; byte readback and independent opening |
+| Does the handoff reject stale or forged events? | `sdk/text-browser.mjs`, `tests/text-browser.mjs` |
+| Are both modes in the same bounded store? | `self-service/backend/store.mjs`, `self-service/backend/profile.mjs`, `tests/self-service-backend.mjs` |
+| Does the UI preserve native action and cancellation? | `self-service/text/app.mjs`, `tests/self-service-text-ui.mjs` |
+| Does a real editor integrate? | `integrations/textarea-text/`, `tests/oss-text-integration.mjs`; synthetic/JSDOM evidence |
 
 For targeted local checks:
 
 ```sh
-npm run typecheck:work
-npm run test:work
-npm run test:work-release
+npm run test:text
+npm run test:oss-text
+node --test tests/self-service-text-host.mjs tests/self-service-text-ui.mjs
 ```
 
 `npm run verify:local` covers the wider project, including the older account and payment fixtures. Its chain stages require Foundry `anvil`; complete Redis integration coverage requires `ACCOUNT_RESERVE_REDIS_BIN`. Read the produced `evidence/verification.json` and stage outputs rather than treating an exit code with skipped tests as full coverage. Miniflare tests exercise local D1 behavior. None of these simulated tests substitutes for the native or cross-device checks.
@@ -218,15 +270,22 @@ To reproduce only that older synthetic payment sequence, use the root `npm run b
 
 A correctly retained encrypted export can also preserve this work. ContinuityKit adds a credential-discoverable reserve and a continuation client, in return for enrollment, available storage and another trusted client. Demand and superiority to an ordinary export are not established.
 
-The stored work is one immutable snapshot. It is not current-state synchronization, lost-passkey recovery or a guarantee against operator failure. Opening work leaves account signing locked, but the underlying optional account vault can restore full account authority; it does not revoke the original key. The hosted demonstration uses one operator, fictional work and no funded Work account. Multiple native confirmations may occur; API-call counts are not visible prompt counts.
+The stored text is one immutable snapshot. It is not current-state synchronization,
+lost-passkey recovery or a guarantee against operator failure. Text-v1 has no account
+vault. The separate Work v1 account vault can restore full account authority and does
+not revoke the original key. The hosted demonstration has one operator and fictional
+data. Multiple native confirmations may occur; API counts are not prompt counts.
 
-Demo access ends **10 November 2026 at 00:00 UTC**. Expiry cleanup is scheduled but its future execution is not yet observed. Provider recovery history may retain deleted records for up to 30 further days. Keep any intentional export locally. This is experimental software, not a production backup or custody service.
+Demo access ends **10 November 2026 at 00:00 UTC**. Access expiry and cleanup are
+separate; this guide does not establish cleanup execution. Provider recovery history
+may retain deleted records for up to 30 further days. Keep intentional exports locally.
+This is experimental software, not a production backup or custody service.
 
 Built by Mikkel / CryptoMickle as a solo project. Source is MIT-licensed; the SDK is unpublished on npm. External adoption, audited security and competition eligibility are not claimed.
 
-## Textarea browser follow-through — 9 October
+## Earlier Work Textarea browser follow-through — 9 October
 
-The corrected local adapter also passed an observed Codex-browser sequence: exact
+The earlier `integrations/textarea/` Work adapter passed an observed Codex-browser sequence: exact
 multiline paste, two-window setup, original frontend/API 503, original tab closed,
 fresh B recovery, further editing and actual TXT/JSON downloads. Both downloaded
 formats matched the intended text, including its terminal newline. The original

@@ -1,3 +1,40 @@
+# Account-free text candidate — 9 October 2026
+
+The preferred new candidate lives at [A/text/](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)
+and [B/text/](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/).
+It is published on the existing public Sites; native acceptance is pending. The dated records below
+refer to the earlier five-field Work mode at the homepages, not this new protocol.
+
+1. In A, edit the single fictional text document. Choose **Prepare this text in B**.
+2. Keep A open. B checks admission before offering **Create reserve passkey**. The human
+   creates one reserve credential and completes the subsequent independent check.
+3. Wait until both pages confirm the snapshot is ready. If setup fails, keep any new
+   passkey and use **Check existing reserve**; an uncertain write is never retried.
+4. Close A. Open the public B/text/ address in a fresh page and use the same text passkey.
+   Continue writing and export TXT or JSON. This does not overwrite the original snapshot.
+
+No wallet or account key is generated; this path cannot unlock account signing. The
+configuration is only appId, recoveryOrigin and recoveryRpId. The new format uses separate
+key/locator derivation from Work v1. The earlier Work homepages, keys and encrypted records
+remain available without migration. Because both modes use the existing D1 store, the
+64-record and 256-admission bounds below are **shared**, not additional capacity.
+
+One bundled native check remains: prepare recognizable fictional text in Safari on Mac,
+then recover in Safari on iPhone using that same passkey, edit and inspect an export.
+Do not reuse the earlier Work passkey as evidence for this new protocol. A fresh page is
+not a fresh browser profile; second-device success must be reported as such. Native
+success is not inferred from synthetic tests or earlier Work acceptance.
+
+Local checks:
+
+```sh
+npm run test:text
+node --test tests/self-service-text-ui.mjs tests/self-service-text-host.mjs
+npm run test:oss-text
+```
+
+---
+
 # ContinuityKit self-service judge demo
 
 An isolated native-passkey demonstration for a judge's own fictional work. Both Sites are publicly live following explicit user approval on 9 October 2026. All 19 anonymous read-only HTTP checks passed. Browser checks verified desktop and mobile layouts, edited fictional content, A-to-B setup, automatic capacity admission before native creation, cancellation, fresh B recovery entry and TXT/JSON export readback. No native credential was created or authenticated during these checks. After the Safari correction, the user reported that the fresh iPhone setup worked. Worker logs corroborate successful iPhone admission, upload and subsequent read on 9 October at 19:02–19:03 UTC. The user then confirmed fresh-page recovery with the existing passkey, continued editing and TXT export in Safari on iPhone. A later iPhone reserve read returned HTTP 200 at 19:06:21 UTC. Device-screen and exported-file contents were not independently inspected. This is the builder’s acceptance test, not an independent participant trial.

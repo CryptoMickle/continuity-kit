@@ -1,0 +1,136 @@
+{
+  "format": "continuity-adoption-research/v1",
+  "checkedAt": "2026-10-09T21:33:34Z",
+  "scope": "Read-only official pricing/specification and pinned public-source research plus current local source/evidence inspection. Documentation only; no outreach, recruitment, new test execution, production mutation or publication.",
+  "status": "hypothesis-and-operating-plan-not-demand-validation",
+  "externalAdoptionVerified": false,
+  "customerInterestVerified": false,
+  "hypothesizedCustomer": {
+    "team": "Small independent browser-app maintainer or team",
+    "job": "Recover private unfinished text after the primary app becomes unavailable, without locating a retained export file; continue editing and export",
+    "initialData": "One explicit snapshot of drafts, briefs or notes; current Work v1 serialized work maximum 16384 bytes",
+    "requiredTradeoff": "Accept a named operator responsible for the recovery origin, storage, maintenance and costs",
+    "excluded": ["Attachments", "Automatic synchronization", "Collaborative history", "Safety-critical or regulated records", "Lost-credential recovery", "Permanent-hosting guarantees"],
+    "marketSize": null,
+    "willingnessToPay": null
+  },
+  "integrationEvidence": {
+    "path": "integrations/textarea/README.md",
+    "upstream": "https://github.com/antonmedv/textarea/tree/8aa2247e4d92d963059e8788624e0c0d1be8d6a3",
+    "kind": "Agent-built integration executing independently authored editor/highlighter code and installing the SDK as a local tarball consumer through public entry points",
+    "upstreamAdoption": false,
+    "externalDeveloperFeedback": false,
+    "nativeEvidence": false,
+    "limitation": "Current Work v1 adapter supplies an unfunded disposable EOA and four envelope fields; upstream Textarea has only a document, no account model",
+    "textOnlyCandidate": "Separate protocol work requires its own release and native acceptance evidence; no result inferred here"
+  },
+  "sources": [
+    {
+      "id": "workers-pricing",
+      "url": "https://developers.cloudflare.com/workers/platform/pricing/",
+      "type": "official-current",
+      "pageUpdated": "2026-10-02",
+      "currency": "USD",
+      "free": { "requestsPerDay": 100000, "cpuMsPerInvocation": 10 },
+      "paidStandard": { "minimumAccountMonthlyUsd": 5, "includedRequestsPerMonth": 10000000, "includedCpuMsPerMonth": 30000000, "excessPerMillionRequestsUsd": 0.30, "excessPerMillionCpuMsUsd": 0.02 },
+      "billingApplicability": "Direct Cloudflare list prices; actual Sites plan and billing unknown. No free-static-asset assumption for Worker-served assets. Other account usage consumes allowances."
+    },
+    {
+      "id": "d1-pricing",
+      "url": "https://developers.cloudflare.com/d1/platform/pricing/",
+      "type": "official-current",
+      "pageUpdated": "2026-04-21",
+      "currency": "USD",
+      "free": { "rowsReadPerDay": 5000000, "rowsWrittenPerDay": 100000, "storageGb": 5 },
+      "paid": { "includedRowsReadPerMonth": 25000000000, "includedRowsWrittenPerMonth": 50000000, "includedStorageGb": 5, "excessPerMillionRowsReadUsd": 0.001, "excessPerMillionRowsWrittenUsd": 1, "excessPerGbMonthUsd": 0.75 },
+      "measurement": "Billable rows are rows read/scanned or written, not SDK calls or HTTP request counts. Index and query behavior matter."
+    },
+    {
+      "id": "d1-limits",
+      "url": "https://developers.cloudflare.com/d1/platform/limits/",
+      "type": "official-current",
+      "pageUpdated": "2026-04-21",
+      "freeDatabaseMaximumMb": 500,
+      "paidDatabaseMaximumGb": 10,
+      "maximumRowStringOrBlobBytes": 2000000,
+      "timeTravelDays": { "free": 7, "paid": 30 },
+      "limit": "Small stored data does not prevent query quota exhaustion or overload; expiry or active-row cleanup is not proof of provider-level erasure."
+    },
+    {
+      "id": "webauthn-rp",
+      "url": "https://www.w3.org/TR/webauthn-3/#relying-party-identifier",
+      "type": "official-specification",
+      "finding": "Credential use is scoped by RP ID. Ordinary web use requires a matching domain or registrable suffix; the specification also describes related-origin requests, which this implementation does not implement."
+    },
+    {
+      "id": "iris-account",
+      "url": "https://github.com/vmlechko/Iris/blob/3a1244c418c0f8308ec95a56383c2509965ebb70/lib/account.ts#L44",
+      "type": "pinned-primary-source-code-read",
+      "fromReview": "../competition-review-2026-10-07/payments-agent.json",
+      "commit": "3a1244c418c0f8308ec95a56383c2509965ebb70",
+      "finding": "relyingParty uses location.hostname; restore calls Mera getPasskeyPrfOutput using that RP ID before creating a secp256k1 signing session",
+      "inferenceLimit": "Illustrates RP dependence; not an integration request, adoption signal, complete recovery audit or current competitor ranking"
+    },
+    {
+      "id": "firsthand-bundle",
+      "url": "https://github.com/kaustubh76/Firsthand/blob/a3a078ca97d7234eefc01228c0f92b343a4c3f1f/packages/sdk/src/portability/bundle.ts#L104",
+      "type": "pinned-primary-source-code-read",
+      "fromReview": "../competition-review-2026-10-07/sponsor-agent.json",
+      "commit": "a3a078ca97d7234eefc01228c0f92b343a4c3f1f",
+      "finding": "exportLocker includes ciphertext, sidecars and wrapped DEKs after reference checks; importLocker republishes objects to a configured gateway and reports skipped failures",
+      "inferenceLimit": "Competent existing portability code; not proof of independent demand, native device acceptance or universal interchangeability"
+    }
+  ],
+  "currentDemoBounds": {
+    "sourcePaths": ["self-service/backend/profile.mjs", "self-service/backend/store.mjs", "self-service/backend/schema.sql", "self-service/backend/host.mjs", "self-service/profile.json"],
+    "maxRecords": 64,
+    "maxRecordBytes": 65536,
+    "maxEncryptedPayloadBytes": 4194304,
+    "maxBase64urlCharactersPerRecord": 87382,
+    "maxBase64urlPayloadBytesAllRecords": 5592448,
+    "databaseOverheadIncludedInPayloadCalculation": false,
+    "actualDatabaseBytesMeasured": null,
+    "maxLifetimeAdmissions": 256,
+    "capabilityTtlMs": 300000,
+    "capacityReservation": "Unconsumed live admissions reserve a record slot atomically; expired admissions remain in the lifetime count",
+    "boundsDoNotCover": ["HTTP request volume", "Repeated reads and failed writes", "Worker CPU", "D1 billed rows", "Logs", "Total bills"],
+    "throttle": "Best-effort isolate-local admission friction; not a global rate or billing guarantee",
+    "primaryOrigin": "https://continuitykit-try-primary.cryptomickle.chatgpt.site",
+    "recoveryOrigin": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site",
+    "accessEnds": "2026-11-10T00:00:00.000Z",
+    "expiryDeletesRecords": false,
+    "cleanupExecutionClaimed": false,
+    "sitesPlanAndChargesVerified": false,
+    "independentOperatorVerified": false,
+    "sameRpInfrastructureMigrationDemonstrated": false,
+    "providerHostnamePortabilityVerified": false
+  },
+  "existingDrill": {
+    "report": "evidence/work-drill-2026-10-09.json",
+    "readableReport": "evidence/work-drill-2026-10-09.txt",
+    "generatedAt": "2026-10-09T14:51:36.246Z",
+    "status": "passed",
+    "checks": 10,
+    "synthetic": true,
+    "newRunPerformedForThisResearch": false,
+    "sameWorkAndCredentialCompared": true,
+    "fileIncludesAccountLeaf": false,
+    "equalFeatureAccountSetupBenchmark": false,
+    "observedPreparation": { "workStoreReads": 3, "workStoreWrites": 1, "workAssertions": 3, "fileProtectionAssertions": 1, "fileReadbackAssertions": 1 },
+    "observedRecovery": { "workStoreReads": 1, "workAssertions": 1, "fileHostRequests": 0, "fileAssertions": 1 },
+    "results": ["Both recover when their bytes survive and A is unavailable", "Reserve recovers when only the export file is missing", "Retained export recovers when reserve record is missing or host is unavailable", "Both reject tampering", "Neither recovers without the credential", "Edited work exports correctly; original snapshot remains immutable"],
+    "notMeasured": ["Human timing", "Native prompt count", "Fresh physical device", "D1 billed rows", "Customer preference", "Production cost"]
+  },
+  "proposedPilot": {
+    "executed": false,
+    "recruitmentInitiated": false,
+    "candidateCountTarget": 1,
+    "target": "Consenting maintainer of an independently maintained app matching the text-snapshot hypothesis",
+    "integrationTimeboxHours": 4,
+    "timeboxIsMeasuredResult": false,
+    "successGates": ["Real recovery job where maintained encrypted export alone is insufficient for this maintainer", "Public-entrypoint integration into their actual app", "Exact recovery and continued export with A unavailable using the released protocol", "Named funded B/domain/retention/support owner", "Maintainer chooses to retain or ship the integration after fair file comparison"],
+    "stopConditions": ["Required platform lacks working PRF", "Required data or sync exceeds scope", "RP/domain continuity cannot be owned", "Integration timebox exceeded without a concrete remedy", "Maintainer prefers ordinary export", "Hosting and support responsibility not accepted"],
+    "economicsUnknown": ["External developer time", "Author assistance time", "Production CPU and D1 row use", "Sites bill", "Domain/maintenance/support cost", "Acquisition cost", "Willingness to pay", "Retention"],
+    "conclusion": "Agent work can improve implementation and evidence. Actual interest and independent continued use remain unverified and cannot be supplied by this research."
+  }
+}

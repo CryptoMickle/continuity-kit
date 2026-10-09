@@ -1,0 +1,3 @@
+@import '../client/style.css';
+#work-deliverable { min-height:360px; }
+@media(max-width:760px) { #work-deliverable { min-height:310px; } }

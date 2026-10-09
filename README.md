@@ -1,20 +1,18 @@
 # ContinuityKit
 
-## Current submission direction: Work Reserve
+## Current direction: a prepared way back to your work
 
-Recover prepared private work when its original app is unavailable. Open the brief, finish the draft and export a usable copy with an existing recovery passkey. Account signing stays locked throughout the Work task.
+Prepare an encrypted text snapshot, reopen it with its reserve passkey, continue writing and export. The new text API requires one document, with no wallet or account key.
 
-Try the [interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/) first: edit a fictional draft, prepare it, recover it, finish it and export it. No setup code, wallet or native passkey is needed. This runs the actual Work SDK encryption with browser-local synthetic credentials; it is not physical-passkey, cross-device or HTTP-outage proof.
+**Try the published [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/) and [reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/).** Use fictional data only. Prepare in B, wait for its independent check, then reopen B with the same passkey. Native acceptance and same-passkey second-device proof for this new format are pending; earlier Work results do not establish that new result.
 
-Read the [current Work Reserve source and commands](account-reserve/README.md) and [judge guide](account-reserve/delivery/JUDGE_GUIDE.md). The guide separates the playground, the [recorded physical Work result](account-reserve/evidence/work-public-proof.json), and the [finished fictional handoff](account-reserve/delivery/examples/finished-checkout.txt). The hosted physical demonstration uses bounded encrypted D1 storage and an existing prepared passkey.
+Read the [current SDK and commands](account-reserve/README.md) and [judge guide](account-reserve/delivery/JUDGE_GUIDE.md). The [actual Textarea text integration](account-reserve/integrations/textarea-text/README.md) consumes the packaged API without invented account or project fields. It is project-built work against pinned MIT upstream code, not upstream adoption. The [export comparison](account-reserve/delivery/EXPORT_COMPARISON.md) includes conditions in which a retained encrypted file wins. The [adoption and operating plan](account-reserve/delivery/ADOPTION_PLAN.md) separates proposed pilots and cost assumptions from evidence.
 
-Reproducible source examples include a [Textarea editor adapter](account-reserve/integrations/textarea/README.md), a [controlled comparison with encrypted export](account-reserve/drill/README.md), and an [optional pre-existing payment through the same recovered account](account-reserve/examples/work-entitlement/README.md). The Textarea adapter is written by this project against independently authored MIT source, not external adoption or endorsement. The payment example runs only on disposable local Anvil: work opens without account signing, and a separate deliberate action may claim a previously issued right. Editing or exporting work does not earn that right. These additions do not replace the separately attributed historical physical proofs.
+This is one immutable prepared snapshot, not automatic backup or synchronization. Both Sites and storage have one operator. Text mode and earlier self-service Work share 64 stored records and 256 lifetime upload permissions; access ends 10 November 2026 at 00:00 UTC. Those are storage/admission bounds, not a billing cap. Existing Work records remain on the original homepages without migration.
 
-The [9 October core Work snapshot](https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve) and [8 October Account Reserve snapshot](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve) remain preserved historical references. Use the current relative source links above for the newer examples.
+The earlier Account Reserve's [Monad testnet proof](account-reserve/evidence/public-proof.json) is a separate result: the same recovered account claimed a pre-issued payment once. Text recovery sends no blockchain transaction. The [older synthetic playground](https://continuitykit-playground.cryptomickle.chatgpt.site/) and [physical Work evidence](account-reserve/evidence/work-public-proof.json) remain scoped references.
 
-This is one immutable prepared snapshot, not automatic backup or synchronization. Later edits need their own export. The services share one operator; shared-provider failure, loss of the recovery passkey, independent security and customer demand remain unproven. Mikkel / CryptoMickle is the sole human builder, assisted by OpenAI Codex and GPT agents.
-
-The earlier Account Reserve implementation and its [Monad testnet proof](account-reserve/evidence/public-proof.json) remain separately attributed supporting work: a recovered account claimed an existing payment once. The Work demonstration uses fictional data and an unfunded example account, and sends no blockchain transactions. Original source is MIT-licensed; the SDK is not published on npm. Video and final competition submission remain deferred.
+Mikkel / CryptoMickle is the sole human builder, assisted by OpenAI Codex and GPT agents. Original source is MIT-licensed. The experimental SDK is not published on npm. No external adoption, demand, willingness to pay or independent security audit is claimed. Video and final submission remain deferred.
 
 ## Earlier content-recovery prototype
 Recover private application work through a separately prepared client, and detect when a surviving copy does not match the owner's approved checkpoint.
@@ -75,5 +73,6 @@ No external integrator, customer adoption, revenue or recurring transaction dema
 Mikkel / CryptoMickle is the sole human developer. OpenAI Codex and GPT agents assisted design, code, tests, documentation and review. Original project source is under the supplied [MIT license](LICENSE); dependencies retain their own licenses. The passport example references Turnstile's public data model but does not integrate its identity layer or imply endorsement.
 
 [Provenance and preserved history](PROVENANCE.md) · [Dependency notices](continuity-kit/public/third-party-notices.txt) · [Exact selected source manifest](continuity-kit/SOURCE_MANIFEST.json) · [Publication file list](PUBLICATION_FILES.json)
+
 
 

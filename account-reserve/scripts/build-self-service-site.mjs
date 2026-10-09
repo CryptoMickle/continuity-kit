@@ -27,6 +27,9 @@ export async function buildSelfServiceSite(root, role) {
     }
   }
   await collect(client);
+  const textClient = join(root, 'artifacts/self-service-text-client');
+  await build({root:join(root,'self-service/text'),base:'/text/',configFile:false,build:{target:'es2022',outDir:textClient,emptyOutDir:true}});
+  await collect(textClient, '/text');
   await build({root,configFile:false,define:{__SELF_SERVICE_PROFILE__:JSON.stringify(profile),__SELF_SERVICE_ROLE__:JSON.stringify(role),__SELF_SERVICE_ASSETS__:JSON.stringify(assets)},build:{ssr:join(root,'self-service/backend/entry.mjs'),target:'es2022',outDir:join(root,'dist/server'),emptyOutDir:true,rollupOptions:{output:{entryFileNames:'index.js'}}},ssr:{noExternal:true}});
   const entry=join(root,'dist/server/index.js'), worker=(await import(entry+'?check='+Date.now())).default;
   const env={DB:{prepare(){throw Error('BUILD_DATABASE_ACCESS');},batch(){throw Error('BUILD_DATABASE_ACCESS');}}};
@@ -37,6 +40,10 @@ export async function buildSelfServiceSite(root, role) {
   if(value.role!==role || !value.selfService || value.synthetic!==false || !value.physicalEnabled || 'enrollmentToken' in value) throw Error('CONFIG_INVALID');
   const page=await worker.fetch(new Request(origin+'/'),env);
   if(page.status!==200 || !page.headers.get('content-security-policy')?.includes("connect-src 'self'")) throw Error('PAGE_INVALID');
+  const textConfig = await worker.fetch(new Request(origin+'/api/text-config'),env);
+  const textValue = await textConfig.json();
+  if(textConfig.status!==200 || textValue.config.appId!=='continuity-judge-text-v1' || Object.keys(textValue.config).sort().join(',')!=='appId,recoveryOrigin,recoveryRpId') throw Error('TEXT_CONFIG_INVALID');
+  if((await worker.fetch(new Request(origin+'/text/'),env)).status!==200) throw Error('TEXT_PAGE_INVALID');
   for(const path of ['/api/synthetic','/rpc','/api/primary','/api/status']) if((await worker.fetch(new Request(origin+path),env)).status!==404) throw Error('UNEXPECTED_ROUTE');
   await mkdir(join(root,'dist/.openai'),{recursive:true});
   await cp(join(root,'.openai/hosting.json'),join(root,'dist/.openai/hosting.json'));
