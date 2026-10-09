@@ -1,15 +1,15 @@
 # ContinuityKit self-service judge demo
 
-An isolated native-passkey demonstration for a judge's own fictional work. Both Sites were deployed on 9 October 2026 with owner-only access. Seven read-only runtime checks passed, including recovery database access. Public access awaits the owner's explicit confirmation. Physical acceptance of this new deployment and browser layout verification remain pending.
+An isolated native-passkey demonstration for a judge's own fictional work. Both Sites are publicly live following explicit user approval on 9 October 2026. All 19 anonymous read-only HTTP checks passed. Browser checks verified desktop and mobile layouts, edited fictional content, A-to-B setup, automatic capacity admission before native creation, cancellation, fresh B recovery entry and TXT/JSON export readback. No native credential was created or authenticated during these checks. Physical passkey acceptance of this new deployment remains pending.
 
-Deployed addresses from `profile.json` (currently owner-only):
+Public addresses from `profile.json`:
 
 - **A — original workspace:** [continuitykit-try-primary](https://continuitykit-try-primary.cryptomickle.chatgpt.site/)
 - **B — independent reserve:** [continuitykit-try-reserve](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/)
 
 These are new Sites with a separate recovery relying-party domain and a dedicated D1 database. Passkeys and snapshots from earlier demos remain associated with their original B site; they do not migrate to this one. Prepare a new fictional snapshot and reserve passkey for this B site.
 
-## Try the flow once access is available
+## Try the public flow
 
 1. Open A and edit the fictional project, client, brief, draft and next step. Use no personal, confidential or valuable content.
 2. Select **Start my example account**, then **Prepare in B**. A creates a new, unfunded account key locally and opens B. Keep both windows open.
