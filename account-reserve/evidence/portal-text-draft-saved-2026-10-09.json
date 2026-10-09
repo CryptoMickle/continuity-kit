@@ -1,0 +1,13 @@
+{
+  "savedAt": "2026-10-09T21:52:00Z",
+  "exactMinuteFromPortal": true,
+  "fieldsReadBack": 13,
+  "plannedChangedFields": 5,
+  "allFiveMatch": true,
+  "otherFieldsPreserved": true,
+  "checklist": "5/6",
+  "videos": "missing; intentionally deferred",
+  "finalSubmitted": false,
+  "sourceCommit": "55321fa53f389d6772c699deb382bbfe9c0328e3",
+  "nativeTextAcceptance": "pending"
+}

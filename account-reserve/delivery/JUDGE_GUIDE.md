@@ -16,6 +16,11 @@ results do not establish this new protocol's physical-device support.
 22/22 checks, including configuration, preserved older routes and exact compiled
 asset matches. This verifies the deployed pages/assets, not native recovery.
 
+
+Current text runtime and integration source: [commit `55321fa`](https://github.com/CryptoMickle/continuity-kit/tree/55321fa53f389d6772c699deb382bbfe9c0328e3/account-reserve).
+The text entry was saved to the competition portal and verified after reload at
+21:52 UTC on 9 October. Native text acceptance, videos and final submission remain pending.
+
 ## Start here
 
 1. Preferred published entry: [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/) and [text reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/). Write fictional text, choose **Prepare this text in B**, then explicitly create the reserve passkey in B. Wait for independent verification, close or discard A's window state, reopen a fresh B page and recover, edit and export TXT/JSON. This native sequence still needs acceptance evidence. Closing A does not prove an HTTP outage. This text namespace does not migrate earlier Work reserves.

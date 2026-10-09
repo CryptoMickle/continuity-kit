@@ -13,7 +13,7 @@ physical results below retain their scope and are not text-v1 acceptance.
 [Public HTTP verification](../evidence/text-public-http-2026-10-09.json) passed
 22/22 checks for configuration, preserved old routes and exact compiled assets.
 
-Implemented locally: a separate immutable text protocol and typed public APIs,
+Published implementation: a separate immutable text protocol and typed public APIs,
 origin/source/nonce-bound browser handoff, exact UTF-8 text recovery, one write with
 byte readback and independent passkey-based decryption before readiness. It creates
 no EOA, account vault or signer. Its protocol-wide PRF salt is fixed; HKDF binds the
@@ -43,9 +43,11 @@ database schema change or migration of old reserves. Limits do not cap request
 traffic or bills. Same operator and recovery-domain dependencies remain.
 Expiry is not proof of deletion or cleanup execution.
 
-The judge guide and local entry draft now lead with published text-v1 pages and mark
-the native gap. Source commands refer to this current tree; no new public commit
-hash is inferred here. **The portal has not been updated with this text draft.**
+The judge guide and saved portal entry lead with published text-v1 pages and mark
+the native gap. Runtime source is published at commit `55321fa53f389d6772c699deb382bbfe9c0328e3`.
+At 21:52 UTC on 9 October, five changed portal fields were saved and all 13 fields
+read back after reload. The other fields were preserved. The checklist remains 5/6.
+[Portal save evidence](../evidence/portal-text-draft-saved-2026-10-09.json).
 Video and final submission remain deferred. Older dated records below are historical.
 
 ---

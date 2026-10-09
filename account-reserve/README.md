@@ -40,8 +40,8 @@ npm ci --ignore-scripts --no-audit --no-fund
 node integrations/textarea-text/create.mjs /absolute/path/to/textarea-text-demo
 cd /absolute/path/to/textarea-text-demo
 npm ci --ignore-scripts --no-audit --no-fund
-npm test
 npm run build
+npm test
 npm run dev
 ```
 

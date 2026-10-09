@@ -1,12 +1,13 @@
 # Metropolis entry — text-v1 draft, 9 October 2026
 
-**Local replacement draft; not saved to the portal.** Both text-v1 Sites version 3
-pages are published and observed live. A editing/export and pre-native admission/
-cancellation were checked; native text-v1 setup and Mac-to-iPhone recovery/export
-remain pending. The previous portal update was saved
-at 15:46 UTC on 9 October and verified after reload; its evidence is
-`evidence/portal-developer-update-saved-2026-10-09.json`. That saved text predates this
-candidate. Video and final submission remain deferred.
+**Saved to the portal and verified after reload at 21:52 UTC, 9 October 2026.**
+Five changed fields matched this draft; all 13 text fields were read back, with the
+other fields preserved. Checklist remains 5/6 because demo/pitch videos are deliberately
+absent. Final submission has not been performed. Evidence:
+`evidence/portal-text-draft-saved-2026-10-09.json`.
+
+The text pages are published; native text-v1 setup and same-passkey Mac-to-iPhone
+recovery/export remain pending. That gap is explicit in the saved entry.
 
 Project: ContinuityKit. Solo builder: Mikkel / CryptoMickle. Track: Trust, Identity &
 AI Infrastructure. Sponsor: Mera: One Passkey, Many Keys. The Monad live-product URL
@@ -181,7 +182,7 @@ with no automatic sync, lost-passkey recovery or guaranteed provider independenc
 
 ## Remaining submission boundary
 
-This revised draft has not been written to the portal. Text sites are published;
+This revised draft was saved and verified after reload at 21:52 UTC on 9 October. Text sites are published;
 source commands refer to the current tree without an inferred new commit hash.
 Native text-v1 setup and Mac-to-iPhone
 recovery/export still need evidence for the exact release. Technical demo and
