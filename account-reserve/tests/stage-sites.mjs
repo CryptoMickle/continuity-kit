@@ -148,3 +148,19 @@ test('standalone build rejects changed worker, changed identity and output symli
     assert.match(build.stderr, /BUILD_(?:WORKER_CHANGED|SITE_ID_MISMATCH|PATH_REJECTED)/);
   }
 });
+
+test('legacy Site staging accepts complete added work verification but rejects failed or unknown extensions', async t => {
+  for (const count of [3, 5]) {
+    const f = await fixture(t);
+    f.verification.stages.push(...['work-build', 'work-types', 'work-tests', 'work-release-tests', 'work-sites-build'].slice(0, count).map(name => ({ name, passed: true, exitCode: 0 })));
+    await f.put('evidence/verification.json', f.verification);
+    assert.equal((await f.stage()).deployed, false);
+  }
+  for (const change of [stage => { stage.passed = false; }, stage => { stage.name = 'unreviewed'; }]) {
+    const f = await fixture(t);
+    const extra = ['work-build', 'work-types', 'work-tests'].map(name => ({ name, passed: true, exitCode: 0 }));
+    change(extra[2]); f.verification.stages.push(...extra);
+    await f.put('evidence/verification.json', f.verification);
+    await assert.rejects(f.stage(), /STAGE_VERIFICATION_REQUIRED/); await f.unchanged();
+  }
+});

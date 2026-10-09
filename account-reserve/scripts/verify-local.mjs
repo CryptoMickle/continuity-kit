@@ -6,8 +6,9 @@ import {dirname,join} from 'node:path';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
 const npmCli=join(dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js');
-const files=['sdk/index.mjs','sdk/PROTOCOL.txt','app.mjs','app-session.mjs','app-setup.mjs','app-progress.mjs','handoff.mjs','transaction.mjs','pending-ticket.mjs','server.mjs','chain/PaymentRight.sol','chain/PaymentRight.artifact.json','chain/harness.mjs','package.json','package-lock.json','style.css'];
-for(const directory of ['sdk','starter','release','deploy','scripts','tests'])for(const file of await readdir(join(root,directory))){if(/\.(mjs|ts|json|sol|sb|toml|html|css)$/.test(file))files.push(directory+'/'+file);}
+const files=['sdk/index.mjs','sdk/PROTOCOL.txt','app.mjs','app-session.mjs','app-setup.mjs','app-progress.mjs','handoff.mjs','transaction.mjs','pending-ticket.mjs','server.mjs','chain/PaymentRight.sol','chain/PaymentRight.artifact.json','chain/harness.mjs','package.json','package-lock.json','style.css','work/public/favicon.svg'];
+for(const directory of ['sdk','starter','work','work-release','release','deploy','scripts','tests'])for(const file of await readdir(join(root,directory))){if(/\.(mjs|ts|json|sol|sb|toml|html|css)$/.test(file))files.push(directory+'/'+file);}
+for(const directory of ['work-release/db','work-release/drizzle','work-release/drizzle/meta'])for(const file of await readdir(join(root,directory))){if(/\.(ts|sql|json)$/.test(file))files.push(directory+'/'+file);}
 const stages=[];
 await mkdir(join(root,'evidence'),{recursive:true});
 for(const [name,arguments_] of [
@@ -17,6 +18,11 @@ for(const [name,arguments_] of [
   ['http-boundaries',[npmCli,'run','test:http']],
   ['release-tests',[npmCli,'run','test:release']],
   ['sites-build',[npmCli,'run','build:sites']],
+  ['work-build',[npmCli,'run','build:work']],
+  ['work-types',[npmCli,'run','typecheck:work']],
+  ['work-tests',[npmCli,'run','test:work']],
+  ['work-release-tests',[npmCli,'run','test:work-release']],
+  ['work-sites-build',[npmCli,'run','build:work-sites']],
 ]){
   // On macOS child processes inherit an explicit OS network policy: loopback only.
   const command=process.platform==='darwin'?'/usr/bin/sandbox-exec':process.execPath;
@@ -31,4 +37,4 @@ for(const [name,arguments_] of [
 const sourceHashes={};for(const file of files)sourceHashes[file]=createHash('sha256').update(await readFile(join(root,file))).digest('hex');
 const evidence={generatedAt:new Date().toISOString(),scope:'synthetic-local-only',networkBoundary:process.platform==='darwin'?'OS-enforced loopback only':'not OS-enforced on this platform',stages,sourceHashes,physicalPasskeys:false,publicMonad:false,externalIntegrations:false};
 await writeFile(join(root,'evidence/verification.json'),JSON.stringify(evidence,null,2)+'\n');
-if(stages.length!==6||stages.some(s=>!s.passed))process.exitCode=1;
+if(stages.length!==11||stages.some(s=>!s.passed))process.exitCode=1;

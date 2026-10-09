@@ -1,6 +1,6 @@
 {
   "status": "passed-local-operator-setup",
-  "executedAt": "2026-10-08T19:47:57.641Z",
+  "executedAt": "2026-10-08T23:15:23.087Z",
   "scope": "Disposable owned loopback Anvil, Paris hardfork, numeric chain 10143; NOT public Monad",
   "implementation": "deploy/operator.mjs through injected loopback adapters and durable file journal",
   "publicRpcRequests": 0,
@@ -9,11 +9,11 @@
   "physicalPasskeys": false,
   "publicRunnerInvoked": false,
   "independentPublicProvidersVerified": false,
-  "proposalHash": "6950a251f8feb0af7cadf70debbbf94a86f85606f970cffe39e89de0b39f8f84",
+  "proposalHash": "c3a16c7d8c1277e1bb06b12638c579d472fd9c2fe70373a112e85a529872c367",
   "artifactSha256": "a53bf271aea4715490a6e0d0ed78e6fd396a1b15061a3c80c796e967e03acf06",
-  "issuer": "0x314970b0f78e15A8294E09bd147709dAE511f851",
-  "beneficiary": "0x799A163dcdAAF1E60B24C9bB6255C6Ce6A9A0588",
-  "contractAddress": "0xa4F8A23D25003885EE455b10c8Afc06b3569576b",
+  "issuer": "0x9B23554EB415df5499fc1124f88737f7D469B0a0",
+  "beneficiary": "0xdC01766C2906a39e0432445a6E1036d1618952B1",
+  "contractAddress": "0x05Ec199b0557b1aBb615F9d84b31d0d724D77aB6",
   "signingCalls": 3,
   "broadcastCalls": 3,
   "durableReservationBeforeEachSignature": true,
@@ -22,21 +22,21 @@
   "transactions": [
     {
       "role": "deploy",
-      "hash": "0x2d74f7a10fc9f045dbf5cbe60d1f87835ad911d64ce5efc3831cfe8fb866f3b3",
+      "hash": "0x306aaba9f15a23358b009e0b034a8ce49af8e467e40cc6e56eeedbf1eb90eafa",
       "selectedLocalGas": "443860",
       "localGasUsed": "369883",
       "finalized": true
     },
     {
       "role": "fund-beneficiary-gas",
-      "hash": "0x1ae3472290fb81f2f101bf5936fc97f63c442536af13ef3e5b3a08b9ff8c7e20",
+      "hash": "0xf38b89066173013fb2512cf0d85336bb1f33454e6b020b7dc44aa50818e8a633",
       "selectedLocalGas": "25202",
       "localGasUsed": "21000",
       "finalized": true
     },
     {
       "role": "issue-fixed-right",
-      "hash": "0x13f68a2e4ade499a7d61d53dd18fb91ad2a622704a09eb82c1e67e29c8850060",
+      "hash": "0x62ef3a002c502ac9056e85ea656fd30c26f7c704e6090afc8cae12ebd34ec376",
       "selectedLocalGas": "117354",
       "localGasUsed": "97795",
       "finalized": true

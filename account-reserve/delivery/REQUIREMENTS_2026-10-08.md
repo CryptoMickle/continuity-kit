@@ -1,6 +1,6 @@
 # Metropolis — verified submission requirements
 
-Publication update, 8 October 2026: the owner approved the reviewed account-reserve source release to `CryptoMickle/continuity-kit/account-reserve` with MIT for original code and preserved dependency notices. The package remains unpublished on npm. Portal submission and video are separate. Earlier pending-license/publication statements below are retained as historical preparation records, not current license status.
+Source publication completed and anonymously verified on 8 October 2026: https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve. MIT applies to original Account Reserve source; dependency notices are preserved. All 134 published file hashes matched. Earlier statements below about pending source licensing/publication are historical. The SDK remains unpublished on npm; the competition entry is not submitted and video is deferred. Evidence: `evidence/source-publication-2026-10-08.json`.
 
 Read-only portal review on 8 October 2026. No field, track, bounty, setting or submission was saved. This is a delivery checklist, not confirmation of eligibility or prize prospects. Video remains a separate final work block.
 

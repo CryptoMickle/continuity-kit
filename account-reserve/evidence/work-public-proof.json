@@ -1,0 +1,70 @@
+{
+  "format": "continuity-work-public-proof/v1",
+  "updatedAt": "2026-10-09T14:01:42.427094+00:00",
+  "product": "ContinuityKit Work Reserve",
+  "mode": "fictional private work; no Work blockchain transactions",
+  "sites": {
+    "primary": "https://continuitykit-work-primary.cryptomickle.chatgpt.site/",
+    "reserve": "https://continuitykit-work-reserve.cryptomickle.chatgpt.site/"
+  },
+  "nativeOutageTest": {
+    "status": "directly-observed-and-restored",
+    "date": "2026-10-09",
+    "device": "Mac",
+    "browser": "Codex integrated browser",
+    "freshApplicationPage": true,
+    "freshBrowserProfile": false,
+    "observedAt": "2026-10-09T13:47:40.475Z",
+    "allFiveWorkFieldsMatchPreparedSnapshot": true,
+    "matchingPreparedAccount": true,
+    "accountSigningStayedLocked": true,
+    "noTransactionSent": true,
+    "primaryBefore": {
+      "status": 503,
+      "error": "PRIMARY_OFFLINE",
+      "checkedAt": "2026-10-09T13:41:39.840398+00:00"
+    },
+    "primaryAfterRecovery": {
+      "status": 503,
+      "error": "PRIMARY_OFFLINE",
+      "checkedAt": "2026-10-09T13:48:09.283868+00:00"
+    },
+    "primaryRestored": {
+      "status": 200,
+      "checkedAt": "2026-10-09T13:49:38.724376+00:00"
+    },
+    "screenshot": "evidence/work-recovered-2026-10-09.jpg"
+  },
+  "finishedExample": {
+    "status": "verified-local-export",
+    "evidence": "evidence/work-finished-export-2026-10-09.json",
+    "text": "delivery/examples/finished-checkout.txt",
+    "json": "delivery/examples/finished-checkout.json"
+  },
+  "secondDevice": {
+    "recordedAt": "2026-10-09T14:01:42.427094+00:00",
+    "status": "user-confirmed-visual-proof-pending",
+    "browser": "Safari",
+    "device": "iPhone",
+    "sameExistingPasskey": true,
+    "reportedProject": "A calmer checkout",
+    "reportedClient": "Studio North",
+    "confirmation": "Ja, Safari på iPhone med eksisterende passkey",
+    "reportedFieldsMatch": true,
+    "fullDraftIndependentlyCompared": false,
+    "deviceScreenIndependentlyObserved": false,
+    "judgeVisibleLiveDemonstrationRecorded": false
+  },
+  "monadEvidence": {
+    "path": "evidence/public-proof.json",
+    "scope": "Earlier separate Account Reserve protocol: native account recovery and a finalized Monad testnet payment. The new Work recovery/edit/export flow sends no transaction."
+  },
+  "limitations": [
+    "One prepared immutable snapshot; edits are local until exported.",
+    "One operator and shared hosting/storage dependencies; not proof of infrastructure loss survival.",
+    "Existing usable passkey required; no lost-passkey recovery claim.",
+    "iPhone recovery is explicitly user-confirmed; screen/full-content/live-video evidence has not been independently collected.",
+    "Experimental demonstration; no external adoption, security audit, sponsor acceptance or prize guarantee.",
+    "This source tree includes the Work implementation and reviewed portable evidence. Video and final competition submission remain pending."
+  ]
+}

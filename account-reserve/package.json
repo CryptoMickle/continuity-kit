@@ -22,6 +22,14 @@
     "./preflight": {
       "types": "./sdk/preflight.d.ts",
       "import": "./sdk/preflight.mjs"
+    },
+    "./work-reserve": {
+      "types": "./sdk/work-reserve.d.ts",
+      "import": "./sdk/work-reserve.mjs"
+    },
+    "./work-browser": {
+      "types": "./sdk/work-browser.d.ts",
+      "import": "./sdk/work-browser.mjs"
     }
   },
   "files": [
@@ -29,6 +37,7 @@
     "README.md",
     "SECURITY.md",
     "starter",
+    "work",
     "scripts/create-starter.mjs",
     "LICENSE",
     "delivery/THIRD_PARTY_NOTICES.md"
@@ -46,7 +55,13 @@
     "create:starter": "node scripts/create-starter.mjs",
     "prepare:physical": "node scripts/prepare-physical-test.mjs",
     "prepare:approval": "node scripts/prepare-approval.mjs",
-    "stage:sites": "node scripts/stage-sites.mjs"
+    "stage:sites": "node scripts/stage-sites.mjs",
+    "build:work": "vite build work --config work/vite.config.mjs",
+    "dev:work": "node work/server.mjs",
+    "test:work": "node --test tests/work-reserve.mjs tests/work-browser.mjs tests/work-http.mjs",
+    "typecheck:work": "tsc --project work/tsconfig.json",
+    "build:work-sites": "node scripts/build-work-sites.mjs",
+    "test:work-release": "node --test tests/work-release-host.mjs tests/work-release-integration.mjs tests/work-ui-boundary.mjs tests/work-ui-lifecycle.mjs tests/work-d1.mjs tests/work-d1-boundaries.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",
@@ -55,8 +70,11 @@
     "viem": "2.56.9"
   },
   "devDependencies": {
-    "vite": "8.3.1",
-    "typescript": "5.9.3"
+    "drizzle-kit": "0.31.11",
+    "drizzle-orm": "0.45.4",
+    "miniflare": "4.20260730.0",
+    "typescript": "5.9.3",
+    "vite": "8.3.1"
   },
   "types": "./sdk/index.d.ts",
   "license": "MIT"

@@ -1,0 +1,8 @@
+{
+  "schema": "continuity-work/brief-v1",
+  "title": "A calmer checkout",
+  "client": "Studio North",
+  "brief": "Redesign the checkout for a small furniture studio. Keep delivery costs visible before the final step. The tone should be clear and reassuring, with no countdowns or pressure to buy.",
+  "deliverable": "CHECKOUT DIRECTION · COPY HANDOFF\n\n1. Keep the order summary beside the form. Show the full delivery price as soon as the postcode is entered.\n\n2. Let customers check out as guests. Offer account creation after the order is confirmed.\n\n3. Use “Continue to payment” for the final review step. Explain what happens next in one sentence.\n\nADDRESS ERROR\nCheck your address and try again.\nMake sure the street name, house number and postcode are correct.\n\nORDER CONFIRMATION\nYour order is confirmed.\nOrder: {order_number}\nEstimated delivery: {delivery_window}\nTotal paid: {order_total}, including {delivery_cost} for delivery.\nFor help with your order, contact {support_email} and include your order number.\n\nIMPLEMENTATION NOTES\nReplace the marked placeholders with confirmed order data. Keep the delivery amount visible before payment. Show the confirmation only after the order has been accepted. Preserve the entered address when validation fails.\n\nFictional client example; copy prepared for implementation review.",
+  "nextStep": "Review the copy in the checkout screens, connect the marked order fields and check that delivery costs remain visible before payment."
+}

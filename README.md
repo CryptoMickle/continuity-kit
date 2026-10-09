@@ -1,12 +1,14 @@
 # ContinuityKit
 
-## Current submission direction: Account Reserve
+## Current submission direction: Work Reserve
 
-An experimental developer toolkit for preparing independent access to an existing passkey-derived account. If the original app disappears, a prepared reserve client can recover the same account and use rights it already owns.
+Recover prepared private work when its original app is unavailable. Open the brief, finish the draft and export a usable copy with an existing recovery passkey. Account signing stays locked throughout the Work task.
 
-Start with [Account Reserve](account-reserve/README.md), [the judge guide](account-reserve/delivery/JUDGE_GUIDE.md) and [the public testnet evidence](account-reserve/evidence/public-proof.json). This is the current Metropolis submission direction. The earlier content-recovery prototype and its history are retained below.
+Start with [Work Reserve](account-reserve/README.md), [the judge guide](account-reserve/delivery/JUDGE_GUIDE.md), [the portable Work proof](account-reserve/evidence/work-public-proof.json) and [the finished fictional copy handoff](account-reserve/delivery/examples/finished-checkout.txt). The chain-free local example is reproducible without a wallet or native passkey. The separate hosted demonstration uses physical passkeys and bounded encrypted D1 storage.
 
-The SDK is experimental. Recovery restores full account authority, does not revoke the original key, and has not been independently audited. The public demonstration uses testnet funds only. No external adoption or commercial traction is claimed. Mikkel / CryptoMickle is the sole human builder, assisted by OpenAI Codex and GPT agents.
+This is one immutable prepared snapshot, not automatic backup or synchronization. Later edits need their own export. The services share one operator; shared-provider failure, loss of the recovery passkey, independent security and customer demand remain unproven. Mikkel / CryptoMickle is the sole human builder, assisted by OpenAI Codex and GPT agents.
+
+The earlier Account Reserve implementation and its [Monad testnet proof](account-reserve/evidence/public-proof.json) remain separately attributed supporting work: a recovered account claimed an existing payment once. The Work demonstration uses fictional data and an unfunded example account, and sends no blockchain transactions. Original source is MIT-licensed; the SDK is not published on npm. Video and final competition submission remain deferred.
 
 ## Earlier content-recovery prototype
 Recover private application work through a separately prepared client, and detect when a surviving copy does not match the owner's approved checkpoint.
@@ -67,4 +69,5 @@ No external integrator, customer adoption, revenue or recurring transaction dema
 Mikkel / CryptoMickle is the sole human developer. OpenAI Codex and GPT agents assisted design, code, tests, documentation and review. Original project source is under the supplied [MIT license](LICENSE); dependencies retain their own licenses. The passport example references Turnstile's public data model but does not integrate its identity layer or imply endorsement.
 
 [Provenance and preserved history](PROVENANCE.md) · [Dependency notices](continuity-kit/public/third-party-notices.txt) · [Exact selected source manifest](continuity-kit/SOURCE_MANIFEST.json) · [Publication file list](PUBLICATION_FILES.json)
+
 

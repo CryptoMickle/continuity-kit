@@ -91,7 +91,8 @@ export async function stageSites({ profilePath, root = projectRoot } = {}) {
   if (registration.status !== 'registered-private-unpublished' || registration.sites?.length !== 2) fail('STAGE_REGISTRATION_INVALID');
   const verification = JSON.parse(await readPublic(root, join(root, 'evidence/verification.json'), 256 * 1024));
   const expectedStages = ['build', 'tests', 'onboarding', 'http-boundaries', 'release-tests', 'sites-build'];
-  if (verification.stages?.length !== 6 || expectedStages.some((name, i) => verification.stages[i].name !== name || verification.stages[i].passed !== true || verification.stages[i].exitCode !== 0)) fail('STAGE_VERIFICATION_REQUIRED');
+  const additionalStages = ['work-build', 'work-types', 'work-tests', 'work-release-tests', 'work-sites-build'];
+  if (![6, 9, 11].includes(verification.stages?.length) || verification.stages.slice(6).some((stage, i) => stage.name !== additionalStages[i] || stage.passed !== true || stage.exitCode !== 0) || expectedStages.some((name, i) => verification.stages[i].name !== name || verification.stages[i].passed !== true || verification.stages[i].exitCode !== 0)) fail('STAGE_VERIFICATION_REQUIRED');
   const requiredSources = ['app.mjs', 'release/worker-entry.mjs', 'release/client-profile.mjs', 'scripts/build-sites.mjs', 'scripts/stage-sites.mjs'];
   if (requiredSources.some(path => !digest(verification.sourceHashes?.[path]))) fail('STAGE_SOURCE_HASHES_MISSING');
   for (const [path, expected] of Object.entries(verification.sourceHashes)) {

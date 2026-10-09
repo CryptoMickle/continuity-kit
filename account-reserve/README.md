@@ -1,12 +1,61 @@
-# ContinuityKit account reserve
+# ContinuityKit — Work Reserve
 
-Experimental developer toolkit for preparing independent access to an **existing** passkey-derived EOA. This is a new protocol with a local reference application and a separately approved public Monad testnet demonstration. It does not replace the previously published, data-only ContinuityKit demo.
+Recover prepared private work when its original app is unavailable. Open the brief,
+finish the draft and export a usable copy with an existing recovery passkey. The
+account can stay locked throughout that task.
 
-A reference application earns a small, valueless payment before preparing its reserve. After that application's frontend, API and RPC endpoint become unavailable, a fresh reserve client discovers the encrypted package from a recovery credential, authenticates the original account binding and collects the already-existing payment. A replacement account cannot collect it.
+Work Reserve is an experimental developer toolkit and reference app. It stores one
+immutable encrypted snapshot, discoverable from a prepared credential without a
+pasted address or saved export file. It does not automatically back up later edits.
+Account access is a separate explicit action; the existing Account Reserve protocol
+and its Monad testnet proof remain available as supporting, separately attributed work.
 
-The local demo uses a synthetic authenticator by default and a disposable Anvil chain. There are no external RPCs or real funds. Ciphertext survives browser reloads but **not server restarts**. Both origins and the chain run on one machine; shutting down A is an application-outage experiment, not proof of independent hosting.
+## Start with the work
 
-## Developer first run — no chain required
+With Node 24+ and npm installed, from this source package:
+
+```sh
+npm ci --ignore-scripts
+npm run build:work
+npm run dev:work
+```
+
+Open <http://work-primary.localhost:5073/>. Prepare the fictional brief in the reserve,
+take A offline with the local control, open a fresh B page, finish the two missing
+messages and export. No database account, wallet, chain or funds are needed for this
+local run. It uses a synthetic authenticator and RAM storage; restarting the server
+loses the example. [Run and integration guide](work/README.md).
+
+## Public demonstration and evidence
+
+- [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site/)
+- [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site/)
+- [Portable Work proof](evidence/work-public-proof.json)
+- [Finished fictional copy handoff](delivery/examples/finished-checkout.txt)
+- [Judge guide](delivery/JUDGE_GUIDE.md)
+
+On 9 October, a deliberately reloaded reserve page in Codex’s integrated browser on
+Mac recovered all five prepared work fields and the matching account while Primary A
+returned HTTP 503 before and after the observation. Account signing stayed locked.
+Primary A was then restored and checked with HTTP 200. The two missing copy sections
+were later completed in that recovered editor and actual TXT/JSON exports matched.
+
+The user also explicitly confirmed recovery in Safari on iPhone using the same existing
+passkey and reported the matching project/client. This is user-confirmed second-device
+evidence; a device-screen/full-content capture and recorded live demonstration remain
+pending. The Mac test is a fresh page, not a new browser profile.
+
+The public Work services use native passkeys and bounded D1 storage under one operator.
+Opening the public page does not provide the existing passkey or a new setup code.
+The demonstration uses fictional data, no funds and no Work blockchain transactions.
+Access ends 10 November 2026 at 00:00 UTC; scheduled cleanup is not claimed as executed.
+It is not a production backup service or proof of survival after hosting/provider loss.
+
+This source tree includes the Work Reserve implementation, portable evidence and
+finished fictional export. The 8 October Account Reserve snapshot remains preserved
+in repository history. Videos and final competition submission remain pending.
+
+## Account SDK starter — separate chain-free reference
 
 For the smallest complete integration, generate a **separate** project from the
 local package. The destination must be empty; existing files are never replaced.
@@ -33,14 +82,14 @@ read-only environment diagnostics and TypeScript declarations. See
 explicit separate test; default mode is synthetic. The teaching server is
 loopback-only and loses its data on restart. Do not deploy it.
 
-Public entry points are the core package, `/browser`, `/http-store` and
-`/preflight`. `npm run test:onboarding` generates an empty consumer, installs the
+Public entry points include the core package, `/browser`, `/http-store`,
+`/preflight`, `/work-reserve` and `/work-browser`. `npm run test:onboarding` generates an empty consumer, installs the
 tarball offline, checks its types/build and verifies fresh recovery through its
 own HTTP server with A unavailable. This is internal integration evidence, not
 external adoption or a measured human onboarding time. The experimental SDK source is MIT-licensed and remains unpublished on npm.
 `private: true` prevents accidental registry publication.
 
-## Run the local demonstration
+## Earlier account/payment demonstration
 
 Requirements: Node 24+, npm, and installed Foundry `anvil`. Install dependencies from the included lockfile:
 
@@ -111,7 +160,7 @@ Use `webAuthnClient` only for a deliberate adapter or synthetic tests. Omit it f
 
 The immutable enrollment protocol is documented in [sdk/PROTOCOL.txt](sdk/PROTOCOL.txt). One newly dedicated recovery credential binds to one account per app namespace. Rotation, re-binding, multi-account selection and account-key revocation are intentionally unsupported.
 
-## Evidence and fair comparison
+## Account Reserve evidence and fair comparison
 
 `npm test` runs SDK tamper/failure tests, two clean offline package consumers, local payment-contract tests and two complete recovered-signer tests. `npm run verify:local` also checks HTTP, the release candidate and both disabled Worker builds; set `ACCOUNT_RESERVE_REDIS_BIN` to a Redis server binary for the real-storage tests. Read [SECURITY.md](SECURITY.md), [delivery/STATUS.md](delivery/STATUS.md) and [the inspection guide](delivery/JUDGE_GUIDE.md) for the evidence boundary.
 
@@ -123,7 +172,7 @@ The portable [public proof](evidence/public-proof.json) includes the completed t
 
 Mikkel / CryptoMickle is the sole human builder. OpenAI Codex and GPT agents assisted product exploration, implementation, tests, design, documentation and review. Automated agents are not external users, independent integrators or additional human team members.
 
-The submitted direction is the account-reserve work developed during the 2026 Metropolis build period. It follows the earlier ContinuityKit data-recovery experiment and reuses its product name and presentation direction. The earlier app recovers content against an on-chain version registry; this package instead preserves an existing account's selected key and demonstrates its original authority. The old app and its tests are not included or counted as evidence for this protocol. The current source export is a snapshot, not a Git commit history. The source release preserves the existing repository history and adds this snapshot with its actual commit date; it does not reconstruct earlier development commits.
+The current Work Reserve direction extends the account-reserve work developed during the 2026 Metropolis build period. It adds encrypted unfinished work and a work-only recovery path; account unlock remains separate. The earlier ContinuityKit data-recovery experiment uses an on-chain version registry and is a different protocol. Its product name and presentation direction are reused, but its tests are not counted as proof of Work Reserve. The current source export is a snapshot, not a Git commit history. The source release preserves the existing repository history and adds this snapshot with its actual commit date; it does not reconstruct earlier development commits.
 
 The local fixtures follow the account patterns identified in [Iris](https://github.com/vmlechko/Iris/blob/main/lib/account.ts) and [Accrue at a pinned revision](https://github.com/pauleke65/accrue/blob/ab1d8580f339addaa02ea118e89ba4b89627e926/lib/mera-account.ts). No upstream app source or assets are vendored. The protocol uses unmodified published Mera 0.2.0 APIs, viem 2.56.9, Web Crypto and scure BIP39/BIP32. Existing local experiments are recorded in `../mera-account-exit/`; that directory is not a runtime SDK dependency.
 

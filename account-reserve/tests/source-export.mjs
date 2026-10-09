@@ -9,13 +9,18 @@ import {packageCandidate} from '../scripts/package-candidate.mjs';
 
 const publicProofBytes=await readFile(new URL('../evidence/public-proof.json',import.meta.url));
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD6sAAAAASUVORK5CYII=','base64');
+// Header/footer bytes are sufficient for the export type guard; no image decoding is claimed.
+const jpeg=Buffer.from([255,216,255,224,0,16,74,70,73,70,0,255,217]);
+const workProofFiles=['evidence/work-public-proof.json','evidence/work-finished-export-2026-10-09.json'];
+const workRequiredFiles=[...workProofFiles,'evidence/work-recovered-2026-10-09.jpg','delivery/examples/finished-checkout.txt','delivery/examples/finished-checkout.json'];
 
 async function fixture(t){
   const temp=await mkdtemp(join(tmpdir(),'source-export-test-'));
   t.after(()=>rm(temp,{recursive:true,force:true}));
   const root=join(temp,'source');
   const file=async(path,content='Synthetic source-export fixture.\n')=>{await mkdir(dirname(join(root,path)),{recursive:true});await writeFile(join(root,path),content);};
-  for(const directory of ['sdk','starter','chain','tests','scripts','release','deploy','delivery','evidence'])await mkdir(join(root,directory),{recursive:true});
+  for(const directory of ['sdk','starter','work','work-release','chain','tests','scripts','release','deploy','delivery','evidence'])await mkdir(join(root,directory),{recursive:true});
   for(const path of ['LICENSE','README.md','SECURITY.md','package.json','package-lock.json','index.html','vite.config.mjs','app.mjs','app-session.mjs','app-setup.mjs','app-progress.mjs','style.css','server.mjs','handoff.mjs','transaction.mjs','pending-ticket.mjs'])await file(path);
   await file('evidence/public-proof.json',publicProofBytes);
   await file('sdk/index.mjs');
@@ -23,12 +28,25 @@ async function fixture(t){
   return {temp,root,file};
 }
 
+async function workFixture(t){
+  const f=await fixture(t);
+  for(const path of workProofFiles)await f.file(path,JSON.stringify({format:'synthetic-public-proof/v1',scope:'Fictional source-export test only.',blockchainTransactions:0}));
+  await f.file('evidence/work-recovered-2026-10-09.jpg',jpeg);
+  await f.file('delivery/examples/finished-checkout.txt','Fictional completed draft.\n');
+  await f.file('delivery/examples/finished-checkout.json',JSON.stringify({title:'Fictional completed draft'}));
+  return f;
+}
+
 test('source archive contains mandatory portable proof and reviewed files without raw operational evidence',async t=>{
   const f=await fixture(t);
   await f.file('delivery/REVIEW.md',`Local record: ${f.root}/sdk/index.mjs\n`);
   await f.file('evidence/raw-cloud-response.json','Unselected operational response.\n');
+  await f.file('work/index.html', '<p>Synthetic work example</p>');
+  await f.file('work-release/db/schema.ts','// Public D1 schema.\n');
+  await f.file('work-release/drizzle/0000_example.sql','CREATE TABLE example (id TEXT);\n');
+  await f.file('work-release/drizzle/meta/_journal.json','{"version":"7","entries":[]}\n');
+  await f.file('deploy/work-public-2026-10-08/secret-transfer-approval.json','Local operational record, not public source.\n');
   await f.file('node_modules/ignored.txt','Not source.\n');
-  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD6sAAAAASUVORK5CYII=','base64');
   await f.file('delivery/assets/continuitykit-logo.png',png);
   await f.file('delivery/assets/unreviewed.png',png);
   const result=await packageCandidate({root:f.root});
@@ -38,6 +56,11 @@ test('source archive contains mandatory portable proof and reviewed files withou
   const files=listed.stdout.trim().split('\n');
   assert.ok(files.includes('evidence/public-proof.json'));
   assert.ok(files.includes('deploy/operator-journal.mjs'));
+  assert.ok(files.includes('work/index.html'));
+  assert.ok(files.includes('work-release/db/schema.ts'));
+  assert.ok(files.includes('work-release/drizzle/0000_example.sql'));
+  assert.ok(files.includes('work-release/drizzle/meta/_journal.json'));
+  assert.ok(!files.some(path=>path.startsWith('deploy/work-public-2026-10-08/')));
   assert.ok(files.includes('delivery/assets/continuitykit-logo.png'));
   assert.ok(!files.includes('delivery/assets/unreviewed.png'));
   assert.ok(!files.includes('evidence/raw-cloud-response.json'));
@@ -54,6 +77,98 @@ test('source archive contains mandatory portable proof and reviewed files withou
   assert.notEqual(manifest.files['delivery/REVIEW.md'],manifest.sourceHashes['delivery/REVIEW.md']);
   assert.equal(manifest.files['delivery/assets/continuitykit-logo.png'],hash(png));
   assert.match(await readFile(join(f.root,'delivery/REVIEW.md'),'utf8'),new RegExp(f.root));
+});
+
+test('Work candidate packages the complete selected implementation and portable proof without replacing Account artifacts',async t=>{
+  const f=await workFixture(t);
+  const implementation=[
+    'work/index.html','work/app.mjs','work/public/favicon.svg',
+    'sdk/work-reserve.mjs','sdk/work-reserve.d.ts','sdk/work-browser.mjs','sdk/work-browser.d.ts','sdk/WORK_PROTOCOL.txt',
+    'work-release/d1-handler.mjs','work-release/d1-host-worker.mjs','work-release/d1-store.mjs','work-release/d1-worker-entry.mjs',
+    'work-release/db/schema.ts','work-release/drizzle/0000_example.sql','work-release/drizzle/meta/_journal.json','work-release/RETENTION.md',
+    'tests/work-d1-boundaries.mjs','tests/work-ui-lifecycle.mjs','scripts/verify-work-d1-built.mjs'
+  ];
+  for(const path of implementation)await f.file(path);
+  await f.file('deploy/work-public-2099-01-01/environment.json','Unreviewed deployment state.\n');
+  await f.file('work/.openai/hosting.json','Unreviewed project binding.\n');
+  await f.file('work/.git/config','Unreviewed Git state.\n');
+  await f.file('evidence/portal-many-keys.txt','Unreviewed authenticated portal capture.\n');
+  await f.file('evidence/work-native-outage-proof-2026-10-09.json','Unreviewed operational proof.\n');
+  const account=await packageCandidate({root:f.root});
+  const originalAccountArchive=await readFile(account.archive);
+  const originalAccountManifest=await readFile(account.manifestPath);
+  const result=await packageCandidate({root:f.root,target:'work'});
+  const manifest=JSON.parse(await readFile(result.manifestPath,'utf8'));
+  assert.equal(manifest.target,'work');
+  assert.equal(manifest.archive,'work-reserve-source-candidate.tgz');
+  assert.match(result.manifestPath,/work-source-manifest\.json$/);
+  for(const path of [...implementation,...workRequiredFiles,'evidence/public-proof.json'])assert.ok(Object.hasOwn(manifest.files,path),path);
+  for(const path of ['deploy/work-public-2099-01-01/environment.json','work/.openai/hosting.json','work/.git/config','evidence/portal-many-keys.txt','evidence/work-native-outage-proof-2026-10-09.json'])assert.ok(!Object.hasOwn(manifest.files,path),path);
+  const listed=spawnSync('/usr/bin/tar',['-tzf',result.archive],{encoding:'utf8'});
+  assert.equal(listed.status,0,listed.stderr);
+  const files=listed.stdout.trim().split('\n');
+  assert.equal(files.length,new Set(files).size,'Required delivery files must not be duplicated');
+  assert.deepEqual(files.sort(),Object.keys(manifest.files).sort());
+  for(const path of workRequiredFiles){
+    const extracted=spawnSync('/usr/bin/tar',['-xOzf',result.archive,path]);
+    assert.equal(extracted.status,0);
+    assert.equal(hash(extracted.stdout),manifest.files[path]);
+  }
+  assert.deepEqual(await readFile(account.archive),originalAccountArchive);
+  assert.deepEqual(await readFile(account.manifestPath),originalAccountManifest);
+});
+
+test('Work export fails closed if any required proof, screenshot or completed example is missing',async t=>{
+  const f=await workFixture(t);
+  for(const path of workRequiredFiles){
+    const content=await readFile(join(f.root,path));
+    await rm(join(f.root,path));
+    await assert.rejects(packageCandidate({root:f.root,target:'work'}),/MANDATORY_WORK_EXPORT_FILE_MISSING/);
+    await assert.rejects(readFile(join(f.root,'artifacts/work-reserve-source-candidate.tgz')),{code:'ENOENT'});
+    await f.file(path,content);
+  }
+});
+
+test('Work screenshot must have the declared JPEG type and is exported without conversion',async t=>{
+  const f=await workFixture(t);
+  const path='evidence/work-recovered-2026-10-09.jpg';
+  await f.file(path,png);
+  await assert.rejects(packageCandidate({root:f.root,target:'work'}),/EXPECTED_JPEG_ASSET/);
+  await f.file(path,jpeg);
+  const result=await packageCandidate({root:f.root,target:'work'});
+  const extracted=spawnSync('/usr/bin/tar',['-xOzf',result.archive,path]);
+  assert.equal(extracted.status,0);
+  assert.deepEqual(extracted.stdout,jpeg);
+});
+
+test('Work proof rejects operational identifiers and private references instead of silently sanitizing them',async t=>{
+  const f=await workFixture(t);
+  const path='evidence/work-public-proof.json';
+  for(const content of [
+    {nested:{project_id:'Synthetic project'}},
+    {probe:{requestAuth:'Synthetic dispatch metadata'}},
+    {note:'appgdep_synthetic'},
+    {source:'deploy/work-public-2099-01-01/probe.json'},
+    {source:'artifacts/work-native-2099-01-01/raw-dom.json'}
+  ]){
+    const bytes=JSON.stringify(content);
+    await f.file(path,bytes);
+    await assert.rejects(packageCandidate({root:f.root,target:'work'}),/OPERATIONAL_(?:FIELD|REFERENCE)_IN_PUBLIC_PROOF/);
+    assert.equal(await readFile(join(f.root,path),'utf8'),bytes);
+  }
+  await f.file(path,'Invalid JSON fixture');
+  await assert.rejects(packageCandidate({root:f.root,target:'work'}),/INVALID_PUBLIC_PROOF_JSON/);
+});
+
+test('unknown target is rejected and linked Work outputs cannot overwrite another file',async t=>{
+  const f=await workFixture(t);
+  await assert.rejects(packageCandidate({root:f.root,target:'unknown'}),/UNKNOWN_EXPORT_TARGET/);
+  const external=join(f.temp,'keep.txt');
+  await writeFile(external,'Keep this synthetic content.\n');
+  await mkdir(join(f.root,'artifacts'));
+  await symlink(external,join(f.root,'artifacts/work-reserve-source-candidate.tgz'));
+  await assert.rejects(packageCandidate({root:f.root,target:'work'}),/SYMLINK_REJECTED/);
+  assert.equal(await readFile(external,'utf8'),'Keep this synthetic content.\n');
 });
 
 test('missing mandatory public proof fails before producing an archive',async t=>{

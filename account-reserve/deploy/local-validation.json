@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "executedAt": "2026-10-08T19:47:56.881Z",
+  "executedAt": "2026-10-08T23:15:22.357Z",
   "scope": "Disposable loopback Anvil, Paris hardfork, numeric chain 10143; NOT public Monad",
   "publicRpcRequests": 0,
   "publicTransactions": 0,
@@ -9,11 +9,11 @@
   "syntheticAuthenticator": true,
   "sourceFixture": "Iris-style independent fixture, not original application",
   "artifactSha256": "a53bf271aea4715490a6e0d0ed78e6fd396a1b15061a3c80c796e967e03acf06",
-  "contractAddress": "0x4B9d9368FD14B922eB7E7Fb42E09D803946a93D6",
-  "issuer": "0x32B5bAFA51c2d8a95C810C47Fb68368cd38AF7f3",
-  "beneficiary": "0x29222Caf7e12121306134Ec98Ac130bE32454747",
-  "expectedRuntimeCodeHash": "0x48cc89c2837f79130a636e6bec31bd8881e787e4f9d7c3c98e26f22a68c9a1d6",
-  "actualRuntimeCodeHash": "0x48cc89c2837f79130a636e6bec31bd8881e787e4f9d7c3c98e26f22a68c9a1d6",
+  "contractAddress": "0xE6c17bdfeF65F267BCf18e6D90C2D37aa59c5301",
+  "issuer": "0x94758dd2F30f9e05C725025f76770f1080953480",
+  "beneficiary": "0x3bb7C7A1f74CbFE0553065a615E1B96DaCe7aD13",
+  "expectedRuntimeCodeHash": "0x3ecbbf80ef59376ba32d11a568de071b1494dda629af1e11b2d75d7ecf55e1cb",
+  "actualRuntimeCodeHash": "0x3ecbbf80ef59376ba32d11a568de071b1494dda629af1e11b2d75d7ecf55e1cb",
   "beneficiaryInitiallyUnfunded": true,
   "explicitGasFundingVerified": true,
   "sameOwnerAfterPreparedRecovery": true,
@@ -22,7 +22,7 @@
   "transactions": [
     {
       "role": "deploy",
-      "hash": "0x06b885ae8172f71f11c67e438eb6d51922df0ffe1a7df4af3455470bbc8811ea",
+      "hash": "0x6513901bed5ed3d4e242a5554550da38d02978b1c4236a399d65938fa93c2064",
       "localEstimateGas": "369883",
       "selectedLocalGas": "443860",
       "localReceiptGasUsed": "369883",
@@ -30,7 +30,7 @@
     },
     {
       "role": "fund-beneficiary-gas",
-      "hash": "0xa91fe3d0d59da032fb9108a22081b29bfd4d6765e3d153a1193b95304e34e6ae",
+      "hash": "0xad7c25565aa996b355fb3b0c8ee0d0f31164c74c8da348685579309d1708f51f",
       "localEstimateGas": "21000",
       "selectedLocalGas": "25200",
       "localReceiptGasUsed": "21000",
@@ -38,7 +38,7 @@
     },
     {
       "role": "issue-fixed-right",
-      "hash": "0x1cd3a548ca9971a481b735bee8326c1d4f7d641b2762d6e75af92c52f8bf2ab4",
+      "hash": "0x07f4a241331365a7c14dcc3e029b2d7cff3faa9cb9c761ab04bf4c521e78e9db",
       "localEstimateGas": "97795",
       "selectedLocalGas": "117354",
       "localReceiptGasUsed": "97795",
@@ -46,7 +46,7 @@
     },
     {
       "role": "claim-after-prepared-recovery",
-      "hash": "0xfc231503eea96d58155f1c5000df92b9ff5b335a2c7b4d0a1ada465077e1a5c0",
+      "hash": "0x2e2a232661e3ec61f880fd52202925436a80f2e25c8a9ef1d014eb0896762e23",
       "localEstimateGas": "57421",
       "selectedLocalGas": "68906",
       "localReceiptGasUsed": "57260",

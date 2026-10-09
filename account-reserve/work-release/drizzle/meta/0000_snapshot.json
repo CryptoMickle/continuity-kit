@@ -1,0 +1,151 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "1ff91df5-a67e-4176-baff-e44aba661175",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "work_records": {
+      "name": "work_records",
+      "columns": {
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "locator": {
+          "name": "locator",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ticket_hash": {
+          "name": "ticket_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ciphertext": {
+          "name": "ciphertext",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "work_record_ticket": {
+          "name": "work_record_ticket",
+          "columns": [
+            "namespace",
+            "ticket_hash"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "work_records_namespace_work_releases_namespace_fk": {
+          "name": "work_records_namespace_work_releases_namespace_fk",
+          "tableFrom": "work_records",
+          "tableTo": "work_releases",
+          "columnsFrom": [
+            "namespace"
+          ],
+          "columnsTo": [
+            "namespace"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "work_records_namespace_locator_pk": {
+          "columns": [
+            "namespace",
+            "locator"
+          ],
+          "name": "work_records_namespace_locator_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "record_locator": {
+          "name": "record_locator",
+          "value": "length(\"work_records\".\"locator\") = 43 AND \"work_records\".\"locator\" NOT GLOB '*[^A-Za-z0-9_-]*'"
+        },
+        "record_ticket": {
+          "name": "record_ticket",
+          "value": "length(\"work_records\".\"ticket_hash\") = 64 AND \"work_records\".\"ticket_hash\" NOT GLOB '*[^0-9a-f]*'"
+        },
+        "record_bytes": {
+          "name": "record_bytes",
+          "value": "length(\"work_records\".\"ciphertext\") BETWEEN 2 AND 87382 AND \"work_records\".\"ciphertext\" NOT GLOB '*[^A-Za-z0-9_-]*'"
+        }
+      }
+    },
+    "work_releases": {
+      "name": "work_releases",
+      "columns": {
+        "namespace": {
+          "name": "namespace",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "schema": {
+          "name": "schema",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_ms": {
+          "name": "expires_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "purged_ms": {
+          "name": "purged_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "release_schema": {
+          "name": "release_schema",
+          "value": "\"work_releases\".\"schema\" = 'account-reserve-ciphertext/v1'"
+        },
+        "release_expiry": {
+          "name": "release_expiry",
+          "value": "typeof(\"work_releases\".\"expires_ms\") = 'integer' AND \"work_releases\".\"expires_ms\" > 0"
+        },
+        "release_purge": {
+          "name": "release_purge",
+          "value": "\"work_releases\".\"purged_ms\" IS NULL OR (typeof(\"work_releases\".\"purged_ms\") = 'integer' AND \"work_releases\".\"purged_ms\" >= \"work_releases\".\"expires_ms\")"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

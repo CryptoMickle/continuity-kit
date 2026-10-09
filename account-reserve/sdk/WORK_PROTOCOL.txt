@@ -1,0 +1,49 @@
+ContinuityKit private-work reserve — experimental candidate
+Protocol: account-continuity/work-reserve-v1
+
+This protocol is additive and distinct from reserve-v1. There is no legacy
+fallback, implicit migration, mutable checkpoint, registry or latest-version claim.
+
+Inputs: trusted exact appId/originalRpId/recoveryRpId/derivation configuration;
+an existing 32-byte EOA leaf; lowercase expectedOwner; a dedicated recovery
+credential; one plain-string work snapshot; a conditional immutable ciphertext
+store. Work is canonical sorted JSON and <=16384 UTF-8 bytes.
+
+Discovery: Mera WebAuthn PRF with the work-specific bootstrap salt derives HKDF
+material. Separate HKDF info labels produce a locator and nonextractable AES-GCM
+keys for manifest and work. Raw PRF material is cleared. Configuration and locator
+are manifest AAD. Existing reserve-v1 namespaces cannot discover this record.
+
+Account vault: Mera encrypts a length-prefixed canonical header plus the leaf.
+The header binds protocol, trusted configuration, owner, credential and work
+SHA-256 digest. The canonical vault itself is hashed. The work payload and its
+AES-GCM AAD bind protocol, configuration, locator, owner, credential, work digest
+and vault digest. Random 96-bit nonces are used. The encrypted manifest holds
+the matching owner/config/credential/digests, Mera vault and encrypted work.
+The server receives a bounded ciphertext record and opaque lookup locator.
+
+Preparation: validate/snapshot input, check actual derived owner, refuse existing
+locator, one conditional write, exact readback, independent discovery/work open,
+explicit vault unlock, same-owner signature challenge, close signer. Only then
+return ready. A lost write response is uncertain, never a blind retry. Caller
+owns and must clear its original leaf. Dedicated creation reuse is one-use,
+configuration-bound and expires within five minutes.
+
+Read: discover using recovery passkey, authenticate manifest/work envelopes and
+bindings/digests, return the prepared work. It does not decrypt the account leaf
+or construct a signing session. The returned account address is authenticated
+reserve metadata, not a fresh proof of currently open signing authority.
+
+Explicit account open: a separate bounded PRF request decrypts the Mera vault;
+validate every header binding and work digest, derive and verify owner, then
+return a signer. Concurrent opens reject. Context closure/expiry/cancellation
+close any active signer and discard retained encrypted vault references.
+Integration must limit actions exposed through the full EOA signer.
+
+The recovery credential can authorize both cryptographic purposes. Separate
+namespaces are cryptographic domain separation, not independently granted roles.
+The design trusts the original app, recovery app, passkey provider, PRF adapter
+(if supplied) and availability of the prepared ciphertext. It does not recover
+from stolen original keys or compromise of those clients. No production audit,
+independent hosting, native cross-profile success, usage demand or bounty
+eligibility is implied by local synthetic tests.

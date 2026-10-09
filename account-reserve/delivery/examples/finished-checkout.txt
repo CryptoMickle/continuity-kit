@@ -1,0 +1,33 @@
+A calmer checkout
+Studio North
+
+BRIEF
+Redesign the checkout for a small furniture studio. Keep delivery costs visible before the final step. The tone should be clear and reassuring, with no countdowns or pressure to buy.
+
+WORKING DRAFT
+CHECKOUT DIRECTION · COPY HANDOFF
+
+1. Keep the order summary beside the form. Show the full delivery price as soon as the postcode is entered.
+
+2. Let customers check out as guests. Offer account creation after the order is confirmed.
+
+3. Use “Continue to payment” for the final review step. Explain what happens next in one sentence.
+
+ADDRESS ERROR
+Check your address and try again.
+Make sure the street name, house number and postcode are correct.
+
+ORDER CONFIRMATION
+Your order is confirmed.
+Order: {order_number}
+Estimated delivery: {delivery_window}
+Total paid: {order_total}, including {delivery_cost} for delivery.
+For help with your order, contact {support_email} and include your order number.
+
+IMPLEMENTATION NOTES
+Replace the marked placeholders with confirmed order data. Keep the delivery amount visible before payment. Show the confirmation only after the order has been accepted. Preserve the entered address when validation fails.
+
+Fictional client example; copy prepared for implementation review.
+
+NEXT STEP
+Review the copy in the checkout screens, connect the marked order fields and check that delivery costs remain visible before payment.

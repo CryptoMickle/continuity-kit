@@ -1,6 +1,20 @@
+> Work Reserve update, 9 October: the separate public Work Sites are published
+> with native D1 storage. A fresh page in Codex’s integrated browser on Mac
+> recovered all five original work fields and the matching prepared account
+> while Primary A returned HTTP 503 before and after the visible recovery.
+> Account signing stayed locked; no transaction was sent. Primary A was then
+> restored and checked with HTTP 200. [Portable Work proof](../evidence/work-public-proof.json).
+> Editing/export were separately verified, and the two missing copy sections were
+> completed in the Mac editor with matching saved TXT/JSON exports. iPhone recovery
+> with the same passkey is explicitly user-confirmed; direct device-screen/full-content
+> and recorded live evidence remain pending. A fresh browser profile is untested.
+> This source tree includes the Work implementation and reviewed portable evidence.
+> Final competition submission is deferred. Existing Account Reserve proof below is separate.
+> Video remains deferred.
+
 # Account reserve — leveransestatus
 
-Publication update, 8 October 2026: the owner approved the reviewed account-reserve source release to `CryptoMickle/continuity-kit/account-reserve` with MIT for original code and preserved dependency notices. The package remains unpublished on npm. Portal submission and video are separate. Earlier pending-license/publication statements below are retained as historical preparation records, not current license status.
+Source publication completed and anonymously verified on 8 October 2026: https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve. MIT applies to original Account Reserve source; dependency notices are preserved. All 134 published file hashes matched. Earlier statements below about pending source licensing/publication are historical. The SDK remains unpublished on npm; the competition entry is not submitted and video is deferred. Evidence: `evidence/source-publication-2026-10-08.json`.
 
 Oppdatert 8. oktober 2026. Dette er den nye kontoreserven, ikke den tidligere publiserte notatbackupen. Video er uttrykkelig utsatt.
 

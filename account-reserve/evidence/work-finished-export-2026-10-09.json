@@ -1,0 +1,28 @@
+{
+  "format": "continuity-work-finished-export/v1",
+  "recordedAt": "2026-10-09T14:01:42.427094+00:00",
+  "status": "verified-fictional-copy-handoff",
+  "performedBy": "Codex using the public Work Reserve editor after the native Mac recovery",
+  "browser": "Codex integrated browser on Mac",
+  "checks": {
+    "bothFilesDownloadedFromVisibleExportButtons": true,
+    "txtAndJsonRepresentIdenticalWork": true,
+    "originalProjectClientBriefPreserved": true,
+    "missingAddressErrorAndOrderConfirmationCompleted": true,
+    "accountAccessAlreadyExpiredDuringEditing": true,
+    "storedSnapshotNotUpdatedByLocalExport": true
+  },
+  "files": [
+    {
+      "path": "delivery/examples/finished-checkout.txt",
+      "bytes": 1401,
+      "sha256": "2fb4de796e6332d0a0678ab49f20b2f018490e4b4d1af4139c10c89cd8293b58"
+    },
+    {
+      "path": "delivery/examples/finished-checkout.json",
+      "bytes": 1513,
+      "sha256": "d740aa3a6715368651584c4225c20ade6efde28d34c52d8a683892b152e63259"
+    }
+  ],
+  "scope": "Completed copy for a fictional client example, with implementation placeholders. Not a delivered or approved real client project. This export happened after Primary A was restored; the earlier outage recovery is separately documented."
+}

@@ -1,18 +1,87 @@
-# Inspect ContinuityKit Account Reserve
+# Inspect ContinuityKit Work Reserve
 
-ContinuityKit prepares independent access to an existing passkey-derived account. The important check is whether the recovered account can still use a right issued **before** the original app becomes unavailable. A newly generated account cannot collect that payment.
+**Recover the draft, finish the work, leave account signing locked.** Work Reserve prepares an encrypted copy that a separate client can discover with an existing recovery passkey when the original application is unavailable.
 
-This guide accompanies two live demonstration sites and MIT-licensed experimental source at https://github.com/CryptoMickle/continuity-kit/tree/main/account-reserve. README AI disclosure is included. The repository retains earlier history and adds this source snapshot with its actual commit date; no earlier development commits are reconstructed. Video is pending separately. The guide describes the new account reserve, not the earlier data-only ContinuityKit demo.
+The example contains a fictional design brief and an unfinished checkout deliverable for **Studio North**. Its useful outcome is an editable, exportable draft. No payment or account-unlock action is needed for that task.
 
 ## Start here
 
-1. Inspect [Primary A](https://continuitykit-account-primary.cryptomickle.chatgpt.site) and [Reserve B](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris) for the product flow. Opening a page does not grant the existing reserve credential or a new enrollment code.
-2. Check the completed public testnet result below. The payment has already been claimed; the public account is not an open, repeatable test account.
-3. Reproduce locally from the source package. Its default synthetic credentials require no passkey creation, wallet, testnet faucet or real funds.
+1. Inspect [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site). These are the new work demonstration, separate from the earlier account-reserve sites.
+2. Read the physical test result below, then use the local Work example for a repeatable run. Public page access does not grant the existing reserve passkey or a new setup code.
+3. For the required Monad live product, inspect [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris) and its [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). Their separate testnet result demonstrates preserved account authority. The recorded payment is already claimed. The Work flow itself sends no blockchain transactions.
 
-## Completed public proof — 8 October 2026
+**Source status:** this source tree includes the Work Reserve implementation, tests, portable proof and finished fictional exports. Commands below apply to this Work tree. The [8 October commit `fdfd817`](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve) remains the earlier Account Reserve snapshot. Videos and final competition submission remain deferred.
 
-The original account had a 0.1 test-MON payment right before the outage. Primary A and its API were then made unavailable with HTTP 503, and the original/setup tabs were closed. A fresh B tab used the existing physical reserve passkey to recover the same beneficiary and collect that right once. The client showed **Payment collected** and closed its signer. A was restored afterward.
+## Observed physical Work result — 9 October 2026
+
+The original site's frontend and configuration API returned HTTP 503 before recovery. In a freshly loaded reserve page in the **Codex integrated browser on Mac**, the existing physical passkey restored the prepared project. The editor and all five fields were directly observed. The page showed **Work recovered. Account signing is locked. No transaction sent.** A second network probe still found the original frontend and API unavailable. The original service was then restored and checked at HTTP 200.
+
+| Check | Result |
+| --- | --- |
+| Project / fictional client | A calmer checkout / Studio North |
+| Recovered data | Project, client, brief, working draft and next step exactly matched the prepared snapshot |
+| Bound account | `0x386b5eff74b0e22e0f1c2de4ff84929d96be6e09` |
+| Signing authority during work recovery | Locked; account key not opened by the work action |
+| Original service | Frontend and API 503 before and after the observed recovery; restored to 200 |
+| Separate edit/export check | Downloaded text from the user-reported Mac Safari run contained the requested added sentence; all remaining content matched the prior export |
+| Finished fictional deliverable | Missing address-error and confirmation copy completed in the recovered Mac editor; downloaded TXT and JSON match; account access was already expired |
+| Work blockchain transactions | Zero |
+
+The portable Work summary is `evidence/work-public-proof.json`; its source is the retained local outage record `evidence/work-native-outage-proof-2026-10-09.json`. This source tree includes `evidence/work-recovered-2026-10-09.jpg`. The Safari export proves an edit survived into the downloaded file; its device/browser attribution comes from the user's report. It does not independently establish the timing of that earlier recovery relative to the first outage attempt. The later observed Codex-browser outage test supplies the bracketed outage evidence.
+
+Inspect the finished fictional handoff at `delivery/examples/finished-checkout.txt` or `delivery/examples/finished-checkout.json`. Both were downloaded through the recovered editor's visible export controls and compared exactly; `evidence/work-finished-export-2026-10-09.json` records the check. The project, client and original brief are preserved. The new copy fills the two missing messages and marks the order-data placeholders for implementation review. This completion/export happened after Primary was restored, with account access expired. It is not a real client delivery or a claim that export was observed during the outage.
+
+**Second-device boundary:** the user explicitly confirmed Safari on iPhone with the same existing passkey and reported the matching project **A calmer checkout** and client **Studio North**. This is a user-confirmed result, not an independently observed device screen or full-content comparison. A judge-visible live demonstration remains for the deferred video. The [Mera Many Keys bounty](https://hackathon.monad.xyz/tracks/mera-one-passkey-many-keys), read on 9 October, explicitly asks for the same passkey on a second device or fresh browser profile. The directly observed Mac fresh page alone would not satisfy that condition. This guide makes no eligibility or prize claim.
+
+## Reproduce the Work sequence locally
+
+Requirements: Node 24+ and npm. No Foundry, chain, wallet, faucet or database account is needed for this example. From the new source candidate's project directory:
+
+```sh
+npm ci --ignore-scripts
+npm run build:work
+npm run dev:work
+```
+
+Open <http://work-primary.localhost:5073/>. This run deliberately uses simulated credentials and an in-memory store; it is not physical passkey evidence.
+
+1. Read the client brief and unfinished **Working draft**. Select **Create example account**, then **Prepare work reserve**.
+2. Keep both windows open until the stored snapshot has been reopened and checked. Preparation preserves the draft as it exists at that moment.
+3. In the reserve window, expand **Try it without the original app** and select **Take original app offline**. Check the original URL returns unavailable and close its tab.
+4. Choose **Open a fresh reserve**, then **Open existing work reserve**. The recovered project should be **A calmer checkout**, with signing **Locked**.
+5. Finish the missing address-error message and confirmation-page copy in **Working draft**. Select **Export finished draft**, open the downloaded text file and verify your changes. **Export JSON** is also available.
+6. Reopen a fresh reserve once more. It must return the original prepared snapshot. Exported edits do not overwrite it.
+
+The local service keeps simulated credentials and encrypted records in memory. Restarting it deletes both. Both origins run on one computer; the availability switch tests loss of the original app, not independent infrastructure survival. Use fictional content only.
+
+For a physical run against the hosted demonstration, new preparation requires an operator-issued single-use code and native passkey confirmation. Existing recovery needs the prepared passkey, not the setup code. The site cannot itself prove another site's outage; the recorded physical test uses separate network checks. Do not create replacement credentials to recover an existing snapshot.
+
+## Inspect the implementation
+
+| Question | Source to inspect |
+| --- | --- |
+| How is work recovered without a saved file or account address? | `sdk/work-reserve.mjs`: app-specific PRF bootstrap and opaque locator derivation |
+| Are encryption and lookup purposes separate? | Distinct HKDF purposes for locator, manifest AES-GCM and work AES-GCM in `sdk/work-reserve.mjs` |
+| Can work open without account signing? | Work-only recovery and explicit `openAccount` boundary; `tests/work-reserve.mjs` |
+| Is the received snapshot the intended one? | Configuration, credential, owner and work bindings; readback and independent opening tests |
+| Does the two-origin handoff expire and reject stale events? | `sdk/work-browser.mjs`, `tests/work-browser.mjs`, `tests/work-ui-lifecycle.mjs` |
+| What is stored publicly? | Encrypted record bytes, opaque locator and used enrollment-code hash; `work-release/d1-store.mjs` and `work-release/db/` |
+| Are stored copies immutable and bounded? | `tests/work-d1.mjs`, `tests/work-d1-boundaries.mjs`, release HTTP tests |
+| Does exported work preserve edited fields? | `work/app.mjs` export handler, plus the recorded physical downloaded-file comparison |
+
+For targeted local checks:
+
+```sh
+npm run typecheck:work
+npm run test:work
+npm run test:work-release
+```
+
+`npm run verify:local` covers the wider project, including the older account and payment fixtures. Its chain stages require Foundry `anvil`; complete Redis integration coverage requires `ACCOUNT_RESERVE_REDIS_BIN`. Read the produced `evidence/verification.json` and stage outputs rather than treating an exit code with skipped tests as full coverage. Miniflare tests exercise local D1 behavior. None of these simulated tests substitutes for the native or cross-device checks.
+
+## Separate Monad account-continuity proof — 8 October 2026
+
+The earlier Account Reserve demonstrates a complementary capability. A beneficiary already held a 0.1 test-MON right before the original app became unavailable. A fresh reserve tab used its existing physical passkey to recover the same account and collect that right once. The signer closed after confirmation, and the original app was restored.
 
 | Check | Recorded result |
 | --- | --- |
@@ -21,56 +90,20 @@ The original account had a 0.1 test-MON payment right before the outage. Primary
 | Payment contract | `0x738F3a0E2376a8e9AFf6A4440B0dBC77c22e6B4A` |
 | Claim transaction | `0x4e0598a6b6faa3774e7da445257b61fe10357395c93ae7c7d220ae2b507487a5` |
 | Result | Right 1, 0.1 test-MON, `claimed=true`, finalized block 69,286,156 |
-| Independent reads | Both fixed RPC providers agreed on receipt, event and contract state |
+| Verification | Two configured RPCs agreed on receipt, event and contract state; not a light-client proof |
 
-The portable summary is `evidence/public-proof.json`, required by the source packager. Its supporting local records are `evidence/native-public-testnet-proof-2026-10-08.json` and `evidence/public-claim-finalized-2026-10-08.json`. Two agreeing RPC providers are corroboration, not a light-client consensus proof. The raw operational files remain outside the source export.
+The portable record is `evidence/public-proof.json`. Its native proof belongs to **Account Primary 3 / Reserve 2**. The later **Account Primary 4 / Reserve 3** enrollment optimization was locally tested but not physically retested. The native account test used a fresh tab in the same browser. These account versions and credentials are separate from the Work demonstration.
 
-**Version boundary:** the native proof used Primary 3 / Reserve 2. The current published versions, Primary 4 / Reserve 3, add a locally tested reduction in enrollment work. The publication summary is included in `evidence/public-proof.json`; the optimized setup has not been physically retested. The native test used a fresh tab in the same browser, not a separate browser profile or a direct iPhone webpage. The user reported many setup confirmations; the exact count was not measured.
+The [Account Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site) and [Account Reserve](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris) pages remain separate supporting references. The payment was already collected; it is not an open or repeatable public faucet. Do not call it Work transaction activity.
 
-## Reproduce the payment flow locally
+To reproduce only that older synthetic payment sequence, use the root `npm run build` and `npm run dev` commands with Foundry `anvil` installed, then open <http://continuity-primary.localhost:4573/?model=iris>. `CONTINUITY_ANVIL` may specify the executable's absolute path. The `iris` and `accrue` selectors name independently written account-pattern fixtures, not upstream integrations or endorsements. The default disposable chain ID is 31337; local tests using ID 10143 are still local tests.
 
-Requirements: Node 24+, npm and Foundry `anvil`. The harness looks for `~/.foundry/bin/anvil`; set `CONTINUITY_ANVIL` to the executable's absolute path if it is installed elsewhere. From the repository's `account-reserve/` directory:
+## The tradeoff to judge
 
-```sh
-npm ci --ignore-scripts
-npm run build
-npm run dev
-```
+A correctly retained encrypted export can also preserve this work. ContinuityKit adds a credential-discoverable reserve and a continuation client, in return for enrollment, available storage and another trusted client. Demand and superiority to an ordinary export are not established.
 
-Open <http://continuity-primary.localhost:4573/?model=iris>.
+The stored work is one immutable snapshot. It is not current-state synchronization, lost-passkey recovery or a guarantee against operator failure. Opening work leaves account signing locked, but the underlying optional account vault can restore full account authority; it does not revoke the original key. The hosted demonstration uses one operator, fictional work and no funded Work account. Multiple native confirmations may occur; API-call counts are not visible prompt counts.
 
-1. Create the example account. Note its address and unclaimed payment.
-2. Open the reserve window and prepare it. Wait for the stored-copy readback and independent opening to succeed.
-3. In Reserve, expand **Demo controls** and press **Take original app offline**. Close Primary, then follow **Open a fresh reserve**.
-4. Open the existing reserve. Compare the recovered account and pre-existing right.
-5. Collect the local payment. Confirm that the signer closes after the receipt is checked.
-6. Reload and reopen the reserve. The existing transaction can be checked; the client does not submit it again.
+Demo access ends **10 November 2026 at 00:00 UTC**. Expiry cleanup is scheduled but its future execution is not yet observed. Provider recovery history may retain deleted records for up to 30 further days. Keep any intentional export locally. This is experimental software, not a production backup or custody service.
 
-Use `?model=accrue` to inspect the second account-derivation fixture. The fixtures follow direct-PRF and selected BIP39/BIP32 leaf patterns; they are not integrations with, or endorsements from, the upstream projects. The default local chain uses ID 31337. Separate tests with simulated chain ID 10143 are also local; only the recorded public run above supplies public Monad evidence.
-
-The local server keeps ciphertext in memory and loses it on restart. The default run is a protocol demonstration, not a durability test. Use example data only.
-
-For the smallest developer integration without Foundry or a chain, follow **Developer first run** in the root README. It generates a clean consumer that verifies recovery with a signing challenge and closes the signer. It does not perform the payment demonstration.
-
-## Inspect the implementation
-
-| Question | Where to look |
-| --- | --- |
-| How does B find the right account without a file or address? | `sdk/PROTOCOL.txt`, `sdk/index.mjs`, `tests/sdk-discovery.mjs` |
-| Is the encrypted record bound to the correct app, credential and owner? | SDK tampering, mismatch and immutable-enrollment tests |
-| Is the reserve independently opened before setup succeeds? | SDK preparation readback, fresh recovery and signed-challenge checks |
-| What changed in the latest enrollment path? | `createReserveCredential` and `tests/sdk-creation.mjs`; fresh recovery still uses its separate path |
-| Does the restored account have the original payment right? | `chain/PaymentRight.sol`, `tests/chain-reserve.mjs` and the public receipt above |
-| Can a developer consume the package without internal fixtures? | `tests/starter-package.mjs`: clean install, type/build checks and A-off recovery; `tests/sdk-package.mjs`: two account models |
-| What happens after cancellation, an uncertain send or reload? | `tests/browser-flow.mjs`, `transaction.mjs`, `pending-ticket.mjs` and their tests |
-| Are the HTTP and storage limits enforced? | `tests/http-boundaries.mjs`, `tests/release-store.mjs` with disposable Redis |
-
-The latest complete local run passed **318 tests**, with no failures or skips. `npm run verify:local` orchestrates the checks and builds; full Redis verification requires `ACCOUNT_RESERVE_REDIS_BIN` to point to a Redis server binary. A skipped Redis group is not a complete run. On macOS, the verifier restricts test networking to loopback. `evidence/verification.json` records source hashes and stage results. Automated authentication is synthetic; it is distinct from the native proof above.
-
-## Evaluate the tradeoff
-
-A correctly retained encrypted Mera export also restores the same account. ContinuityKit adds credential-driven discovery, so the user does not need to find that file. It also adds a separate credential, storage availability and trust in the reserve client. There is no proven demand or general superiority to encrypted export.
-
-The latest complete new enrollment uses one credential creation plus three assertion calls, or four assertions when creation requires a PRF fallback. Fresh recovery uses two assertions. These are synthetic API-call measurements, not visible system-prompt counts.
-
-The reserve restores full account authority. It does not revoke the original key, recover from compromise, or make a malicious reserve client safe. Hosting and storage in this demonstration remain under one operator. The SDK source is MIT-licensed and unpublished on npm; external integrations, production security and commercial adoption are not claimed. The narrow demonstrated result is recovery of the same prepared account and use of its existing right after an application outage.
+Built by Mikkel / CryptoMickle as a solo project. Source is MIT-licensed; the SDK is unpublished on npm. External adoption, audited security and competition eligibility are not claimed.
