@@ -1,0 +1,49 @@
+ContinuityKit recovery drill — PASSED
+SYNTHETIC FIXTURES. No native passkey, blockchain, funds or human timing.
+
+PASS prepare-real-work-sdk
+PASS prepare-and-independently-import-encrypted-file
+PASS fresh-work-recovery-during-primary-outage
+PASS retained-encrypted-file-also-recovers-during-outage
+PASS missing-file-retained-host
+PASS retained-file-missing-host
+PASS retained-file-unavailable-host
+PASS tampered-ciphertext-rejected-by-both
+PASS lost-credential-is-not-recovered-by-either-method
+PASS continued-edit-export-preserves-original-reserve
+
+Functional comparison:
+- Primary unavailable; file and reserve storage retained: reserve=recovered; export=recovered. Reserve discovers bytes through credential + host. Export imports retained file + credential.
+- Encrypted export file missing; reserve storage retained: reserve=recovered; export=BASELINE_FILE_MISSING. Credential-driven reserve discovery avoids requiring the retained file.
+- Reserve host missing; encrypted file retained: reserve=RESERVE_MISSING; export=recovered. The retained file wins here: no reserve host or database is needed.
+- Reserve host unavailable; encrypted file retained: reserve=STORE_UNAVAILABLE; export=recovered. The retained file wins here: no reserve host or database is needed.
+- Encrypted bytes altered: reserve=MANIFEST_AUTH_FAILED; export=BASELINE_AUTH_FAILED. Both must reject unauthenticated content.
+- Recovery credential unavailable: reserve=PASSKEY_OPERATION_FAILED; export=BASELINE_AUTH_FAILED. Neither design solves credential loss.
+
+Measured credential API operations (not device prompts):
+- sharedCredentialCreation: create=1, assertions=0, account-PRF denied=0
+- workPreparation: create=0, assertions=3, account-PRF denied=0
+- exportProtection: create=0, assertions=1, account-PRF denied=0
+- exportReadbackVerification: create=0, assertions=1, account-PRF denied=0
+- workRecovery: create=0, assertions=1, account-PRF denied=0
+- exportRecovery: create=0, assertions=1, account-PRF denied=0
+- missingFile: create=0, assertions=0, account-PRF denied=0
+- workWithNoExportFile: create=0, assertions=1, account-PRF denied=0
+- workHostmissing: create=0, assertions=1, account-PRF denied=0
+- exportHostmissing: create=0, assertions=1, account-PRF denied=0
+- workHostunavailable: create=0, assertions=1, account-PRF denied=0
+- exportHostunavailable: create=0, assertions=1, account-PRF denied=0
+- tamperedWork: create=0, assertions=1, account-PRF denied=0
+- tamperedExport: create=0, assertions=1, account-PRF denied=0
+- lostCredentialWork: create=0, assertions=1, account-PRF denied=0
+- lostCredentialExport: create=0, assertions=1, account-PRF denied=0
+- immutableSnapshotCheck: create=0, assertions=1, account-PRF denied=0
+
+Both methods recovered the same private work. Work Reserve avoids supplying a retained file, but adds host-storage availability. A correctly retained encrypted export worked even when the reserve host or stored record was unavailable. This drill does not establish user preference or general superiority.
+
+Boundary: Fixture credentials and unfunded account are public deterministic test material. Never use them for real work or funds.
+Boundary: This tests local application unavailability, not browser isolation, cross-device sync, provider durability or production security.
+Boundary: The encrypted-export baseline protects the same private work and owner binding with the same credential. It does not export the optional account leaf; Work preparation also verifies that separate vault.
+Boundary: API/assertion and storage-call counts are measured operations, not Face ID prompts, human steps or elapsed usability time.
+Boundary: Both methods need trusted recovery/import code, the retained credential and their surviving encrypted bytes. Neither recovers a lost credential.
+Boundary: Both protect one prepared snapshot. Continued edits need another intentional export and do not update the reserve.

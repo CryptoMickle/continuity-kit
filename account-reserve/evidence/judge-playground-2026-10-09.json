@@ -1,0 +1,34 @@
+{
+  "schema": "continuity-playground-proof/v1",
+  "date": "2026-10-09",
+  "url": "https://continuitykit-playground.cryptomickle.chatgpt.site",
+  "public": true,
+  "version": 1,
+  "sourceCommit": "a8b45d147e2c60ac1297d3d7afcd9cc8321868c5",
+  "mode": "browser-local simulation",
+  "sdk": "unchanged Work SDK; Mera 0.2.0; viem 2.56.9",
+  "checks": {
+    "unitTestsPassed": 3,
+    "productionBuild": true,
+    "desktopRecoveredCustomText": true,
+    "damagedCiphertextRejected": true,
+    "downloadedJsonReadBack": true,
+    "exportedEdit": "Browser proof: finished after recovery.",
+    "responsiveWidths": [
+      390,
+      320
+    ],
+    "horizontalOverflowAt320": false,
+    "smallScreenRecoveredCustomText": true,
+    "nativePasskeyRequested": false,
+    "blockchainTransactions": 0,
+    "publicSiteCustomTextRecovered": true,
+    "publicEvidenceScreenshot": "judge-playground-public-2026-10-09.jpg"
+  },
+  "limits": [
+    "Not physical-passkey or cross-device evidence",
+    "Original outage is an in-memory model, not an HTTP outage",
+    "Synthetic account and credential; all state discarded on reset/reload",
+    "Public UI recovery checked after deployment; separate physical proof remains unchanged"
+  ]
+}

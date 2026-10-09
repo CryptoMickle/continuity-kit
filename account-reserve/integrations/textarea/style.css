@@ -1,0 +1,12 @@
+#continuity-controls { font: 14px/1.5 system-ui; max-width: 1000px; margin: 20px auto; padding: 20px; border: 1px solid #a4aab4; border-radius: 12px; }
+#continuity-controls header { display: flex; justify-content: space-between; gap: 12px; font-size: 18px; }
+#continuity-controls p { margin: 10px 0; }
+#continuity-controls .metadata { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+#continuity-controls label { display: flex; flex-direction: column; }
+#continuity-controls input, #continuity-controls textarea { width: 100%; font: inherit; padding: 7px; border: 1px solid #888; border-radius: 5px; background: transparent; color: inherit; }
+#continuity-controls button, #actions a { font: inherit; padding: 8px 12px; margin: 6px 6px 6px 0; border: 1px solid #888; border-radius: 6px; cursor: pointer; }
+#continuity-controls button:disabled { opacity: .6; cursor: default; }
+#status[data-error="true"] { color: #bd3434; }
+article { min-height: 50vh; border-top: 1px solid #aaa; }
+article[hidden], #continuity-controls [hidden] { display: none !important; }
+@media(max-width: 600px) { #continuity-controls { margin: 8px; padding: 12px; } #continuity-controls .metadata { grid-template-columns: 1fr; } }

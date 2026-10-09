@@ -1,0 +1,13 @@
+{
+  "project": "Textarea",
+  "author": "Anton Medvedev",
+  "repository": "https://github.com/antonmedv/textarea",
+  "commit": "8aa2247e4d92d963059e8788624e0c0d1be8d6a3",
+  "checkedOn": "2026-10-09",
+  "license": "MIT",
+  "files": {
+    "index.html": "74ff304cd6e6b9192e0e008ad1e940e80b8d8bed8c5304b114d95c8d81fedd15",
+    "LICENSE": "e03f41ed49b86c6811a64aba3ea4abfb5aeb21263bfaa2941c5c25e0610a1516"
+  },
+  "boundary": "Unchanged upstream files are retained under upstream/. The local adapter is written by the ContinuityKit project, not upstream adoption, endorsement or an independently authored SDK integration. No upstream build scripts are downloaded or executed."
+}

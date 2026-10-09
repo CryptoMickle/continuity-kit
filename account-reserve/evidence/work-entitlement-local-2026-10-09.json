@@ -1,0 +1,76 @@
+{
+  "format": "continuity-work-entitlement-local-proof/v1",
+  "recordedAt": "2026-10-09T14:53:59.164Z",
+  "runnerExecutedAt": "2026-10-09T14:53:16.570Z",
+  "scope": "One fictional job; real Work SDK and unchanged PaymentRight contract; synthetic RAM credential; disposable local Anvil EVM",
+  "chainId": 31337,
+  "publicBlockchain": false,
+  "realFunds": false,
+  "physicalPasskey": false,
+  "externalIntegration": false,
+  "networkBoundary": "Executed with scripts/loopback-only.sb under macOS sandbox-exec; only loopback network access allowed",
+  "validation": {
+    "testCommand": "node --test tests/work-entitlement.mjs",
+    "tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "runnerCommand": "node examples/work-entitlement/run.mjs --claim-existing-payment",
+    "runnerExitCode": 0
+  },
+  "observed": {
+    "entitlementIssuedBeforePreparationAndOutage": true,
+    "reservedOwnerMatchesFixedBeneficiary": true,
+    "originalUnavailable": "Local primary read interface rejects; original signer ends. Not an HTTP or domain outage.",
+    "originalSignerRejectsFurtherSigning": "SESSION_ENDED",
+    "samePreparedWorkRecovered": true,
+    "recoveryInputContainsOriginalPrivateKey": false,
+    "workRecoveryExposesSigner": false,
+    "workRecoveryAccountVaultAssertions": 0,
+    "unapprovedAccountUnlockDenied": true,
+    "workRecoveryAndExportLeaveBeneficiaryNonceUnchanged": true,
+    "workRecoveryAndExportLeavePreIssuedRightUnclaimed": true,
+    "laterRecoveryPreservesOriginalSnapshot": true,
+    "editedJsonMatchesExportedWork": true,
+    "originalBriefPreservedInLocalExport": true,
+    "paymentNeedsSeparateExplicitAction": true,
+    "wrongBeneficiary": {
+      "method": "contract simulation (eth_call)",
+      "rejection": "WrongBeneficiary"
+    },
+    "payment": {
+      "method": "signed transaction on disposable local chain",
+      "receiptStatus": "success",
+      "amountWei": "1000000000000000",
+      "matchingClaimEvent": true,
+      "exactBalanceAfterGasVerified": true
+    },
+    "secondClaim": {
+      "contractMethod": "contract simulation (eth_call)",
+      "contractRejection": "AlreadyClaimed",
+      "consumerRejection": "PAYMENT_ALREADY_CLAIMED",
+      "additionalAccountUnlock": false
+    },
+    "postClaimSigning": {
+      "method": "actual signMessage call through closed recovered account interface",
+      "rejection": "SESSION_ENDED"
+    }
+  },
+  "limitations": [
+    "This is a new local integration example, not a physical-passkey, browser-profile or public Monad proof.",
+    "It does not reinterpret the earlier separately demonstrated public Account Reserve payment as a combined Work/payment result.",
+    "The existing contract enforces fixed beneficiary and single collection; it does not attest job completion, client approval or whether payment was earned.",
+    "Editing and export do not issue or earn the payment. The fictional entitlement already exists before recovery.",
+    "One immutable snapshot; all credentials and encrypted storage exist in one process. No independent infrastructure survival or automatic sync.",
+    "Synthetic credentials do not establish real device support, prompt counts, external adoption, production security or sponsor qualification.",
+    "Anvil was destroyed after each run; local transaction hashes are not public explorer evidence."
+  ],
+  "sourceSha256": {
+    "examples/work-entitlement/scenario.mjs": "ac212dc7133cb575cf71dfe7bbdce57a82fb008348f5a5037d58a80eb2351242",
+    "examples/work-entitlement/run.mjs": "adae2f03c82f8fd41ef30b6b7b078774351b27d4834bfd233211f19cc8c26cc8",
+    "tests/work-entitlement.mjs": "b993e5afcb1eedf39a1c981f7f5e79447b3047e2e6d5c9067f1aa5427dc68b98",
+    "sdk/work-reserve.mjs": "a52505ec92b588bbf5da82af6b05a940991326683047ab03e314cb596b14abd7",
+    "chain/PaymentRight.sol": "a89fe3d93272c8a2cfa92ef01c689792f8488ac65858bc5bde0234f4c57184b7",
+    "chain/harness.mjs": "f45b01098d8c00f67160c4655f6b27764cfcf487b024fb3c9a03dcfb2df76705"
+  }
+}

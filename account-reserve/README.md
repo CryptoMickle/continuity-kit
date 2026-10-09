@@ -10,6 +10,30 @@ pasted address or saved export file. It does not automatically back up later edi
 Account access is a separate explicit action; the existing Account Reserve protocol
 and its Monad testnet proof remain available as supporting, separately attributed work.
 
+## Try it without credentials
+
+[Open the interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/).
+Change a line, prepare a snapshot, discard the original, recover and export. It runs the
+real Work SDK with a simulated credential, entirely inside the browser. It is not native
+passkey, HTTP-outage or physical-device evidence.
+
+## Developer checks in this source update
+
+- [Textarea integration](integrations/textarea/README.md): an isolated adapter into Anton
+  Medvedev's pinned MIT editor, consuming the packaged SDK. This is project-authored
+  integration work, not upstream adoption or endorsement.
+- [Recovery drill and encrypted-export comparison](drill/README.md): `npm run drill:work`
+  executes ten checks with real encryption and loopback HTTP failure injection. Both
+  approaches recover when their copies survive. Retained files also work without reserve
+  storage; Work can recover without the file. [Measured report](evidence/work-drill-2026-10-09.json).
+- [Work and existing payment](examples/work-entitlement/README.md): one local fictional
+  job recovers its work with signing locked, then optionally unlocks the same account to
+  claim a pre-issued right. Local chain only; completing the draft does not earn payment.
+- [Playground source](judge-playground/README.md): standalone build with the unchanged SDK.
+
+These additions improve reproducibility and evaluation. They do not establish customer
+demand, willingness to pay or production security. Video and final entry submission remain deferred.
+
 ## Start with the work
 
 With Node 24+ and npm installed, from this source package:
@@ -51,9 +75,16 @@ The demonstration uses fictional data, no funds and no Work blockchain transacti
 Access ends 10 November 2026 at 00:00 UTC; scheduled cleanup is not claimed as executed.
 It is not a production backup service or proof of survival after hosting/provider loss.
 
-This source tree includes the Work Reserve implementation, portable evidence and
-finished fictional export. The 8 October Account Reserve snapshot remains preserved
-in repository history. Videos and final competition submission remain pending.
+The Work implementation, portable evidence and finished fictional export are
+[published at commit `3e309345`](https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve).
+An anonymous download matched all 183 selected publication files; runtime source
+was unchanged from the validated candidate. The 8 October Account Reserve snapshot
+remains preserved in repository history. The competition draft was saved and reloaded
+on 9 October: all 13 text fields matched, and its checklist is 5/6 with videos remaining.
+Videos and final submission are still deferred. See the local publication and portal
+records in `evidence/work-source-publication-2026-10-09.json` and
+`evidence/portal-draft-saved-2026-10-09.json`; these later operational records are not
+part of the published source snapshot.
 
 ## Account SDK starter — separate chain-free reference
 

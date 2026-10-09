@@ -1,0 +1,273 @@
+{
+  "format": "continuity-work-recovery-drill/v1",
+  "generatedAt": "2026-10-09T14:51:36.246Z",
+  "status": "passed",
+  "synthetic": true,
+  "scope": "Developer drill using real Work SDK and Mera encryption, synthetic PRF credential and two disposable loopback HTTP hosts. No native passkeys, public hosting, blockchain, funds or human timing.",
+  "checks": [
+    {
+      "id": "prepare-real-work-sdk",
+      "status": "passed",
+      "observed": {
+        "independentlyVerified": true,
+        "ownerBound": true,
+        "immutableRecords": 1
+      }
+    },
+    {
+      "id": "prepare-and-independently-import-encrypted-file",
+      "status": "passed",
+      "observed": {
+        "samePreparedWork": true,
+        "sameCredential": true,
+        "independentlyImported": true,
+        "encryptedFileBytes": 1163
+      }
+    },
+    {
+      "id": "fresh-work-recovery-during-primary-outage",
+      "status": "passed",
+      "observed": {
+        "primaryBefore": 503,
+        "primaryAfter": 503,
+        "allFiveFieldsMatch": true,
+        "expectedOwnerMatches": true,
+        "originalAppRequestsDuringRecovery": 0,
+        "signerExposed": false,
+        "accountVaultPrfRequests": 0,
+        "suppliedLocatorOrOwnerOrPrivateKey": false
+      }
+    },
+    {
+      "id": "retained-encrypted-file-also-recovers-during-outage",
+      "status": "passed",
+      "observed": {
+        "recovered": true,
+        "hostRequests": 0
+      }
+    },
+    {
+      "id": "missing-file-retained-host",
+      "status": "passed",
+      "observed": {
+        "rejected": true,
+        "error": "BASELINE_FILE_MISSING",
+        "workReserveRecovered": true
+      }
+    },
+    {
+      "id": "retained-file-missing-host",
+      "status": "passed",
+      "observed": {
+        "workReserve": "RESERVE_MISSING",
+        "encryptedExportRecovered": true,
+        "exportHostRequests": 0
+      }
+    },
+    {
+      "id": "retained-file-unavailable-host",
+      "status": "passed",
+      "observed": {
+        "workReserve": "STORE_UNAVAILABLE",
+        "encryptedExportRecovered": true,
+        "exportHostRequests": 0
+      }
+    },
+    {
+      "id": "tampered-ciphertext-rejected-by-both",
+      "status": "passed",
+      "observed": {
+        "workReserve": "MANIFEST_AUTH_FAILED",
+        "encryptedExport": "BASELINE_AUTH_FAILED"
+      }
+    },
+    {
+      "id": "lost-credential-is-not-recovered-by-either-method",
+      "status": "passed",
+      "observed": {
+        "workReserve": "PASSKEY_OPERATION_FAILED",
+        "encryptedExport": "BASELINE_AUTH_FAILED"
+      }
+    },
+    {
+      "id": "continued-edit-export-preserves-original-reserve",
+      "status": "passed",
+      "observed": {
+        "editedContentPresent": true,
+        "originalBriefPreserved": true,
+        "snapshotStillOriginal": true,
+        "totalReserveWrites": 1,
+        "primaryStill503": true
+      }
+    }
+  ],
+  "comparison": [
+    {
+      "condition": "Primary unavailable; file and reserve storage retained",
+      "workReserve": "recovered",
+      "encryptedExport": "recovered",
+      "dependencyDifference": "Reserve discovers bytes through credential + host. Export imports retained file + credential."
+    },
+    {
+      "condition": "Encrypted export file missing; reserve storage retained",
+      "workReserve": "recovered",
+      "encryptedExport": "BASELINE_FILE_MISSING",
+      "dependencyDifference": "Credential-driven reserve discovery avoids requiring the retained file."
+    },
+    {
+      "condition": "Reserve host missing; encrypted file retained",
+      "workReserve": "RESERVE_MISSING",
+      "encryptedExport": "recovered",
+      "dependencyDifference": "The retained file wins here: no reserve host or database is needed."
+    },
+    {
+      "condition": "Reserve host unavailable; encrypted file retained",
+      "workReserve": "STORE_UNAVAILABLE",
+      "encryptedExport": "recovered",
+      "dependencyDifference": "The retained file wins here: no reserve host or database is needed."
+    },
+    {
+      "condition": "Encrypted bytes altered",
+      "workReserve": "MANIFEST_AUTH_FAILED",
+      "encryptedExport": "BASELINE_AUTH_FAILED",
+      "dependencyDifference": "Both must reject unauthenticated content."
+    },
+    {
+      "condition": "Recovery credential unavailable",
+      "workReserve": "PASSKEY_OPERATION_FAILED",
+      "encryptedExport": "BASELINE_AUTH_FAILED",
+      "dependencyDifference": "Neither design solves credential loss."
+    }
+  ],
+  "operations": {
+    "workPreparationStorage": {
+      "primary": 0,
+      "storeReads": 3,
+      "storeWrites": 1
+    },
+    "workRecoveryStorage": {
+      "primary": 0,
+      "storeReads": 1,
+      "storeWrites": 0
+    },
+    "credentialApiCalls": {
+      "sharedCredentialCreation": {
+        "creates": 1,
+        "assertions": 0,
+        "accountPrfDenied": 0
+      },
+      "workPreparation": {
+        "creates": 0,
+        "assertions": 3,
+        "accountPrfDenied": 0
+      },
+      "exportProtection": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "exportReadbackVerification": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "workRecovery": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "exportRecovery": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "missingFile": {
+        "creates": 0,
+        "assertions": 0,
+        "accountPrfDenied": 0
+      },
+      "workWithNoExportFile": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "workHostmissing": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "exportHostmissing": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "workHostunavailable": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "exportHostunavailable": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "tamperedWork": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "tamperedExport": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "lostCredentialWork": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "lostCredentialExport": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      },
+      "immutableSnapshotCheck": {
+        "creates": 0,
+        "assertions": 1,
+        "accountPrfDenied": 0
+      }
+    },
+    "freshSdkRecoveryLoads": 7,
+    "totalHttp": {
+      "primary": 4,
+      "storeReads": 9,
+      "storeWrites": 1
+    },
+    "nativePromptsMeasured": false
+  },
+  "limitations": [
+    "Fixture credentials and unfunded account are public deterministic test material. Never use them for real work or funds.",
+    "This tests local application unavailability, not browser isolation, cross-device sync, provider durability or production security.",
+    "The encrypted-export baseline protects the same private work and owner binding with the same credential. It does not export the optional account leaf; Work preparation also verifies that separate vault.",
+    "API/assertion and storage-call counts are measured operations, not Face ID prompts, human steps or elapsed usability time.",
+    "Both methods need trusted recovery/import code, the retained credential and their surviving encrypted bytes. Neither recovers a lost credential.",
+    "Both protect one prepared snapshot. Continued edits need another intentional export and do not update the reserve."
+  ],
+  "implementation": {
+    "node": "v24.19.0",
+    "workSdkSha256": "a52505ec92b588bbf5da82af6b05a940991326683047ab03e314cb596b14abd7",
+    "baselineSha256": "a240b95ea3415efd0eaa403f0cbb6b82a1b9df26d1f615f9ad13aed90c5130a6",
+    "injectedTestAdapters": false
+  },
+  "fixtureId": "f7e9d991316ae8ef",
+  "exports": {
+    "json": "finished-work.json",
+    "text": "finished-work.txt",
+    "encryptedBaseline": "encrypted-export.json",
+    "editedJsonSha256": "4ed3c325d3eceefb12bbe1b221c7c2a91730071f1af9ceb3875c8d8f33bdbfb6",
+    "editedTextSha256": "080521f7f2d4100fafed9faf9a5a587deea9429e59b817aeda2d839d67e547c0",
+    "storedSnapshotUnchanged": true,
+    "writtenAndReadBack": true
+  },
+  "verdict": "Both methods recovered the same private work. Work Reserve avoids supplying a retained file, but adds host-storage availability. A correctly retained encrypted export worked even when the reserve host or stored record was unavailable. This drill does not establish user preference or general superiority."
+}

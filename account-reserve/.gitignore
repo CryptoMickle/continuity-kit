@@ -1,0 +1,6 @@
+node_modules/
+dist/
+artifacts/*.tgz
+
+drill/evidence/
+examples/work-entitlement/output/

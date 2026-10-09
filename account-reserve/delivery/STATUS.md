@@ -1,3 +1,21 @@
+# Developer and judge update — 9 October 2026
+
+The public [playground](https://continuitykit-playground.cryptomickle.chatgpt.site/) is deployed,
+with real SDK encryption and explicit simulated credentials/outage. Desktop and 320/390-pixel
+layouts were exercised; custom text was recovered, damaged ciphertext rejected and an edited
+JSON download read back. It is not a new physical-passkey proof.
+
+This source update adds the isolated upstream Textarea adapter, executable recovery/export
+comparison and optional same-account local payment example. See `delivery/JUDGE_GUIDE.md`
+for reproducible commands and individually scoped reports. The drill passed 10 checks and
+9 regression tests; the local payment example passed 6 tests, including signing rejection
+after closure. Public testnet and existing native Work services are unchanged.
+
+Video and final submission remain deferred. New source/portal publication results are recorded
+separately when complete; prior publication and portal records below remain historical.
+
+---
+
 > Work Reserve update, 9 October: the separate public Work Sites are published
 > with native D1 storage. A fresh page in Codex’s integrated browser on Mac
 > recovered all five original work fields and the matching prepared account
@@ -8,9 +26,16 @@
 > completed in the Mac editor with matching saved TXT/JSON exports. iPhone recovery
 > with the same passkey is explicitly user-confirmed; direct device-screen/full-content
 > and recorded live evidence remain pending. A fresh browser profile is untested.
-> This source tree includes the Work implementation and reviewed portable evidence.
-> Final competition submission is deferred. Existing Account Reserve proof below is separate.
-> Video remains deferred.
+> Work source is published at commit `3e3093456ebbf7765e40967b83b120a1cbc54b97`:
+> https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve.
+> Anonymous download matched all 183 selected files; runtime source is unchanged
+> from the validated candidate. Evidence: `evidence/work-source-publication-2026-10-09.json`.
+> The portal draft was saved at 14:22 UTC on 9 October and reloaded at 14:23 UTC.
+> All 13 text fields matched. Checklist: **5/6; only demo and pitch videos remain**.
+> The logo, Trust track and Many Keys selection persisted; the bounty form is complete.
+> Evidence: `evidence/portal-draft-saved-2026-10-09.json`. Form completion does not establish award eligibility.
+> **No final submission or video was produced.** Both remain deferred.
+> Historical Account Reserve milestones below retain their original scope and dates.
 
 # Account reserve — leveransestatus
 
@@ -53,7 +78,7 @@ Startpakken er fortsatt lokal og eksperimentell. Den er ikke publisert på npm o
 - Native forespørsler får en tidsgrense og avbrudd helt ned til nettleserens passkey-grensesnitt. Forsinkede resultater etter avbrudd forkastes; kontrollerte nøkkelbuffere nullstilles. Dette er ikke en påstand om garantert sletting av alle JavaScript-minnekopier eller validert støtte på alle enheter.
 - A kan åpnes igjen med eksisterende nøkkel. B har en eksplisitt handling for videreføring med eksisterende reservenøkkel. En allerede lagret reserve bekreftes lesende; uklar lagring overskrives eller gjentas ikke automatisk.
 - Feil under lesekontroll før signering låser ikke betalingsforsøket. Etter signering bevares forsøket, og stopp før sending skilles fra en sendt transaksjon uten kvittering.
-- Separat fysisk testpakke: `<local-physical-snapshot>`. Fil- og programhasher er kontrollert med `--verify-only`. Serveren er deretter **godkjent og startet** i fysisk modus; native opprettelse og reserveklargjøring er observert. Brukeren rapporterte fem bekreftelser under reserveoppsettet. Fersk B har nå gjenopprettet samme konto etter verifisert A-bortfall, og klienten viste bekreftet lokal utbetaling og lukket signeringsøkt. Kjedekvittering og kontraktstatus er kontrollert lesende: vellykket claim(1), blokk 3, samme mottaker, 0,001 lokale testenheter og claimed=true. Én reserveskriving og én kringkastingsprøve; begge syntetiske tellere er null. Se `evidence/physical-run-2026-10-08.json`, `evidence/physical-preparation.json` og `PHYSICAL_TEST.md`.
+- Separat fysisk testpakke: en isolert lokal operatørmappe. Fil- og programhasher er kontrollert med `--verify-only`. Serveren er deretter **godkjent og startet** i fysisk modus; native opprettelse og reserveklargjøring er observert. Brukeren rapporterte fem bekreftelser under reserveoppsettet. Fersk B har nå gjenopprettet samme konto etter verifisert A-bortfall, og klienten viste bekreftet lokal utbetaling og lukket signeringsøkt. Kjedekvittering og kontraktstatus er kontrollert lesende: vellykket claim(1), blokk 3, samme mottaker, 0,001 lokale testenheter og claimed=true. Én reserveskriving og én kringkastingsprøve; begge syntetiske tellere er null. Se `evidence/physical-run-2026-10-08.json`, `evidence/physical-preparation.json` og `PHYSICAL_TEST.md`.
 - Nettleserprøve på separat port 4973/4974: avbrutt oppsett, samme A åpnet igjen, ny reserve, deretter videreføring med eksisterende B uten ekstra skriving. A returnerte 503, gamle prøvefaner ble lukket, fersk B gjenopprettet samme konto og hentet eksisterende betaling. Etter omlasting var tellingen fortsatt én reserveskriving og én sending; samme kvittering og lukket signeringsøkt. Se `evidence/prephysical-browser.json`.
 - Eksisterende RAM-demoer på 4573/4574 og 4673/4674 er ikke startet på nytt.
 

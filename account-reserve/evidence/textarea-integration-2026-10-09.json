@@ -1,0 +1,71 @@
+{
+  "schema": "continuity-textarea-integration-proof/v1",
+  "date": "2026-10-09",
+  "mode": "local synthetic credentials, actual SDK, pinned upstream editor",
+  "upstream": {
+    "project": "Textarea",
+    "author": "Anton Medvedev",
+    "repository": "https://github.com/antonmedv/textarea",
+    "commit": "8aa2247e4d92d963059e8788624e0c0d1be8d6a3",
+    "checkedOn": "2026-10-09",
+    "license": "MIT",
+    "files": {
+      "index.html": "74ff304cd6e6b9192e0e008ad1e940e80b8d8bed8c5304b114d95c8d81fedd15",
+      "LICENSE": "e03f41ed49b86c6811a64aba3ea4abfb5aeb21263bfaa2941c5c25e0610a1516"
+    },
+    "boundary": "Unchanged upstream files are retained under upstream/. The local adapter is written by the ContinuityKit project, not upstream adoption, endorsement or an independently authored SDK integration. No upstream build scripts are downloaded or executed."
+  },
+  "automated": {
+    "cleanConsumerTestPassed": true,
+    "freshNodeProcessRecovery": true,
+    "fiveFieldsExact": true,
+    "oneCredentialOneWrite": true,
+    "zeroPrimaryRecoveryRequests": true,
+    "immutableSnapshot": true,
+    "pasteUndoBlockNormalization": true
+  },
+  "browser": {
+    "environment": "Codex integrated browser on Mac",
+    "freshPrimaryAndSetupPopup": true,
+    "clipboardPlaintextExactBeforeSnapshot": true,
+    "primaryTabClosed": true,
+    "freshReserveInitiallyEmpty": true,
+    "recoveredMultilineDocumentExact": true,
+    "sameObservedAccount": true,
+    "accountSigningLocked": true,
+    "selectAllPastePreservesTerminalNewline": true,
+    "txtAndJsonDownloadsReadBack": true,
+    "editedTxtJsonMatch": true,
+    "primaryFrontendAndApiBefore": [
+      503,
+      503
+    ],
+    "primaryFrontendAndApiAfter": [
+      503,
+      503
+    ],
+    "screenshot": "textarea-integration-2026-10-09.jpg"
+  },
+  "failedTrials": [
+    "Initial paste collapsed DOM line breaks; fixed plaintext bridge and repeated test.",
+    "Replacement paste retained an extra terminal LF; fixed explicit select-all and repeated test.",
+    "A download waiter timed out; final downloaded TXT/JSON bytes were read and compared, not inferred from clicks."
+  ],
+  "sourceHashes": {
+    "plain-text-editing.mjs": "260b14a72dafbc53343be72f49f02d9de2be12705ac54fe3c433abf7f6fa720b",
+    "main.mjs": "4d4c2c575d1ad89c37b3cf1598960be65b259fe56ffcc19c92e0b1c783b59764",
+    "upstream-build.mjs": "d7147dad54d6016c242ed5dc513d5ab21486ef4834bc77fc733284d003934c0d",
+    "smoke.mjs": "fc680d606470a602e662881c5bbf45787eb2f9ce1e09ea1b301771ecddedf9d1"
+  },
+  "finishedExportSha256": {
+    "txt": "937b48ef58e11b826738793a7851362bc82df07019c367668b5cf0ca36ce3968",
+    "json": "fd3bad11d3f9053aa352c718d1ea3df593b048291efc714709eacd616dc0d22b"
+  },
+  "limits": [
+    "Project-authored integration, not upstream adoption, endorsement or external developer demand.",
+    "Simulated credential and storage share a loopback server; no physical-passkey, device or independent-hosting claim.",
+    "One prepared immutable snapshot; exports do not change it.",
+    "Textarea has no account; the adapter supplies a disposable unfunded account binding.",
+    "No new public transactions, real funds or real client delivery."
+  ]
+}

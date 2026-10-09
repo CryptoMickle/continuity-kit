@@ -1,0 +1,15 @@
+<section id="continuity-controls" aria-label="Work Reserve integration">
+  <header><strong>Textarea + Work Reserve</strong><span id="role"></span></header>
+  <p>This is a local, simulated-credential integration into Anton Medvedev’s editor. Use fictional text. No native passkeys, account funding or blockchain transactions.</p>
+  <p><a href="https://github.com/antonmedv/textarea/tree/8aa2247e4d92d963059e8788624e0c0d1be8d6a3" target="_blank" rel="noreferrer">Upstream Textarea · MIT</a> · Adapter by ContinuityKit; no upstream endorsement.</p>
+  <details id="envelope-panel"><summary>Snapshot envelope added by this adapter</summary>
+    <p>Textarea itself has one document. These four fields are adapter metadata; the editable document below becomes the fifth field, <em>deliverable</em>.</p>
+    <div class="metadata"><label>Project<input id="field-title" maxlength="256" autocomplete="off"></label><label>Client<input id="field-client" maxlength="256" autocomplete="off"></label><label>Brief<textarea id="field-brief" rows="2"></textarea></label><label>Next step<textarea id="field-nextStep" rows="2"></textarea></label></div>
+  </details>
+  <div id="actions"></div>
+  <p id="status" role="status">Loading local configuration…</p>
+  <p id="identity" hidden></p>
+  <p id="storage-note">URL-hash autosave and sharing are disabled here. Edits remain in this window until an explicit snapshot or export. The reserve is immutable; later edits never update it.</p>
+  <div id="recovery-controls" hidden><button id="toggle-primary">Take original app offline</button> <a id="fresh-reserve">Open a fresh reserve</a> <span id="availability"></span></div>
+  <button id="export-envelope" hidden>Export all five fields as JSON</button>
+</section>

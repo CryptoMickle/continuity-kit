@@ -61,7 +61,15 @@
     "test:work": "node --test tests/work-reserve.mjs tests/work-browser.mjs tests/work-http.mjs",
     "typecheck:work": "tsc --project work/tsconfig.json",
     "build:work-sites": "node scripts/build-work-sites.mjs",
-    "test:work-release": "node --test tests/work-release-host.mjs tests/work-release-integration.mjs tests/work-ui-boundary.mjs tests/work-ui-lifecycle.mjs tests/work-d1.mjs tests/work-d1-boundaries.mjs"
+    "test:work-release": "node --test tests/work-release-host.mjs tests/work-release-integration.mjs tests/work-ui-boundary.mjs tests/work-ui-lifecycle.mjs tests/work-d1.mjs tests/work-d1-boundaries.mjs",
+    "dev:playground": "vite judge-playground --config judge-playground/vite.config.mjs",
+    "build:playground": "vite build judge-playground --config judge-playground/vite.config.mjs",
+    "test:playground": "node --test tests/judge-playground.mjs",
+    "drill:work": "node scripts/work-recovery-drill.mjs",
+    "test:drill": "node --test tests/work-recovery-drill.mjs",
+    "test:work-entitlement": "node --test tests/work-entitlement.mjs",
+    "demo:work-entitlement": "node examples/work-entitlement/run.mjs",
+    "test:oss-work": "node --test tests/oss-work-integration.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

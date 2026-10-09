@@ -6,11 +6,114 @@ The example contains a fictional design brief and an unfinished checkout deliver
 
 ## Start here
 
-1. Inspect [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site). These are the new work demonstration, separate from the earlier account-reserve sites.
-2. Read the physical test result below, then use the local Work example for a repeatable run. Public page access does not grant the existing reserve passkey or a new setup code.
+1. Start with the published [interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/). It offers the edit → prepare → recover → finish → export sequence without a setup code, wallet or native passkey. It runs real Work encryption with fictional, browser-local credentials; it does not simulate a physical authentication success or prove an HTTP outage.
+2. Inspect [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site), then read their recorded physical result below. Public page access does not grant the existing reserve passkey or a new setup code. The local examples below provide repeatable checks without those credentials.
 3. For the required Monad live product, inspect [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris) and its [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). Their separate testnet result demonstrates preserved account authority. The recorded payment is already claimed. The Work flow itself sends no blockchain transactions.
 
-**Source status:** this source tree includes the Work Reserve implementation, tests, portable proof and finished fictional exports. Commands below apply to this Work tree. The [8 October commit `fdfd817`](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve) remains the earlier Account Reserve snapshot. Videos and final competition submission remain deferred.
+**Source status:** the core Work Reserve implementation, tests, portable physical proof and finished fictional exports are [published at commit `3e309345`](https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve). The public archive was anonymously downloaded and all 183 selected publication files matched. The playground, Textarea consumer, recovery drill and combined local entitlement example are included in this updated source tree. Their commands apply to this revision, not that earlier commit. The [8 October commit `fdfd817`](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve) remains the earlier Account Reserve snapshot. The competition draft was saved and verified after reload on 9 October; videos and final submission remain deferred.
+
+## Inspect a real editor integration
+
+`integrations/textarea/` adapts [Anton Medvedev's Textarea](https://github.com/antonmedv/textarea)
+at pinned commit `8aa2247e4d92d963059e8788624e0c0d1be8d6a3`. It executes the original
+contenteditable editor and Markdown highlighter. Its unchanged upstream source and MIT
+license have matching GitHub blob hashes and recorded SHA-256 digests. This is an
+agent-built adapter to independently authored software, **not upstream adoption,
+endorsement or external developer feedback**.
+
+Textarea has one document and no account model. Its text becomes `deliverable`; the
+adapter adds an explicit four-field envelope and a disposable unfunded example account.
+It does not invent an upstream account to claim to preserve. The generated consumer
+installs a local SDK tarball using a dependency lock and imports public SDK entry points.
+No source-checkout or internal fixture import is needed by that consumer.
+
+From the updated source tree, with Node 24+ and npm, choose an empty destination:
+
+```sh
+node integrations/textarea/create.mjs /absolute/path/to/textarea-work-demo
+cd /absolute/path/to/textarea-work-demo
+npm ci --ignore-scripts --no-audit --no-fund
+npm run build
+npm test
+npm run dev
+```
+
+Open <http://textarea-primary.localhost:5373/>. Edit the actual document, select
+**Prepare work reserve**, and confirm **Prepare received snapshot** in B. After its
+independent check, use B's **Take original app offline** control, close A, then open a
+fresh reserve. Recover and continue the document. Textarea's **Save as txt** preserves
+the document; **Export all five fields as JSON** preserves the complete Work envelope.
+Reopening a fresh reserve returns the original snapshot, not the later edit.
+
+The automated check builds a clean installed consumer, runs the upstream editor in
+JSDOM, verifies A's frontend/API return HTTP 503, and recovers in two fresh Node processes
+given only B's origin. It verifies all five fields, the bound owner, no requests to A
+during recovery, one immutable write and no account unlock. The edited export check is
+a JSON roundtrip. JSDOM does not verify browser popups, native typing, layout or downloads.
+The server and credential are synthetic and memory-backed; this remains **local only**.
+The build removes upstream's document-in-URL subscriptions and service worker, preserving
+the editor itself. Its first-line tab title remains and may appear in browser history.
+See `integrations/textarea/README.md` for every modification and limit.
+
+## Measure the tradeoff against encrypted export
+
+From the updated project root:
+
+```sh
+npm ci --ignore-scripts
+npm run drill:work
+npm run test:drill
+```
+
+This drill executes real Work SDK and Mera encryption with a synthetic credential and
+two disposable local HTTP hosts. Its encrypted-file baseline protects the same work and
+owner annotation with the same available credential, then actually imports that file.
+
+| Controlled condition | Work Reserve | Encrypted file |
+| --- | --- | --- |
+| A unavailable; both copies retained | Recovers | Recovers |
+| File missing; hosted record retained | Recovers without file | Fails: file missing |
+| Reserve host unavailable or record missing; file retained | Fails | Recovers without host requests |
+| Ciphertext altered | Rejects | Rejects |
+| Credential unavailable | Fails | Fails |
+
+The reviewed run passed ten checks, including a fresh SDK recovery bracketed by A=503,
+all-field/owner equality, signing locked, continued edit/export readback and the unchanged
+original snapshot. Read `evidence/work-drill-2026-10-09.json` or
+`evidence/work-drill-2026-10-09.txt`. The new run writes its own report and fictional
+artifacts under `drill/evidence/`; only the reviewed report/summary are portable evidence.
+
+Healthy Work recovery and file import each used one credential assertion. Preparation
+is reported separately: the Work path also verifies its optional account vault, while
+the file baseline contains private work only. These measured API/storage operations are
+not device prompt counts, human onboarding time or an equal-feature account benchmark.
+This comparison establishes where each dependency model fails; it does not prove that
+people prefer Work Reserve or that ordinary backup is generally inadequate.
+
+## Optional existing payment, through the same recovered account
+
+`examples/work-entitlement/` joins the real Work SDK to the unchanged local `PaymentRight`
+fixture. A fictional job's payment right is issued to its existing account before reserve
+preparation. Work then opens, is edited and exported with account signing locked. Only a
+separate explicit action unlocks the same account to collect that pre-existing right once.
+The signer closes afterward and rejects further signing.
+
+With the repository's locked dependencies and Foundry Anvil installed locally:
+
+```sh
+npm run demo:work-entitlement
+npm run demo:work-entitlement -- --claim-existing-payment
+npm run test:work-entitlement
+```
+
+The first command stops after work export. The second creates a **new disposable local
+run** and opts into its payment claim. All chain activity uses local Anvil, chain 31337;
+there is no public RPC, native passkey, deployed combined flow or real money. The example
+does not claim that editing earns payment or proves a completed job: the fixed right
+already existed. Read `evidence/work-entitlement-local-2026-10-09.json` for six passing
+tests and the scoped local runner result. The original access failure is a local interface
+rejection, not an HTTP or domain outage. This is separate from the historical public
+Account Reserve proof below.
 
 ## Observed physical Work result — 9 October 2026
 
@@ -107,3 +210,13 @@ The stored work is one immutable snapshot. It is not current-state synchronizati
 Demo access ends **10 November 2026 at 00:00 UTC**. Expiry cleanup is scheduled but its future execution is not yet observed. Provider recovery history may retain deleted records for up to 30 further days. Keep any intentional export locally. This is experimental software, not a production backup or custody service.
 
 Built by Mikkel / CryptoMickle as a solo project. Source is MIT-licensed; the SDK is unpublished on npm. External adoption, audited security and competition eligibility are not claimed.
+
+## Textarea browser follow-through — 9 October
+
+The corrected local adapter also passed an observed Codex-browser sequence: exact
+multiline paste, two-window setup, original frontend/API 503, original tab closed,
+fresh B recovery, further editing and actual TXT/JSON downloads. Both downloaded
+formats matched the intended text, including its terminal newline. The original
+frontend/API remained 503 afterward. This uses simulated credentials in a loopback
+service; it adds no physical-device or external-adoption evidence. See
+`evidence/textarea-integration-2026-10-09.json` for the earlier failed trials and fixes.

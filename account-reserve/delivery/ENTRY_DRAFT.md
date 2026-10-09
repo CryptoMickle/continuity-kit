@@ -1,84 +1,81 @@
-# Metropolis entry — ContinuityKit Work Reserve
+# Metropolis entry — developer update, 9 October 2026
 
-Submission copy, 9 October 2026. Final submission and video are deferred; portal draft status is tracked separately. This draft leads with Work Reserve; the earlier Account Reserve supplies separate Monad evidence.
+Prepared replacement for three portal fields. The prior portal copy was saved and checked at 14:22–14:23 UTC; these new description, go-to-market and access sections are not claimed saved here. The later operational save record is separate. Video and final submission remain deferred.
 
-**Project:** ContinuityKit
+Project: ContinuityKit. Solo builder: Mikkel / CryptoMickle. Track: Trust, Identity & AI Infrastructure. Sponsor: Mera: One Passkey, Many Keys. Form completeness is not eligibility or a prize prediction.
 
-**Tagline:** Your work has a way back. Pick up where the app left off.
+The required Monad live-product URL remains the separate Account Reserve Primary. The synthetic playground is the easiest first evaluation, not a Monad deployment.
 
-**Short description:** A developer toolkit for a prepared, encrypted work reserve. Recover a private draft in a separate client, finish it and export it while the original app is unavailable. Account signing stays locked.
+## One-liner
 
-**Main category candidate:** Trust, Identity & AI Infrastructure.
-
-**Sponsor candidate:** Mera: One Passkey, Many Keys — conditional. The work namespace performs non-account encryption and recovery. The user has confirmed opening the same prepared project in Safari on iPhone with the existing passkey. Direct device-screen, full-content and judge-visible live demonstration evidence remain to be captured with the deferred video. No eligibility decision or prize is assumed.
-
-**Monad live-product link:** [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris), with [Account Reserve recovery](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). This is the separately demonstrated Monad testnet account flow. Work Reserve is the private-work continuation flow and sends no blockchain transactions.
+Recover prepared private work with a passkey and keep account signing locked. ContinuityKit pairs a work reserve with separately verified Monad account recovery.
 
 ## Project description
 
 A client brief should remain useful when the app holding it disappears. I built ContinuityKit so a developer can give users a prepared way to continue their work from a separate client.
 
-The example is a small design project: a private brief and an unfinished checkout draft for a fictional furniture studio. While the original workspace is available, the user prepares one immutable encrypted snapshot with a recovery passkey. Later, that credential finds and opens the snapshot in the reserve client. There is no backup file to locate, account address to paste or old setup tab to keep. The user can finish the missing copy and export a local deliverable.
+Try the public interactive playground without a setup code, passkey or wallet: change a draft, prepare it, discard the original, recover and export. It runs the actual Work SDK encryption with a clearly labelled simulated credential and outage. It is an evaluation tool, not physical-device proof.
 
-Work access is separate from account authority. Opening, editing and exporting the draft does not decrypt the account key, create a signer or send a transaction. An optional, deliberate action can separately verify the same account. The public Work demonstration uses a new unfunded example account and fictional content only.
+Work Reserve stores one immutable encrypted snapshot of a private brief and unfinished deliverable. Later, the existing recovery credential finds and opens it without a backup file, pasted account address or original browser session. The user can finish the work and export a local copy. Reading, editing and exporting do not decrypt the account key or send a transaction. A separate deliberate action can unlock the same account; this grants full account authority, not a narrowly delegated signer.
 
-The Work flow has been physically tested on Mac. On 9 October, the original site's page and API returned HTTP 503 before and after recovery was directly observed in a fresh application page in the Codex browser. The existing reserve passkey restored all five prepared fields and the expected account binding, with account signing still locked. The original site was then restored and returned HTTP 200. A separate Safari-on-Mac test produced a downloaded text file containing a new edit with all other prepared content preserved.
+The hosted Work demonstration uses physical passkeys, fictional work and a new unfunded account. On 9 October, a fresh Codex-browser page on Mac recovered all five prepared fields and the expected account while the original frontend and API returned HTTP 503 before and after. Signing remained locked. The original service was restored afterward. The missing checkout copy was later finished and downloaded as matching TXT and JSON. Safari/iPhone recovery using the same passkey and matching project/client is user-confirmed; independent device-screen/full-content and judge-visible live proof remain pending.
 
-I then used the recovered editor to finish the example's address-error and order-confirmation copy. The downloaded text and JSON files contained identical work and preserved the original brief. Account access had already expired; editing and export still worked. This is a finished fictional copy handoff with implementation placeholders, not a delivered client project. Export took place after the original service was restored. The user also confirmed opening the matching project and client in Safari on iPhone using the existing passkey; that second-device result is user-reported, with independent screen and full-content evidence still pending.
+I also integrated the packaged SDK into an isolated copy of Anton Medvedev's MIT-licensed Textarea editor, pinned to its upstream commit. The actual editor supplies the document; an explicit adapter supplies four project fields. Clean-consumer tests install the SDK tarball, build, prepare over HTTP, make the original app return 503 and recover in a fresh Node process. This is an integration I built into independently authored code, not upstream adoption, endorsement or customer traction.
 
-The toolkit uses Mera's PRF material for a dedicated work namespace. HKDF separates the discovery locator, manifest encryption and work encryption. The encrypted record binds the work to the application configuration, recovery credential and separately encrypted account vault. Setup reads the stored bytes back and independently opens the reserve before reporting success. Fresh work recovery checks those bindings without unlocking the account signer. The hosted example stores ciphertext in a separate recovery site's D1 database; both sites remain under one operator.
+A one-command developer drill executes ten checks rather than displaying canned outcomes. It compares Work recovery with a functioning Mera-encrypted export of the same work using the same available credential. Both recover when their copies survive. Work succeeds without the export file; a retained file succeeds when reserve storage is unavailable. Both reject altered ciphertext and fail without the credential. This demonstrates a tradeoff, not universal superiority or demand.
 
-ContinuityKit also includes an earlier Account Reserve flow with a concrete Monad testnet result. On 8 October, an account already entitled to 0.1 test-MON was recovered while its original app was unavailable and collected that payment once. Two configured RPC providers agreed on the finalized receipt and claimed state. That is evidence for recovered account authority, not a transaction performed by Work Reserve. The Work demonstration sends no blockchain transactions.
+Mera 0.2.0 provides passkey PRF and secret-vault primitives. App-specific HKDF purposes separate discovery, manifest encryption and work encryption. The record binds the work, configuration, credential and separately encrypted account vault. Preparation reads back and independently opens the stored bytes before reporting readiness. Hosted ciphertext lives in the recovery site's D1 database; both sites remain under one operator.
 
-A retained encrypted export is a credible alternative. The proposed advantage here is credential-driven discovery plus a usable continuation client: users return to prepared work without supplying their backup file. The cost is enrollment, storage availability and trust in the reserve code. This is one prepared snapshot, not automatic backup or synchronization. Changes made after preparation are not silently protected, and edits in the recovery client must be exported.
+The separately demonstrated Account Reserve recovered a beneficiary already entitled to 0.1 test-MON and collected that payment once on Monad testnet. Two RPC providers agreed on the finalized receipt and claimed state. A new local reference consumer now joins work recovery and optional collection of a pre-issued payment under the same account. That joined sequence uses a disposable local chain; it is not a new public Monad result, and completing an export does not earn the payment.
 
-I built the SDK, typed interfaces, two-origin setup flow, storage boundary, reference applications and tests as a solo project. The earlier account SDK has a generated developer starter and two independently written account-model fixtures. These are internal reference consumers, not external adoption. Developer demand, willingness to pay and production security remain unproven.
+This is a solo project by Mikkel / CryptoMickle, developed with AI assistance. Source, typed SDK, integration, reproducible drill, contract fixture and scoped evidence are included. One prepared snapshot is not automatic backup, synchronization or lost-passkey recovery. Customer demand, willingness to pay, independent security audit and production readiness remain unproven.
 
-Built by Mikkel / CryptoMickle. No external users, endorsements or third-party integrations are claimed.
+## Go-to-market
 
-## Go-to-market draft
+The initial developer use case is a small web app holding private drafts, client briefs or unfinished deliverables. The integration maps a bounded snapshot and an existing selected account leaf to the Work SDK. Users get a separate place to open prepared work and take it away.
 
-The initial developer use case is a small web application holding private drafts, client briefs or other unfinished deliverables. An integration supplies a bounded work snapshot and an existing account leaf to the reserve SDK. The user gets an independent place to open the prepared work, continue editing and take it away.
+Distribution begins with the no-credential public playground, MIT source, an actual isolated Textarea adapter and a one-command recovery drill. The Textarea consumer installs the packaged SDK in a clean project and uses only public package exports. This is project-authored integration work; upstream adoption or an independently motivated integrator is not claimed. The SDK is not published on npm.
 
-The developer package has a chain-free local Work example with simulated credentials. It makes the core sequence reproducible without a wallet, faucet, database subscription or native passkey setup. A separate hosted demonstration exercises physical passkeys and durable encrypted storage. The SDK is MIT-licensed and unpublished on npm; the Work source, tests and portable evidence are included in this repository.
+An integrating developer can run the existing app, map its data, test an actual local HTTP outage, inspect a fresh-process recovery and compare against a functional encrypted export. The benchmark deliberately includes conditions in which the retained file wins. These artifacts reduce evaluation friction; no human onboarding-time or conversion-rate claim is made.
 
-The commercial hypothesis is an integration toolkit and implementation support. The relevant comparison is the developer's own encrypted export and restore flow. There is no demonstrated customer preference for this extra setup, and no claim of a high-volume transaction business. The next product decision depends on whether credential-driven discovery and a working exit client justify their operational cost for a specific integrating application.
+The commercial hypothesis is an integration toolkit and implementation support. There are no proven paying customers, retention, product-market fit or high-volume transaction business. The product decision is whether credential-driven discovery and a usable continuation client justify setup and storage dependency for a specific app. Work recovery itself does not require a blockchain transaction; optional recovery of existing account rights supplies the separately demonstrated Monad use case.
 
-## Mera: non-account use
+## Judge access instructions
 
-Mera 0.2.0 supplies the passkey PRF and secret-vault primitives. Work Reserve uses the namespace `account-continuity/work-reserve-v1`; its bootstrap salt also includes the application ID. Distinct HKDF purposes derive the opaque lookup material, manifest AES-GCM key and work AES-GCM key. The account leaf is protected in a separately salted Mera vault. The work operation decrypts and validates the brief and draft without decrypting that leaf.
+START WITH THE PUBLIC PLAYGROUND
+https://continuitykit-playground.cryptomickle.chatgpt.site/
+No setup code, passkey, wallet or funds are needed. Edit a line, prepare, take the simulated original offline, recover and export. Real SDK encryption; explicitly synthetic browser-local credentials/outage. Reloading clears this fictional example. This is not physical-device evidence.
 
-The server stores encrypted record bytes and enrollment metadata, not plaintext work or PRF output. A user-requested export intentionally creates a plaintext local copy. This is not a claim that plaintext never exists: the original and recovery editors necessarily handle it in memory, and both clients must be trusted.
+SOURCE AND REPRODUCIBLE DEVELOPER CHECKS
+https://github.com/CryptoMickle/continuity-kit/tree/main/account-reserve
+Read delivery/JUDGE_GUIDE.md. integrations/textarea/ contains a real adapter into pinned MIT upstream editor code, built by this project without upstream endorsement. drill/ contains the one-command recovery and functional encrypted-export comparison. examples/work-entitlement/ joins work recovery and an optional existing payment on a disposable local chain. These synthetic checks do not replace native proof.
 
-The non-account result is recovering and editing the private work. Payment is not required to demonstrate it. The user has confirmed same-passkey iPhone recovery and identified the matching project and client. The remaining sponsor evidence is a judge-visible live demonstration with the device and recovered content visible. The directly observed fresh-page Mac test is not a fresh-profile test, and the iPhone report has not independently established full-content equality.
+PHYSICAL WORK REFERENCE
+https://continuitykit-work-primary.cryptomickle.chatgpt.site/
+https://continuitykit-work-reserve.cryptomickle.chatgpt.site/
+Existing prepared passkey required. Public viewing does not provide that key or a new enrollment code; do not create an unrelated key expecting the recorded work. Mac outage recovery and finished fictional TXT/JSON exports are recorded in evidence/work-public-proof.json and delivery/examples/. iPhone Safari using the same passkey and matching project/client is user-confirmed; recorded screen/full-content proof remains pending.
 
-## Access instructions draft
+SEPARATE MONAD LIVE PRODUCT
+https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris
+https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris
+Claim: 0x4e0598a6b6faa3774e7da445257b61fe10357395c93ae7c7d220ae2b507487a5, Monad testnet 10143, finalized block 69,286,156. evidence/public-proof.json. The 0.1 test-MON right is already claimed, not an open faucet. This receipt is separate from Work and the new local combined scenario.
 
-The required Monad live-product link is [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris); its separate [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris) demonstrates prepared account access. The recorded testnet payment is already claimed. The private Work flow below is distinct and does not send a transaction.
+Physical Work access ends 10 November 2026, 00:00 UTC. Both sites/storage have one operator. One immutable prepared snapshot; no automatic sync, lost-passkey recovery or audited production guarantee. Video and final submission are deferred.
 
-Start with [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site). The hosted demo is a bounded physical-passkey trial. Viewing the pages does not give a visitor the existing reserve credential or a new enrollment code. Use the accompanying local example for a repeatable walkthrough without those credentials.
+## Mera non-account explanation
 
-Follow `delivery/JUDGE_GUIDE.md` for the Work sequence, evidence boundaries and the separate Monad result. The recorded Work recovery restores the project **A calmer checkout** and fictional client **Studio North**, while displaying **Work recovered. Account signing is locked. No transaction sent.** Inspect the resulting copy handoff in `delivery/examples/finished-checkout.txt` or `.json`. The snapshot remains immutable; a later recovery returns the prepared draft, not that exported edit. This source tree includes the portable Work evidence at `evidence/work-public-proof.json`.
+Mera 0.2.0 supplies the passkey PRF and secret-vault primitives. Work Reserve uses the namespace account-continuity/work-reserve-v1; its bootstrap salt also includes the application ID. Distinct HKDF purposes derive the opaque lookup material, manifest AES-GCM key and work AES-GCM key. The account leaf is protected in a separately salted Mera vault. The work operation decrypts and validates the private brief and draft without decrypting that leaf.
 
-The separate Account Reserve claim is `0x4e0598a6b6faa3774e7da445257b61fe10357395c93ae7c7d220ae2b507487a5` on Monad testnet, finalized block 69,286,156. Its portable evidence is `evidence/public-proof.json`. The payment has already been claimed; it is historical evidence, not an open faucet.
+The non-account result is useful work: reopen a prepared client brief, finish the missing checkout copy and export a local deliverable. The retained example contains a fictional project and client; it is not a real client delivery. Opening, editing and exporting Work sends no blockchain transaction. The toolkit's separate Account Reserve Monad testnet demonstration is evidence of account recovery, not the purpose of this Mera work namespace.
 
-The [Work source](../README.md), tests, demonstration instructions and portable evidence are included in this source tree. The [8 October Account Reserve snapshot](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve) remains available separately in repository history. The repository retains its actual commit history, with no reconstructed development commits.
+The server stores encrypted record bytes and enrollment metadata, not plaintext work or PRF output. A requested export intentionally creates a plaintext local copy. The original and recovery editors necessarily handle plaintext in memory, and both clients must be trusted. Storage and both sites remain under one operator.
 
-## Submission readiness — internal, not portal copy
+On 9 October, directly observed Mac recovery restored all five prepared fields while the original page and API returned HTTP 503 before and after. The same prepared project and client were also opened in Safari on iPhone using the existing passkey; that second-device result is self-reported. Direct device-screen/full-content comparison and a judge-visible live demonstration remain pending. The observed fresh-page Mac test is not a fresh-browser-profile test. I am not claiming a single native confirmation or an independently verified second-device full-content match.
 
-The 9 October [Many Keys page](https://hackathon.monad.xyz/tracks/mera-one-passkey-many-keys) offers one $2,500 prize and explicitly requires non-account work plus a live same-passkey second-device or fresh-profile test. The Trust track's previously captured rubric also gives substantial weight to market readiness and traction. Technical evidence does not establish those qualities, and no minimum payout can be promised.
+Portable evidence, source and the completed fictional TXT/JSON export are included in the public repository. The Work flow is one immutable prepared snapshot, not automatic backup or sync.
 
-| Item | Current state |
-| --- | --- |
-| Work app-outage recovery | Observed on Mac in a fresh Codex browser page; A page/API 503 before and after; restored A 200. |
-| Edited local export | Safari-on-Mac requested edit verified. Completed fictional checkout copy subsequently downloaded through the Mac Codex browser as matching TXT and JSON; account access was expired. Original app was already restored during completion/export. |
-| Same passkey, second device / fresh profile | User explicitly confirmed Safari on iPhone with the existing passkey and matching project/client. Direct device-screen/full-content comparison and judge-visible live demonstration remain pending. |
-| Public Work source | Work implementation, tests, portable evidence and fictional finished exports are included in this repository. The earlier Account Reserve remains preserved in history. |
-| Public source requirements | Previously checked rules require licensed source, build-window commit history and README AI disclosure. Verify the new public package meets them before submission. |
-| Portal copy | Final submission is deferred. Portal draft save/readback is tracked separately from source publication. Name/tagline limits were 120/200 characters; description, go-to-market and access fields allowed 8,000 each at the prior check. |
-| Logo | Prepared `delivery/assets/continuitykit-logo.png`, 1024 × 1024, 249,425 bytes. Upload not claimed. |
-| Video | Deferred. Prior form asked for a product demonstration of at most 3 minutes and a pitch of at most 2 minutes; the Many Keys page lists an optional Mera demonstration of at most 2 minutes. |
-| Deadline | 9 October bounty-page observation: 14 October 2026, 05:59 GMT+2. Recheck the submission portal before final submission. |
-| Availability | Work demo access ends 10 November 2026, 00:00 UTC. Scheduled expiry cleanup has not yet executed. Provider recovery history may retain deleted records for up to 30 further days. |
+## Remaining submission boundary
 
-Known limits: one immutable snapshot; multiple native confirmations possible; no loss-of-passkey recovery; same-operator hosting and storage; no shared-infrastructure-failure proof; no independent security audit. The underlying account vault can restore full account authority if deliberately opened; it does not revoke the original key. Use fictional data and no real funds.
+Technical demo and pitch video URLs remain empty. Same-passkey iPhone recovery is user-confirmed, but recorded screen/full-content and judge-visible live evidence remain pending. There is no fresh-browser-profile claim, external adoption, measured onboarding time, security audit or demand proof. Final submission is explicitly deferred.
+
+The portal was observed on 9 October with a deadline of 14 October 2026, 05:59 GMT+2. Recheck before final submission. Existing physical Work demo access ends 10 November, 00:00 UTC; scheduled cleanup has not yet executed.
