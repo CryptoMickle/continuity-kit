@@ -62,6 +62,42 @@ same 24 app/editor tests and was checked in the published 390px layout.
 including exact compiled asset matches and preservation of the earlier routes.
 These are agent-run engineering checks, not human adoption or native passkey proof.
 
+## Open several app reserves with one recovery action
+
+The additive `recoverTextReserves` API opens a bounded list of prepared text
+namespaces using one discoverable passkey assertion. The B `/apps/` collection
+view shows each app's result and lets users switch editors, continue drafts and
+export them in the same page. Existing single-app links and records remain valid.
+One SDK assertion does not guarantee one device confirmation.
+
+```js
+import { recoverTextReserves } from '@continuitykit/account-reserve/text-reserve';
+import { createReserveHttpStore } from '@continuitykit/account-reserve/http-store';
+
+// Invoke directly from a user action on the configured recovery origin.
+const results = await recoverTextReserves({
+  configs: trustedApps.map(app => app.config),
+  store: createReserveHttpStore(),
+  signal: pageLifetime.signal,
+});
+for (const result of results) {
+  if (result.status === 'recovered') showDraft(result.appId, result.reserve.text);
+  else showReadFailure(result.appId, result.status);
+}
+```
+
+Choose 1–8 distinct appIds on the same exact recovery origin/RP. There are no
+writes, new passkeys or retained cryptographic sessions. Missing, unavailable
+and rejected app copies are reported separately; cancellation rejects the entire
+operation. App-specific derivation and v1 ciphertext are unchanged. The caller
+still trusts the shared recovery page with all requested documents.
+
+`npm run test:collection` covers the SDK and page lifecycle. The
+[installed-package replay](evidence/collection-installed-sdk-2026-10-10.json)
+checks a fresh offline consumer and strict TypeScript usage. These are synthetic
+engineering checks. Earlier builder-reported iPhone tests do not establish the
+new collection view's physical prompt count or independent usability.
+
 ## Earlier account-free text candidate
 
 [Open original workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)

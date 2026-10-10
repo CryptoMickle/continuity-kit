@@ -4,6 +4,7 @@ import { recoverTextReserve, validateText, MAX_TEXT_BYTES } from '../../sdk/text
 import { startTextReserveSetup, createTextReserveReceiver } from '../../sdk/text-browser.mjs';
 import { createReserveHttpStore } from '../../sdk/http-store.mjs';
 import { validateEnvironment, validateCapability } from './config.mjs';
+import { mountTextReserveCollection } from './collection.mjs';
 
 
 const SESSION_MS = 5 * 60000;
@@ -23,7 +24,11 @@ async function main() {
   const environment = await response.json();
   if (lifetime.signal.aborted) return;
   const { primary, expiresAtMs, selected } = validateEnvironment(environment, window.location.href);
-  if (!selected) { renderHub(environment, primary); return; }
+  if (!selected) {
+    if (primary) renderHub(environment, primary);
+    else mountTextReserveCollection({ root: $('app'), env: environment, expiresAtMs, lifetime });
+    return;
+  }
   const env = { ...environment, config: selected.config };
   const appPath = '/apps/' + selected.id + '/';
   const publicReserveUrl = env.recoveryOrigin + appPath;

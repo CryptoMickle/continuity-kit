@@ -91,3 +91,38 @@ export declare function recoverTextReserve(options: {
   signal?: AbortSignal;
   onProgress?: (stage: 'find-text' | 'open-text') => void;
 }): Promise<Readonly<RecoveredTextReserve>>;
+
+export type TextReserveCollectionResult = Readonly<{
+  appId: string;
+  status: 'recovered';
+  reserve: Readonly<RecoveredTextReserve>;
+}> | Readonly<{
+  appId: string;
+  status: 'missing' | 'unavailable' | 'rejected';
+  /** Bounded protocol error code, without a locator or provider message. */
+  code: string;
+}>;
+/** Recover 1–8 explicitly selected app namespaces with one discoverable PRF
+ * assertion. Configs must have unique appIds and the same exact recovery origin
+ * and RP ID; all are validated and copied before a native prompt. Call directly
+ * from the user action. This does not discover unknown apps or create a key.
+ *
+ * Uses unchanged text-v1 records and app-specific derivations. Raw PRF buffers
+ * are erased before storage reads; no live key/session is returned. Each read
+ * is bounded to ten seconds and the whole operation has a five-minute scope.
+ * Results preserve config order; an unavailable/rejected app does not suppress
+ * recovered siblings. A wrong but valid selected credential normally yields
+ * missing results. Credential acquisition failure or cancellation rejects the
+ * entire call without returning partial plaintext. Failed results contain no
+ * locator, credential identifier, plaintext or untrusted provider message.
+ * The API makes one assertion request; native confirmation counts may vary.
+ */
+export declare function recoverTextReserves(options: {
+  configs: readonly TextReserveConfig[];
+  store: TextReserveReader;
+  webAuthnClient?: WebAuthnClient;
+  signal?: AbortSignal;
+  /** find-text once, open-text for each authenticated manifest. Stage names
+   * only; no app identity or plaintext is sent to this observational callback. */
+  onProgress?: (stage: 'find-text' | 'open-text') => void;
+}): Promise<readonly TextReserveCollectionResult[]>;

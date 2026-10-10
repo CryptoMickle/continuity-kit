@@ -1,0 +1,73 @@
+{
+  "checkedAt": "2026-10-10T12:52:46.873603+00:00",
+  "scope": "Additive one-assertion collection recovery for existing text-v1 app snapshots. Synthetic credentials for automated and local browser checks.",
+  "status": "PASSED",
+  "tests": {
+    "sdkIncludingExisting": {
+      "passed": 79,
+      "failed": 0
+    },
+    "uiIncludingExisting": {
+      "passed": 34,
+      "failed": 0
+    },
+    "hostAndEditor": {
+      "passed": 7,
+      "failed": 0
+    },
+    "installedSdk": {
+      "passed": 14,
+      "failed": 0,
+      "strictTypecheck": true
+    }
+  },
+  "independentCodeReview": "No remaining release blocker in scoped SDK/UI review; BFCache and real EasyMDE BOM/CRLF export fixes independently checked.",
+  "browser": {
+    "localSimulation": true,
+    "physicalPasskeyCeremonies": 0,
+    "mobileViewport": {
+      "width": 390,
+      "height": 844,
+      "pageScrollWidth": 375
+    },
+    "observed": [
+      "Both app results displayed",
+      "Real Markdown editor loaded",
+      "Edited fictional draft survived switching to Textarea and back",
+      "Closing copies removed editor and displayed closed status",
+      "Public collection page loaded after deployment"
+    ],
+    "exportBytes": "Verified in automated UI tests including real EasyMDE. Browser download readback was not completed.",
+    "screenshots": [
+      "collection-mobile-2026-10-10.png",
+      "collection-public-2026-10-10.png"
+    ]
+  },
+  "publication": {
+    "sitesVersion": 8,
+    "primary": "https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/",
+    "reserve": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/",
+    "sourceCommits": {
+      "primary": "3f27a8837511b31adad8433ca627e50798bb08f5",
+      "recovery": "0931415a7a2e457988d1ee59d3ec02a3ebc0776b"
+    },
+    "httpChecksPassed": 40,
+    "httpReport": "collection-public-http-2026-10-10.json"
+  },
+  "limits": [
+    "Exactly one SDK assertion does not guarantee one operating-system prompt",
+    "Earlier iPhone acceptance does not establish physical validation of the new collection flow",
+    "Both apps share the recovery-origin trust boundary",
+    "No external adoption, security audit, independent provider resilience or prize outcome established"
+  ],
+  "sourceHashes": {
+    "sdk/text-reserve.mjs": "c0023b03a8d394b9b25a725e2f02c69e072a81a2b2dd15d138b2603de35d73b4",
+    "sdk/text-reserve.d.ts": "3c731e4a9e41ebf4c36a0a8623da25032304e639d79a7aa90e63394ac38f2563",
+    "self-service/apps/collection.mjs": "0d78b6d5ed554cd2ad91425266c8fac541b35f5a91c22d01201fe9b4cc0a894a",
+    "self-service/apps/app.mjs": "05ee606e02d6a1480b9b70cc3964e6f34b932df648414f55ac308411527634b4",
+    "self-service/apps/style.css": "7d472f3ad3df46000e45e41c1e26aa70d92b94eab1390bac553c74d2c0349c9a",
+    "tests/text-collection.mjs": "d50792b26b34c847d3d744bfe705218c1acccd53c524d133ab8bca156b67156c",
+    "tests/text-types.mts": "efc27500b2b5f96cbe55e091ab7fbfa57243819a09b64708e1a62f10b21efd9d",
+    "tests/self-service-collection-ui.mjs": "6ae6406071fc02d376d8d0009e9b04f7f2d4991f62da9d2eaa8e18be2b23eb6f"
+  }
+}

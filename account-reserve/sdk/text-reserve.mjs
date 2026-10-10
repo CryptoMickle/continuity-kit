@@ -48,6 +48,22 @@ function assertOrigin(config) {
   // origin. In browsers reject even same-RP sibling/port origins explicitly.
   if (typeof globalThis.location?.origin === 'string') check(globalThis.location.origin === config.recoveryOrigin, 'RECOVERY_ORIGIN_MISMATCH');
 }
+function freezeCollection(value) {
+  check(Array.isArray(value) && value.length >= 1 && value.length <= 8, 'CONFIG_COLLECTION_INVALID');
+  check(Object.getOwnPropertySymbols(value).length === 0, 'CONFIG_COLLECTION_INVALID');
+  const fields = ['length', ...Array.from({ length: value.length }, (_, index) => String(index))];
+  check(Object.getOwnPropertyNames(value).sort().join(',') === fields.sort().join(','), 'CONFIG_COLLECTION_INVALID');
+  const configs = [], appIds = new Set();
+  for (let index = 0; index < value.length; index++) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+    check(descriptor && Object.hasOwn(descriptor, 'value'), 'CONFIG_COLLECTION_INVALID');
+    const config = freezeConfig(descriptor.value);
+    check(!appIds.has(config.appId), 'CONFIG_COLLECTION_INVALID');
+    check(!configs.length || (config.recoveryOrigin === configs[0].recoveryOrigin && config.recoveryRpId === configs[0].recoveryRpId), 'CONFIG_COLLECTION_INVALID');
+    appIds.add(config.appId); configs.push(config);
+  }
+  return Object.freeze(configs);
+}
 function sorted(value) {
   if (Array.isArray(value)) return value.map(sorted);
   if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map(key => [key, sorted(value[key])]));
@@ -295,17 +311,11 @@ export async function prepareTextReserve({ config: suppliedConfig, recoveryCrede
   }
 }
 
-/** Read-only discovery and authenticated decryption. Returns data only; all
- * PRF bytes are wiped and derived CryptoKey references dropped before return. */
-export async function recoverTextReserve({ config: suppliedConfig, store, webAuthnClient, signal, onProgress }) {
-  const config = freezeConfig(suppliedConfig), storage = storeMethods(store);
-  assertOrigin(config); active(signal);
-  const ceremony = createWebAuthnScope({ webAuthnClient, signal });
-  signal = ceremony.signal;
-  let found, manifestBytes, textBytes;
+// Shared authenticated read: callers own discovery and key lifetime. Neither
+// storage nor an observer receives the derived keys or unauthenticated text.
+async function openStoredText(config, found, storage, signal, onProgress) {
+  let manifestBytes, textBytes;
   try {
-    progress(onProgress, 'find-text', signal);
-    found = await discovery(config, ceremony.client, signal);
     const stored = await io(() => storage.get(found.locator), signal);
     active(signal); check(stored !== undefined && stored !== null, 'RESERVE_MISSING');
     const record = parse(recordCopy(stored));
@@ -332,6 +342,85 @@ export async function recoverTextReserve({ config: suppliedConfig, store, webAut
     check(await textHash(textBytes) === manifest.textDigest, 'TEXT_DIGEST_MISMATCH');
     active(signal);
     return Object.freeze({ protocol: TEXT_PROTOCOL, text, textDigest: manifest.textDigest, locator: found.locator });
+  } finally { manifestBytes?.fill(0); textBytes?.fill(0); }
+}
+
+/** Read-only discovery and authenticated decryption. Returns data only; all
+ * PRF bytes are wiped and derived CryptoKey references dropped before return. */
+export async function recoverTextReserve({ config: suppliedConfig, store, webAuthnClient, signal, onProgress }) {
+  const config = freezeConfig(suppliedConfig), storage = storeMethods(store);
+  assertOrigin(config); active(signal);
+  const ceremony = createWebAuthnScope({ webAuthnClient, signal });
+  signal = ceremony.signal;
+  let found;
+  try {
+    progress(onProgress, 'find-text', signal);
+    found = await discovery(config, ceremony.client, signal);
+    return await openStoredText(config, found, storage, signal, onProgress);
   } catch (error) { ceremony.assertActive(); throw error; }
-  finally { manifestBytes?.fill(0); textBytes?.fill(0); found = undefined; ceremony.close(); }
+  finally { found = undefined; ceremony.close(); }
+}
+
+const COLLECTION_REJECTIONS = new Set(['RECORD_INVALID', 'MANIFEST_AUTH_FAILED', 'MANIFEST_INVALID', 'CONFIG_INVALID',
+  'POLICY_MISMATCH', 'CREDENTIAL_MISMATCH', 'TEXT_DIGEST_INVALID', 'TEXT_INVALID', 'TEXT_AUTH_FAILED', 'TEXT_DIGEST_MISMATCH']);
+
+/** One discoverable assertion opens a caller-selected, bounded collection of
+ * existing app namespaces. The v1 derivation and records remain unchanged.
+ * Missing or rejected apps do not suppress valid siblings; native failure or
+ * cancellation rejects the whole operation. There is no session or write API. */
+export async function recoverTextReserves({ configs: suppliedConfigs, store, webAuthnClient, signal, onProgress }) {
+  const configs = freezeCollection(suppliedConfigs), storage = storeMethods(store);
+  assertOrigin(configs[0]); active(signal);
+  const ceremony = createWebAuthnScope({ webAuthnClient, signal });
+  signal = ceremony.signal;
+  const materials = [], prfSalt = salt();
+  let result, adapterOutput;
+  try {
+    progress(onProgress, 'find-text', signal);
+    // Retain the adapter output only to erase it as soon as Mera has made its
+    // own copy. The scope also erases outputs on cancellation, including late
+    // responses from an uncooperative adapter. Invocation stays synchronous.
+    const client = {
+      createCredential: ceremony.client.createCredential,
+      getCredential(request) {
+        return ceremony.client.getCredential(request).then(value => { adapterOutput = value; return value; });
+      },
+    };
+    try {
+      result = await getPasskeyPrfOutput({ rpId: configs[0].recoveryRpId, prfSalt, webAuthnClient: boundClient(client, configs[0]) });
+      adapterOutput?.prfOutput?.fill(0); adapterOutput = undefined;
+      ceremony.assertActive();
+      for (const config of configs) materials.push(await discoveryMaterial(result, config, signal));
+      ceremony.assertActive();
+    } finally {
+      result?.prfOutput?.fill(0); result?.prfSalt?.fill(0); result = undefined;
+      adapterOutput?.prfOutput?.fill(0); adapterOutput = undefined; prfSalt.fill(0);
+    }
+    // At most eight concurrent, individually timed reads. All settle before
+    // releasing the local key references; cancellation never returns partial
+    // plaintext results. The operation also has the scope's five-minute bound.
+    const completed = await Promise.allSettled(configs.map(async (config, index) => {
+      try {
+        const reserve = await openStoredText(config, materials[index], storage, signal, onProgress);
+        return Object.freeze({ appId: config.appId, status: 'recovered', reserve });
+      } catch (error) {
+        ceremony.assertActive();
+        const missing = error?.code === 'RESERVE_MISSING';
+        const unavailable = error?.code === 'STORE_UNAVAILABLE' || error?.code === 'STORE_EXPIRED';
+        const status = missing ? 'missing' : unavailable ? 'unavailable' : 'rejected';
+        // Do not copy arbitrary provider errors, messages or locators into a
+        // failed result. Only protocol-defined classifications are returned.
+        const code = missing ? 'RESERVE_MISSING' : unavailable ? error.code : COLLECTION_REJECTIONS.has(error?.code) ? error.code : 'RECORD_INVALID';
+        return Object.freeze({ appId: config.appId, status, code });
+      } finally { materials[index] = undefined; }
+    }));
+    ceremony.assertActive();
+    const failure = completed.find(value => value.status === 'rejected');
+    if (failure) throw failure.reason;
+    return Object.freeze(completed.map(value => value.value));
+  } catch (error) { ceremony.assertActive(); throw error; }
+  finally {
+    result?.prfOutput?.fill(0); result?.prfSalt?.fill(0); adapterOutput?.prfOutput?.fill(0); prfSalt.fill(0);
+    materials.fill(undefined); ceremony.close();
+  }
 }

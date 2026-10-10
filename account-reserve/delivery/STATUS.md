@@ -1,3 +1,33 @@
+# Collection recovery published — 10 October 2026
+
+The Reserve `/apps/` page now checks both prepared app snapshots using one
+intentional SDK passkey assertion. Recovered drafts can be edited, switched and
+exported on the same page. Missing, unavailable and rejected records are distinct;
+one failed record does not hide a healthy sibling. This does not guarantee a
+single device prompt. Existing single-app routes, passkeys, records and v1
+cryptographic format are preserved.
+
+Both Sites are version 8. Validation passed: 79 SDK tests including existing text
+flows, 34 UI tests including existing app flows, seven host/editor tests, and a
+separate installed-package replay with 14 tests plus strict TypeScript. Forty
+read-only public checks matched the staged configuration and assets. A second
+code review checked cancellation, page lifecycle and exact no-edit export,
+including real EasyMDE BOM/CRLF handling. Mobile browser QA used a local synthetic
+fixture; the published page was read back without invoking a native credential.
+
+[Collection validation](../evidence/collection-validation-2026-10-10.json) ·
+[Installed SDK](../evidence/collection-installed-sdk-2026-10-10.json) ·
+[Public HTTP checks](../evidence/collection-public-http-2026-10-10.json).
+The new collection flow has not received a builder-run physical passkey check;
+earlier iPhone results below keep their original scope.
+
+The user has prioritized substantive development until Monday 12 October, with
+video and final polish afterward. Next: authenticated recovery from surviving
+replicas, then an account-free text SDK starter. No external adoption or prize
+outcome is claimed. Video and final submission remain deferred.
+
+---
+
 # Two-app reuse and operator replacement — 10 October 2026
 
 ## Native two-app acceptance completed by builder report

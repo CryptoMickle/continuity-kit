@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-10-10T12:39:18.816Z",
+  "scope": "clean offline installed public SDK package, synthetic credentials; no native passkey or external developer adoption",
+  "tests": 14,
+  "passed": 14,
+  "failed": 0,
+  "strictTypecheck": true,
+  "packageIntegrity": "sha512-F0MxMwHF/tA1U1I1twwUQGTP0s1HTXX8K8IyoJSN7MLIAKCj/IkS5/G0uEUF3FOdMpVEMY2UA6Hqs6Ab7LiJdQ==",
+  "sourceHashes": {
+    "sdk/text-reserve.mjs": "c0023b03a8d394b9b25a725e2f02c69e072a81a2b2dd15d138b2603de35d73b4",
+    "sdk/text-reserve.d.ts": "3c731e4a9e41ebf4c36a0a8623da25032304e639d79a7aa90e63394ac38f2563",
+    "tests/text-collection.mjs": "d50792b26b34c847d3d744bfe705218c1acccd53c524d133ab8bca156b67156c",
+    "tests/text-types.mts": "efc27500b2b5f96cbe55e091ab7fbfa57243819a09b64708e1a62f10b21efd9d"
+  }
+}

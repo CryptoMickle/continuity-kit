@@ -139,6 +139,31 @@ byte buffers are wiped; JavaScript strings and WebCrypto internals cannot be
 reliably zeroized by this library. Callers control returned plaintext lifetime.
 Progress observers receive stage names only and cannot replace security checks.
 
+Collection recovery (additive API, unchanged wire format)
+-------------------------------------------------------
+recoverTextReserves accepts 1-8 explicit app configurations with unique appIds
+and the same exact recovery origin/RP. Validation and defensive copies happen
+before native activity. One discoverable assertion supplies one PRF result;
+HKDF derives each app's existing independent locator/manifest/text keys. The
+raw PRF buffers are erased before the concurrent record reads begin. There is
+no reusable credential handle, signing session or encryption key in the result.
+One assertion request does not promise one operating-system confirmation.
+
+Each result is recovered, missing, unavailable or rejected. Only recovered
+results include text. Invalid ciphertext in one app does not prevent a valid
+sibling from opening. Credential acquisition failure, cancellation and the
+operation deadline reject the whole call without returning partial plaintext.
+A different valid selected credential may produce missing results; the caller
+has not provided an expected credential identity. Each read is bounded to ten
+seconds; the whole call uses the existing five-minute operation scope.
+
+The integrator must choose the app list, rather than accepting arbitrary appIds
+from a URL. This API does not discover unknown apps or migrate old records.
+Opening the collection explicitly permits the trusted B client to read all
+listed app namespaces for the selected key. Per-app derivation remains domain
+separation, not protection from malicious code on B. Returned draft strings
+are ordinary plaintext owned by the caller and cannot be reliably zeroized.
+
 Availability and proof boundaries
 ---------------------------------
 A surviving credential, recovery RP/origin and encrypted record are required.
