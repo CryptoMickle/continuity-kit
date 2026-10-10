@@ -54,6 +54,16 @@ check and build it separately. It requires an already prepared reserve and funde
 approved payments; it creates neither. The exact recovery origin and passkey
 bindings must stay unchanged.
 
+The [generated-page survival check](evidence/payment-starter-continuity-2026-10-10.json)
+connects a freshly installed consumer's unchanged source entry, public SDK and
+encrypted reserve to an actual disposable local EVM. With A unavailable, the page
+opens the same beneficiary and sends one approved claim. A deliberately lost reply
+leaves the signed hash in its journal; a fresh process checks that exact receipt
+without another credential or broadcast. Actual signing sessions close and the
+ciphertext stays unchanged. This is a synthetic browser/passkey integration test;
+the built bundle is preserved but not executed, and both RPC names map to one
+local node. It proves no new physical-device test, public payment or adoption.
+
 ## Start with your own text editor
 
 The [text starter](text-starter/README.md) generates a separate, installable

@@ -167,7 +167,8 @@
     "test:payments": "node --test tests/payments-*.mjs",
     "build:payments": "node payments/build-browser.mjs",
     "create:payment-starter": "node scripts/create-payment-starter.mjs",
-    "test:payment-starter": "node --test tests/payment-starter-profile.mjs tests/payment-starter-ui.mjs tests/payment-starter-package.mjs"
+    "test:payment-starter": "node --test tests/payment-starter-profile.mjs tests/payment-starter-ui.mjs tests/payment-starter-package.mjs",
+    "test:payment-survival": "node --test tests/payment-starter-continuity.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

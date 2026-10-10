@@ -54,6 +54,12 @@ function positiveId(value) {
  * rpc() is an INTERNAL primitive; an HTTP bridge must apply its own allowlist.
  */
 export async function startSequentialPaymentChain(options = {}) {
+  // The public testnet SDK pins 10143. A fixture may use that actual local
+  // chain ID without changing signed transactions or remapping RPC results.
+  const localChainId = options.chainId ?? LOCAL_CHAIN_ID;
+  if (![LOCAL_CHAIN_ID, 10143].includes(localChainId)) {
+    throw new Error('Disposable fixture chain ID must be 31337 or 10143');
+  }
   const artifact = JSON.parse(await readFile(join(directory, 'SequentialPayment.artifact.json'), 'utf8'));
   const source = await readFile(join(directory, 'SequentialPayment.sol'));
   if (createHash('sha256').update(source).digest('hex') !== artifact.sourceSha256) {
@@ -64,7 +70,7 @@ export async function startSequentialPaymentChain(options = {}) {
   const binary = options.anvilPath ?? process.env.CONTINUITY_ANVIL ?? join(homedir(), '.foundry/bin/anvil');
   const child = spawn(binary, [
     '--accounts', '0', '--silent', '--host', '127.0.0.1',
-    '--port', String(port), '--chain-id', String(LOCAL_CHAIN_ID),
+    '--port', String(port), '--chain-id', String(localChainId),
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
   // Do not relay child output to logs. There are no generated default accounts.
   child.stderr.resume();
@@ -118,7 +124,7 @@ export async function startSequentialPaymentChain(options = {}) {
       if (childExited) throw new Error('Local Anvil exited before startup');
       try {
         const [chainId, version] = await Promise.all([rpc('eth_chainId'), rpc('web3_clientVersion')]);
-        if (Number(BigInt(chainId)) !== LOCAL_CHAIN_ID || !/anvil/i.test(version)) {
+        if (Number(BigInt(chainId)) !== localChainId || !/anvil/i.test(version)) {
           throw new Error('Unexpected server on disposable local chain port');
         }
         break;
@@ -129,7 +135,7 @@ export async function startSequentialPaymentChain(options = {}) {
     }
 
     const chain = defineChain({
-      id: LOCAL_CHAIN_ID,
+      id: localChainId,
       name: 'Continuity sequential payment fixture',
       nativeCurrency: { name: 'Synthetic local test units', symbol: 'TEST', decimals: 18 },
       rpcUrls: { default: { http: [rpcUrl] } },
@@ -198,7 +204,7 @@ export async function startSequentialPaymentChain(options = {}) {
     }
 
     return Object.freeze({
-      chainId: LOCAL_CHAIN_ID, rpcUrl, contractAddress, abi,
+      chainId: localChainId, rpcUrl, contractAddress, abi,
       scope: LOCAL_CHAIN_SCOPE,
       issuer: employer.address, deploymentHash, runtimeCodeHash,
       preparePayment, readRight, rightForOwner, claimReceipt, rpc, close,

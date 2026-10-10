@@ -23,6 +23,12 @@ async function fixture(t) {
   return { harness, chain, client, account, wallet };
 }
 
+test('local fixture rejects public-chain identifiers outside its two explicit test modes before starting Anvil', async () => {
+  for (const chainId of [1, 143, '10143', 0, -1, NaN]) {
+    await assert.rejects(startSequentialPaymentChain({ chainId, anvilPath: '/nonexistent-fixture-binary' }), /chain ID must be 31337 or 10143/);
+  }
+});
+
 test('three distinct funded obligations settle sequentially to the same account without resetting its balance', async t => {
   const { harness, client, account, wallet } = await fixture(t);
   assert.equal(artifact.sourceSha256, createHash('sha256').update(source).digest('hex'));

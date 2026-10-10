@@ -130,3 +130,23 @@ npm run test:payment-starter
 
 Those UI tests run controlled fixtures. They are not included in the generated
 page or its runtime dependencies and do not invoke native credentials or payments.
+
+The separate whole-template recovery test also requires a locally installed Anvil
+binary (default `~/.foundry/bin/anvil`, or `CONTINUITY_ANVIL`):
+
+```sh
+npm run test:payment-survival
+```
+
+It generates and installs a fresh consumer, builds its production assets, then
+executes the unchanged source entrypoint and page using test-only browser emulation.
+The compiled assets are checked for preservation; their browser bundle is not
+executed by this source-module test.
+An encrypted reserve is served by a disposable B endpoint while A is unavailable.
+The two fixed public RPC names are redirected by the test to one owned local
+Anvil chain with actual chain ID `10143`; no public RPC is contacted. An existing
+credential is emulated through the native browser API boundary. The test covers
+a dropped response after a real local claim and a fresh-page receipt check with
+no signer. Its session observer and browser/RPC adapters live outside production
+assets. This is controlled integration evidence, not a physical passkey test,
+independent-provider verification or external adoption.
