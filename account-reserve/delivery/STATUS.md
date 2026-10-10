@@ -1,3 +1,41 @@
+# Installed payment SDK and independent consumer — 10 October 2026
+
+A separate application can now import the experimental typed
+`@continuitykit/account-reserve/payments` entry. The previous installed import
+failed because payments had no package export or packaged runtime. The new entry
+exposes only the existing bounded testnet client and credential-free receipt reader;
+public transport overrides and unexpected options are rejected. Issuer tools,
+Sites workers and operational files are excluded from the browser entry.
+
+The copyable integration helper uses an existing account callback and keeps opening,
+collection and checking separate. It captures the reviewed policy, closes the parent
+signer after every collection attempt, and handles cancellation, page exit and expiry.
+Late authentication results cannot reopen a cancelled session. Closing a raw executor
+alone does not close the recovered signer; this obligation is explicit in the types.
+
+Anonymous source replay of `39d23cee9a3b798fd88283f6baffddfcc476bb84` passed all **13 new tests**,
+with no failures or skips, after a fresh offline install and app build. A separately
+packed and installed consumer typechecked and built browser assets with public imports
+only. It exercised six behavior scenarios using disposable real Mera sessions and
+simulated RPCs: two signatures, two simulated sends, five verified session closures,
+no repeated broadcast after uncertainty, and one simultaneous account lock owner.
+No native credential or public-network transaction occurred in this fixture.
+
+The focused current/source regression passed 25 cases; four packaging checks passed,
+including an extracted source install and local EVM/browser build. Counts overlap and
+are not summed with repeated independent reviews. An initial loopback check was blocked
+by sandbox permissions and passed unchanged with localhost binding permitted.
+
+Code and exact replay evidence are public. Existing Sites, credentials, encrypted
+records, contract policy and legacy exports are unchanged. The package is distributed
+as a source/local tarball, not an npm-registry release. This removes an observed
+integration barrier; it is not external adoption or demand evidence.
+
+[Installed example](../integrations/payment-client/README.md) ·
+[Validation and public replay](../evidence/payments-sdk-validation-2026-10-10.json).
+
+---
+
 # Sequential payments: both claims verified and A restored — 10 October 2026
 
 The additive payment integration passed 81 relevant tests. An actual local EVM

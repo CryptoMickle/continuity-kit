@@ -1,0 +1,168 @@
+{
+  "format": "continuitykit/installed-payment-sdk-validation/v1",
+  "recordedAt": "2026-10-10T20:20:32.178Z",
+  "state": "published-and-replayed",
+  "publicSourceCommit": "39d23cee9a3b798fd88283f6baffddfcc476bb84",
+  "publicEntry": "@continuitykit/account-reserve/payments",
+  "distribution": "Source/local npm tarball; not published to npm registry",
+  "api": {
+    "exports": [
+      "createTestnetPaymentClient",
+      "createTestnetPaymentReader"
+    ],
+    "typeDeclarations": true,
+    "publicTransportOverride": false,
+    "publicMainnetSupport": false,
+    "constructionRequestsCredentials": false,
+    "constructionReadsNetwork": false,
+    "constructionSigns": false,
+    "readerMayWritePublicConfirmationJournal": true,
+    "issuerToolsInBrowserEntry": false
+  },
+  "integration": {
+    "path": "integrations/payment-client/actions.mjs",
+    "existingAccountCallback": true,
+    "separateOpenAndCollect": true,
+    "immutableProfileSnapshot": true,
+    "parentSignerClosedAfterEveryCollectAttempt": true,
+    "lateAuthenticationAfterCancelClosed": true,
+    "pageExitAndBoundedExpiryCloseSigner": true,
+    "rawClientRequiresCallerCleanup": true
+  },
+  "tests": {
+    "newPublicBoundaryAndTypeCases": 4,
+    "newHelperLifecycleCases": 8,
+    "newInstalledConsumerCases": 1,
+    "focusedPaymentAndPageRegression": 25,
+    "sourceAndPrivatePackagingCases": 4,
+    "failed": 0,
+    "skipped": 0,
+    "countsOverlapAndMustNotBeAdded": true,
+    "initialPackagingAttempt": "Loopback EVM test was blocked by sandbox EPERM; the unchanged test passed with permitted localhost binding."
+  },
+  "installedConsumer": {
+    "experiment": "installed-public-payment-adapter",
+    "strictTypes": true,
+    "browserBundle": true,
+    "publicModules": [
+      "payments/executor.mjs",
+      "payments/guard.mjs",
+      "payments/index.mjs",
+      "payments/pending.mjs",
+      "payments/testnet.mjs",
+      "release/client-profile.mjs",
+      "release/paced-rpc.mjs"
+    ],
+    "scenarios": [
+      "strict public boundary and inert construction",
+      "account lock and unknown send never replay",
+      "unknown-send helper finally and explicit client closure end actual Mera signers",
+      "credential-free reconciliation survives signer closure",
+      "prior receipt rechecked, next approved nonce settles once and helper success closes signer",
+      "persistence failure closes safely and no native credentials"
+    ],
+    "nativeCalls": 0,
+    "publicNetwork": false,
+    "rpcSimulated": true,
+    "actualEvm": false,
+    "signatures": 2,
+    "sends": 2,
+    "closures": 5,
+    "maxConcurrentLockOwners": 1,
+    "fixedRpcNames": true,
+    "journalEntries": 2,
+    "limits": [
+      "simulated RPC responses",
+      "disposable local Mera signing sessions",
+      "no native passkey",
+      "no EVM or public transaction",
+      "same-origin in-memory lock adapter"
+    ]
+  },
+  "publicReplay": {
+    "verifiedAt": "2026-10-10T20:19:48.682Z",
+    "commit": "39d23cee9a3b798fd88283f6baffddfcc476bb84",
+    "anonymousArchive": true,
+    "archiveSha256": "9cf84d7052a74bc5c14cbacc73718a431bef6a24545aecddb9b40d303b794e7f",
+    "archiveBytes": 2561294,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 13,
+    "failed": 0,
+    "skipped": 0,
+    "installedConsumerReport": {
+      "experiment": "installed-public-payment-adapter",
+      "strictTypes": true,
+      "browserBundle": true,
+      "publicModules": [
+        "payments/executor.mjs",
+        "payments/guard.mjs",
+        "payments/index.mjs",
+        "payments/pending.mjs",
+        "payments/testnet.mjs",
+        "release/client-profile.mjs",
+        "release/paced-rpc.mjs"
+      ],
+      "scenarios": [
+        "strict public boundary and inert construction",
+        "account lock and unknown send never replay",
+        "unknown-send helper finally and explicit client closure end actual Mera signers",
+        "credential-free reconciliation survives signer closure",
+        "prior receipt rechecked, next approved nonce settles once and helper success closes signer",
+        "persistence failure closes safely and no native credentials"
+      ],
+      "nativeCalls": 0,
+      "publicNetwork": false,
+      "rpcSimulated": true,
+      "actualEvm": false,
+      "signatures": 2,
+      "sends": 2,
+      "closures": 5,
+      "maxConcurrentLockOwners": 1,
+      "fixedRpcNames": true,
+      "journalEntries": 2,
+      "limits": [
+        "simulated RPC responses",
+        "disposable local Mera signing sessions",
+        "no native passkey",
+        "no EVM or public transaction",
+        "same-origin in-memory lock adapter"
+      ]
+    },
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true
+  },
+  "sourceSha256": {
+    "package.json": "2d66d37bb974d1f247fb6546a68e7701c0d2abd32c3f35fcd16bd1199d1e518c",
+    "payments/index.mjs": "727dc8bdca3a58307be3ac988bbaaa0f2c8cc92f7d3da79a937de3a5c1c8e628",
+    "payments/index.d.ts": "877a36e2182a0d7f7aced7d8b3a8a20159773d3c08a2f38c307e7bbe885cf41e",
+    "integrations/payment-client/actions.mjs": "8d8b833d9100a3006b03242b3c71653fa96b16234020a9cbbd2b02b03397f655",
+    "tests/payments-public-api.mjs": "87502f110d8b8810eba707b66047e35c0ee379c1e8f9f0004994413c183224a0",
+    "tests/payments-consumer-actions.mjs": "33169ae80190859e79807ed2e1c03fb6b63eb4c4fc0ca3707635799fa4dcb918",
+    "tests/payments-installed-package.mjs": "fe2d22b05fc8c31d29421a1c753d98a8fb53b44f581dad25594b1e9836a57d48"
+  },
+  "independentInternalReview": {
+    "publicApi": "passed",
+    "lifecycleExample": "passed",
+    "installedConsumer": "passed"
+  },
+  "preserved": {
+    "existingPublicSites": true,
+    "existingPasskeys": true,
+    "storedReserves": true,
+    "contractsAndTransactionLimits": true,
+    "legacySdkExports": true,
+    "textRecoveryAccountFree": true
+  },
+  "newPublicWalletTransactions": 0,
+  "newNativeTestsRequested": 0,
+  "limits": [
+    "This is an agent-built integration example, not external developer adoption or customer demand.",
+    "The installed behavior fixture uses simulated RPC responses and disposable real Mera signing sessions; it does not execute an EVM or broadcast a public transaction.",
+    "The earlier two-payment Monad testnet proof remains separate.",
+    "Same-origin local journal and locks do not coordinate other devices or origins.",
+    "The caller-supplied recovered account has full signing authority; the payment adapter does not restrict the underlying account key."
+  ]
+}

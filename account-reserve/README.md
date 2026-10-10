@@ -29,7 +29,8 @@ application import the typed client and credential-free receipt reader from the
 installed SDK. The [integration example](integrations/payment-client/README.md)
 connects an existing account session, separates authentication from collection,
 and demonstrates explicit signer cleanup. No issuer tools or deployment state are
-exposed through that browser entry.
+exposed through that browser entry. [A clean public-source replay](evidence/payments-sdk-validation-2026-10-10.json)
+passed the installed consumer, strict types, browser build and session-lifecycle checks.
 
 ## Start with your own text editor
 

@@ -201,10 +201,27 @@
       "publicSitesChanged": false,
       "physicalPasskeyVerified": false,
       "publicCommit": "38b06b9e65d5281105d0413c1b1d439e9321299b"
+    },
+    {
+      "id": "installed-payment-integration",
+      "priority": 12,
+      "status": "complete",
+      "value": "Let an integrator use the payment adapter from an installed package with explicit existing-account recovery, rather than copying the repository demonstration.",
+      "acceptance": [
+        "One explicit experimental public subpath for the bounded testnet payment client and credential-free reader, with TypeScript declarations",
+        "Fresh external consumer installs the packed SDK, typechecks and builds using public imports only",
+        "Installed integration preserves unknown-send reconciliation, owner locks, signer closure and prior-payment verification",
+        "Browser dependency graph excludes issuer tools, local harness, Sites workers and private operational state",
+        "Keep existing contracts, profiles, passkeys and fee/nonce/expiry policy; no new public transactions or native test required"
+      ],
+      "evidence": "evidence/payments-sdk-validation-2026-10-10.json",
+      "publicCommit": "39d23cee9a3b798fd88283f6baffddfcc476bb84",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
     }
   ],
-  "lastCompleted": "Both separate 0.01 test-MON claims to the same beneficiary are finalized. Claim2 followed controlled A outage and builder-reported B completion. A restored; all eight A/B routes200 and original config/profile hashes preserved.",
-  "next": "Assess and implement a clean installed-consumer payment integration with explicit existing-account handoff; the current payment adapter is source-only. Preserve the completed bounded public demonstration and existing credentials. No additional public transaction is needed for packaging work.",
+  "lastCompleted": "Typed public payment API plus a separate installed consumer are published. Anonymous source replay passed all 13 new cases, app/payment builds and clean package/browser integration. Existing hosted flows and credentials unchanged; no new public transactions or native prompts.",
+  "next": "Implement a stateless exact-hash receipt check for fresh browsers, using the existing verified receipt guard, then expose a deliberate transaction-reference UI. Do not infer history, mutate journal state or request credentials.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -300,22 +317,24 @@
     }
   },
   "nextDevelopmentAssessment": {
-    "id": "installed-payment-integration",
+    "id": "stateless-payment-receipt",
     "status": "planned",
-    "value": "Let an integrator use the payment adapter from an installed package with explicit existing-account recovery, rather than copying the repository demonstration.",
-    "constraints": [
-      "No new public transactions or passkey ceremonies needed",
-      "Preserve exact bounded transaction policy and legacy exports",
-      "Keep text recovery account-free",
-      "No adoption or demand claim from internal replay"
-    ],
-    "observedGap": "No payment export, packaged runtime files or TypeScript declarations. Public payment import fails ERR_PACKAGE_PATH_NOT_EXPORTED; existing tests use repository-relative imports.",
+    "value": "Verify a previously settled payment in a fresh browser or recovery origin using an explicit transaction reference, without requiring the local journal or opening a passkey.",
+    "observedGap": "createTestnetPaymentReader.check(rightId) throws PAYMENT_TRANSACTION_MISSING before RPC when the current origin has no journal entry. The payment page exposes only that check. Existing CLI already verifies explicit hashes through the exact guard.",
     "acceptance": [
-      "One explicit experimental public subpath for the bounded testnet payment client and credential-free reader, with TypeScript declarations",
-      "Fresh external consumer installs the packed SDK, typechecks and builds using public imports only",
-      "Installed integration preserves unknown-send reconciliation, owner locks, signer closure and prior-payment verification",
-      "Browser dependency graph excludes issuer tools, local harness, Sites workers and private operational state",
-      "Keep existing contracts, profiles, passkeys and fee/nonce/expiry policy; no new public transactions or native test required"
+      "One additive typed stateless public verifier: trusted profile, approved right and explicit transaction hash",
+      "No signer, native credential, browser storage or Web Lock needed",
+      "Preserve fixed RPCs and exact signed transaction, beneficiary, amount, contract and finality verification",
+      "Never create, clear or bypass journal entries or unblock an unresolved signing attempt; never broadcast",
+      "Small deliberate transaction-reference UI with verified, pending, reverted and mismatch outcomes in fresh-browser tests",
+      "This is explicit-hash verification, not history discovery or device synchronization"
+    ],
+    "constraints": [
+      "Preserve current SDK exports and published credential/protocol bindings",
+      "Reuse existing receipt guard and CLI semantics",
+      "No new public transactions or native tests required",
+      "Keep account-free text recovery unchanged",
+      "Existing journal reconciliation remains distinct from stateless viewing"
     ]
   }
 }

@@ -36,6 +36,11 @@ helpers. Issuer tools, contract deployment, Sites workers and operational files
 are excluded from this npm entry. The package remains experimental and is
 distributed from the public source as a tarball; it is not published to npm.
 
+[Installed-package validation](../evidence/payments-sdk-validation-2026-10-10.json)
+records a clean anonymous replay, strict TypeScript checks and the browser module
+graph. The separate consumer uses real disposable Mera signing sessions with mocked
+RPC responses; its simulated sends are not additional public transactions.
+
 ## Local verification
 
 Use Node 24 or newer. From `account-reserve/` in the public repository:
