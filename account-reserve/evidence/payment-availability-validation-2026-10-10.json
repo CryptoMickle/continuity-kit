@@ -1,0 +1,438 @@
+{
+  "format": "continuitykit/payment-availability-validation/v1",
+  "recordedAt": "2026-10-10T20:52:09.777987+00:00",
+  "state": "published-and-replayed",
+  "publicSourceCommit": "7c38843c9bbe299f9cb45d5d18dbbf9e67eebcc6",
+  "publicEntry": "@continuitykit/account-reserve/payments",
+  "factory": "createTestnetPaymentAvailability({profile}).check({rightId})",
+  "publicReplay": {
+    "verifiedAt": "2026-10-10T20:48:35.868Z",
+    "commit": "7c38843c9bbe299f9cb45d5d18dbbf9e67eebcc6",
+    "anonymousArchive": true,
+    "archiveSha256": "7315b19762c501aa647dc16281c0ba7968dcf6ee3f79ab87ddd92406a55448f9",
+    "archiveBytes": 2585832,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 67,
+    "failed": 0,
+    "skipped": 0,
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true,
+    "installedConsumerReport": {
+      "experiment": "installed-public-payment-adapter",
+      "strictTypes": true,
+      "browserBundle": true,
+      "publicModules": [
+        "payments/executor.mjs",
+        "payments/guard.mjs",
+        "payments/index.mjs",
+        "payments/pending.mjs",
+        "payments/testnet.mjs",
+        "release/client-profile.mjs",
+        "release/paced-rpc.mjs"
+      ],
+      "scenarios": [
+        "strict public boundary and inert construction",
+        "account lock and unknown send never replay",
+        "unknown-send helper finally and explicit client closure end actual Mera signers",
+        "credential-free reconciliation survives signer closure",
+        "prior receipt rechecked, next approved nonce settles once and helper success closes signer",
+        "persistence failure closes safely and no native credentials"
+      ],
+      "nativeCalls": 0,
+      "publicNetwork": false,
+      "rpcSimulated": true,
+      "actualEvm": false,
+      "signatures": 2,
+      "sends": 2,
+      "closures": 5,
+      "maxConcurrentLockOwners": 1,
+      "fixedRpcNames": true,
+      "journalEntries": 2,
+      "stateless": {
+        "freshProcess": true,
+        "noJournal": true,
+        "noAccount": true,
+        "forbiddenBrowserAccess": 0,
+        "observations": [
+          "finalized",
+          "pending-or-unknown",
+          "reverted",
+          "mismatch-rejected"
+        ],
+        "expiredProfileRead": true,
+        "fixedRpcNames": true,
+        "publicNetwork": false,
+        "persistenceUntouched": true
+      },
+      "availability": {
+        "freshProcess": true,
+        "noJournal": true,
+        "noAccount": true,
+        "forbiddenBrowserAccess": 0,
+        "observations": [
+          "funded",
+          "not-issued",
+          "already-collected",
+          "expired",
+          "insufficient-gas",
+          "rpc-disagreement-rejected",
+          "rpc-failure-rejected"
+        ],
+        "errors": [
+          "PAYMENT_CANONICAL_BLOCK_MISMATCH",
+          "PAYMENT_AVAILABILITY_FAILED"
+        ],
+        "availabilityIsNotPaymentProof": true,
+        "fixedRpcNames": true,
+        "publicNetwork": false,
+        "persistenceUntouched": true
+      },
+      "limits": [
+        "simulated RPC responses",
+        "disposable local Mera signing sessions",
+        "no native passkey",
+        "no EVM or public transaction",
+        "same-origin in-memory lock adapter"
+      ]
+    }
+  },
+  "newTests": {
+    "availabilityGuard": 6,
+    "availabilityUi": 9
+  },
+  "additionalPackagingChecks": {
+    "passed": 2,
+    "scope": "curated source; extracted offline install, local EVM payment suite and builds; counts overlap and are not summed"
+  },
+  "independentInternalReview": "passed; not an external audit",
+  "browser": {
+    "checkedAt": "2026-10-10T20:51:08.794Z",
+    "primary": {
+      "passkeyActionVisible": false,
+      "status": "The contract records this payment as collected. No passkey is needed. Use a transaction reference below to verify its exact receipt.",
+      "title": "This payment is already collected.",
+      "url": "https://continuitykit-account-primary.cryptomickle.chatgpt.site/payments/"
+    },
+    "reserve": {
+      "passkeyActionVisible": false,
+      "status": "The contract records this payment as collected. No passkey is needed. Use a transaction reference below to verify its exact receipt.",
+      "title": "This payment is already collected.",
+      "url": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/"
+    },
+    "existingSecondReceiptVerified": {
+      "rightId": "2",
+      "hash": "0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2",
+      "block": "69914955"
+    },
+    "nativePromptRequested": false,
+    "transactionSent": false,
+    "localViewportChecked": {
+      "width": 390,
+      "height": 844,
+      "documentWidth": 375,
+      "physicalDevice": false
+    }
+  },
+  "sites": {
+    "primary": {
+      "version": 7,
+      "sourceCommit": "c7371edf346f8c151f027669389ed44e416337e4",
+      "deployment": "appgdep_6acaa4a877c48191ae860e4a66109b53",
+      "environmentRevision": 4,
+      "url": "https://continuitykit-account-primary.cryptomickle.chatgpt.site/payments/",
+      "status": "succeeded"
+    },
+    "recovery": {
+      "version": 6,
+      "sourceCommit": "0c5c6c88fd3785e9486eb15a8e10705dd673905c",
+      "deployment": "appgdep_6acaa4c7a74c8191b7a65571da2d96b9",
+      "environmentRevision": 1,
+      "url": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/",
+      "status": "succeeded"
+    }
+  },
+  "sourceSha256": {
+    "payments/guard.mjs": "129d6b700c04b9456da52137b23af81705fd7be6d9bff8d83421e9fd3aa4a8d6",
+    "payments/testnet.mjs": "b159e07b84114656f21ab70586ff496aaf32aa5a986c0b2c476a86a2a79612b4",
+    "payments/index.mjs": "c145c1eeb3c7650c6cfbc9fdaac0436e3e76ff41c9db0ac7458bc08095009187",
+    "payments/index.d.ts": "9b3d378b05c43aa874b19d9d6531d0d276df36747eff9bf3ff29631ff3115c90",
+    "payments/page.mjs": "4043fec08f9522463446162a129031399f87e524ce7666d4fc50b40ce93ebb38",
+    "payments/main.mjs": "e4e3a46c448aaf63344f6e0e7565aa08db65d7cb4d54f24281ca276911c2b7fa",
+    "tests/payments-public-api.mjs": "d28870821301030697cbad34fb4dbb43dcdc18155a25ba3875a3901e9fd8ecef",
+    "tests/payments-availability.mjs": "72444831c39bc4d8160d49c3f3f89a626d1acd57367d12f3cec8e0a8b43fce58",
+    "tests/payments-availability-page.mjs": "f4eddd7640da70a436a89bf148cc7087217717f11949ce9f9beaa8292f14c6d7",
+    "tests/payments-installed-package.mjs": "8a0a8a5957b6497b9432eb864ef8060d40438b3803adaf1c095231cdadc1df76"
+  },
+  "preserved": {
+    "passkeys": true,
+    "storedReserves": true,
+    "protocolBindings": true,
+    "journalAndUnresolvedAttemptBlocking": true,
+    "contractFeeNonceAndExpiryPolicy": true,
+    "accountFreeTextRecovery": true
+  },
+  "newPublicTransactions": 0,
+  "newNativeTestsRequested": 0,
+  "limits": [
+    "Funded is a recent advisory observation, never signing authority or receipt proof. Final transaction checks always run again.",
+    "Fixed trusted RPC corroboration is not a light-client proof or independent-provider guarantee.",
+    "Exact agreement on moving nonce, balance, fee and gas observations can conservatively report verification unavailable; an explicit refresh may succeed later.",
+    "The UI allows readiness for at most 30 seconds and checks the local monotonic clock and signing expiry again in the explicit click.",
+    "Stopping or leaving suppresses late results; already-started bounded read-only requests may finish.",
+    "Installed-consumer RPCs are simulated; browser verification reads existing real testnet state without authenticating or sending.",
+    "No new physical-device proof, adoption, market demand or prize probability is established.",
+    "The current demonstration still binds A to approved payment 1 and B to payment 2; role-independent selection is planned."
+  ],
+  "publicPreservation": {
+    "at": "2026-10-10T20:51:15.963Z",
+    "baselineSha256": "01dc0e955d2a1d3e9b1ec2a1d5fc43d114ddaf26e2e1fed0ebdecbeb8eea96e8",
+    "readOnly": true,
+    "method": "GET",
+    "publicRequests": 22,
+    "credentialsUsed": false,
+    "nativePrompts": false,
+    "transactions": false,
+    "rows": [
+      {
+        "side": "primary",
+        "path": "/",
+        "status": 200,
+        "bytes": 1989,
+        "sha256": "d43e65086e94db2f9859331c7c83171df4f8fca9ae2da5839c38a9c0ba951ac4",
+        "passed": true,
+        "allowedCdnBlocksRemoved": 1,
+        "applicationSha256": "da1452a1bdea1b2b6fb02d1106d9350f6a3ac2caeeeb26f23a34671b49fb71ee",
+        "expectedSha256": "da1452a1bdea1b2b6fb02d1106d9350f6a3ac2caeeeb26f23a34671b49fb71ee",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/payments/",
+        "status": 200,
+        "bytes": 1649,
+        "sha256": "6a4645a4fb85d7d8842e0f32c084e62559da50f570d9a56009ae374d985dc2c1",
+        "passed": true
+      },
+      {
+        "side": "primary",
+        "path": "/api/config",
+        "status": 200,
+        "bytes": 1930,
+        "sha256": "3dfd1441a7da9b7b4bcffddeb6ca6dc54d18fc7b245199158244d0769a626780",
+        "passed": true,
+        "expectedSha256": "3dfd1441a7da9b7b4bcffddeb6ca6dc54d18fc7b245199158244d0769a626780",
+        "bytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/payments/profile.json",
+        "status": 200,
+        "bytes": 434,
+        "sha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+        "passed": true,
+        "expectedSha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+        "bytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/assets/ccip-DQjIVt-A.js",
+        "status": 200,
+        "bytes": 2869,
+        "sha256": "7732fd179d7be18597126d8bb50e4ad3dcc3b09aaab9c00eb1021ae8c81cfed0",
+        "passed": true,
+        "expectedSha256": "7732fd179d7be18597126d8bb50e4ad3dcc3b09aaab9c00eb1021ae8c81cfed0",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/assets/index-BItaFUvt.js",
+        "status": 200,
+        "bytes": 376004,
+        "sha256": "3f65b160170530987f1a748939fa36c1551c40833891792c14e1936ed304a038",
+        "passed": true,
+        "expectedSha256": "3f65b160170530987f1a748939fa36c1551c40833891792c14e1936ed304a038",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/assets/index-Di880uah.css",
+        "status": 200,
+        "bytes": 15302,
+        "sha256": "458afd8490d30fd25e82aedb78e0cb3d29e50e832c009cecc50081e44b8e328c",
+        "passed": true,
+        "expectedSha256": "458afd8490d30fd25e82aedb78e0cb3d29e50e832c009cecc50081e44b8e328c",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/assets/localBatchGatewayRequest-CguLZGxa.js",
+        "status": 200,
+        "bytes": 110757,
+        "sha256": "9abcef7e8cdd123aff8ddd04cefbdde1e41d53b4394c2b342b0b62f867251b24",
+        "passed": true,
+        "expectedSha256": "9abcef7e8cdd123aff8ddd04cefbdde1e41d53b4394c2b342b0b62f867251b24",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/assets/secp256k1-DAeh7u1B.js",
+        "status": 200,
+        "bytes": 29835,
+        "sha256": "f8babcd5319df128b8363fdfc01567df19cb527bdcdaf826ef3818db54bbc8b9",
+        "passed": true,
+        "expectedSha256": "f8babcd5319df128b8363fdfc01567df19cb527bdcdaf826ef3818db54bbc8b9",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/assets/secp256k1-ofSKK0fl.js",
+        "status": 200,
+        "bytes": 52,
+        "sha256": "2c536cd182941308fd423eb36dae288845c9d1169cd7b02edd1165c74a1eccea",
+        "passed": true,
+        "expectedSha256": "2c536cd182941308fd423eb36dae288845c9d1169cd7b02edd1165c74a1eccea",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "primary",
+        "path": "/assets/utils-Bpv4vmSW.js",
+        "status": 200,
+        "bytes": 2194,
+        "sha256": "5114638bb111b647e478a947be5beed5558487685dc8284144566df3fc03d851",
+        "passed": true,
+        "expectedSha256": "5114638bb111b647e478a947be5beed5558487685dc8284144566df3fc03d851",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/",
+        "status": 200,
+        "bytes": 1989,
+        "sha256": "3fa897dfa4809e4720cf9da98c24695f9d38fd628bffc00f947fd8c294956301",
+        "passed": true,
+        "allowedCdnBlocksRemoved": 1,
+        "applicationSha256": "da1452a1bdea1b2b6fb02d1106d9350f6a3ac2caeeeb26f23a34671b49fb71ee",
+        "expectedSha256": "da1452a1bdea1b2b6fb02d1106d9350f6a3ac2caeeeb26f23a34671b49fb71ee",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/payments/",
+        "status": 200,
+        "bytes": 1649,
+        "sha256": "37954b18c0f634e4a211aa177f77f2203f437df10ff30720a205284adfc71c0b",
+        "passed": true
+      },
+      {
+        "side": "reserve",
+        "path": "/api/config",
+        "status": 200,
+        "bytes": 1931,
+        "sha256": "a71027c6c5301877453c0f587a1bc36376e2678988808b23b044784a0f304385",
+        "passed": true,
+        "expectedSha256": "a71027c6c5301877453c0f587a1bc36376e2678988808b23b044784a0f304385",
+        "bytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/payments/profile.json",
+        "status": 200,
+        "bytes": 434,
+        "sha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+        "passed": true,
+        "expectedSha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+        "bytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/assets/ccip-DQjIVt-A.js",
+        "status": 200,
+        "bytes": 2869,
+        "sha256": "7732fd179d7be18597126d8bb50e4ad3dcc3b09aaab9c00eb1021ae8c81cfed0",
+        "passed": true,
+        "expectedSha256": "7732fd179d7be18597126d8bb50e4ad3dcc3b09aaab9c00eb1021ae8c81cfed0",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/assets/index-BItaFUvt.js",
+        "status": 200,
+        "bytes": 376004,
+        "sha256": "3f65b160170530987f1a748939fa36c1551c40833891792c14e1936ed304a038",
+        "passed": true,
+        "expectedSha256": "3f65b160170530987f1a748939fa36c1551c40833891792c14e1936ed304a038",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/assets/index-Di880uah.css",
+        "status": 200,
+        "bytes": 15302,
+        "sha256": "458afd8490d30fd25e82aedb78e0cb3d29e50e832c009cecc50081e44b8e328c",
+        "passed": true,
+        "expectedSha256": "458afd8490d30fd25e82aedb78e0cb3d29e50e832c009cecc50081e44b8e328c",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/assets/localBatchGatewayRequest-CguLZGxa.js",
+        "status": 200,
+        "bytes": 110757,
+        "sha256": "9abcef7e8cdd123aff8ddd04cefbdde1e41d53b4394c2b342b0b62f867251b24",
+        "passed": true,
+        "expectedSha256": "9abcef7e8cdd123aff8ddd04cefbdde1e41d53b4394c2b342b0b62f867251b24",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/assets/secp256k1-DAeh7u1B.js",
+        "status": 200,
+        "bytes": 29835,
+        "sha256": "f8babcd5319df128b8363fdfc01567df19cb527bdcdaf826ef3818db54bbc8b9",
+        "passed": true,
+        "expectedSha256": "f8babcd5319df128b8363fdfc01567df19cb527bdcdaf826ef3818db54bbc8b9",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/assets/secp256k1-ofSKK0fl.js",
+        "status": 200,
+        "bytes": 52,
+        "sha256": "2c536cd182941308fd423eb36dae288845c9d1169cd7b02edd1165c74a1eccea",
+        "passed": true,
+        "expectedSha256": "2c536cd182941308fd423eb36dae288845c9d1169cd7b02edd1165c74a1eccea",
+        "legacyBytesUnchanged": true
+      },
+      {
+        "side": "reserve",
+        "path": "/assets/utils-Bpv4vmSW.js",
+        "status": 200,
+        "bytes": 2194,
+        "sha256": "5114638bb111b647e478a947be5beed5558487685dc8284144566df3fc03d851",
+        "passed": true,
+        "expectedSha256": "5114638bb111b647e478a947be5beed5558487685dc8284144566df3fc03d851",
+        "legacyBytesUnchanged": true
+      }
+    ],
+    "legacyFiles": [
+      {
+        "role": "primary",
+        "expectedSha256": "3ab3c2a9ec719d5d56f30d3152f7800841c36fd536439ecbcad20476b80e4664",
+        "afterSha256": "3ab3c2a9ec719d5d56f30d3152f7800841c36fd536439ecbcad20476b80e4664",
+        "unchanged": true
+      },
+      {
+        "role": "recovery",
+        "expectedSha256": "ba4318889a5856c7925b10b51b78ebb16d3c47d2059cf3046a123053e80314e7",
+        "afterSha256": "ba4318889a5856c7925b10b51b78ebb16d3c47d2059cf3046a123053e80314e7",
+        "unchanged": true
+      }
+    ],
+    "passed": true,
+    "baselineFileUnchanged": true,
+    "scope": "Public HTTP availability and exact configuration/profile/legacy-asset preservation. Root HTML allows only the exact previously observed Cloudflare block immediately before </body>. No wallet, signing, native passkey, payment or browser-interaction verification."
+  }
+}

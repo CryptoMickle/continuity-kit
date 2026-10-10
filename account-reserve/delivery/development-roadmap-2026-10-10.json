@@ -236,10 +236,29 @@
       "publicCommit": "311c2878f2b146185068e98d35cedb26cb006d26",
       "publicSitesChanged": true,
       "physicalPasskeyVerified": false
+    },
+    {
+      "id": "payment-readiness-before-authentication",
+      "status": "complete",
+      "observedGap": "Both public example obligations are already claimed, but the payment page still initially invites opening a passkey before the signing guard can report PAYMENT_RIGHT_MISMATCH.",
+      "value": "Avoid unnecessary native authentication for already-collected, unfunded or unavailable payments.",
+      "acceptance": [
+        "Credential-free bounded readiness check for the exact approved payment and expected beneficiary.",
+        "Show funded, already collected, not available and verification unavailable as distinct states.",
+        "Do not auto-authenticate, auto-send, discover history, mutate a local journal or retry transactions.",
+        "A readiness observation is not signing authority; preserve the existing final guard, nonce, fees, expiry and once-only behavior.",
+        "Avoid losing the native user gesture or encouraging a new credential; use an explicit existing-key action after readiness.",
+        "Verify through public installed SDK and UI tests without new native credentials or public wallet transactions."
+      ],
+      "evidence": "evidence/payment-availability-validation-2026-10-10.json",
+      "publicCommit": "7c38843c9bbe299f9cb45d5d18dbbf9e67eebcc6",
+      "publicSitesChanged": true,
+      "physicalPasskeyVerified": false,
+      "priority": 14
     }
   ],
-  "lastCompleted": "Stateless typed payment reference verifier and explicit-hash UI published on existing A v6/B v5. Anonymous replay passed 36 tests; public B verifies the existing second payment and rejects a mismatched right without native authentication or new transactions. Legacy assets/config/profiles preserved.",
-  "next": "Reduce observed payment friction: show whether the approved obligation is available or already collected before asking for a passkey. Preserve final transaction preflight and do not interpret an unavailable read as permission to sign.",
+  "lastCompleted": "Payment availability SDK/UI published on existing A v7/B v6. Anonymous source replay passed 67 tests, installed public consumer and both builds. Public A/B show already-collected without passkey; 22 HTTP/preservation checks passed with all 14 legacy assets unchanged. No new native authentication or public transactions.",
+  "next": "Collect any explicitly approved obligation through the reserve if A disappears before that payment was claimed.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -265,7 +284,7 @@
   },
   "transactionPriority": {
     "recordedAt": "2026-10-10T18:34:33.466764+00:00",
-    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet v\u00e5rt ikke genererte transaksjoner",
+    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet vårt ikke genererte transaksjoner",
     "evidenceBoundary": "User-reported reason for the prior loss; not independently verified judge feedback or a formal current eligibility rule.",
     "currentGap": "Two exact testnet claims demonstrated recurring settlement through the same beneficiary, including a controlled original-app outage. Installed SDK integration and fresh-browser receipt verification are now tested; external adoption and demand remain unproven.",
     "priority": "Before further general operator polish, establish a narrowly scoped useful recurring transaction loop using the account-reserve capability.",
@@ -335,8 +354,22 @@
     }
   },
   "nextDevelopmentAssessment": {
-    "id": "payment-readiness-before-authentication",
+    "id": "role-independent-approved-payment-selection",
     "status": "planned",
+    "observedGap": "payments/page.mjs hardcodes A to right 1 and B to right 2. A recovery profile containing only approved right 1 throws PAYMENT_NOT_APPROVED before UI mount, even though the SDK supports approved policies independently of role.",
+    "value": "Collect any explicitly approved obligation through the reserve if A disappears before that payment was claimed.",
+    "acceptance": [
+      "List only the trusted profile's bounded 1-8 approved payments; no chain history discovery or arbitrary right input.",
+      "Changing payment closes any signer, invalidates readiness and old displayed receipt state, and requires a fresh availability check.",
+      "Late authentication, availability and receipt results cannot affect another selected payment.",
+      "Each selected payment preserves nonce, owner locks, fee/expiry policy, local journal reconciliation and once-only guards.",
+      "Prove reserve collection of approved payment 1 with original app unavailable using installed/local fixtures; no new native key or public transaction required.",
+      "Keep existing credentials, ciphertext, contract and published configuration unchanged."
+    ]
+  },
+  "lastCompletedAssessment": {
+    "id": "payment-readiness-before-authentication",
+    "status": "complete",
     "observedGap": "Both public example obligations are already claimed, but the payment page still initially invites opening a passkey before the signing guard can report PAYMENT_RIGHT_MISMATCH.",
     "value": "Avoid unnecessary native authentication for already-collected, unfunded or unavailable payments.",
     "acceptance": [
@@ -346,29 +379,10 @@
       "A readiness observation is not signing authority; preserve the existing final guard, nonce, fees, expiry and once-only behavior.",
       "Avoid losing the native user gesture or encouraging a new credential; use an explicit existing-key action after readiness.",
       "Verify through public installed SDK and UI tests without new native credentials or public wallet transactions."
-    ]
-  },
-  "lastCompletedAssessment": {
-    "id": "stateless-payment-receipt",
-    "status": "complete",
-    "value": "Verify a previously settled payment in a fresh browser or recovery origin using an explicit transaction reference, without requiring the local journal or opening a passkey.",
-    "observedGap": "createTestnetPaymentReader.check(rightId) throws PAYMENT_TRANSACTION_MISSING before RPC when the current origin has no journal entry. The payment page exposes only that check. Existing CLI already verifies explicit hashes through the exact guard.",
-    "acceptance": [
-      "One additive typed stateless public verifier: trusted profile, approved right and explicit transaction hash",
-      "No signer, native credential, browser storage or Web Lock needed",
-      "Preserve fixed RPCs and exact signed transaction, beneficiary, amount, contract and finality verification",
-      "Never create, clear or bypass journal entries or unblock an unresolved signing attempt; never broadcast",
-      "Small deliberate transaction-reference UI with verified, pending, reverted and mismatch outcomes in fresh-browser tests",
-      "This is explicit-hash verification, not history discovery or device synchronization"
     ],
-    "constraints": [
-      "Preserve current SDK exports and published credential/protocol bindings",
-      "Reuse existing receipt guard and CLI semantics",
-      "No new public transactions or native tests required",
-      "Keep account-free text recovery unchanged",
-      "Existing journal reconciliation remains distinct from stateless viewing"
-    ],
-    "evidence": "evidence/payment-reference-validation-2026-10-10.json",
-    "publicCommit": "311c2878f2b146185068e98d35cedb26cb006d26"
+    "evidence": "evidence/payment-availability-validation-2026-10-10.json",
+    "publicCommit": "7c38843c9bbe299f9cb45d5d18dbbf9e67eebcc6",
+    "publicSitesChanged": true,
+    "physicalPasskeyVerified": false
   }
 }

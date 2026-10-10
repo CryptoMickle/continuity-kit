@@ -1,3 +1,45 @@
+# Payment availability before passkey — 10 October 2026
+
+The existing public A version 7 and B version 6 now check the approved payment
+before offering an existing-passkey action. Collected, unissued, expired,
+fee/gas/nonce problems and failed verification remain distinct. An uncertain
+read never enables authentication. Readiness lasts at most 30 seconds, is checked
+again inside the explicit native-opening click, and is invalidated by refresh,
+cancellation or page exit. Final signing checks remain mandatory.
+
+The typed public SDK adds `createTestnetPaymentAvailability({profile}).check({rightId})`.
+It binds two RPC observations to the same finalized block, checks the expected
+runtime, issuer and beneficiary, and rechecks canonical state after eligibility.
+It has no signer, credential, storage or journal dependency. A funded observation
+is advisory; `paymentVerified` remains false. Strict agreement on changing fees,
+nonce and balances can conservatively reject a healthy payment; explicit refresh
+may be needed. Every collection attempt now closes its parent signer in `finally`,
+including a failure before sending.
+
+Anonymous replay of `7c38843c9bbe299f9cb45d5d18dbbf9e67eebcc6` passed **67 tests**,
+zero failures or skips, after fresh installation and both builds. This includes
+15 new focused guard/UI tests and a fresh installed public consumer with seven
+availability outcomes, strict types and browser-bundle checks. Two source-package
+checks also passed. Counts from repeated and overlapping runs are not summed.
+Independent internal source review found no release blocker; this is not an audit.
+
+Both published pages show the existing obligation as already collected without
+requesting a passkey. B also verified the exact existing second claim at block
+69914955. Local 390×844 rendering passed; no physical iPhone test was requested.
+All 22 HTTP checks passed: four root/payment pages, four byte-identical public
+configuration/profile responses, and all 14 exact legacy assets. Application HTML
+matches the pinned Worker after the known host-injected Cloudflare script.
+Environment revisions, origins, passkeys, records and account-free text recovery
+are preserved. No public transaction, credential or wallet action was performed.
+
+[Validation and exact replay](../evidence/payment-availability-validation-2026-10-10.json).
+Next is role-independent selection of explicitly approved payments. The current
+demo binds A to payment 1 and B to payment 2, which prevents B from collecting
+payment 1 if A disappears early, despite the SDK supporting that policy.
+No external adoption or demand is established. Video and final submission remain deferred.
+
+---
+
 # Payment references from a fresh browser — 10 October 2026
 
 The typed public payment entry now includes `createTestnetPaymentVerifier`.
