@@ -342,6 +342,35 @@ test('late journal corruption creates an account block even when the selected ol
   f.actions.select(1n); assert.equal(f.actions.state.payment.confirmed, true);
 });
 
+test('late pending receipt from a canceled check immediately closes a newer active signer', async t => {
+  const old = deferred(), f = fixture(t); f.behavior.check = () => old.promise;
+  const checking = f.actions.check(1n), rejected = assert.rejects(checking, code('PAYMENT_SESSION_CLOSED'));
+  f.actions.select(2n); await f.ready(); await f.actions.open();
+  assert.equal(f.actions.isOpen, true); assert.equal(f.counts.closes, 0);
+  old.resolve({ hash: '0x' + '1'.repeat(64) }); await rejected;
+  assert.equal(f.actions.selectedRightId, 2n); assert.equal(f.actions.state.accountBlocked, true);
+  assert.deepEqual(f.actions.state.unresolvedPayments, [1n]);
+  assert.equal(f.actions.isOpen, false); assert.equal(f.counts.closes, 1); assert.equal(f.sessions[0].closed, true);
+  assert.equal(f.actions.canOpen, false); assert.equal(f.counts.claims.length, 0);
+});
+
+test('late reservation error from a canceled check aborts newer authentication and closes its eventual session', async t => {
+  const old = deferred(), native = deferred(), f = fixture(t); let signal;
+  f.behavior.check = () => old.promise;
+  f.behavior.open = options => { signal = options.signal; return native.promise; };
+  const checking = f.actions.check(1n), rejectedCheck = assert.rejects(checking, code('PAYMENT_SESSION_CLOSED'));
+  f.actions.select(2n); await f.ready();
+  const opening = f.actions.open(), rejectedOpen = assert.rejects(opening, code('PAYMENT_SESSION_CLOSED'));
+  assert.equal(signal.aborted, false);
+  old.reject(fail('PAYMENT_RECONCILIATION_REQUIRED')); await rejectedCheck;
+  assert.equal(signal.aborted, true); assert.equal(f.actions.state.accountBlocked, true);
+  assert.equal(f.actions.state.authenticationPending, true); assert.equal(f.actions.isOpen, false);
+  const late = f.recovered(); native.resolve(late); await rejectedOpen;
+  assert.equal(late.closed, true); assert.equal(f.counts.closes, 1); assert.equal(f.counts.clientCreates, 0);
+  assert.equal(f.actions.isOpen, false); assert.equal(f.actions.state.authenticationPending, false);
+  assert.equal(f.actions.canOpen, false); assert.equal(f.counts.claims.length, 0);
+});
+
 test('caller profile mutation during authentication cannot change captured policy', async t => {
   const pending = deferred(), f = fixture(t); f.behavior.open = () => pending.promise;
   await f.ready(); const session = f.recovered(), opening = f.actions.open();

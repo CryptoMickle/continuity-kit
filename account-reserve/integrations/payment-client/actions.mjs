@@ -56,6 +56,7 @@ export function createPaymentActions({ profile, openExistingAccount, storage, lo
   function remember(rightId, result) {
     if (!result?.hash) throw fail('PAYMENT_RESULT_INVALID');
     states.set(rightId, Object.freeze({ hash: result.hash, confirmed: !!result.receipt, unresolved: !result.receipt }));
+    closeBlockedSigning();
   }
   function rememberError(rightId, error, claimAttempt = false, hash) {
     const code = errorCode(error);
@@ -63,6 +64,12 @@ export function createPaymentActions({ profile, openExistingAccount, storage, lo
     if (hash || code === 'PAYMENT_RECONCILIATION_REQUIRED' || claimAttempt && reservationErrors.has(code)) {
       states.set(rightId, Object.freeze({ hash: hash ?? states.get(rightId)?.hash, confirmed: false, unresolved: true }));
     }
+    closeBlockedSigning();
+  }
+  function closeBlockedSigning() {
+    // A cancelled journal read can discover uncertainty after another account
+    // opening began. Retain no new signer once that account-wide block is known.
+    if (blocked() && !claimPending && (client || authenticationPending && !authenticationPending.controller.signal.aborted)) close();
   }
   lifetimeTarget.addEventListener('pagehide', dispose);
   return Object.freeze({
@@ -103,6 +110,7 @@ export function createPaymentActions({ profile, openExistingAccount, storage, lo
         // Intentionally no await before invoking the host's native callback.
         recovered = await openExistingAccount({ signal: token.controller.signal });
         if (disposed || token.generation !== generation || token.controller.signal.aborted || performance.now() >= token.deadline || Date.now() >= expires) throw fail('PAYMENT_SESSION_CLOSED');
+        if (blocked()) throw fail('PAYMENT_ACCOUNT_BLOCKED');
         created = createTestnetPaymentClient({ ...options, recovered });
         const openedExecutor = created.forRight(token.rightId);
         client = created; executor = openedExecutor; openedRight = token.rightId; sessionUntil = token.deadline;

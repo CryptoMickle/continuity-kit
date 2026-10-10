@@ -129,7 +129,9 @@ closed. Cancelled read/authentication promises reject `PAYMENT_SESSION_CLOSED`;
 a claim already in flight may preserve its original error and uncertainty. Read-only requests
 already sent may still finish; cancellation suppresses their display results. A late
 journal result can retain a safety block for its original payment, but cannot clear
-an existing block; run a fresh explicit check to reconcile it. Selection is
+an existing block; run a fresh explicit check to reconcile it. If such a result
+blocks the account after another opening began, that newer signing session is
+closed or its pending native request is aborted. Selection is
 rejected while collection is in flight, even after Close, because closing a session
 cannot recall a transaction already sent.
 
