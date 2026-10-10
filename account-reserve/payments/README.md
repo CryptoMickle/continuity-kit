@@ -58,6 +58,34 @@ The maximum claim gas is 300,000, max fee 200 gwei, priority fee 2 gwei: a maxim
 0.06 test-MON fee per claim. These are test tokens, not a production payment service.
 The reserve restores full signing authority, not a restricted withdrawal token.
 
+## Verify an existing public claim without a wallet
+
+The first example claim is finalized on Monad testnet. Download the public profile
+and check the exact transaction with the same two-RPC guard used by the app:
+
+```sh
+curl --fail --proto '=https' --tlsv1.2 \
+  https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/profile.json \
+  -o payment-profile.json
+node payments/verify-claim.mjs --profile payment-profile.json --right-id 1 \
+  --hash 0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600
+```
+
+This reads public chain data only. It needs no signer, passkey, approval or pending
+journal, writes no files, and never broadcasts. It checks the profile's exact chain,
+contract, issuer, beneficiary, right, amount, nonce and fee bounds; both RPCs must
+corroborate the signed transaction, canonical finalized receipt and claimed state.
+An expired profile can still verify an earlier payment. A missing or unfinalized
+receipt remains pending; an RPC failure or mismatch is not a successful claim.
+Check the JSON `paymentVerified` field: only `true` establishes a verified payment.
+Pending and reverted observations set it to `false`; invalid input or a failed
+verification exits with code 1. The reported `amount` is denominated in wei.
+
+The public profile and these source files are trust inputs. This is a reproducible
+RPC check, not a light client or independent audit. A receipt proves settlement,
+not which browser or device was used, nor that a passkey ceremony occurred.
+The second funding and recovery claim are not yet completed on public testnet.
+
 ## Issuer operation
 
 `proposal.mjs` produces a deterministic public five-transaction proposal:

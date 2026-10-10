@@ -203,8 +203,8 @@
       "publicCommit": "38b06b9e65d5281105d0413c1b1d439e9321299b"
     }
   ],
-  "lastCompleted": "Anonymous public-source replay completed at 309f62e: 135 base, 72 payment and 119 native tests passed. Public contract and first funded payment are finalized; beneficiary-native continuation is still pending.",
-  "next": "Continue the exact payment proposal after the user opens the existing primary account and claims right1. Corroborate exact finalized claim1, then make A unavailable, fund right2 under the same proposal and recover/claim through existing B. Restore A afterwards. No new passkeys, proposal retry, video or submission.",
+  "lastCompleted": "First public beneficiary claim finalized in block 69905019; exact signed envelope, event and state corroborated by both pinned RPCs. Public second payment/outage proof remains unfinished.",
+  "next": "First claim is verified. Continue the same exact proposal with a recorded A outage, second funding, existing B recovery/claim, then restore A when wallet execution is in scope. Do not ask the user to repeat claim1. No new credentials, journal reset, video or submission.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -230,7 +230,7 @@
   },
   "transactionPriority": {
     "recordedAt": "2026-10-10T18:34:33.466764+00:00",
-    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet v\u00e5rt ikke genererte transaksjoner",
+    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet vårt ikke genererte transaksjoner",
     "evidenceBoundary": "User-reported reason for the prior loss; not independently verified judge feedback or a formal current eligibility rule.",
     "currentGap": "Current text collection/replica product sends no blockchain transactions. The separate Account Reserve proof is a historical single claimed payment. The current PaymentRight contract permits only one right per beneficiary, and the release executor pins right 1 and nonce 0. Recurring usage is not demonstrated.",
     "priority": "Before further general operator polish, establish a narrowly scoped useful recurring transaction loop using the account-reserve capability.",
@@ -252,18 +252,26 @@
     "basis": "Direct user steering on 10 October 2026; see transactionPriority",
     "releaseGate": "Complete: exact anonymous public commit replay passed base135, payments72 and native119 tests plus builds and installed consumers.",
     "localProgress": {
-      "paymentTests": 72,
+      "paymentTests": 81,
       "legacyTransactionRegression": 44,
       "sourcePackagingTests": 15,
       "publicIssuerTransactionsFinalized": 2,
-      "publicBeneficiaryClaimsVerified": 0,
+      "publicBeneficiaryClaimsVerified": 1,
       "nativeProof": false,
-      "evidenceBoundary": "Local SDK/EVM proof and two public issuer transactions; beneficiary claims pending."
+      "evidenceBoundary": "Local SDK/EVM proof, two public issuer transactions and one exact public beneficiary claim. Public post-outage second payment remains pending; chain receipts do not prove device authentication.",
+      "receiptVerifierTests": 9,
+      "currentSourcePackagingTests": 2
     },
     "sourceCommit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",
     "publicPrimaryVersion": 5,
     "publicReserveVersion": 4,
-    "awaitingUser": "Existing Primary passkey authentication and explicit claim at /payments/. Native prompt only; no new credential. Do not issue second obligation until first exact claim finalizes.",
-    "publicEvidence": "evidence/payments-validation-2026-10-10.json"
+    "awaitingUser": "Clarification requested because latest heartbeat says no wallet transactions while earlier direct instruction authorizes testnet. First claim is already verified; do not repeat it. No second funding or A outage in this run.",
+    "publicEvidence": "evidence/payments-validation-2026-10-10.json",
+    "lastHeartbeat": {
+      "at": "2026-10-10T19:15:54.982Z",
+      "firstClaimVerified": true,
+      "newWalletTransactionsSent": 0,
+      "scope": "Read-only chain verification during the 19:09 heartbeat, which says not to execute wallet transactions. Existing direct testnet authorization is retained above; no new funding was attempted in this run."
+    }
   }
 }

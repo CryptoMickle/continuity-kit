@@ -19,7 +19,7 @@ const required=[
  'text-native/collection-main.mjs','text-native/operator-backup.mjs','text-native/operator-diagnostics.mjs','text-native/operator-runtime/cli.mjs','text-native/.npmignore','text-starter/collection-server.mjs','text-starter/replica-server.mjs','operator/replica-gateway.mjs',
  'integrations/multi-app/vendor/easymde/dist/easymde.min.js','integrations/multi-app/vendor/easymde/dist/easymde.min.css','integrations/multi-app/vendor/easymde/LICENSE','integrations/multi-app/vendor/easymde/marked-LICENSE','integrations/textarea-text/upstream/LICENSE',
  'self-service/apps/app.mjs','self-service/apps/collection.mjs','self-service/client/config.mjs','self-service/backend/store.mjs','self-service/backend/db/schema.ts',
- 'payments/SequentialPayment.sol','payments/SequentialPayment.artifact.json','payments/operator-runner.mjs','payments/operator-journal.mjs','payments/page.mjs','payments/site-handler.mjs','tests/payments-operator.mjs','deploy/operator-runner.mjs','release/paced-rpc.mjs','starter/prism-art.mjs','sdk/COLLECTION_REPLICAS.md',
+ 'payments/SequentialPayment.sol','payments/SequentialPayment.artifact.json','payments/operator-runner.mjs','payments/operator-journal.mjs','payments/verify-claim.mjs','payments/page.mjs','payments/site-handler.mjs','tests/payments-operator.mjs','tests/payments-verify-claim.mjs','deploy/operator-runner.mjs','release/paced-rpc.mjs','starter/prism-art.mjs','sdk/COLLECTION_REPLICAS.md',
 ];
 async function candidate(t){const base=await mkdtemp(join(tmpdir(),'continuity-current-candidate-'));t.after(()=>rm(base,{recursive:true,force:true}));const packed=await packageCandidate({artifactDirectory:join(base,'output')});const root=join(base,'source');await mkdir(root);await execute('/usr/bin/tar',['-xzf',packed.archive,'-C',root],base);return {base,root,packed};}
 
@@ -43,7 +43,7 @@ test('unpacked candidate clean offline install runs current local payment proof 
  const f=await candidate(t),cache=process.env.SDK_TEST_NPM_CACHE??'/tmp/continuity-reserve-npm';
  const env={PATH:dirname(process.execPath)+':'+process.env.PATH,npm_config_cache:cache,npm_config_audit:'false',npm_config_fund:'false',NO_COLOR:'1'};
  await execute(join(dirname(process.execPath),'npm'),['ci','--offline','--ignore-scripts'],f.root,{env,timeout:60000});
- const output=await execute(process.execPath,['--test','--test-reporter=tap','tests/payments-chain.mjs','tests/payments-guard.mjs','tests/payments-pending.mjs','tests/payments-transaction.mjs','tests/payments-operator.mjs'],f.root,{env:{...env,NODE_TEST_CONTEXT:''},timeout:60000});
+ const output=await execute(process.execPath,['--test','--test-reporter=tap','tests/payments-chain.mjs','tests/payments-guard.mjs','tests/payments-pending.mjs','tests/payments-transaction.mjs','tests/payments-operator.mjs','tests/payments-verify-claim.mjs'],f.root,{env:{...env,NODE_TEST_CONTEXT:''},timeout:60000});
  assert.match(output,/# fail 0/);assert.match(output,/# skipped 0/);assert.ok(Number(output.match(/# tests (\d+)/)?.[1])>=55);assert.match(output,/two genuine payouts keep original beneficiary/);assert.match(output,/actual viem wallet executes two guarded sequential obligations/);
  await execute(process.execPath,['payments/build-browser.mjs'],f.root,{env});
  await execute(process.execPath,['scripts/build-app-reserves.mjs'],f.root,{env});

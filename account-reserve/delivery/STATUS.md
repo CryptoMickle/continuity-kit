@@ -1,6 +1,6 @@
-# Sequential payments: public funding ready — 10 October 2026
+# Sequential payments: first public claim verified — 10 October 2026
 
-The additive payment integration passed 72 relevant tests. An actual local EVM
+The additive payment integration passed 81 relevant tests. An actual local EVM
 and SDK test collected two independently funded payments with the same account;
 A returned HTTP 503 before a fresh recovery in B. No recovery credential was
 created and stored ciphertext was unchanged. This is synthetic local evidence.
@@ -8,16 +8,32 @@ created and stored ciphertext was unchanged. This is synthetic local evidence.
 The new SequentialPayment contract is deployed on Monad testnet at
 `0x47C8c753295AC4fBe4c23D9BD2dC899F61b66564`. Its first 0.01 test-MON obligation is
 funded for the existing beneficiary. Both issuer transactions are finalized and
-corroborated on the two fixed RPCs. No beneficiary claim in this new flow has yet
-been verified. The second obligation is not issued until the first claim finalizes.
+corroborated on the two fixed RPCs. The first beneficiary claim is now finalized
+in block `69905019`: `0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600`.
+The operator verified the exact signed envelope, sender, amount, nonce, event,
+canonical block and contract state through both RPCs. The second obligation is
+not yet funded. Public recovery after an original-app outage remains unfinished.
 
 The existing Account Primary and Reserve Sites now serve additive `/payments/`
 pages. Legacy code, origin/RP/namespace bindings, passkeys and stored records remain
 unchanged. Unknown signed outcomes close the signer and leave read-only checking;
-there is no automatic resend. Native authentication with the existing primary key
-is the next required user action. Anonymous public-source replay of commit
+there is no automatic resend. Do not ask the user to repeat the first claim.
+The receipt establishes settlement, not the physical device or prompt count.
+Anonymous public-source replay of commit
 `309f62e552ecb6bafbc841afcc1fe5928cd40d3b` passed 135 base, 72 payment and
 119 native tests, plus application/payment/multi-app builds and installed consumers.
+
+The new `payments/verify-claim.mjs` lets an integrator verify an explicit public
+profile, right and transaction hash through the same fixed two-RPC guard without
+a wallet, passkey or local journal. It distinguishes a verified payment from
+pending, reverted and failed checks; only `paymentVerified: true` is success.
+Nine new boundary tests passed, with a separate internal review. Both source-package
+checks passed, including a fresh offline install and 64 payment tests from the
+extracted archive. The CLI also verified the real first claim using the public
+profile downloaded from B. Existing Sites and browser flows were not changed.
+
+This verification run performed chain reads only. Second funding remains pending;
+A remains available and the original proposal/journal are preserved.
 
 This closes an implementation gap, not the demand gap. Test funding and claims do
 not establish organic transactions, customers, sponsor acceptance or prize odds.

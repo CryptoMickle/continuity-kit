@@ -16,7 +16,9 @@ The separate [sequential-payment integration](payments/README.md) exercises a
 recurring onchain obligation: collect a funded payment in A, then collect a second
 payment through B with the same prepared account after A is unavailable. The local
 SDK/EVM proof passes. The new contract and first 0.01 test-MON obligation are now
-confirmed on Monad testnet; the new public beneficiary claims are still pending.
+confirmed on Monad testnet, and the first beneficiary claim is finalized. The
+second funding and public recovery claim remain pending. The integration includes
+a wallet-free command for verifying the exact public receipt.
 These are development payments, not external usage. The text API remains account-free.
 
 ## Start with your own text editor
