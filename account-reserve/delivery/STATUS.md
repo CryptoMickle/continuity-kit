@@ -1,3 +1,48 @@
+# Actionable operator diagnostics — 10 October 2026
+
+The native integration now explains why an existing operator cannot start. A
+read-only preflight distinguishes mismatched app/profile bindings, private file
+permissions, invalid state, runtime locks, built assets and occupied local ports.
+The launcher presents the same guidance before starting child services. It does
+not rewrite a profile, repair permissions, delete a lock or choose another port.
+
+**119 relevant tests passed, with no failures or skips:** the previous 107 native
+regressions, 11 new diagnostic boundary cases and one installed-package case with
+nine API/CLI scenarios. An independent internal review repeated the 12 diagnostic
+cases; repeats are not counted as additional tests.
+
+A freshly installed SDK generated another fresh consumer, installed offline and
+built its assets. The actual diagnostic API and CLI agreed on the failure reasons.
+State bytes, file permissions, inode identities, modification times and database
+counters remained unchanged. Live and stale locks were retained. An unrelated
+listener received no probe connections and remained usable. Startup independently
+rejected a lock or occupied port introduced after a successful preflight.
+
+Review also improved required-file handling: private files are checked before
+opening and read in bounded chunks through a no-follow descriptor, then checked
+for concurrent replacement or mutation. Unreadable private files now get permission
+guidance, and the CLI preserves the raw state path for traversal checks. Existing
+public error codes are unchanged; reports contain only fixed messages, check IDs
+and validated port numbers, never secrets or arbitrary filesystem errors.
+
+Optional port checks briefly bind and release validated loopback ports. Their
+result is advisory, not a reservation or service identity check. A lock's presence
+does not establish its owner or whether that owner is still running. This is
+local installation and operational evidence, not physical-device acceptance,
+cryptographic recovery proof, independent hosting or external adoption.
+
+Existing public Sites, passkeys and snapshots are unchanged. No wallet transaction,
+spending, video or final submission was needed. Necessary testnet transactions are
+now authorized by the user for later development and verification.
+
+Next: verify the published source can reproduce the documented native integration
+from a clean checkout, and address any observed installation or operation failure.
+
+[Native operator guide](../text-native/README.md) ·
+[Validation and limits](../evidence/native-operator-diagnostics-2026-10-10.json).
+
+---
+
 # Managed operator backup and restore — 10 October 2026
 
 The native package can now export every configured encrypted replica and restore

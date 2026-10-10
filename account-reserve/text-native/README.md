@@ -43,6 +43,43 @@ Start the frontend, gateway and each store with one command:
 npm run operator:start -- --profile profile.json --state private/operator --out dist
 ```
 
+The startup command first reports correctable configuration problems with a
+specific explanation and action. To inspect a stopped setup without starting it:
+
+```sh
+npm run operator:diagnose -- --profile profile.json --state private/operator --out dist
+```
+
+Add `--check-ports true` to briefly bind and release each configured loopback port.
+The probe sends no request to an existing listener and never stops it. Port
+availability is an observation, not a reservation or proof of service identity.
+Startup independently checks everything again and acquires its own exclusive lock.
+
+| Command | When to use it | What it establishes |
+| --- | --- | --- |
+| `doctor` | After build | Installed SDK and role assets match the profile. |
+| `operator:diagnose` | Before startup, or after a startup refusal | Private state, original bindings, build and optionally local port availability. |
+| `operator:check` | While the managed operator is running | Configured frontend, gateway and stored-response consistency. |
+
+Diagnostics make no file changes, issue no grants and request no credentials.
+They return fixed messages without private paths, invitations, locators, database
+contents or raw system errors. Their result is not authenticated plaintext
+recovery or native-device acceptance.
+
+| Diagnostic | Corrective action |
+| --- | --- |
+| `PROFILE_STATE_MISMATCH` | Locate the original profile for this state. Do not rewrite app IDs, RP, origins, expiry or the saved manifest to force a match. |
+| `PRIVATE_PERMISSIONS_INVALID` | Inspect ownership and access to the intended private paths. Directories require `0700`, files `0600`, owned by the operating user. The command never changes permissions. |
+| `RUNTIME_LOCK_PRESENT` | Investigate the known launcher and any interrupted shutdown. The report cannot identify a live or stale owner; free ports or lock age do not justify deleting it. |
+| `PORT_OCCUPIED` | Identify the existing port owner. Stop it only if it is yours and you intend to stop it. No automatic termination, rebinding or port change occurs. |
+| `STATE_INVALID` | Preserve the state for inspection or restore a verified backup into a new directory. Do not reinitialize the existing directory. |
+| `BUILD_INVALID` | Run the doctor with the same profile. Install dependencies or rebuild into a new output directory as appropriate. |
+
+A runtime lock stops the preflight before state-content and port checks; use
+`operator:check` for an already running stack. Diagnostic success is advisory:
+files and ports may change afterward, so the launcher does not trust it as a
+replacement for startup validation.
+
 The launcher checks the installed SDK, built asset hashes and original state, reserves every port, starts each store in a separate child process, then verifies the configured read paths. An occupied port or incomplete startup closes only resources owned by this launch. It never stops a process found through a PID file. No grant is issued or native credential requested during startup.
 
 Once ready, an individual store failure reports `degraded` while the gateway, B and surviving stores stay running. If every store stops, status becomes `unavailable`. The launcher never remaps a failed route or automatically restarts a store. Initial setup still needs all intended copies; recovery can use an authenticated survivor. This is one managed local stack, not a deployment to independent providers.

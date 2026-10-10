@@ -14,6 +14,7 @@
     "operator:init": "node operator-state.mjs init",
     "operator:start": "node operate.mjs",
     "operator:check": "node operator-readiness.mjs",
+    "operator:diagnose": "node operator-diagnostics.mjs",
     "operator:backup": "node operator-backup.mjs backup",
     "operator:restore": "node operator-backup.mjs restore"
   },

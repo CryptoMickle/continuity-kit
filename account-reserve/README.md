@@ -107,6 +107,12 @@ old upload grants are discarded. The same B hostname and existing passkey are
 still required. This is an explicit operator migration, not an automatic offsite
 backup or protection against losing the recovery origin or credential.
 
+Before starting that operator, `operator:diagnose` distinguishes a mismatched
+original profile, unsafe private-file permissions, a present runtime lock and
+optionally occupied local ports. It gives corrective guidance without repairing
+state or stopping another process. `operator:start` runs the same preflight and
+then performs its own startup checks. See the [operator guide](text-native/README.md#start-the-operator-stack).
+
 To run the repository's generator/UI regressions, first install the root and
 shared test harness dependencies into your normal npm cache:
 

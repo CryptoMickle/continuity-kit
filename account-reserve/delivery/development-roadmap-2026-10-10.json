@@ -7,7 +7,7 @@
     "No video or final submission before user resumes Monday",
     "No Delveworn integration",
     "Preserve existing passkeys, immutable snapshots and wire format",
-    "No money, wallet transactions, new accounts, domains or outreach",
+    "No real-money spending, mainnet wallet transactions, new accounts, domains or outreach; necessary testnet wallet transactions are authorized by the user on 10 October 2026",
     "Avoid repeated human tests; label synthetic and builder-reported evidence correctly"
   ],
   "milestones": [
@@ -181,12 +181,13 @@
       ],
       "evidence": "evidence/native-operator-backup-2026-10-10.json",
       "publicSitesChanged": false,
-      "physicalPasskeyVerified": false
+      "physicalPasskeyVerified": false,
+      "publicCommit": "09197e5c32b514791871af815424482e2cc2d04d"
     },
     {
       "id": "native-operator-actionable-diagnostics",
       "priority": 11,
-      "status": "pending",
+      "status": "complete",
       "value": "Remove an observed integrator blocker: startup currently collapses a mismatched app profile and insecure state-file permissions into the same generic error even though their remedies differ.",
       "acceptance": [
         "Read-only preflight distinguishes profile/state binding, private file permissions, occupied ports and runtime locks with useful corrective guidance",
@@ -195,9 +196,21 @@
         "No automatic profile/state rewriting, permission repair, port changes or lock deletion",
         "Preserve all state bytes, counters, live/stale locks and existing hosted flows",
         "No native authentication, provider deployment, video or final submission required"
-      ]
+      ],
+      "evidence": "evidence/native-operator-diagnostics-2026-10-10.json",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
     }
   ],
-  "lastCompleted": "Managed operator backup/restore completed: 107 native tests passed, installed-to-installed generation, exact two-app exports after original-state loss and replica failure, private npm packaging fixed.",
-  "next": "Implement read-only actionable native operator diagnostics for observed binding/permissions ambiguity, plus occupied ports and runtime locks. No automatic repairs, video or final submission."
+  "lastCompleted": "Actionable native operator diagnostics completed: 119 native tests passed; installed CLI/API diagnostics distinguish binding, permissions, locks and ports without state changes or service interference.",
+  "next": "Check clean public-source reproducibility of the native integration and operator commands after publication; continue from observed failures, not new speculative features. Video and final submission remain deferred.",
+  "testnetAuthorization": {
+    "grantedBy": "direct user instruction on 2026-10-10",
+    "scope": "Necessary testnet wallet transactions for development and verification",
+    "doesNotAuthorize": [
+      "mainnet transactions",
+      "spending real money",
+      "unrelated asset transfers"
+    ]
+  }
 }

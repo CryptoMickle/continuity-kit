@@ -1,4 +1,4 @@
-import { constants, openSync, closeSync, fstatSync, lstatSync, realpathSync, readFileSync, writeFileSync, fsyncSync, mkdirSync, rmdirSync, unlinkSync, linkSync } from 'node:fs';
+import { constants, openSync, closeSync, fstatSync, lstatSync, realpathSync, readSync, readFileSync, writeFileSync, fsyncSync, mkdirSync, rmdirSync, unlinkSync, linkSync } from 'node:fs';
 import { resolve, dirname, basename, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
@@ -13,7 +13,18 @@ const within = (child, parent) => child === parent || child.startsWith(parent + 
 const fail = code => Object.assign(new Error(code), { code });
 const check = (condition, code) => { if (!condition) throw fail(code); };
 const codes = new Set(['NATIVE_STATE_INVALID', 'NATIVE_STATE_PATH_INVALID', 'NATIVE_STATE_EXISTS', 'NATIVE_STATE_PORTS_INVALID', 'NATIVE_STATE_BINDING_INVALID', 'NATIVE_STATE_DATABASE_INVALID', 'NATIVE_STATE_TRANSFER_INVALID', 'NATIVE_STATE_INITIALIZATION_FAILED', 'NATIVE_PROFILE_INVALID', 'NATIVE_PROFILE_EXPIRED']);
-function safeError(error, fallback = 'NATIVE_STATE_INVALID') { return fail(codes.has(error?.code) ? error.code : fallback); }
+function errorField(error, field) { try { const value = Object.getOwnPropertyDescriptor(error, field); return value && Object.hasOwn(value, 'value') ? value.value : undefined; } catch { return undefined; } }
+function permissionError(error) { return errorField(error, 'diagnosticCode') === 'PRIVATE_PERMISSIONS_INVALID' || ['EACCES', 'EPERM'].includes(errorField(error, 'code')); }
+function safeError(error, fallback = 'NATIVE_STATE_INVALID') {
+  const code = errorField(error, 'code'), result = fail(codes.has(code) ? code : fallback);
+  if (permissionError(error)) Object.defineProperty(result, 'diagnosticCode', { value: 'PRIVATE_PERMISSIONS_INVALID' });
+  return result;
+}
+function privatePermissions(stat, mode, code) {
+  if ((stat.mode & 0o7777) !== mode || !owned(stat)) {
+    const error = fail(code); Object.defineProperty(error, 'diagnosticCode', { value: 'PRIVATE_PERMISSIONS_INVALID' }); throw error;
+  }
+}
 function object(value, fields, code = 'NATIVE_STATE_INVALID') {
   try {
     check(value && typeof value === 'object' && !Array.isArray(value), code);
@@ -46,7 +57,7 @@ function runtimeProfile(profile) { return Object.freeze({ version: 1, primaryOri
 function gatewayConfiguration(profile, ports) { return Object.freeze({ recoveryOrigin: profile.recoveryOrigin, replicas: Object.freeze(ports.replicas.map(item => Object.freeze({ ...item }))) }); }
 function exists(path) { try { return lstatSync(path); } catch (error) { if (error.code === 'ENOENT') return undefined; throw error; } }
 function owned(stat) { return typeof process.getuid !== 'function' || stat.uid === process.getuid(); }
-function directory(path) { const stat = lstatSync(path); check(stat.isDirectory() && !stat.isSymbolicLink() && (stat.mode & 0o7777) === 0o700 && owned(stat), 'NATIVE_STATE_PATH_INVALID'); return stat; }
+function directory(path) { const stat = lstatSync(path); check(stat.isDirectory() && !stat.isSymbolicLink(), 'NATIVE_STATE_PATH_INVALID'); privatePermissions(stat, 0o700, 'NATIVE_STATE_PATH_INVALID'); return stat; }
 function systemAliases(path) {
   for (const alias of ['/tmp', '/var']) if (within(path, alias)) {
     try { const real = realpathSync(alias); if (real === '/private' + alias) return real + path.slice(alias.length); } catch { /* ordinary path validation follows */ }
@@ -79,10 +90,21 @@ export function nativeOperatorDirectory(state) { return planDirectory(state, fal
 function privateFile(path, limit) {
   let fd;
   try {
-    fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW);
+    const before = lstatSync(path);
+    check(before.isFile() && !before.isSymbolicLink() && before.nlink === 1 && before.size > 0 && before.size <= limit, 'NATIVE_STATE_INVALID');
+    privatePermissions(before, 0o600, 'NATIVE_STATE_INVALID');
+    fd = openSync(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
     const stat = fstatSync(fd);
-    check(stat.isFile() && !stat.isSymbolicLink() && stat.nlink === 1 && (stat.mode & 0o7777) === 0o600 && owned(stat) && stat.size > 0 && stat.size <= limit, 'NATIVE_STATE_INVALID');
-    const bytes = readFileSync(fd); check(bytes.length <= limit, 'NATIVE_STATE_INVALID'); return { bytes, stat };
+    check(stat.isFile() && !stat.isSymbolicLink() && stat.nlink === 1 && stat.size > 0 && stat.size <= limit && stat.dev === before.dev && stat.ino === before.ino, 'NATIVE_STATE_INVALID');
+    privatePermissions(stat, 0o600, 'NATIVE_STATE_INVALID');
+    const chunks = []; let size = 0;
+    while (size <= limit) {
+      const chunk = Buffer.allocUnsafe(Math.min(65536, limit + 1 - size)), count = readSync(fd, chunk, 0, chunk.length, null);
+      if (!count) break; size += count; chunks.push(chunk.subarray(0, count));
+    }
+    const after = fstatSync(fd);
+    check(size <= limit && size === stat.size && after.size === stat.size && after.mtimeMs === stat.mtimeMs && after.ctimeMs === stat.ctimeMs, 'NATIVE_STATE_INVALID');
+    return { bytes: Buffer.concat(chunks, size), stat };
   } finally { if (fd !== undefined) closeSync(fd); }
 }
 function json(path, limit = 16384) { return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(privateFile(path, limit).bytes)); }
@@ -105,7 +127,7 @@ function validateDatabase(path, expected) {
     check(capabilities.length <= meta[0].issued && new Set(capabilities.map(item => item.hash)).size === capabilities.length, 'NATIVE_STATE_DATABASE_INVALID');
     for (const cap of capabilities) check(typeof cap.hash === 'string' && /^[a-f0-9]{64}$/.test(cap.hash) && Number.isSafeInteger(cap.expires) && cap.expires > 0 && cap.expires <= Date.parse(expected.expiresAt) && (cap.used === 0 || cap.used === 1), 'NATIVE_STATE_DATABASE_INVALID');
     db.exec('COMMIT');
-  } catch { throw fail('NATIVE_STATE_DATABASE_INVALID'); }
+  } catch (error) { const result = fail('NATIVE_STATE_DATABASE_INVALID'); if (permissionError(error)) Object.defineProperty(result, 'diagnosticCode', { value: 'PRIVATE_PERMISSIONS_INVALID' }); throw result; }
   finally { try { db?.close(); } catch { /* errors never include database paths */ } }
 }
 function output(directory, profile, ports) {

@@ -1,0 +1,153 @@
+{
+  "checkedAt": "2026-10-10T17:15:40.642916+00:00",
+  "milestone": "native-operator-actionable-diagnostics",
+  "scope": "Read-only operator preflight and actionable CLI failures. Source delivery only; existing public Sites unchanged.",
+  "validation": {
+    "command": "SDK_TEST_NPM_CACHE=/tmp/continuity-reserve-npm /usr/bin/sandbox-exec -f scripts/loopback-only.sb node --test tests/text-native-*.mjs",
+    "node": "24.19.0",
+    "network": "loopback only; offline dependency cache",
+    "passedTopLevelTests": 119,
+    "failed": 0,
+    "skipped": 0,
+    "priorNativeRegressionCases": 107,
+    "newDiagnosticBoundaryCases": 11,
+    "newInstalledDiagnosticCase": 1,
+    "repeatRunsCountedAgain": false,
+    "durationMs": 43485.063333,
+    "logSha256": "0d5e9ee2ac29a5dc29b8c9f004b673c67378da09f48bedd6a7c79c3070dd8906"
+  },
+  "installedDiagnostics": {
+    "installedNativeDiagnosticsPackage": true,
+    "installedGeneratorReplay": true,
+    "offlineConsumerInstall": true,
+    "actionableProfileAndPermissionDistinction": true,
+    "liveAndStaleLocksPreserved": true,
+    "occupiedListenerNeverProbedOrStopped": true,
+    "startupRechecksLockAndPort": true,
+    "sourceStateBuildBytesAndCountersPreserved": true,
+    "diagnosticChildren": 0,
+    "diagnosticFilesystemMutations": 0,
+    "diagnosticGrants": 0,
+    "diagnosticCredentials": 0,
+    "diagnosticOutboundRequests": 0,
+    "checkPortsAdvisoryOnly": true,
+    "physicalPasskeyVerified": false,
+    "cryptographicRecoveryVerified": false,
+    "sameMachineOnly": true,
+    "cases": [
+      {
+        "name": "healthy",
+        "code": "READY",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "profile-mismatch",
+        "code": "PROFILE_STATE_MISMATCH",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "private-file-permissions",
+        "code": "PRIVATE_PERMISSIONS_INVALID",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "existing-live-lock",
+        "code": "RUNTIME_LOCK_PRESENT",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "healthy-before-changes",
+        "code": "READY",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "retained-stale-lock",
+        "code": "RUNTIME_LOCK_PRESENT",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "healthy-before-port-change",
+        "code": "READY",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "occupied-recovery-port",
+        "code": "PORT_OCCUPIED",
+        "readOnly": true,
+        "sameCliAndApi": true
+      },
+      {
+        "name": "healthy-after-port-release",
+        "code": "READY",
+        "readOnly": true,
+        "sameCliAndApi": true
+      }
+    ]
+  },
+  "distinguishedFailures": [
+    "invalid or expired profile",
+    "unsafe state path",
+    "private ownership or permissions",
+    "profile/state binding mismatch",
+    "invalid or incomplete committed state",
+    "present or unreadable runtime lock",
+    "invalid installed build",
+    "occupied or unavailable loopback port"
+  ],
+  "securityChanges": [
+    "Fixed-vocabulary diagnostics omit private paths, labels, invitations, grants, locators, plaintext and raw exceptions.",
+    "Required private files are checked before opening, read in bounded chunks through a no-follow descriptor, and checked again for replacement or mutation.",
+    "Existing public error codes and enumerable error shape are preserved; only an allowlisted nonenumerable permission hint is added.",
+    "Any observed runtime lock stops diagnostics before state content or port checks; ownership is never guessed.",
+    "Optional port checks briefly bind and release validated loopback ports; they never connect to, stop or identify an existing service.",
+    "The launcher independently reacquires its lock and revalidates conditions after preflight."
+  ],
+  "internalReview": {
+    "scope": "Independent agent review, not an external security audit",
+    "remainingReleaseBlockers": 0,
+    "independentFocusedTestsPassed": 12,
+    "repeatRunsCountedAsNewTests": false,
+    "foundAndFixed": [
+      "Unreadable mode 000/0200 private files initially reported generic invalid state; now report permissions.",
+      "CLI state path normalization could hide a traversal spelling before preflight; raw path now reaches validation."
+    ]
+  },
+  "preserved": [
+    "source and installed package files",
+    "profile and operator state bytes, modes, inode identities, modification times and SQLite counters",
+    "live and stale runtime locks",
+    "unrelated running listeners",
+    "existing public Sites, passkeys and immutable snapshots"
+  ],
+  "limits": [
+    "The report is advisory and cannot reserve ports or prevent later filesystem changes.",
+    "A present runtime lock does not establish whether its owner is live or stale.",
+    "Read-only diagnostics are not a native passkey, cryptographic recovery or public provider test.",
+    "All new installed tests use temporary local processes on one machine; no external adoption or production audit is established."
+  ],
+  "physicalPasskeyVerified": false,
+  "cryptographicRecoveryVerifiedByDiagnostics": false,
+  "independentProvidersVerified": false,
+  "externalAdoptionClaimed": false,
+  "publicSitesChanged": false,
+  "walletTransactions": false,
+  "moneySpent": false,
+  "videoOrFinalSubmission": false,
+  "sourceSha256": {
+    "text-native/operator-diagnostics.mjs": "8fbb456fc4606dfe43a106c02413b3a14bc79f543b2c2a8847d758fab000d04f",
+    "text-native/operator-state.mjs": "6dd99422edce766165fbcfa1ae41d3c82ed18d02fae8b1b694bedfe0203f66d9",
+    "text-native/operate.mjs": "6eec3d61f37cc0fa63163468ef38eef88a6d8586533cb4f680345c508b125590",
+    "text-native/package.json": "0c29342525d8313f9b746738e65d305424e8adf5c01c3747256b6de721cd659c",
+    "scripts/create-native-text-starter.mjs": "8a3f32da0735d0cd9189845df7047217032e1018044e45376e3f2382b1554ec8",
+    "package.json": "e2ea51b671500553012fdf549c6fe84e5bcd937a6ea7b44000a20a760e0f03e0",
+    "tests/text-native-diagnostics.mjs": "319d7e3bbb342b7f082ff63319ef5def48fd2a5192b4598aa6e18862331ad694",
+    "tests/text-native-diagnostics-package.mjs": "a2ad7d8b07f01ca9b7968ac818be78968c3f575bdb3bccf72ac2f4d21058ca7a"
+  }
+}

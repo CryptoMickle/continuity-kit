@@ -4,7 +4,7 @@ import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const files = ['package.json','README.md','profile.mjs','profile.example.json','profile.collection.example.json','ports.example.json','adapter.mjs','index.html','main.mjs','style.css','collection-index.html','collection-main.mjs','collection-style.css','prism-art.mjs','build.mjs','doctor.mjs','operator.mjs','native-host.mjs','operator-state.mjs','operator-backup.mjs','operator-readiness.mjs','operate.mjs','operator-worker.mjs'];
+const files = ['package.json','README.md','profile.mjs','profile.example.json','profile.collection.example.json','ports.example.json','adapter.mjs','index.html','main.mjs','style.css','collection-index.html','collection-main.mjs','collection-style.css','prism-art.mjs','build.mjs','doctor.mjs','operator.mjs','native-host.mjs','operator-state.mjs','operator-backup.mjs','operator-readiness.mjs','operator-diagnostics.mjs','operate.mjs','operator-worker.mjs'];
 const operatorFiles = ['profile.mjs','store.mjs','host.mjs','replica-gateway.mjs','cli.mjs'];
 // npm omits ignore files from an installed SDK. Recreate these rules rather
 // than reading a template that would disappear on the installed-generator path.

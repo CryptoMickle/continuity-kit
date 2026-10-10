@@ -218,3 +218,24 @@ also receive private-state and build-output ignore rules. Regression tests inspe
 actual source-style, installed-SDK and generated-project archives containing only
 fictional secret sentinels. This protects those packaging paths, not arbitrary
 manual copies or uploads of operator directories.
+
+## Read-only operator diagnostics (10 October 2026)
+
+The diagnostic API captures exact data options without invoking getters, validates
+the fixed profile and private path, and checks only metadata for an existing
+runtime lock. Any lock stops further preflight work; its age, content or free ports
+do not establish ownership or justify deletion. Diagnostic messages and corrective
+actions come from a fixed vocabulary. Reports omit private paths, labels, nonces,
+invitations, locators, ciphertext and original exception text.
+
+Private permission errors retain a bounded nonenumerable hint while preserving
+existing state API error codes. Required files are checked before open and through
+no-follow descriptors with bounded reads and identity checks. Optional port checks
+briefly bind and release validated loopback ports, without connecting to existing
+listeners. They do not reserve ports for the subsequent launch or identify services.
+
+The start CLI runs preflight, but the runtime still validates assets/state, acquires
+its own exclusive lock and owns its listeners. The diagnostic does not create or
+repair files, change permissions or ports, delete locks, issue upload grants or
+authenticate. Successful diagnostics are advisory and do not prove decrypted
+recovery, TLS ownership, physical-device support or production readiness.

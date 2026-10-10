@@ -76,6 +76,7 @@
     "text-native/operator-state.mjs",
     "text-native/operator-backup.mjs",
     "text-native/operator-readiness.mjs",
+    "text-native/operator-diagnostics.mjs",
     "text-native/operate.mjs",
     "text-native/operator-worker.mjs",
     "text-native/operator-runtime/profile.mjs",
@@ -133,7 +134,8 @@
     "test:collection-replicas": "node --test tests/text-collection-replicas.mjs tests/text-collection-replica-package.mjs",
     "test:collection-browser": "node --test tests/text-collection-browser.mjs tests/text-collection-browser-package.mjs tests/text-collection-browser-host.mjs",
     "test:native-collection": "node --test tests/text-native-collection-profile.mjs tests/text-native-collection-ui.mjs tests/text-native-collection-package.mjs tests/text-native-collection-managed.mjs",
-    "test:native-backup": "node --test tests/text-native-backup.mjs tests/text-native-backup-races.mjs tests/text-native-backup-package.mjs tests/text-native-package-private.mjs"
+    "test:native-backup": "node --test tests/text-native-backup.mjs tests/text-native-backup-races.mjs tests/text-native-backup-package.mjs tests/text-native-package-private.mjs",
+    "test:native-diagnostics": "node --test tests/text-native-diagnostics.mjs tests/text-native-diagnostics-package.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

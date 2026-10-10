@@ -10,6 +10,7 @@ import { readNativeOperatorState } from './operator-state.mjs';
 import { checkNativeOperator } from './operator-readiness.mjs';
 import { startReplicaGateway } from './operator-runtime/replica-gateway.mjs';
 import { startNativeHost } from './native-host.mjs';
+import { diagnoseNativeOperator, nativeDiagnosticInputFailure } from './operator-diagnostics.mjs';
 
 const fail = code => Object.assign(new Error(code), { code });
 const workerPath = fileURLToPath(new URL('./operator-worker.mjs', import.meta.url));
@@ -172,14 +173,19 @@ export async function startNativeOperator({ profile, state, out = fileURLToPath(
 
 if (process.argv[1] && await realpath(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const controller = new AbortController();
+  let launchOptions, preflightComplete = false;
   const stop = () => controller.abort();
   // npm may forward a terminal signal already delivered to the whole process
   // group. Repeated signals must not restore the default exit before cleanup.
   for (const name of ['SIGINT', 'SIGTERM']) process.on(name, stop);
   try {
     const args = argumentsFrom(process.argv.slice(2), ['profile', 'state', 'out']);
-    if (!args.state || !args.out) throw fail('NATIVE_OPERATOR_START_FAILED');
-    const running = await startNativeOperator({ profile: await readProfile(args.profile), state: resolve(args.state), out: resolve(args.out), signal: controller.signal,
+    if (!args.state || !args.out) throw fail('ARGUMENTS_INVALID');
+    launchOptions = { profile: await readProfile(args.profile), state: args.state, out: resolve(args.out) };
+    const diagnostic = await diagnoseNativeOperator({ ...launchOptions, checkPorts: true });
+    if (!diagnostic.ok) { await new Promise(done => process.stderr.write(JSON.stringify(diagnostic) + '\n', done)); process.exit(1); }
+    preflightComplete = true;
+    const running = await startNativeOperator({ ...launchOptions, signal: controller.signal,
       onState(value) { if (value.state === 'degraded' || value.state === 'unavailable') console.log(JSON.stringify({ operatorState: value.state, unavailableReplicas: value.unavailableReplicas })); } });
     console.log(JSON.stringify({ ready: running.status().state === 'ready', bind: '127.0.0.1', ports: running.ports, status: running.status(), physicalPasskeyVerified: false, cryptographicRecoveryVerified: false }));
     const problem = await running.failure;
@@ -191,6 +197,10 @@ if (process.argv[1] && await realpath(process.argv[1]) === fileURLToPath(import.
     process.exit(0);
   } catch (error) {
     if (!(controller.signal.aborted && error?.code === 'NATIVE_OPERATOR_ABORTED')) {
+      // A condition can change between advisory preflight and exclusive startup.
+      // Recheck only after the runtime has completed its own failure cleanup.
+      const diagnostic = preflightComplete ? await diagnoseNativeOperator({ ...launchOptions, checkPorts: true }) : nativeDiagnosticInputFailure(error);
+      if (!diagnostic.ok) await new Promise(done => process.stderr.write(JSON.stringify(diagnostic) + '\n', done));
       await new Promise(done => process.stderr.write(safeError(error).code + '\n', done)); process.exit(1);
     }
     process.exit(0);
