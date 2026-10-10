@@ -98,6 +98,54 @@ checks a fresh offline consumer and strict TypeScript usage. These are synthetic
 engineering checks. Earlier builder-reported iPhone tests do not establish the
 new collection view's physical prompt count or independent usability.
 
+## Recover when one storage copy fails
+
+The optional replica API checks two or three configured copies of the **same
+immutable encrypted snapshot**. It uses one passkey assertion, authenticates each
+candidate in the client and returns a valid survivor when another copy is missing,
+unavailable or fails verification. Different authenticated records stop recovery;
+the protocol does not guess which one is newer.
+
+```js
+import { recoverTextReserveFromReplicas } from '@continuitykit/account-reserve/text-reserve';
+import { createReserveHttpStore } from '@continuitykit/account-reserve/http-store';
+
+// These fixed routes belong to your trusted recovery-origin integration.
+const replicas = ['alpha', 'beta'].map(id => ({
+  id, store: createReserveHttpStore({ basePath: `/api/replicas/${id}/reserve` }),
+}));
+const { reserve, replicas: checkedCopies } = await recoverTextReserveFromReplicas({
+  config, replicas, signal: pageLifetime.signal,
+});
+showDraft(reserve.text);
+showCopyStatus(checkedCopies);
+```
+
+`prepareTextReserveReplicas` encrypts once and writes each intended store at most
+once. Full readiness requires exact readback and independent passkey verification
+of every copy. An uncertain or partial write is reported with `recordMayExist`;
+the integration must not retry automatically or create another key.
+
+The [operator package](operator/README.md#optional-replicas-for-a-custom-text-integration)
+includes an optional fixed-route gateway for separate SQLite store processes.
+Each store has its own upload permission and quota. The packaged two-app UI and
+public Sites demo keep their single-store configuration; this SDK capability
+does not silently migrate existing reserves or change native passkey behavior.
+
+```sh
+npm run build:apps
+npm run test:replicas
+node scripts/text-replica-drill.mjs /absolute/path/replica-proof.json
+```
+
+The drill exercises the installed SDK and real child processes with separate
+durable databases, including process shutdown, corrupted ciphertext and exact
+export. It uses synthetic credentials on one machine. Independent hosting
+providers, native-device acceptance and protection against loss of the recovery
+domain are not established by this local test.
+[Recorded process-failure proof](evidence/text-replica-process-proof-2026-10-10.json)
+and [scoped validation](evidence/text-replica-validation-2026-10-10.json).
+
 ## Earlier account-free text candidate
 
 [Open original workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)

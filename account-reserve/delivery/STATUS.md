@@ -1,3 +1,37 @@
+# Authenticated replica SDK and operator gateway — 10 October 2026
+
+Added optional preparation/recovery across two or three configured stores using
+unchanged text-v1 ciphertext. Preparation only returns ready after every intended
+copy passes exact readback and independent passkey decryption. Recovery uses one
+assertion and authenticates every candidate; a valid survivor can open despite a
+failed/corrupted peer. Divergent authenticated ciphertext rejects as a conflict,
+even if the plaintext happens to match. Unknown writes are never retried.
+
+The standalone operator package now contains a fixed-route, loopback-only gateway
+for separate SQLite store processes. It forwards bounded operations, requires
+separate upload capabilities and does not select, decrypt, repair or retry records.
+The bundled browser UI and public Sites retain their current single-store setup.
+No existing passkeys, records, domains or public storage configuration changed.
+
+Validation: 100 SDK/collection/browser tests, eight gateway tests and six existing
+operator tests passed; strict TypeScript and the two-app browser build passed.
+The installed-SDK drill used real operator/gateway processes and two durable SQLite
+files. Three fresh-client exports matched exactly: healthy, one process stopped,
+and one persisted ciphertext corrupted. When only the corrupt copy survived,
+recovery rejected with no export. Recovery clients received neither expected
+plaintext nor locators; all four recovery/rejection runs used one synthetic
+assertion, no creation and no writes. A separate agent reviewed the SDK.
+
+[Process-failure proof](../evidence/text-replica-process-proof-2026-10-10.json) ·
+[Validation scope](../evidence/text-replica-validation-2026-10-10.json) ·
+[Operator guide](../operator/README.md#optional-replicas-for-a-custom-text-integration).
+This is local engineering evidence, not native-device validation, separate-provider
+independence, automatic ongoing backup, external adoption or a security audit.
+Next development block: a small account-free text SDK starter. Video and final
+submission remain deferred until the user's Monday review.
+
+---
+
 # Collection recovery published — 10 October 2026
 
 The Reserve `/apps/` page now checks both prepared app snapshots using one

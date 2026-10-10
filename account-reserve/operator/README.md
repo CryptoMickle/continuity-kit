@@ -20,6 +20,7 @@ create a package in a new directory:
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
+npm --prefix integrations/multi-app ci --ignore-scripts --no-audit --no-fund
 node scripts/build-app-reserves.mjs
 node operator/create.mjs /absolute/empty/operator-package
 cd /absolute/empty/operator-package
@@ -99,6 +100,11 @@ separation does not protect either app from a malicious script on B.
 
 ## Move the ciphertext store without changing B
 
+The single-store migration below retires one database before its replacement
+serves B. Deliberate replication is a separate, opt-in SDK flow described next;
+do not turn old database exports into parallel active writers and assume that
+they will reconcile automatically.
+
 First pause new enrollments by restarting B **without** `--invitation-file`.
 Existing reads continue; wait at least five minutes for outstanding grants to
 expire, then stop B before the final export. The tool can take a consistent live
@@ -130,6 +136,89 @@ Counts apply to one database history. An older archive can omit subsequent write
 and admissions; running forked copies can spend capacity independently. The package
 does not provide anti-rollback state or a global quota across operators. Use the
 final stopped-writer snapshot, retain its provenance, and retire the former instance.
+
+## Optional replicas for a custom text integration
+
+The SDK can prepare the **same immutable ciphertext** in two or three explicitly
+configured stores, then authenticate every available candidate during recovery.
+This is optional developer functionality. The bundled two-app UI and the public
+Sites demo still use their existing single-store flow. Deploying the gateway alone
+does not replicate old records or enable replicas in that UI.
+
+Use separate database files and processes with the exact same `profile.json`.
+Give each store its own invitation file and single-use upload capability. A token
+issued by alpha cannot write to beta. Keep private files outside the served assets.
+
+```sh
+node cli.mjs init --profile profile.json --database private/alpha.db
+node cli.mjs init --profile profile.json --database private/beta.db
+node cli.mjs invite --file private/alpha-invitation.txt
+node cli.mjs invite --file private/beta-invitation.txt
+node host.mjs --profile profile.json --database private/alpha.db --invitation-file private/alpha-invitation.txt --role recovery --port 8787
+# Run the following in separate processes:
+node host.mjs --profile profile.json --database private/beta.db --invitation-file private/beta-invitation.txt --role recovery --port 8789
+node replica-gateway.mjs --configuration replicas.json --port 8790
+```
+
+Copy `replicas.example.json` to `replicas.json`, set the same B recovery origin and
+pin the two loopback ports. The gateway serves only fixed routes under
+`/api/replicas/alpha/` and `/api/replicas/beta/`: `enrollment/start` and
+`reserve/<locator>`. Route these paths from your TLS reverse proxy to port 8790,
+preserving the original Host/Origin. Serve your trusted B frontend independently
+of either storage process. The gateway cannot choose an arbitrary upstream URL,
+does not follow redirects, does not retry writes and does not select ciphertext
+on the client's behalf. Only SDK decryption decides whether a candidate is valid.
+
+For recovery, call directly from a user action on B:
+
+```js
+import { recoverTextReserveFromReplicas } from '@continuitykit/account-reserve/text-reserve';
+import { createReserveHttpStore } from '@continuitykit/account-reserve/http-store';
+
+const replicas = [
+  { id: 'alpha', store: createReserveHttpStore({ basePath: '/api/replicas/alpha/reserve' }) },
+  { id: 'beta', store: createReserveHttpStore({ basePath: '/api/replicas/beta/reserve' }) },
+];
+const result = await recoverTextReserveFromReplicas({ config, replicas, signal });
+showRecoveredText(result.reserve.text);
+showReplicaResults(result.replicas);
+```
+
+For new preparation, your integration must deliberately obtain a separate upload
+capability from each `enrollment/start` endpoint, then pass each capability to its
+own `createReserveHttpStore`. Use a one-use handle from
+`createTextReserveCredential` or `selectTextReserveCredential` and call
+`prepareTextReserveReplicas({ config, recoveryCredential, text, replicas, signal })`.
+Only full byte-exact readback plus independent passkey verification of **every**
+intended store returns ready. A partial or uncertain write is not full replica
+readiness. Keep the existing key, inspect the safe per-store diagnostics and
+recover/check the surviving records. Never automatically retry or make a new key.
+
+Recovery checks all configured candidates before returning. Missing, unavailable
+or unauthentic copies can coexist with a valid survivor. Different authenticated
+ciphertext records produce `REPLICA_CONFLICT`, even if their plaintext matches:
+text-v1 is immutable and provides no timestamp, majority rule or latest-version
+election. The gateway never repairs or copies records automatically.
+
+Each database retains its own 64-record/256-admission bounds. This is not a global
+quota or a bill ceiling across stores. A loopback deployment still shares one
+machine, operator, gateway, B domain and trusted frontend. Separate processes and
+files demonstrate storage-process failure tolerance, not independent hosting
+providers. A stopped gateway, lost B origin/passkey, malicious B code or loss of
+every valid copy still prevents safe recovery.
+
+Run the reproducible process-failure drill from the source checkout:
+
+```sh
+npm run build:apps
+npm run test:replicas
+node scripts/text-replica-drill.mjs /absolute/path/replica-proof.json
+```
+
+The drill installs the packaged SDK in a fresh directory, uses actual operator
+processes and durable SQLite files, stops a store process, changes stored
+ciphertext and checks exact export in fresh clients. Credentials are synthetic;
+this does not measure physical passkey prompts or establish native-device support.
 
 ## Verify the replacement
 

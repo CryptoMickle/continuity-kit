@@ -1,0 +1,48 @@
+{
+  "checkedAt": "2026-10-10T13:26:26.994644+00:00",
+  "status": "PASSED",
+  "scope": "Additive text-v1 replica SDK and optional loopback operator gateway. No live public Sites storage migration.",
+  "tests": {
+    "sdkReplicasCollectionExistingTextBrowser": {
+      "passed": 100,
+      "failed": 0
+    },
+    "gateway": {
+      "passed": 8,
+      "failed": 0
+    },
+    "existingOperatorPortability": {
+      "passed": 6,
+      "failed": 0
+    },
+    "installedSdkMultiProcessDrill": "PASSED",
+    "strictTypeScript": "PASSED",
+    "twoAppBrowserBuild": "PASSED"
+  },
+  "review": "A separate agent reviewed replica SDK authentication, conflict handling, preflight, all-copy independent verification, cancellation, diagnostics and PRF lifetime. Root reviewed gateway routing, size/origin/header bounds and test coverage. No blocker found in this scope. This is not an independent security audit.",
+  "processEvidence": "text-replica-process-proof-2026-10-10.json",
+  "newNativeCeremonies": 0,
+  "publicSitesChanged": false,
+  "wireFormatChanged": false,
+  "sourceHashes": {
+    "sdk/text-reserve.mjs": "69daf476f972a4d39114aa8de9fc96bcaa2e312976469fb3b0d5a48833699d7e",
+    "sdk/text-reserve.d.ts": "76a1d03861d99348ca7efbe5b85deb6a77850935ac28e2dfa092d4e3e5d0a121",
+    "operator/replica-gateway.mjs": "abc1a12eb5e3314413f4254351e8cccf85398d650937d7387eae8774f9865d60",
+    "operator/create.mjs": "6da5c67bbe98e8919b4a4110165f81ec55f63d32a11fa80b3e6985dbe87a905e",
+    "operator/replicas.example.json": "1d263e07888eefd6c3294925029a6b5aed5e97ba1fbc19eef26425bb0fb5bea3",
+    "scripts/text-replica-drill.mjs": "946134294f4db946ac9ac6640166cfec1ced38869d787ae6e66a51d6c9aa8daa",
+    "tests/text-replicas.mjs": "7d22b7b84cded7fecb87589b85113fb1e46e86b8051d039786fb1c02b30ce323",
+    "tests/operator-replica-gateway.mjs": "b04098d4bb5808509de9e8e922c918da030d24e058adf1c02f9deb0df7b6597e",
+    "tests/text-replica-drill.mjs": "4d4f8d62e8d289f1d54ca478bfae1b39539cdd2b651827bbce517704fc0ef869",
+    "tests/fixtures/text-replica-host.mjs": "df0684b494eb73efb65e7b8a15755a2852b2921e030c91b5533ed329031c178f",
+    "tests/fixtures/text-replica-client.mjs": "4bc4306138acae37cebfe775a66e884af4b4b47a85c0c7618cc12bb2980b2500"
+  },
+  "limits": [
+    "2-3 intended stores; caller must configure distinct actual storage",
+    "No distributed atomic write; partial and unknown writes require read-only reconciliation",
+    "Different authenticated ciphertext is a conflict, not a latest-version vote",
+    "The optional gateway and two store processes share a machine/operator in the proof",
+    "Bundled two-app UI and public Sites still use single-store APIs",
+    "No production resilience, native prompt count, audit or external adoption claimed"
+  ]
+}

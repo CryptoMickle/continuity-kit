@@ -164,6 +164,48 @@ listed app namespaces for the selected key. Per-app derivation remains domain
 separation, not protection from malicious code on B. Returned draft strings
 are ordinary plaintext owned by the caller and cannot be reliably zeroized.
 
+Replica preparation and recovery (additive APIs, unchanged wire format)
+---------------------------------------------------------------------
+prepareTextReserveReplicas and recoverTextReserveFromReplicas accept 2-3 trusted
+replicas, each with a unique bounded id and store interface. Configuration,
+replica identities and bound functions are captured before native activity.
+Distinct objects do not prove distinct storage locations or providers. The
+integrator is responsible for choosing independent intended stores and issuing
+separate bounded write capabilities; untrusted URLs cannot choose replicas.
+
+Preparation consumes an existing one-use credential handle, checks absence at
+all stores and encrypts once. Each intended store receives at most one explicit
+putIfAbsent call with the same ciphertext bytes. Every store must pass byte-exact
+readback and an independent discoverable assertion/decryption before readiness.
+After any write dispatch, partial failure, timeout or cancellation may leave a
+record. Error recordMayExist is conservative; sanitized per-replica diagnostics
+do not authorize retry, repair or new-key creation. No distributed transaction
+or all-or-nothing rollback is claimed.
+
+Recovery uses one discoverable assertion and the unchanged text-v1 derivation.
+Every available candidate must pass the complete canonical-record, binding,
+manifest-AEAD, text-AEAD, UTF-8 and digest checks inside the SDK. No server/store
+wrapper chooses the first HTTP 200 as the recovered copy. A valid survivor may
+open despite a missing, unavailable or rejected peer; diagnostics report those
+conditions without provider messages or unauthenticated text. All candidates
+settle within bounded I/O before the result is returned. Cancellation rejects
+the whole operation without returning partial plaintext.
+
+If two authenticated candidates contain different complete encrypted-record
+bytes, recovery fails with REPLICA_CONFLICT, even if decoded text is equal.
+The immutable v1 protocol cannot elect a newer record or establish which valid
+candidate is authoritative. There is no majority rule or automatic repair.
+All-missing returns RESERVE_MISSING; no authentic survivor otherwise returns
+REPLICA_RECOVERY_FAILED. A successful result contains a frozen recovered reserve
+and safe per-replica diagnostics; it contains no signing or cryptographic session.
+
+Replication does not alter PRF salt, HKDF inputs, record format, discovery RP or
+origin binding. Existing single-store records are readable by the replica API.
+The existing single-store and collection APIs remain unchanged; they do not
+automatically enable replication. Device confirmations may still exceed one
+even when SDK recovery makes one assertion call. Replica transport sees opaque
+locators and ciphertext, not the passkey-derived decryption keys or plaintext.
+
 Availability and proof boundaries
 ---------------------------------
 A surviving credential, recovery RP/origin and encrypted record are required.

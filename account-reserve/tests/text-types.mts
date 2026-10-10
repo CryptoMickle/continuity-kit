@@ -1,6 +1,6 @@
 // Compile with TypeScript's strict, noEmit, bundler-resolution settings.
 // These are API-shape checks; this file is never executed as a native ceremony.
-import { createTextReserveCredential, selectTextReserveCredential, prepareTextReserve, recoverTextReserves } from '@continuitykit/account-reserve/text-reserve';
+import { createTextReserveCredential, selectTextReserveCredential, prepareTextReserve, recoverTextReserves, recoverTextReserveFromReplicas, prepareTextReserveReplicas } from '@continuitykit/account-reserve/text-reserve';
 import type { TextReserveConfig, TextReserveCredential, TextReserveStore, TextReserveReader, TextReserveCollectionResult } from '@continuitykit/account-reserve/text-reserve';
 import type { TextReserveReceiver, TextSetupState } from '@continuitykit/account-reserve/text-browser';
 
@@ -58,3 +58,19 @@ void recoverTextReserves({ config, store: reader });
 void recoverTextReserves({ configs: [config], store: reader, credentialId: 'example' });
 // @ts-expect-error No key creation or automatic fallback is exposed.
 void recoverTextReserves({ configs: [config], store: reader, credentialMode: 'create' });
+
+void recoverTextReserveFromReplicas({ config, replicas: [{ id: 'alpha', store: reader }, { id: 'beta', store: reader }] }).then(result => {
+  const text: string = result.reserve.text;
+  void text;
+  // @ts-expect-error No signer/session exists in replica recovery.
+  result.reserve.session;
+  // @ts-expect-error Replica diagnostics never expose plaintext.
+  result.replicas[0].text;
+  // @ts-expect-error Replica diagnostics are readonly.
+  result.replicas[0].status = 'verified';
+});
+void prepareTextReserveReplicas({ config, recoveryCredential: credential, text: 'Example', replicas: [{ id: 'alpha', store }, { id: 'beta', store }] });
+// @ts-expect-error Replica enrollment needs immutable-write stores.
+void prepareTextReserveReplicas({ config, recoveryCredential: credential, text: 'Example', replicas: [{ id: 'alpha', store: reader }, { id: 'beta', store: reader }] });
+// @ts-expect-error Ordinary metadata cannot substitute for a private one-use handle.
+void prepareTextReserveReplicas({ config, recoveryCredential: { credentialId: 'copied', close() {} }, text: 'Example', replicas: [{ id: 'alpha', store }, { id: 'beta', store }] });

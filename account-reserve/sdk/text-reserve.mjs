@@ -182,12 +182,17 @@ async function discoveryMaterial(result, config, signal) {
 }
 async function discovery(config, client, signal) {
   active(signal);
-  let result;
+  let result, adapterOutput;
   const prfSalt = salt();
   try {
-    result = await getPasskeyPrfOutput({ rpId: config.recoveryRpId, prfSalt, webAuthnClient: boundClient(client, config) });
+    const tracked = {
+      createCredential: request => client.createCredential(request),
+      getCredential(request) { return client.getCredential(request).then(value => { adapterOutput = value; return value; }); },
+    };
+    result = await getPasskeyPrfOutput({ rpId: config.recoveryRpId, prfSalt, webAuthnClient: boundClient(tracked, config) });
+    adapterOutput?.prfOutput?.fill(0); adapterOutput = undefined;
     return await discoveryMaterial(result, config, signal);
-  } finally { result?.prfOutput.fill(0); prfSalt.fill(0); }
+  } finally { result?.prfOutput.fill(0); result?.prfSalt?.fill(0); adapterOutput?.prfOutput?.fill(0); prfSalt.fill(0); }
 }
 
 /** Only an exact, one-use handle carries private PRF-derived material into
@@ -261,23 +266,9 @@ function joinSignals(signals) {
 function indexAAD(config, locator, credentialId) { return encode({ format: INDEX_FORMAT, config, locator, credentialId }); }
 function textBinding(config, locator, credentialId, textDigest) { return { format: TEXT_FORMAT, config, locator, credentialId, textDigest }; }
 
-/** One immutable write, byte-for-byte readback and an independent discoverable
- * assertion/decryption. Any dispatched write may have committed on failure. */
-export async function prepareTextReserve({ config: suppliedConfig, recoveryCredential, text: suppliedText, store, webAuthnClient, signal, onProgress }) {
-  const config = freezeConfig(suppliedConfig), text = validateText(suppliedText), storage = storeMethods(store, true);
-  assertOrigin(config); active(signal);
-  const prepared = takeCredential(recoveryCredential, config);
-  const joined = joinSignals([signal, prepared.record.controller.signal]);
-  let ceremony, manifestBytes, textBytes, found = prepared.found, writeStarted = false;
-  prepared.found = undefined;
+async function encryptTextRecord(config, found, text, signal) {
+  let textBytes, manifestBytes;
   try {
-    ceremony = createWebAuthnScope({ webAuthnClient, signal: joined.signal, timeoutMs: Math.max(1, prepared.record.expiresAt - Date.now()) });
-    signal = ceremony.signal;
-    ceremony.assertActive();
-    progress(onProgress, 'protect-text', signal);
-    check(!reservations.has(found.locator), 'RESERVE_ALREADY_ATTEMPTED'); reservations.add(found.locator);
-    const existing = await io(() => storage.get(found.locator), signal);
-    active(signal); check(existing === undefined || existing === null, 'RESERVE_EXISTS');
     textBytes = encoder.encode(text);
     const textDigest = await textHash(textBytes), binding = textBinding(config, found.locator, found.credentialId, textDigest);
     active(signal);
@@ -289,6 +280,28 @@ export async function prepareTextReserve({ config: suppliedConfig, recoveryCrede
     const encryptedManifest = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce, additionalData: indexAAD(config, found.locator, found.credentialId), tagLength: 128 }, found.manifestKey, manifestBytes));
     const bytes = encode({ format: INDEX_FORMAT, nonce: b64(nonce), ciphertext: b64(encryptedManifest) });
     check(bytes.length <= MAX_RECORD_BYTES, 'RECORD_INVALID'); active(signal);
+    return { bytes, textDigest };
+  } finally { manifestBytes?.fill(0); textBytes?.fill(0); }
+}
+
+/** One immutable write, byte-for-byte readback and an independent discoverable
+ * assertion/decryption. Any dispatched write may have committed on failure. */
+export async function prepareTextReserve({ config: suppliedConfig, recoveryCredential, text: suppliedText, store, webAuthnClient, signal, onProgress }) {
+  const config = freezeConfig(suppliedConfig), text = validateText(suppliedText), storage = storeMethods(store, true);
+  assertOrigin(config); active(signal);
+  const prepared = takeCredential(recoveryCredential, config);
+  const joined = joinSignals([signal, prepared.record.controller.signal]);
+  let ceremony, found = prepared.found, writeStarted = false;
+  prepared.found = undefined;
+  try {
+    ceremony = createWebAuthnScope({ webAuthnClient, signal: joined.signal, timeoutMs: Math.max(1, prepared.record.expiresAt - Date.now()) });
+    signal = ceremony.signal;
+    ceremony.assertActive();
+    progress(onProgress, 'protect-text', signal);
+    check(!reservations.has(found.locator), 'RESERVE_ALREADY_ATTEMPTED'); reservations.add(found.locator);
+    const existing = await io(() => storage.get(found.locator), signal);
+    active(signal); check(existing === undefined || existing === null, 'RESERVE_EXISTS');
+    const { bytes, textDigest } = await encryptTextRecord(config, found, text, signal);
     writeStarted = true;
     const created = await io(() => storage.putIfAbsent(found.locator, new Uint8Array(bytes)), signal, true);
     active(signal); check(created === true || created === false, 'STORE_WRITE_UNKNOWN'); check(created, 'RESERVE_EXISTS');
@@ -306,7 +319,7 @@ export async function prepareTextReserve({ config: suppliedConfig, recoveryCrede
     if (error && typeof error === 'object') error.recordMayExist = writeStarted;
     throw error;
   } finally {
-    manifestBytes?.fill(0); textBytes?.fill(0); found = undefined;
+    found = undefined;
     ceremony?.close(); joined.close(); prepared.record.stop('RESERVE_CREDENTIAL_CONSUMED');
   }
 }
@@ -314,10 +327,13 @@ export async function prepareTextReserve({ config: suppliedConfig, recoveryCrede
 // Shared authenticated read: callers own discovery and key lifetime. Neither
 // storage nor an observer receives the derived keys or unauthenticated text.
 async function openStoredText(config, found, storage, signal, onProgress) {
+  const stored = await io(() => storage.get(found.locator), signal);
+  active(signal); check(stored !== undefined && stored !== null, 'RESERVE_MISSING');
+  return decryptStoredText(config, found, stored, signal, onProgress);
+}
+async function decryptStoredText(config, found, stored, signal, onProgress) {
   let manifestBytes, textBytes;
   try {
-    const stored = await io(() => storage.get(found.locator), signal);
-    active(signal); check(stored !== undefined && stored !== null, 'RESERVE_MISSING');
     const record = parse(recordCopy(stored));
     exact(record, ['format', 'nonce', 'ciphertext'], 'RECORD_INVALID');
     check(record.format === INDEX_FORMAT, 'RECORD_INVALID');
@@ -423,4 +439,156 @@ export async function recoverTextReserves({ configs: suppliedConfigs, store, web
     result?.prfOutput?.fill(0); result?.prfSalt?.fill(0); adapterOutput?.prfOutput?.fill(0); prfSalt.fill(0);
     materials.fill(undefined); ceremony.close();
   }
+}
+
+function freezeReplicas(value, writing = false) {
+  check(Array.isArray(value) && value.length >= 2 && value.length <= 3, 'REPLICAS_INVALID');
+  check(Object.getOwnPropertySymbols(value).length === 0, 'REPLICAS_INVALID');
+  const fields = ['length', ...Array.from({ length: value.length }, (_, index) => String(index))];
+  check(Object.getOwnPropertyNames(value).sort().join(',') === fields.sort().join(','), 'REPLICAS_INVALID');
+  const ids = new Set(), stores = new Set(), replicas = [];
+  for (let index = 0; index < value.length; index++) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+    check(descriptor && Object.hasOwn(descriptor, 'value'), 'REPLICAS_INVALID');
+    const replica = descriptor.value; exact(replica, ['id', 'store'], 'REPLICAS_INVALID');
+    check(typeof replica.id === 'string' && /^[a-z][a-z0-9-]{0,31}$/.test(replica.id) && !ids.has(replica.id) && !stores.has(replica.store), 'REPLICAS_INVALID');
+    ids.add(replica.id); stores.add(replica.store);
+    replicas.push(Object.freeze({ id: replica.id, storage: Object.freeze(storeMethods(replica.store, writing)) }));
+  }
+  return Object.freeze(replicas);
+}
+function replicaDiagnostics(value) { return Object.freeze(value.map(item => Object.freeze({ ...item }))); }
+function replicaError(code, diagnostics, recordMayExist) {
+  const error = new TextReserveError(code);
+  error.replicas = replicaDiagnostics(diagnostics);
+  if (recordMayExist !== undefined) error.recordMayExist = recordMayExist;
+  return error;
+}
+function rejectedReplicaCode(error) { return COLLECTION_REJECTIONS.has(error?.code) ? error.code : 'RECORD_INVALID'; }
+
+// An internal verification call can demand exact expected ciphertext, including
+// when a provider substitutes another authenticated encryption of equal text.
+async function recoverReplicaSet(config, replicas, { webAuthnClient, signal, onProgress }, expectedRecord, diagnostics = replicas.map(({ id }) => ({ id, stage: 'verify', status: 'pending' }))) {
+  const ceremony = createWebAuthnScope({ webAuthnClient, signal });
+  signal = ceremony.signal;
+  let found, acquired = false;
+  const candidates = [];
+  try {
+    progress(onProgress, 'find-text', signal);
+    found = await discovery(config, ceremony.client, signal); acquired = true;
+    await Promise.all(replicas.map(async ({ id, storage }, index) => {
+      let bytes;
+      try {
+        const stored = await io(() => storage.get(found.locator), signal);
+        active(signal);
+        if (stored === undefined || stored === null) {
+          diagnostics[index] = { id, stage: 'verify', status: 'missing', code: 'RESERVE_MISSING' }; return;
+        }
+        bytes = recordCopy(stored);
+      } catch (error) {
+        diagnostics[index] = { id, stage: 'verify', status: error?.code === 'RECORD_INVALID' ? 'rejected' : 'unavailable',
+          code: error?.code === 'RECORD_INVALID' ? 'RECORD_INVALID' : signal.aborted ? 'OPERATION_CANCELLED' : 'STORE_UNAVAILABLE' };
+        return;
+      }
+      try {
+        const reserve = await decryptStoredText(config, found, bytes, signal, onProgress);
+        active(signal);
+        candidates[index] = { reserve, bytes };
+        diagnostics[index] = { id, stage: 'verify', status: 'verified' };
+      } catch (error) {
+        diagnostics[index] = { id, stage: 'verify', status: 'rejected', code: signal.aborted ? 'OPERATION_CANCELLED' : rejectedReplicaCode(error) };
+      }
+    }));
+    ceremony.assertActive();
+    const verified = candidates.filter(Boolean);
+    if (!verified.length) throw replicaError(diagnostics.every(item => item.status === 'missing') ? 'RESERVE_MISSING' : 'REPLICA_RECOVERY_FAILED', diagnostics);
+    if (verified.some(candidate => !equal(candidate.bytes, verified[0].bytes))) throw replicaError('REPLICA_CONFLICT', diagnostics);
+    if (expectedRecord && verified.some(candidate => !equal(candidate.bytes, expectedRecord))) throw replicaError('INDEPENDENT_CHECK_FAILED', diagnostics);
+    return Object.freeze({ reserve: verified[0].reserve, replicas: replicaDiagnostics(diagnostics) });
+  } catch (error) {
+    let code = ['RESERVE_MISSING', 'REPLICA_RECOVERY_FAILED', 'REPLICA_CONFLICT', 'INDEPENDENT_CHECK_FAILED'].includes(error?.code)
+      ? error.code : acquired ? 'REPLICA_RECOVERY_FAILED' : 'CREDENTIAL_UNAVAILABLE';
+    try { ceremony.assertActive(); } catch (cancelled) { code = cancelled.code; }
+    throw replicaError(code, diagnostics);
+  } finally { candidates.fill(undefined); found = undefined; ceremony.close(); }
+}
+
+/** One discovery authenticates every bounded replica response. A surviving
+ * valid copy is usable, but divergent authenticated records fail closed. */
+export async function recoverTextReserveFromReplicas({ config: suppliedConfig, replicas: suppliedReplicas, webAuthnClient, signal, onProgress }) {
+  const config = freezeConfig(suppliedConfig), replicas = freezeReplicas(suppliedReplicas);
+  assertOrigin(config); active(signal);
+  return recoverReplicaSet(config, replicas, { webAuthnClient, signal, onProgress });
+}
+
+/** Prepare the same immutable ciphertext at every intended store. There is no
+ * atomic cross-store commit or repair/retry; any dispatched PUT may persist. */
+export async function prepareTextReserveReplicas({ config: suppliedConfig, recoveryCredential, text: suppliedText, replicas: suppliedReplicas, webAuthnClient, signal, onProgress }) {
+  const config = freezeConfig(suppliedConfig), text = validateText(suppliedText), replicas = freezeReplicas(suppliedReplicas, true);
+  assertOrigin(config); active(signal);
+  const prepared = takeCredential(recoveryCredential, config);
+  const joined = joinSignals([signal, prepared.record.controller.signal]);
+  let ceremony, found = prepared.found, writeStarted = false;
+  prepared.found = undefined;
+  const diagnostics = replicas.map(({ id }) => ({ id, stage: 'preflight', status: 'pending' }));
+  try {
+    ceremony = createWebAuthnScope({ webAuthnClient, signal: joined.signal, timeoutMs: Math.max(1, prepared.record.expiresAt - Date.now()) });
+    signal = ceremony.signal; ceremony.assertActive();
+    progress(onProgress, 'protect-text', signal);
+    check(!reservations.has(found.locator), 'RESERVE_ALREADY_ATTEMPTED'); reservations.add(found.locator);
+    await Promise.all(replicas.map(async ({ id, storage }, index) => {
+      try {
+        const stored = await io(() => storage.get(found.locator), signal);
+        active(signal);
+        diagnostics[index] = stored === undefined || stored === null
+          ? { id, stage: 'preflight', status: 'missing' }
+          : { id, stage: 'preflight', status: 'existing', code: 'RESERVE_EXISTS' };
+      } catch {
+        diagnostics[index] = { id, stage: 'preflight', status: 'unavailable', code: signal.aborted ? 'OPERATION_CANCELLED' : 'STORE_UNAVAILABLE' };
+      }
+    }));
+    ceremony.assertActive();
+    check(diagnostics.every(item => item.status === 'missing'), 'REPLICA_PREPARATION_FAILED');
+    const { bytes, textDigest } = await encryptTextRecord(config, found, text, signal), locator = found.locator;
+    diagnostics.forEach((item, index) => { diagnostics[index] = { id: item.id, stage: 'write', status: 'pending' }; });
+    await Promise.all(replicas.map(async ({ id, storage }, index) => {
+      try {
+        const created = await io(() => { writeStarted = true; return storage.putIfAbsent(locator, new Uint8Array(bytes)); }, signal, true);
+        active(signal);
+        diagnostics[index] = created === true ? { id, stage: 'write', status: 'written' }
+          : created === false ? { id, stage: 'write', status: 'existing', code: 'RESERVE_EXISTS' }
+          : { id, stage: 'write', status: 'unknown', code: 'STORE_WRITE_UNKNOWN' };
+      } catch {
+        diagnostics[index] = { id, stage: 'write', status: 'unknown', code: signal.aborted ? 'OPERATION_CANCELLED' : 'STORE_WRITE_UNKNOWN' };
+      }
+    }));
+    ceremony.assertActive(); check(diagnostics.every(item => item.status === 'written'), 'REPLICA_PREPARATION_FAILED');
+    diagnostics.forEach((item, index) => { diagnostics[index] = { id: item.id, stage: 'readback', status: 'pending' }; });
+    await Promise.all(replicas.map(async ({ id, storage }, index) => {
+      try {
+        const stored = await io(() => storage.get(locator), signal); active(signal);
+        if (stored === undefined || stored === null) diagnostics[index] = { id, stage: 'readback', status: 'missing', code: 'RESERVE_MISSING' };
+        else diagnostics[index] = equal(recordCopy(stored), bytes)
+          ? { id, stage: 'readback', status: 'verified' }
+          : { id, stage: 'readback', status: 'rejected', code: 'READBACK_FAILED' };
+      } catch (error) {
+        diagnostics[index] = { id, stage: 'readback', status: error?.code === 'RECORD_INVALID' ? 'rejected' : 'unavailable',
+          code: error?.code === 'RECORD_INVALID' ? 'RECORD_INVALID' : signal.aborted ? 'OPERATION_CANCELLED' : 'STORE_UNAVAILABLE' };
+      }
+    }));
+    ceremony.assertActive(); check(diagnostics.every(item => item.status === 'verified'), 'REPLICA_PREPARATION_FAILED');
+    found = undefined;
+    progress(onProgress, 'verify-text', signal);
+    diagnostics.forEach((item, index) => { diagnostics[index] = { id: item.id, stage: 'verify', status: 'pending' }; });
+    const independent = await recoverReplicaSet(config, replicas, { webAuthnClient, signal }, bytes, diagnostics);
+    check(independent.replicas.every(item => item.status === 'verified'), 'INDEPENDENT_CHECK_FAILED');
+    check(independent.reserve.locator === locator && independent.reserve.textDigest === textDigest && independent.reserve.text === text, 'INDEPENDENT_CHECK_FAILED');
+    ceremony.assertActive();
+    return Object.freeze({ status: 'ready', protocol: TEXT_PROTOCOL, text, textDigest, locator, independentlyVerified: true, replicas: independent.replicas });
+  } catch (error) {
+    let code = ['RESERVE_ALREADY_ATTEMPTED', 'REPLICA_PREPARATION_FAILED', 'REPLICA_CONFLICT', 'INDEPENDENT_CHECK_FAILED', 'RESERVE_MISSING', 'REPLICA_RECOVERY_FAILED', 'CREDENTIAL_UNAVAILABLE'].includes(error?.code)
+      ? error.code : 'REPLICA_PREPARATION_FAILED';
+    try { ceremony?.assertActive(); } catch (cancelled) { code = cancelled.code; }
+    throw replicaError(code, diagnostics, writeStarted);
+  } finally { found = undefined; ceremony?.close(); joined.close(); prepared.record.stop('RESERVE_CREDENTIAL_CONSUMED'); }
 }

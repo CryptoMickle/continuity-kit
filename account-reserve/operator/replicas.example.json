@@ -1,0 +1,7 @@
+{
+  "recoveryOrigin": "https://reserve.example.org",
+  "replicas": [
+    { "id": "alpha", "port": 8787 },
+    { "id": "beta", "port": 8789 }
+  ]
+}

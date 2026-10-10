@@ -18,7 +18,7 @@ export async function createOperatorPackage(target, { assets = join(root, 'dist-
   });
   if (packedResult.status !== 0) throw fail('SDK_PACK_FAILED');
   const [packed] = JSON.parse(packedResult.stdout);
-  for (const name of ['profile.mjs', 'store.mjs', 'host.mjs', 'cli.mjs', 'drill-worker.mjs', 'README.md', 'profile.example.json', 'package.json']) {
+  for (const name of ['profile.mjs', 'store.mjs', 'host.mjs', 'replica-gateway.mjs', 'replicas.example.json', 'cli.mjs', 'drill-worker.mjs', 'README.md', 'profile.example.json', 'package.json']) {
     await cp(join(root, 'operator', name), join(target, name), { errorOnExist: true });
   }
   await cp(assets, join(target, 'public'), { recursive: true, errorOnExist: true });

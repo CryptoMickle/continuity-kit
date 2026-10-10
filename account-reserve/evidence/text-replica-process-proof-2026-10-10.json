@@ -1,0 +1,152 @@
+{
+  "recordedAt": "2026-10-10T13:24:53.397Z",
+  "status": "PASSED",
+  "protocol": "account-continuity/text-reserve-v1",
+  "scope": "Installed public SDK; synthetic credential; two real operator HTTP processes and SQLite databases behind a stable loopback replica gateway. Fresh OS client and byte-checked TXT export for every recovery.",
+  "sdkInstalledOffline": true,
+  "sdkIntegrity": "sha512-FPyfb1BYxq/PWLIGMa1fuj64iMWH1FkGIuazp8BxWMcUK0MYHv788KOr8kYXPdlJC8tmyUn+trQvY2Mf+pqf8g==",
+  "publicEntryPointsOnly": true,
+  "storageProcesses": 2,
+  "separateOnDiskDatabases": true,
+  "gatewayProcess": true,
+  "stableRecoveryOriginAndRp": true,
+  "prepared": {
+    "creates": 1,
+    "assertions": 1,
+    "writes": 2,
+    "replicas": [
+      {
+        "id": "alpha",
+        "stage": "verify",
+        "status": "verified"
+      },
+      {
+        "id": "beta",
+        "stage": "verify",
+        "status": "verified"
+      }
+    ],
+    "byteIdenticalEncryptedRecords": true,
+    "recordBytesEach": 862
+  },
+  "storesContainNoSamplePlaintextCredentialKeyOrInvitation": true,
+  "scenarios": [
+    {
+      "name": "both-stores-healthy",
+      "creates": 0,
+      "assertions": 1,
+      "reads": 2,
+      "writes": 0,
+      "replicas": [
+        {
+          "id": "alpha",
+          "stage": "verify",
+          "status": "verified"
+        },
+        {
+          "id": "beta",
+          "stage": "verify",
+          "status": "verified"
+        }
+      ],
+      "exported": true,
+      "exportBytes": 116,
+      "exportDigest": "0d4516174664264a3803a3befee13b29a6dcdb1ef9f1ca35f4ab7c50ff7e3acb",
+      "prfOutputsZeroed": true,
+      "expectedVerifiedCopies": 2
+    },
+    {
+      "name": "alpha-process-stopped",
+      "creates": 0,
+      "assertions": 1,
+      "reads": 2,
+      "writes": 0,
+      "replicas": [
+        {
+          "id": "alpha",
+          "stage": "verify",
+          "status": "unavailable",
+          "code": "STORE_UNAVAILABLE"
+        },
+        {
+          "id": "beta",
+          "stage": "verify",
+          "status": "verified"
+        }
+      ],
+      "exported": true,
+      "exportBytes": 116,
+      "exportDigest": "0d4516174664264a3803a3befee13b29a6dcdb1ef9f1ca35f4ab7c50ff7e3acb",
+      "prfOutputsZeroed": true,
+      "processExitObserved": true,
+      "expectedVerifiedCopies": 1
+    },
+    {
+      "name": "alpha-ciphertext-corrupted-and-process-restarted",
+      "creates": 0,
+      "assertions": 1,
+      "reads": 2,
+      "writes": 0,
+      "replicas": [
+        {
+          "id": "alpha",
+          "stage": "verify",
+          "status": "rejected",
+          "code": "MANIFEST_AUTH_FAILED"
+        },
+        {
+          "id": "beta",
+          "stage": "verify",
+          "status": "verified"
+        }
+      ],
+      "exported": true,
+      "exportBytes": 116,
+      "exportDigest": "0d4516174664264a3803a3befee13b29a6dcdb1ef9f1ca35f4ab7c50ff7e3acb",
+      "prfOutputsZeroed": true,
+      "corruptionPersistedOnDisk": true,
+      "freshStorageProcess": true,
+      "expectedVerifiedCopies": 1
+    },
+    {
+      "name": "beta-stopped-with-only-corrupt-alpha-surviving",
+      "creates": 0,
+      "assertions": 1,
+      "reads": 2,
+      "writes": 0,
+      "replicas": [
+        {
+          "id": "alpha",
+          "stage": "verify",
+          "status": "rejected",
+          "code": "MANIFEST_AUTH_FAILED"
+        },
+        {
+          "id": "beta",
+          "stage": "verify",
+          "status": "unavailable",
+          "code": "STORE_UNAVAILABLE"
+        }
+      ],
+      "exported": false,
+      "rejection": "REPLICA_RECOVERY_FAILED",
+      "prfOutputsZeroed": true,
+      "processExitObserved": true,
+      "expectedVerifiedCopies": 0,
+      "plaintextReturned": false
+    }
+  ],
+  "successfulExportsByteIdentical": 3,
+  "sampleUtf8Bytes": 116,
+  "sampleSha256": "0d4516174664264a3803a3befee13b29a6dcdb1ef9f1ca35f4ab7c50ff7e3acb",
+  "freshClientProcesses": 5,
+  "notClaimed": [
+    "physical passkeys or Face ID prompt count",
+    "browser CORS or TLS deployment validation",
+    "independent providers or operators",
+    "survival after losing the recovery RP domain",
+    "automatic ongoing snapshot replication",
+    "rollback protection or a security audit",
+    "external adoption"
+  ]
+}

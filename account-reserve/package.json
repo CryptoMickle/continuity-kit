@@ -85,7 +85,9 @@
     "test:operator": "node --test tests/operator-portability.mjs",
     "drill:operator": "node scripts/operator-portability-drill.mjs",
     "create:operator": "node operator/create.mjs",
-    "test:collection": "node --test tests/text-collection.mjs tests/self-service-collection-ui.mjs"
+    "test:collection": "node --test tests/text-collection.mjs tests/self-service-collection-ui.mjs",
+    "test:replicas": "node --test tests/text-replicas.mjs tests/operator-replica-gateway.mjs tests/text-replica-drill.mjs",
+    "drill:replicas": "node scripts/text-replica-drill.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

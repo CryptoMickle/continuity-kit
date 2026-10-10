@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "engines": { "node": ">=24" },
-  "scripts": { "operator": "node cli.mjs", "serve": "node host.mjs" },
+  "scripts": { "operator": "node cli.mjs", "serve": "node host.mjs", "serve:replicas": "node replica-gateway.mjs" },
   "dependencies": { "@continuitykit/account-reserve": "file:./continuitykit-account-reserve-0.0.1-experimental.tgz" }
 }

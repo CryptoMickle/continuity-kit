@@ -7,6 +7,9 @@ export declare class TextReserveError extends Error {
   /** True after a write could have reached storage, even if the response was lost.
    * Recover/check the reserve; never automatically repeat enrollment. */
   recordMayExist?: boolean;
+  /** Safe per-target outcomes for additive replica operations. No provider
+   * error messages, ciphertext, locator or plaintext are included. */
+  replicas?: readonly TextReserveReplicaDiagnostic[];
   constructor(code: string);
 }
 export interface TextReserveConfig {
@@ -126,3 +129,64 @@ export declare function recoverTextReserves(options: {
    * only; no app identity or plaintext is sent to this observational callback. */
   onProgress?: (stage: 'find-text' | 'open-text') => void;
 }): Promise<readonly TextReserveCollectionResult[]>;
+
+export interface TextReserveReplicaDiagnostic {
+  /** Caller-configured public label, 1–32 lowercase letters/digits/hyphens. */
+  readonly id: string;
+  readonly stage: 'preflight' | 'write' | 'readback' | 'verify';
+  readonly status: 'pending' | 'missing' | 'existing' | 'written' | 'verified' | 'unavailable' | 'rejected' | 'unknown';
+  readonly code?: string;
+}
+export interface TextReserveReadReplica {
+  readonly id: string;
+  readonly store: TextReserveReader;
+}
+export interface TextReserveWriteReplica {
+  readonly id: string;
+  readonly store: TextReserveStore;
+}
+export interface RecoveredTextReserveReplicas {
+  readonly reserve: Readonly<RecoveredTextReserve>;
+  readonly replicas: readonly Readonly<TextReserveReplicaDiagnostic>[];
+}
+export interface TextReserveReplicasReady extends TextReserveReady {
+  /** Every intended replica was read back exactly and independently opened. */
+  readonly replicas: readonly Readonly<TextReserveReplicaDiagnostic>[];
+}
+/** One discoverable assertion authenticates every response from 2–3 explicitly
+ * configured stores, with bounded parallel reads. Replica IDs and store object
+ * references must be distinct and are captured before native activity; this
+ * cannot prove distinct infrastructure/operators. Stores are trusted adapters.
+ * A valid surviving copy can recover despite missing/offline/corrupt peers.
+ * Different authenticated record bytes reject with REPLICA_CONFLICT, even if
+ * their plaintext is identical. No record is chosen by response order and no
+ * replica is repaired automatically. All missing => RESERVE_MISSING; no valid
+ * candidate otherwise => REPLICA_RECOVERY_FAILED. Errors have safe .replicas
+ * diagnostics. Cancellation fails the entire operation. The origin/RP and v1
+ * record format are unchanged; this does not provide domain migration.
+ */
+export declare function recoverTextReserveFromReplicas(options: {
+  config: TextReserveConfig;
+  replicas: readonly TextReserveReadReplica[];
+  webAuthnClient?: WebAuthnClient;
+  signal?: AbortSignal;
+  onProgress?: (stage: 'find-text' | 'open-text') => void;
+}): Promise<Readonly<RecoveredTextReserveReplicas>>;
+/** Consume one existing credential handle to encrypt one immutable record and
+ * explicitly attempt at most one PUT at each of 2–3 stores. Every store must
+ * first report absence; all writes and exact byte readbacks must succeed.
+ * A fresh discoverable assertion must then authenticate every intended copy
+ * against the original ciphertext before readiness. Partial/unknown writes
+ * throw with recordMayExist=true; never automatically retry or create a key.
+ * A recovery check may succeed with degraded redundancy after preparation
+ * fails. There is no cross-store atomicity, repair, overwrite or quota bypass.
+ */
+export declare function prepareTextReserveReplicas(options: {
+  config: TextReserveConfig;
+  recoveryCredential: TextReserveCredential;
+  text: string;
+  replicas: readonly TextReserveWriteReplica[];
+  webAuthnClient?: WebAuthnClient;
+  signal?: AbortSignal;
+  onProgress?: (stage: 'protect-text' | 'verify-text') => void;
+}): Promise<Readonly<TextReserveReplicasReady>>;
