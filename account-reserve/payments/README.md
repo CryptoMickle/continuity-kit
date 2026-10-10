@@ -60,8 +60,8 @@ The reserve restores full signing authority, not a restricted withdrawal token.
 
 ## Verify an existing public claim without a wallet
 
-The first example claim is finalized on Monad testnet. Download the public profile
-and check the exact transaction with the same two-RPC guard used by the app:
+Both example claims are finalized on Monad testnet. Download the public profile
+and check each exact transaction with the same two-RPC guard used by the app:
 
 ```sh
 curl --fail --proto '=https' --tlsv1.2 \
@@ -69,6 +69,8 @@ curl --fail --proto '=https' --tlsv1.2 \
   -o payment-profile.json
 node payments/verify-claim.mjs --profile payment-profile.json --right-id 1 \
   --hash 0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600
+node payments/verify-claim.mjs --profile payment-profile.json --right-id 2 \
+  --hash 0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2
 ```
 
 This reads public chain data only. It needs no signer, passkey, approval or pending
@@ -84,8 +86,23 @@ verification exits with code 1. The reported `amount` is denominated in wei.
 The public profile and these source files are trust inputs. This is a reproducible
 RPC check, not a light client or independent audit. A receipt proves settlement,
 not which browser or device was used, nor that a passkey ceremony occurred.
-The second payment is now funded on public testnet after the original app began
-returning HTTP 503. Its recovery claim is still pending.
+The second payment was funded after the original app began returning HTTP 503.
+The builder then reported completing the instructed existing-passkey recovery and
+explicit payment action in B. Device and native prompt count were not specified.
+
+| Recorded step on 10 October 2026 | UTC | Evidence |
+| --- | --- | --- |
+| A routes unavailable; B routes available | 19:43:38.674 | HTTP 503 / 200 |
+| Second 0.01 test-MON obligation funded | 19:45:03 | Finalized block 69912000 |
+| Second 0.01 test-MON claim | 19:59:55 | Finalized block 69914955 |
+| A still unavailable; B available | 20:00:49.011 | HTTP 503 / 200 |
+| A restored; both configurations/profiles unchanged | 20:02:11.110 | All eight routes HTTP 200 |
+
+This is an operator-controlled outage with observations before and after the claim,
+not continuous availability monitoring or independent-provider proof. The exact
+claim verifier corroborates settlement, not the browser session. The original A
+version was restored by removing its temporary outage flag; B was not redeployed.
+See the [validation record](../evidence/payments-validation-2026-10-10.json).
 
 ## Issuer operation
 

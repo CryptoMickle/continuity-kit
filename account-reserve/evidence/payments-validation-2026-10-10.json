@@ -1,7 +1,7 @@
 {
   "format": "continuitykit/sequential-payment-validation/v1",
-  "recordedAt": "2026-10-10T19:47:43.703Z",
-  "state": "public-second-payment-funded-after-primary-outage-reserve-claim-pending",
+  "recordedAt": "2026-10-10T20:03:11.835Z",
+  "state": "public-two-payments-finalized-controlled-primary-outage-complete-primary-restored",
   "tests": {
     "paymentSuites": 81,
     "failed": 0,
@@ -43,7 +43,7 @@
     "corroboratedByBothPinnedRpcs": true,
     "firstClaimVerified": true,
     "secondFundingIssued": true,
-    "secondClaimVerified": false,
+    "secondClaimVerified": true,
     "physicalPasskeyVerifiedForNewFlow": false,
     "firstClaim": {
       "hash": "0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600",
@@ -55,7 +55,7 @@
       "exactSignedEnvelopeVerified": true,
       "checkedAt": "2026-10-10T19:13:46.611Z"
     },
-    "deviceEvidence": "The public signed claim is verified. Device, browser and native prompt count are not inferred from its receipt.",
+    "deviceEvidence": "Builder reported payment received in response to instructions to freshly recover B with the existing Account Reserve passkey and explicitly collect. Device, browser, passkey identity and native prompt count were not independently observed; chain receipts do not establish them.",
     "readOnlyVerifier": {
       "path": "payments/verify-claim.mjs",
       "sourceSha256": "f7efeb310260ee4d40193545f7122019c23d59fc1f3a48f0c7602fc36c4e9990",
@@ -65,7 +65,8 @@
       "fixedRpcs": 2,
       "signerLoaded": false,
       "pendingJournalRequired": false,
-      "independentInternalReview": true
+      "independentInternalReview": true,
+      "liveSecondClaimVerified": true
     },
     "secondFunding": {
       "hash": "0xa7a1b3a83272f2a655670a1965aaf5161375f9a7a4075402fccfef28045e8d63",
@@ -114,10 +115,78 @@
           "status": 200
         }
       ],
-      "stillActive": true,
-      "restorationPending": true,
+      "stillActive": false,
+      "restorationPending": false,
       "operatorControlled": true,
-      "independentProviderProof": false
+      "independentProviderProof": false,
+      "afterClaimObservedAt": "2026-10-10T20:00:49.011Z",
+      "afterClaimPrimaryRoutes": [
+        {
+          "path": "/",
+          "status": 503
+        },
+        {
+          "path": "/api/config",
+          "status": 503
+        },
+        {
+          "path": "/payments/",
+          "status": 503
+        },
+        {
+          "path": "/payments/profile.json",
+          "status": 503
+        }
+      ],
+      "afterClaimReserveRoutes": [
+        {
+          "path": "/",
+          "status": 200
+        },
+        {
+          "path": "/api/config",
+          "status": 200
+        },
+        {
+          "path": "/payments/",
+          "status": 200
+        },
+        {
+          "path": "/payments/profile.json",
+          "status": 200
+        }
+      ],
+      "continuousMonitoring": false
+    },
+    "secondClaim": {
+      "hash": "0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2",
+      "block": "69914955",
+      "blockHash": "0xaf511bedac0b277386b38395dd87d37daf2ba642611a96442f2d122fbbd1ff33",
+      "amountTestMon": "0.01",
+      "finalized": true,
+      "nonce": 2,
+      "exactSignedEnvelopeVerified": true,
+      "checkedAt": "2026-10-10T20:01:20.465Z",
+      "blockTime": "2026-10-10T19:59:55.000Z"
+    },
+    "builderReport": {
+      "message": "betaling mottatt",
+      "context": "Existing-key B recovery and explicit claim2 instructions",
+      "completionReported": true,
+      "independentlyObservedNativeAuthentication": false,
+      "device": null,
+      "browser": null,
+      "promptCount": null
+    },
+    "primaryRestoration": {
+      "checkedAt": "2026-10-10T20:02:11.110Z",
+      "allEightRoutes200": true,
+      "configAndPaymentProfileHashesMatchBaseline": true,
+      "savedVersionUnchanged": true,
+      "primaryVersion": 5,
+      "environmentRevision": 4,
+      "onlyTemporaryOutageFlagRemoved": true,
+      "reserveRedeployed": false
     }
   },
   "sites": {
@@ -137,7 +206,7 @@
     "Developer-funded testnet activity is not organic use, external adoption, revenue, demand or prize eligibility.",
     "Two RPC observations are not a light-client proof.",
     "Browser journal locks coordinate one origin only, not separate devices or origins.",
-    "Second funding after controlled A HTTP503 is verified. Fresh B recovery, second claim and A restoration remain unfinished."
+    "Controlled HTTP observations bracket the second claim; they do not prove continuous outage monitoring, independent providers or native authentication. Builder-reported B completion is recorded separately from exact chain proof."
   ],
   "publicSourceReplay": {
     "commit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",

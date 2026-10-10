@@ -203,8 +203,8 @@
       "publicCommit": "38b06b9e65d5281105d0413c1b1d439e9321299b"
     }
   ],
-  "lastCompleted": "Second 0.01 test-MON payment finalized after recorded A HTTP503; same proposal and beneficiary. Fresh B recovery and claim2 still pending.",
-  "next": "Verify exact second claim while A remains HTTP503, then restore A by removing only ACCOUNT_RESERVE_PRIMARY_OFFLINE and redeploying the existing saved version. Do not resend funding.",
+  "lastCompleted": "Both separate 0.01 test-MON claims to the same beneficiary are finalized. Claim2 followed controlled A outage and builder-reported B completion. A restored; all eight A/B routes200 and original config/profile hashes preserved.",
+  "next": "Assess and implement a clean installed-consumer payment integration with explicit existing-account handoff; the current payment adapter is source-only. Preserve the completed bounded public demonstration and existing credentials. No additional public transaction is needed for packaging work.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -232,7 +232,7 @@
     "recordedAt": "2026-10-10T18:34:33.466764+00:00",
     "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet vårt ikke genererte transaksjoner",
     "evidenceBoundary": "User-reported reason for the prior loss; not independently verified judge feedback or a formal current eligibility rule.",
-    "currentGap": "Current text collection/replica product sends no blockchain transactions. The separate Account Reserve proof is a historical single claimed payment. The current PaymentRight contract permits only one right per beneficiary, and the release executor pins right 1 and nonce 0. Recurring usage is not demonstrated.",
+    "currentGap": "Bounded repeated settlement now demonstrated through two finalized claims to the same beneficiary, with claim2 during a controlled A outage and builder-reported B completion. Installed payment SDK consumption and demand remain unproven.",
     "priority": "Before further general operator polish, establish a narrowly scoped useful recurring transaction loop using the account-reserve capability.",
     "candidate": "A developer integration for receiving multiple separately funded payments with the same account, with an outstanding payment still claimable through the independent reserve after the original app is unavailable.",
     "candidateBoundary": "Product hypothesis and next development scope, not external adoption or demonstrated demand. Do not modify the already-published one-time contract or remove its existing transaction safety checks to generalize it.",
@@ -244,11 +244,12 @@
       "Corroborate testnet receipts, contract state and amounts. Distinguish development transactions from real user volume.",
       "Keep text recovery account-free and read-only; do not add arbitrary per-edit receipts or simulated volume.",
       "Do not claim market demand, prize odds or sponsor acceptance from transaction counts alone."
-    ]
+    ],
+    "originalGap": "Current text collection/replica product sends no blockchain transactions. The separate Account Reserve proof is a historical single claimed payment. The current PaymentRight contract permits only one right per beneficiary, and the release executor pins right 1 and nonce 0. Recurring usage is not demonstrated."
   },
   "nextAssessment": {
     "id": "repeatable-monad-transaction-value",
-    "status": "in_progress",
+    "status": "complete",
     "basis": "Direct user steering on 10 October 2026; see transactionPriority",
     "releaseGate": "Complete: exact anonymous public commit replay passed base135, payments72 and native119 tests plus builds and installed consumers.",
     "localProgress": {
@@ -256,16 +257,16 @@
       "legacyTransactionRegression": 44,
       "sourcePackagingTests": 15,
       "publicIssuerTransactionsFinalized": 3,
-      "publicBeneficiaryClaimsVerified": 1,
+      "publicBeneficiaryClaimsVerified": 2,
       "nativeProof": false,
-      "evidenceBoundary": "Local SDK/EVM proof, three public issuer transactions and one exact public beneficiary claim. Second payment funded after controlled A HTTP503; native B recovery, claim2 and A restoration remain pending.",
+      "evidenceBoundary": "Two exact public beneficiary claims verified through fixed RPCs. Claim2 is bracketed by controlled A503 observations; builder reports instructed B completion. Device/native prompts not independently observed. A restored.",
       "receiptVerifierTests": 9,
       "currentSourcePackagingTests": 2
     },
     "sourceCommit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",
     "publicPrimaryVersion": 5,
     "publicReserveVersion": 4,
-    "awaitingUser": "Existing Account Reserve passkey at B/payments/, followed by explicit Collect this payment. No new credential; first claim must not be repeated.",
+    "awaitingUser": null,
     "publicEvidence": "evidence/payments-validation-2026-10-10.json",
     "lastHeartbeat": {
       "at": "2026-10-10T19:15:54.982Z",
@@ -278,15 +279,43 @@
     "currentRun": {
       "startedAt": "2026-10-10T19:41:32Z",
       "authorization": "Direct user Fortsett after exact testnet continuation question; previous limited testnet scope retained.",
-      "primaryOffline": true,
+      "primaryOffline": false,
       "primaryVersion": 5,
-      "primaryEnvironmentRevision": 3,
-      "primaryDeployment": "appgdep_6aca954d8c188191b38be8cb50b28913",
+      "primaryEnvironmentRevision": 4,
+      "primaryDeployment": "appgdep_6aca99a0b6288191b75caf35ae8d2930",
       "outageEvidence": "artifacts/payments-testnet-2026-10-10/outage-before-second-funding.json",
       "secondFunding": "finalized",
-      "restoreRequired": true,
+      "restoreRequired": false,
       "restoreAction": "Remove only ACCOUNT_RESERVE_PRIMARY_OFFLINE and redeploy the same saved A version. Preserve all other environment entries and the public audience.",
-      "secondFundingHash": "0xa7a1b3a83272f2a655670a1965aaf5161375f9a7a4075402fccfef28045e8d63"
+      "secondFundingHash": "0xa7a1b3a83272f2a655670a1965aaf5161375f9a7a4075402fccfef28045e8d63",
+      "secondClaim": "finalized",
+      "secondClaimHash": "0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2",
+      "primaryRestoredAt": "2026-10-10T20:02:11.110Z",
+      "restorationEnvironmentRevision": 4,
+      "restorationDeployment": "appgdep_6aca99a0b6288191b75caf35ae8d2930",
+      "closureEvidence": "evidence/payments-validation-2026-10-10.json",
+      "closedAt": "2026-10-10T20:03:11.837Z",
+      "outageEnvironmentRevision": 3,
+      "outageDeployment": "appgdep_6aca954d8c188191b38be8cb50b28913"
     }
+  },
+  "nextDevelopmentAssessment": {
+    "id": "installed-payment-integration",
+    "status": "planned",
+    "value": "Let an integrator use the payment adapter from an installed package with explicit existing-account recovery, rather than copying the repository demonstration.",
+    "constraints": [
+      "No new public transactions or passkey ceremonies needed",
+      "Preserve exact bounded transaction policy and legacy exports",
+      "Keep text recovery account-free",
+      "No adoption or demand claim from internal replay"
+    ],
+    "observedGap": "No payment export, packaged runtime files or TypeScript declarations. Public payment import fails ERR_PACKAGE_PATH_NOT_EXPORTED; existing tests use repository-relative imports.",
+    "acceptance": [
+      "One explicit experimental public subpath for the bounded testnet payment client and credential-free reader, with TypeScript declarations",
+      "Fresh external consumer installs the packed SDK, typechecks and builds using public imports only",
+      "Installed integration preserves unknown-send reconciliation, owner locks, signer closure and prior-payment verification",
+      "Browser dependency graph excludes issuer tools, local harness, Sites workers and private operational state",
+      "Keep existing contracts, profiles, passkeys and fee/nonce/expiry policy; no new public transactions or native test required"
+    ]
   }
 }

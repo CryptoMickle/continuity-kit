@@ -14,12 +14,14 @@ export file. The reserve service and compatible passkey must still be available.
 
 The separate [sequential-payment integration](payments/README.md) exercises a
 recurring onchain obligation: collect a funded payment in A, then collect a second
-payment through B with the same prepared account after A is unavailable. The local
-SDK/EVM proof passes. The new contract and first 0.01 test-MON obligation are now
-confirmed on Monad testnet, and the first beneficiary claim is finalized. The
-second payment is funded after a controlled original-app outage; its public
-recovery claim remains pending. The integration includes
-a wallet-free command for verifying the exact public receipt.
+payment through B with the same prepared account after A is unavailable. Both
+0.01 test-MON claims are finalized on Monad testnet and verified through two fixed
+RPCs. The second payment was funded after A was deliberately disabled; A returned
+HTTP 503 before funding and after the second claim. The builder reported completing
+the instructed B recovery/payment flow. A has since been restored, with the same
+configuration and payment profile. The [evidence](evidence/payments-validation-2026-10-10.json)
+separates chain verification, the builder report and controlled HTTP observations.
+The integration includes a wallet-free command for verifying either exact receipt.
 These are development payments, not external usage. The text API remains account-free.
 
 ## Start with your own text editor

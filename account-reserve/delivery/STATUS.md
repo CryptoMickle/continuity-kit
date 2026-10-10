@@ -1,4 +1,4 @@
-# Sequential payments: second payment funded during A outage — 10 October 2026
+# Sequential payments: both claims verified and A restored — 10 October 2026
 
 The additive payment integration passed 81 relevant tests. An actual local EVM
 and SDK test collected two independently funded payments with the same account;
@@ -14,14 +14,26 @@ The operator verified the exact signed envelope, sender, amount, nonce, event,
 canonical block and contract state through both RPCs. The second obligation is
 now funded after a recorded operator-controlled original-app HTTP 503.
 Funding hash: `0xa7a1b3a83272f2a655670a1965aaf5161375f9a7a4075402fccfef28045e8d63`, block `69912000`.
-B continues to serve its existing recovery flow. Fresh B recovery and claim2 remain
-pending; no public recovery-completion claim is made.
+The second claim is finalized in block `69914955`:
+`0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2`.
+The public read-only verifier returned `paymentVerified: true` using both pinned
+RPCs, checking the exact signed envelope, beneficiary, amount, nonce, event,
+canonical finalized block and claimed state. Both 0.01 test-MON payments settled
+to the same beneficiary. The builder reported completing the instructed B flow
+with "betaling mottatt"; device and prompt count were not specified or observed.
+
+A returned HTTP 503 before funding at 19:43:38.674 UTC and again after the claim at
+20:00:49.011 UTC, while B returned HTTP 200. Claim2's block timestamp is 19:59:55 UTC.
+These are observations bracketing a controlled outage, not continuous monitoring.
+A's original saved version 5 was redeployed with only the temporary outage flag
+removed. All eight A/B routes returned HTTP 200 at 20:02:11.110 UTC; both config and
+payment-profile byte hashes matched the pre-outage baseline. B was not redeployed.
 
 The existing Account Primary and Reserve Sites now serve additive `/payments/`
 pages. Legacy code, origin/RP/namespace bindings, passkeys and stored records remain
 unchanged. Unknown signed outcomes close the signer and leave read-only checking;
 there is no automatic resend. Do not ask the user to repeat the first claim.
-The receipt establishes settlement, not the physical device or prompt count.
+The receipts establish settlement, not the physical device or prompt count.
 Anonymous public-source replay of commit
 `309f62e552ecb6bafbc841afcc1fe5928cd40d3b` passed 135 base, 72 payment and
 119 native tests, plus application/payment/multi-app builds and installed consumers.
@@ -33,12 +45,14 @@ pending, reverted and failed checks; only `paymentVerified: true` is success.
 Nine new boundary tests passed, with a separate internal review. Both source-package
 checks passed, including a fresh offline install and 64 payment tests from the
 extracted archive. The CLI also verified the real first claim using the public
-profile downloaded from B. Existing Sites and browser flows were not changed.
+profile downloaded from B. It has now also verified the second public claim.
+The verifier itself required no change to either Site's browser flow.
 
 The user authorized continuing the bounded testnet proposal. Only its second
 issuer funding was sent in this continuation, after fresh checks; no resend or
-journal reset occurred. A is temporarily unavailable for the native B test and
-must be restored afterward. Existing passkeys and reserve records are unchanged.
+journal reset occurred. A is restored; no native step remains pending for this
+bounded two-payment demonstration. Existing passkeys and reserve records were not
+modified by these operations. No additional transaction was sent during closure.
 
 This closes an implementation gap, not the demand gap. Test funding and claims do
 not establish organic transactions, customers, sponsor acceptance or prize odds.
