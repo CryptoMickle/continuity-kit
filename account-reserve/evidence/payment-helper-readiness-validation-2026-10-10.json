@@ -1,0 +1,158 @@
+{
+  "format": "continuitykit/payment-helper-readiness-validation/v1",
+  "verifiedAt": "2026-10-10T21:25:48.137150+00:00",
+  "state": "published-and-replayed",
+  "publicSourceCommit": "a16ff1a27b0d06b9cd6706170c79a507915d4af3",
+  "publicReplay": {
+    "verifiedAt": "2026-10-10T21:25:39.415Z",
+    "commit": "a16ff1a27b0d06b9cd6706170c79a507915d4af3",
+    "anonymousArchive": true,
+    "archiveSha256": "320678303da56d4aff80b48e915316163be68b84fbf2a7fecc25e028e42ebd54",
+    "archiveBytes": 2611284,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 51,
+    "failed": 0,
+    "skipped": 0,
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true,
+    "installedConsumerReport": {
+      "experiment": "installed-public-payment-adapter",
+      "strictTypes": true,
+      "browserBundle": true,
+      "publicModules": [
+        "payments/executor.mjs",
+        "payments/guard.mjs",
+        "payments/index.mjs",
+        "payments/pending.mjs",
+        "payments/testnet.mjs",
+        "release/client-profile.mjs",
+        "release/paced-rpc.mjs"
+      ],
+      "scenarios": [
+        "strict public boundary and inert construction",
+        "explicit selected availability blocks unissued payment before authentication",
+        "account lock and unknown send never replay",
+        "unknown-send helper finally and explicit client closure end actual Mera signers",
+        "credential-free reconciliation survives signer closure",
+        "prior receipt rechecked, next approved nonce settles once and helper success closes signer",
+        "already-collected observation prevents needless reopening while old-right checks stay credential free",
+        "persistence failure closes safely and no native credentials"
+      ],
+      "nativeCalls": 0,
+      "publicNetwork": false,
+      "rpcSimulated": true,
+      "actualEvm": false,
+      "signatures": 2,
+      "sends": 2,
+      "closures": 4,
+      "opens": 3,
+      "maxConcurrentLockOwners": 1,
+      "fixedRpcNames": true,
+      "journalEntries": 2,
+      "stateless": {
+        "freshProcess": true,
+        "noJournal": true,
+        "noAccount": true,
+        "forbiddenBrowserAccess": 0,
+        "observations": [
+          "finalized",
+          "pending-or-unknown",
+          "reverted",
+          "mismatch-rejected"
+        ],
+        "expiredProfileRead": true,
+        "fixedRpcNames": true,
+        "publicNetwork": false,
+        "persistenceUntouched": true
+      },
+      "availability": {
+        "freshProcess": true,
+        "noJournal": true,
+        "noAccount": true,
+        "forbiddenBrowserAccess": 0,
+        "observations": [
+          "funded",
+          "not-issued",
+          "already-collected",
+          "expired",
+          "insufficient-gas",
+          "rpc-disagreement-rejected",
+          "rpc-failure-rejected"
+        ],
+        "errors": [
+          "PAYMENT_CANONICAL_BLOCK_MISMATCH",
+          "PAYMENT_AVAILABILITY_FAILED"
+        ],
+        "availabilityIsNotPaymentProof": true,
+        "fixedRpcNames": true,
+        "publicNetwork": false,
+        "persistenceUntouched": true
+      },
+      "limits": [
+        "simulated RPC responses",
+        "disposable local Mera signing sessions",
+        "no native passkey",
+        "no EVM or public transaction",
+        "same-origin in-memory lock adapter"
+      ]
+    }
+  },
+  "sourceIntegrity": {
+    "candidateSha256": "11cdb9452a58ae849828e5d0e66d49afad5934ff02c48e689f7092b27a4f9586",
+    "candidateFileCount": 467,
+    "exactCuratedFiles": [
+      "integrations/payment-client/actions.mjs",
+      "integrations/payment-client/README.md",
+      "tests/payments-consumer-actions.mjs",
+      "tests/payments-installed-package.mjs",
+      "README.md"
+    ],
+    "sourceSha256": {
+      "integrations/payment-client/actions.mjs": "a6ba8fed4b48b8a082f8c36ab4c1492cc70144d687536a13a3ef2440d874a4d4",
+      "integrations/payment-client/README.md": "061627593e5644be2e616fe9ab065dd8ada09172fa4163ecef8da6389ffca4cc",
+      "tests/payments-consumer-actions.mjs": "269ad972ddb0e0d73ad1749b27c81e311d1a8185152586f2197049c26ae0c0f2",
+      "tests/payments-installed-package.mjs": "161fba96d46749c3d7457002257cc2b4ccfd4297db262a1dbe898f19e03d6219",
+      "README.md": "e45578b87de57fe9a2d16d3c42ed0cae0d17856a9174ad7b7b06f44b4ae28d87"
+    },
+    "candidateMatchesCuratedSource": true
+  },
+  "focusedHelperTests": 34,
+  "focusedTestMethod": "One real public-import boundary case; other lifecycle cases evaluate the unchanged helper body with test-only public-factory substitution. No production dependency injection option.",
+  "installedHelperScenarios": 8,
+  "independentInternalReview": "No remaining release blocker; internal code review, not an external audit.",
+  "implemented": [
+    "Only the captured 1-8 approved payments are selectable; first approved payment is the default.",
+    "Explicit credential-free availability precedes authentication; no journal, storage or Web Lock access during construction or availability.",
+    "Open consumes a funded observation at most 30 seconds old and starts existing native authentication synchronously before awaiting.",
+    "Selection and close invalidate reads and abort native opening; late results cannot install a signer or release a newer operation.",
+    "An unfinished native promise blocks a second prompt until it settles; late recovered signing material is closed.",
+    "Known uncertainty blocks the whole account across selections; exact fresh journal reconciliation clears only its own known pending right.",
+    "Late canceled journal reads can retain a defensive blocker but cannot clear one; if they block a newer active or opening session, it is closed or aborted.",
+    "Unscoped account/journal problems remain blocked pending explicit reconciliation; another receipt does not reset them.",
+    "Collection uses the selected/opened payment only, prevents selection during sending, and closes the parent signer after every attempt.",
+    "Monotonic and absolute deadlines are checked after authentication and before collection, independently of delayed browser timers.",
+    "Updated integration instructions render current state and preserve separate check, open, collect and reconciliation actions."
+  ],
+  "preserved": {
+    "publicSdkSurface": true,
+    "contracts": true,
+    "publicSites": true,
+    "origins": true,
+    "existingCredentials": true,
+    "ciphertext": true,
+    "trustedPaymentProfiles": true,
+    "newPublicTransactions": 0,
+    "nativeAuthentication": false
+  },
+  "limits": [
+    "Copyable integration helper and README, not yet a complete generated runnable payment template.",
+    "Readiness is advisory and does not prove payment, grant signing authority or scan all journal history before native opening.",
+    "Test RPC responses are simulated; actual disposable local Mera signers are used only in the installed consumer.",
+    "No new physical browser/device test, native credential use, public payment, third-party integration or customer-demand evidence.",
+    "Same-origin journal/locks do not coordinate different devices or origins; recovery still returns full account authority.",
+    "Overlapping local and initial replay runs are not summed into the final 51-test count."
+  ]
+}

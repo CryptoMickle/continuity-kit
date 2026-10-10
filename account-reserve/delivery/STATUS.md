@@ -1,3 +1,46 @@
+# Installed payment helper checks before authentication — 10 October 2026
+
+The copyable payment integration now includes approved payment selection,
+`refreshAvailability()` and a frozen current `state`. It imports only the public
+installed SDK. Construction, selection and availability do not touch credentials,
+localStorage or Web Locks; journal access is lazy. A deliberate Open action requires
+funded readiness at most 30 seconds old, then invokes the host's existing-account
+callback synchronously. Already-collected or unavailable payments do not prompt.
+
+Selection and cancellation invalidate old reads and abort native opening. A pending
+native promise cannot overlap another one. Known pending hashes and uncertain
+reservations block all payment choices; an exact fresh journal check clears only
+its own payment. Unscoped or invalid-journal failures remain blocked. A late canceled
+journal read can add defensive uncertainty but cannot clear a block. If it blocks
+an already-open or opening newer session, that signing session closes or aborts.
+Collection keeps the same final SDK guards and closes its parent signer after every
+attempt. Separate monotonic and absolute checks enforce expiry even when a browser
+has delayed its timers. No SDK export or contract was changed.
+
+Exact anonymous replay of `a16ff1a27b0d06b9cd6706170c79a507915d4af3` passed **51 tests**,
+zero failures/skips, after fresh offline installation and both app/payment builds.
+This includes **34 focused helper tests**, SDK regression checks, and the installed
+consumer with strict public-API types and a seven-module browser dependency graph.
+Its eight behavior scenarios use actual disposable Mera signing sessions with mocked
+RPCs: two signatures, two simulated sends, three deliberate account openings and
+four closed signing sessions (including a competing SDK client). Fresh-process
+stateless receipt and availability checks also pass. Repeated/overlapping runs are
+not added. The curated source candidate preserves all five changed source files.
+
+Independent internal review found no remaining release blocker; it is not an
+external audit. The focused lifecycle tests use controlled public-factory doubles
+plus a real public-import boundary check. No physical authentication, public-network
+transaction or hosted UI change was performed. Existing Sites, origins, passkeys,
+ciphertext, contract, profile and fee/nonce/once-only policies are preserved.
+
+[Validation and exact replay](../evidence/payment-helper-readiness-validation-2026-10-10.json).
+Next is a runnable installed payment-recovery template with complete UI and a
+configuration doctor. The present helper still requires the host's account recovery
+and UI wiring. This proves developer capability, not adoption or demand. Video and
+final submission remain deferred.
+
+---
+
 # Approved payments from either app — 10 October 2026
 
 Existing public A version 8 and B version 7 now offer **Payment to collect** from
