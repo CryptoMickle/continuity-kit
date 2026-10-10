@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
 import ts from 'typescript';
 import {privateKeyToAccount,generatePrivateKey} from 'viem/accounts';
-import {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier} from '@continuitykit/account-reserve/payments';
+import {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier,createTestnetPaymentAvailability} from '@continuitykit/account-reserve/payments';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 const code=expected=>error=>error.code===expected&&error.message===expected;
@@ -18,9 +18,9 @@ function fixture(){
   return {profile,storage,locks,recovered:{owner:account.address,account,close(){closed++;}},closed:()=>closed};
 }
 
-test('public payment entry exports only the three fixed-endpoint factories and allowlists their browser dependency graph',async()=>{
+test('public payment entry exports only the four fixed-endpoint factories and allowlists their browser dependency graph',async()=>{
   const module=await import('@continuitykit/account-reserve/payments');
-  assert.deepEqual(Object.keys(module).sort(),['createTestnetPaymentClient','createTestnetPaymentReader','createTestnetPaymentVerifier']);
+  assert.deepEqual(Object.keys(module).sort(),['createTestnetPaymentAvailability','createTestnetPaymentClient','createTestnetPaymentReader','createTestnetPaymentVerifier']);
   const manifest=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
   assert.deepEqual(manifest.exports['./payments'],{types:'./payments/index.d.ts',import:'./payments/index.mjs'});
   assert.deepEqual(manifest.files.filter(name=>name.startsWith('payments/')).sort(),['executor.mjs','guard.mjs','index.d.ts','index.mjs','pending.mjs','testnet.mjs'].map(name=>'payments/'+name).sort());
@@ -31,7 +31,7 @@ test('public payment entry exports only the three fixed-endpoint factories and a
 
 test('public options refuse RPC/transport injection, extra arguments and accessors before reading them',()=>{
   const f=fixture();let evaluated=0;
-  for(const [factory,options]of [[createTestnetPaymentClient,{profile:f.profile,recovered:f.recovered,storage:f.storage,locks:f.locks}],[createTestnetPaymentReader,{profile:f.profile,storage:f.storage,locks:f.locks}],[createTestnetPaymentVerifier,{profile:f.profile}]]){
+  for(const [factory,options]of [[createTestnetPaymentClient,{profile:f.profile,recovered:f.recovered,storage:f.storage,locks:f.locks}],[createTestnetPaymentReader,{profile:f.profile,storage:f.storage,locks:f.locks}],[createTestnetPaymentVerifier,{profile:f.profile}],[createTestnetPaymentAvailability,{profile:f.profile}]]){
     for(const name of ['rpcTransport','transport','rpcUrls','endpoints','url','publicClient','wallet']){
       const extra=Object.defineProperty({...options},name,{enumerable:true,get(){evaluated++;return ()=>{};}});
       assert.throws(()=>factory(extra),code('PAYMENT_OPTIONS_INVALID'));
@@ -44,6 +44,7 @@ test('public options refuse RPC/transport injection, extra arguments and accesso
     assert.throws(()=>factory(getter),code('PAYMENT_OPTIONS_INVALID'));
   }
   for(const name of ['storage','locks','recovered'])assert.throws(()=>createTestnetPaymentVerifier({profile:f.profile,[name]:f[name]}),code('PAYMENT_OPTIONS_INVALID'));
+  for(const name of ['storage','locks','recovered'])assert.throws(()=>createTestnetPaymentAvailability({profile:f.profile,[name]:f[name]}),code('PAYMENT_OPTIONS_INVALID'));
   assert.equal(evaluated,0);assert.equal(f.closed(),0);
 });
 
@@ -54,7 +55,7 @@ test('fresh public import/construction does no IO, credential operation or signi
     const forbidden=key=>()=>{calls[key]++;throw new Error('UNEXPECTED_'+key);};
     globalThis.fetch=forbidden('network');
     Object.defineProperty(globalThis,'navigator',{configurable:true,value:{credentials:{get:forbidden('credentials'),create:forbidden('credentials')}}});
-    const {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier}=await import('@continuitykit/account-reserve/payments');
+    const {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier,createTestnetPaymentAvailability}=await import('@continuitykit/account-reserve/payments');
     const owner='0x'+'ab'.repeat(20),account={address:owner,type:'local',source:'test-only',signTransaction:forbidden('signatures')};
     const profile={chainId:10143,address:'0x'+'12'.repeat(20),owner,issuer:'0x'+'34'.repeat(20),expectedRuntimeCodeHash:'0x'+'56'.repeat(32),expiresAt:new Date(Date.now()+3600000).toISOString(),claims:[{rightId:1n,amount:100n,nonce:0}]};
     const storage={getItem(){calls.reads++;return null;},setItem:forbidden('writes')},locks={request:async(name,options,callback)=>callback({name,mode:options.mode})};
@@ -63,10 +64,12 @@ test('fresh public import/construction does no IO, credential operation or signi
     Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw new Error('STATELESS_STORAGE_FORBIDDEN');}});
     Object.defineProperty(globalThis.navigator,'locks',{get(){throw new Error('STATELESS_LOCKS_FORBIDDEN');}});
     const verifier=createTestnetPaymentVerifier({profile});
+    const availability=createTestnetPaymentAvailability({profile});
     assert.deepEqual(calls,{network:0,credentials:0,signatures:0,reads:0,writes:0,closed:0});
     profile.claims[0].rightId=2n;assert.throws(()=>client.forRight(2n),e=>e.code==='PAYMENT_NOT_APPROVED');
     executor.close();assert.equal(calls.closed,0);
     await assert.rejects(verifier.check({rightId:2n,hash:'0x'+'11'.repeat(32)}),e=>e.code==='PAYMENT_NOT_APPROVED');
+    await assert.rejects(availability.check({rightId:2n}),e=>e.code==='PAYMENT_NOT_APPROVED');
     await assert.rejects(reader.check(1n),e=>e.code==='PAYMENT_TRANSACTION_MISSING');
     client.close();assert.equal(calls.closed,1);assert.throws(()=>client.forRight(1n),e=>e.code==='SESSION_CLOSED');
     assert.deepEqual(calls,{network:0,credentials:0,signatures:0,reads:1,writes:0,closed:1});console.log(JSON.stringify(calls));
@@ -79,7 +82,7 @@ test('public declarations accept SDK recovery and native persistence while rejec
   const source=`
     import type {RecoveredReserve} from '@continuitykit/account-reserve';
     import type {Hash} from 'viem';
-    import {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier,type PaymentProfile,type PaymentResult,type PaymentLocks,type PaymentVerificationResult} from '@continuitykit/account-reserve/payments';
+    import {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier,createTestnetPaymentAvailability,type PaymentProfile,type PaymentResult,type PaymentLocks,type PaymentVerificationResult,type PaymentAvailabilityResult} from '@continuitykit/account-reserve/payments';
     declare const recovered:RecoveredReserve;
     const profile:PaymentProfile={chainId:10143,address:'0x12',owner:recovered.owner,issuer:'0x34',expectedRuntimeCodeHash:'0x56',expiresAt:'2026-11-10T00:00:00.000Z',claims:[{rightId:1n,amount:100n,nonce:0}]};
     const locks:PaymentLocks=navigator.locks;
@@ -91,7 +94,10 @@ test('public declarations accept SDK recovery and native persistence while rejec
     const reader=createTestnetPaymentReader({profile,storage:localStorage,locks:navigator.locks});
     const checked:Promise<PaymentResult>=reader.check(1n);
     const verifier=createTestnetPaymentVerifier({profile});
+    const availability=createTestnetPaymentAvailability({profile});
     const verified:Promise<PaymentVerificationResult>=verifier.check({rightId:1n,hash:'0x12'});
+    const available:Promise<PaymentAvailabilityResult>=availability.check({rightId:1n});
+    void available.then(value=>{const paid:false=value.paymentVerified;const block:bigint=value.blockNumber;if(value.status==='not-available'){const reason:string=value.reason;void reason;}void paid;void block;});
     void verified.then(value=>{const amount:bigint=value.amount;if(value.paymentVerified){const status:'finalized'=value.status;const block:bigint=value.blockNumber;void status;void block;}if(value.status==='pending-or-unknown'){const finalized:false=value.finalized;void finalized;}void amount;});
     void result;void checked;void hash;void status;executor.close();client.close();
     // @ts-expect-error no transport override parameter
@@ -108,6 +114,14 @@ test('public declarations accept SDK recovery and native persistence while rejec
     verifier.check(1n);
     // @ts-expect-error JSON right strings are not approved bigint identifiers
     verifier.check({rightId:'1',hash:'0x12'});
+    // @ts-expect-error availability cannot take storage
+    createTestnetPaymentAvailability({profile,storage:localStorage});
+    // @ts-expect-error availability has no transport override
+    createTestnetPaymentAvailability({profile},{rpcTransport:()=>{}});
+    // @ts-expect-error exact object with bigint right required
+    availability.check(1n);
+    // @ts-expect-error no receipt hash or other fields on availability query
+    availability.check({rightId:1n,hash:'0x12'});
     // @ts-expect-error exact bigint right identifier
     reader.check('1');
     // @ts-expect-error testnet only

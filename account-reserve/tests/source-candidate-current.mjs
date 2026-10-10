@@ -16,7 +16,7 @@ async function execute(command,args,cwd,{timeout=60000,env={}}={}){
  return new Promise((resolve,reject)=>{child.once('error',e=>{if(!settled){settled=true;clearTimeout(timer);reject(e);}});child.once('close',code=>{clearTimeout(timer);clearTimeout(kill);if(settled)return;settled=true;code===0?resolve(stdout):reject(new Error(`CHILD_EXIT_${code}: ${stderr.slice(-4000)} ${stdout.slice(-4000)}`));});});
 }
 const required=[
- 'payments/index.mjs','payments/index.d.ts','tests/payments-stateless.mjs','tests/payments-reference-page.mjs','integrations/payment-client/actions.mjs','integrations/payment-client/README.md',
+ 'payments/index.mjs','payments/index.d.ts','tests/payments-stateless.mjs','tests/payments-reference-page.mjs','tests/payments-availability.mjs','tests/payments-availability-page.mjs','integrations/payment-client/actions.mjs','integrations/payment-client/README.md',
  'text-native/collection-main.mjs','text-native/operator-backup.mjs','text-native/operator-diagnostics.mjs','text-native/operator-runtime/cli.mjs','text-native/.npmignore','text-starter/collection-server.mjs','text-starter/replica-server.mjs','operator/replica-gateway.mjs',
  'integrations/multi-app/vendor/easymde/dist/easymde.min.js','integrations/multi-app/vendor/easymde/dist/easymde.min.css','integrations/multi-app/vendor/easymde/LICENSE','integrations/multi-app/vendor/easymde/marked-LICENSE','integrations/textarea-text/upstream/LICENSE',
  'self-service/apps/app.mjs','self-service/apps/collection.mjs','self-service/client/config.mjs','self-service/backend/store.mjs','self-service/backend/db/schema.ts',

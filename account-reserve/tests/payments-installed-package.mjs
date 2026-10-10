@@ -32,7 +32,7 @@ async function installedBehavior() {
   const { decodeFunctionData, encodeAbiParameters, encodeEventTopics, encodeFunctionResult, getAddress, keccak256, parseAbi, parseTransaction, toHex } = await import('viem');
   const { createTestnetPaymentClient, createTestnetPaymentReader } = api;
   const { createPaymentActions } = await import('./payment-actions.mjs');
-  assert.deepEqual(Object.keys(api).sort(), ['createTestnetPaymentClient', 'createTestnetPaymentReader', 'createTestnetPaymentVerifier']);
+  assert.deepEqual(Object.keys(api).sort(), ['createTestnetPaymentAvailability', 'createTestnetPaymentClient', 'createTestnetPaymentReader', 'createTestnetPaymentVerifier']);
   await assert.rejects(import('@continuitykit/account-reserve/payments/testnet.mjs'), error => error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED');
   const abi = parseAbi(['function claim(uint256 id)', 'function issuer() view returns (address)', 'function rightForOwner(address owner) view returns (uint256)', 'function getRight(uint256 id) view returns ((address beneficiary,uint256 amount,bool claimed))', 'event RightClaimed(uint256 indexed id,address indexed beneficiary,uint256 amount)']);
   const secret = new Uint8Array(32).fill(3), address = getAddress('0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), issuer = getAddress('0xbcdefabcdefabcdefabcdefabcdefabcdefabcde');
@@ -226,8 +226,81 @@ async function installedStatelessVerifier() {
   process.stdout.write(JSON.stringify({ freshProcess: true, noJournal: true, noAccount: true, forbiddenBrowserAccess: forbiddenAccess, observations: [good.status, pending.status, reverted.status, 'mismatch-rejected'], expiredProfileRead: true, fixedRpcNames: true, publicNetwork: false, persistenceUntouched: true }) + '\n');
 }
 
+async function installedAvailability() {
+  const { default: assert } = await import('node:assert/strict');
+  const { readFile } = await import('node:fs/promises');
+  const before = await readFile('public-claim-fixture.json'), fixture = JSON.parse(before);
+  let forbiddenAccess = 0, mode = 'funded'; const calls = [];
+  const forbidden = () => { forbiddenAccess++; throw Error('BROWSER_STATE_FORBIDDEN'); };
+  for (const name of ['navigator', 'localStorage']) Object.defineProperty(globalThis, name, { configurable: true, get: forbidden });
+  globalThis.fetch = () => { throw Error('NETWORK_DURING_IMPORT_FORBIDDEN'); };
+  const { createTestnetPaymentAvailability } = await import('@continuitykit/account-reserve/payments');
+  const { decodeFunctionData, encodeFunctionResult, parseAbi, toHex } = await import('viem');
+  const abi = parseAbi(['function issuer() view returns (address)', 'function nextId() view returns (uint256)', 'function rightForOwner(address owner) view returns (uint256)', 'function getRight(uint256 id) view returns ((address beneficiary,uint256 amount,bool claimed))']);
+  const profile = { ...fixture.profile, claims: fixture.profile.claims.map(claim => ({ ...claim, rightId: BigInt(claim.rightId), amount: BigInt(claim.amount) })) };
+  const allowed = ['https://testnet-rpc.monad.xyz', 'https://rpc-testnet.monadinfra.com'], hash = '0x' + 'a1'.repeat(32), alternate = '0x' + 'b2'.repeat(32);
+  const timestamp = toHex(BigInt(Math.floor(Date.now() / 1000))), blockNumber = 102n;
+  const code = expected => error => error.code === expected;
+  globalThis.fetch = async (url, init) => {
+    const endpoint = new URL(url).origin; assert.ok(allowed.includes(endpoint)); assert.equal(init.redirect, 'error');
+    const { id, method, params } = JSON.parse(init.body); calls.push({ endpoint, method, params, mode });
+    if (mode === 'rpc-failure' && endpoint === allowed[1]) throw Error('private provider message never shown');
+    let result;
+    switch (method) {
+      case 'eth_chainId': result = '0x279f'; break;
+      case 'eth_getBlockByNumber': {
+        const numbered = /^0x/.test(params[0]);
+        result = { number: toHex(numbered ? BigInt(params[0]) : blockNumber), hash: mode === 'rpc-disagreement' && numbered && endpoint === allowed[1] ? alternate : hash, timestamp, baseFeePerGas: '0x1', transactions: [] }; break;
+      }
+      case 'eth_getCode': result = params[0].toLowerCase() === profile.address.toLowerCase() ? '0x6000' : '0x'; break;
+      case 'eth_getTransactionCount': result = '0x0'; break;
+      case 'eth_getBalance': result = mode === 'gas-empty' && params[0].toLowerCase() === profile.owner.toLowerCase() ? '0x0' : toHex(10n ** 18n); break;
+      case 'eth_estimateGas': result = '0xc350'; break;
+      case 'eth_call': {
+        const call = decodeFunctionData({ abi, data: params[0].data }); let answer;
+        if (call.functionName === 'issuer') answer = profile.issuer;
+        else if (call.functionName === 'nextId') answer = mode === 'not-issued' ? 1n : 2n;
+        else if (call.functionName === 'rightForOwner') answer = mode === 'not-issued' ? 0n : 1n;
+        else {
+          assert.notEqual(mode, 'not-issued', 'canonical unissued ID must not be treated as an existing funded right');
+          assert.equal(call.args[0], 1n); answer = { beneficiary: profile.owner, amount: profile.claims[0].amount, claimed: mode === 'already-collected' };
+        }
+        result = encodeFunctionResult({ abi, functionName: call.functionName, result: answer }); break;
+      }
+      default: assert.fail('availability attempted a non-read operation: ' + method);
+    }
+    return new Response(JSON.stringify({ jsonrpc: '2.0', id, result }), { status: 200, headers: { 'content-type': 'application/json' } });
+  };
+  for (const input of [{ profile, storage: {} }, { profile, locks: {} }, { profile, recovered: {} }, { profile, rpcTransport() {} }]) assert.throws(() => createTestnetPaymentAvailability(input), code('PAYMENT_OPTIONS_INVALID'));
+  assert.throws(() => createTestnetPaymentAvailability({ profile }, {}), code('PAYMENT_OPTIONS_INVALID'));
+  const availability = createTestnetPaymentAvailability({ profile }); assert.equal(calls.length, 0);
+  let queryGetters = 0;
+  for (const input of [{ rightId: '1' }, { rightId: 1n, hash: fixture.hash }, Object.defineProperty({}, 'rightId', { enumerable: true, get() { queryGetters++; return 1n; } })]) await assert.rejects(async () => availability.check(input), code('PAYMENT_AVAILABILITY_INPUT_INVALID'));
+  await assert.rejects(async () => availability.check({ rightId: 1n }, {}), code('PAYMENT_AVAILABILITY_INPUT_INVALID'));
+  await assert.rejects(async () => availability.check({ rightId: 3n }), code('PAYMENT_NOT_APPROVED'));
+  assert.equal(calls.length, 0); assert.equal(queryGetters, 0);
+  const outcomes = [];
+  function identity(value) {
+    assert.ok(Object.isFrozen(value)); assert.equal(value.chainId, 10143); assert.equal(value.contract.toLowerCase(), profile.address.toLowerCase()); assert.equal(value.beneficiary.toLowerCase(), profile.owner.toLowerCase()); assert.equal(value.rightId, 1n); assert.equal(value.amount, profile.claims[0].amount);
+    assert.equal(value.readOnly, true); assert.equal(value.paymentVerified, false); assert.equal(value.blockNumber, blockNumber); assert.equal(value.blockHash, hash); assert.equal(new Date(value.observedAt).toISOString(), value.observedAt);
+  }
+  const funded = await availability.check({ rightId: 1n }); identity(funded); assert.equal(funded.status, 'funded'); outcomes.push(funded.status);
+  mode = 'not-issued'; const absent = await availability.check({ rightId: 1n }); identity(absent); assert.equal(absent.status, 'not-available'); assert.equal(absent.reason, 'not-issued'); outcomes.push(absent.reason);
+  const expiredAvailability = createTestnetPaymentAvailability({ profile: { ...profile, expiresAt: '2020-01-01T00:00:00.000Z' } });
+  mode = 'already-collected'; const collected = await expiredAvailability.check({ rightId: 1n }); identity(collected); assert.equal(collected.status, 'already-collected'); outcomes.push(collected.status);
+  mode = 'expired'; const expired = await expiredAvailability.check({ rightId: 1n }); identity(expired); assert.equal(expired.status, 'not-available'); assert.equal(expired.reason, 'expired'); outcomes.push(expired.reason);
+  mode = 'gas-empty'; const unfunded = await availability.check({ rightId: 1n }); identity(unfunded); assert.equal(unfunded.status, 'not-available'); assert.equal(unfunded.reason, 'insufficient-gas'); outcomes.push(unfunded.reason);
+  const errors = [];
+  for (const [state, expected] of [['rpc-disagreement', 'PAYMENT_CANONICAL_BLOCK_MISMATCH'], ['rpc-failure', 'PAYMENT_AVAILABILITY_FAILED']]) {
+    mode = state; await assert.rejects(availability.check({ rightId: 1n }), error => { assert.equal(error.code, expected); assert.equal(error.message, error.code); assert.ok(!error.message.includes('private provider')); errors.push(error.code); return true; }); outcomes.push(state + '-rejected');
+  }
+  assert.equal(forbiddenAccess, 0); assert.ok(calls.every(call => !/send|sign|TransactionReceipt|TransactionByHash/.test(call.method)));
+  assert.deepEqual([...new Set(calls.map(call => call.endpoint))].sort(), allowed.sort()); assert.deepEqual(await readFile('public-claim-fixture.json'), before);
+  process.stdout.write(JSON.stringify({ freshProcess: true, noJournal: true, noAccount: true, forbiddenBrowserAccess: forbiddenAccess, observations: outcomes, errors, availabilityIsNotPaymentProof: true, fixedRpcNames: true, publicNetwork: false, persistenceUntouched: true }) + '\n');
+}
+
 const types = `
-import {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier,type PaymentProfile,type PaymentClient,type PaymentResult,type PaymentLocks} from '@continuitykit/account-reserve/payments';
+import {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier,createTestnetPaymentAvailability,type PaymentProfile,type PaymentClient,type PaymentResult,type PaymentLocks} from '@continuitykit/account-reserve/payments';
 import type {RecoveredReserve} from '@continuitykit/account-reserve';
 declare const recovered:RecoveredReserve;
 declare const locks:LockManager;
@@ -271,6 +344,20 @@ verifier.check({rightId:1n});
 verifier.check({rightId:1n,hash:'0x00',rpcUrl:'https://untrusted.invalid'});
 // @ts-expect-error Query results are immutable.
 verification.paymentVerified=true;
+const availability=createTestnetPaymentAvailability({profile});
+const availabilityResult=await availability.check({rightId:1n});
+const noPaymentProof:false=availabilityResult.paymentVerified;const observedHeight:bigint=availabilityResult.blockNumber;void noPaymentProof;void observedHeight;
+if(availabilityResult.status==='not-available'){const reason:string=availabilityResult.reason;void reason;}
+// @ts-expect-error Availability requires no signer.
+createTestnetPaymentAvailability({profile,recovered});
+// @ts-expect-error Availability takes no persistence configuration.
+createTestnetPaymentAvailability({profile,storage:localStorage});
+// @ts-expect-error Availability is an exact right read, not receipt verification.
+availability.check({rightId:1n,hash:'0x00'});
+// @ts-expect-error Query rights must use bigint.
+availability.check({rightId:'1'});
+// @ts-expect-error Read-only availability is not evidence of payment.
+const paid:true=availabilityResult.paymentVerified;
 `;
 
 test('public payment adapter installs offline, typechecks, bundles for browsers and reconciles without private SDK imports', { timeout: 120000 }, async t => {
@@ -288,7 +375,7 @@ test('public payment adapter installs offline, typechecks, bundles for browsers 
   await writeFile(join(consumer, 'payment-types.mts'), types);
   await execute(consumer, ['node_modules/typescript/bin/tsc', '--noEmit', '--strict', '--skipLibCheck', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--lib', 'ES2022,DOM', 'payment-types.mts']);
   await writeFile(join(consumer, 'payment-actions.mjs'), await readFile(join(root, 'integrations/payment-client/actions.mjs'), 'utf8'));
-  await writeFile(join(consumer, 'payment-entry.mjs'), "export {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier} from '@continuitykit/account-reserve/payments';\nexport {createPaymentActions} from './payment-actions.mjs';\n");
+  await writeFile(join(consumer, 'payment-entry.mjs'), "export {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier,createTestnetPaymentAvailability} from '@continuitykit/account-reserve/payments';\nexport {createPaymentActions} from './payment-actions.mjs';\n");
   await writeFile(join(consumer, 'build-consumer.mjs'), `
 import assert from 'node:assert/strict';import {build} from 'vite';
 const built=await build({configFile:false,logLevel:'silent',build:{write:false,minify:false,lib:{entry:'payment-entry.mjs',formats:['es'],fileName:'payments'}}});
@@ -312,5 +399,9 @@ console.log(JSON.stringify({browserBundle:true,publicModules:own.sort(),moduleCo
   const stateless = JSON.parse((await execute(consumer, ['payment-stateless-consumer.mjs'])).trim());
   assert.deepEqual(await readFile(join(consumer, 'public-claim-fixture.json')), publicFixtureBefore);
   assert.equal(stateless.freshProcess, true); assert.equal(stateless.forbiddenBrowserAccess, 0);
-  console.log(JSON.stringify({ experiment: 'installed-public-payment-adapter', strictTypes: true, browserBundle: bundle.browserBundle, publicModules: bundle.publicModules, ...behavior, stateless, limits: ['simulated RPC responses', 'disposable local Mera signing sessions', 'no native passkey', 'no EVM or public transaction', 'same-origin in-memory lock adapter'] }));
+  await writeFile(join(consumer, 'payment-availability-consumer.mjs'), `await (${installedAvailability.toString()})();\n`);
+  const availability = JSON.parse((await execute(consumer, ['payment-availability-consumer.mjs'])).trim());
+  assert.deepEqual(await readFile(join(consumer, 'public-claim-fixture.json')), publicFixtureBefore);
+  assert.equal(availability.freshProcess, true); assert.equal(availability.forbiddenBrowserAccess, 0);
+  console.log(JSON.stringify({ experiment: 'installed-public-payment-adapter', strictTypes: true, browserBundle: bundle.browserBundle, publicModules: bundle.publicModules, ...behavior, stateless, availability, limits: ['simulated RPC responses', 'disposable local Mera signing sessions', 'no native passkey', 'no EVM or public transaction', 'same-origin in-memory lock adapter'] }));
 });

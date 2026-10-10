@@ -111,3 +111,32 @@ export function createTestnetPaymentVerifier({profile:input},{rpcTransport=publi
     },
   });
 }
+
+const AVAILABILITY_ERRORS = new Set([
+  'PAYMENT_AVAILABILITY_INPUT_INVALID','PAYMENT_NOT_APPROVED','PAYMENT_CHAIN_MISMATCH',
+  'PAYMENT_RUNTIME_MISMATCH','PAYMENT_ISSUER_MISMATCH','PAYMENT_RIGHT_MISMATCH',
+  'PAYMENT_CANONICAL_BLOCK_MISMATCH','PAYMENT_FINALIZED_HEAD_INVALID',
+  'PAYMENT_AVAILABILITY_RESPONSE_INVALID','PAYMENT_STATE_DISAGREEMENT','PAYMENT_OWNER_CODE_UNEXPECTED',
+]);
+function availabilityInput(input,count) {
+  try {
+    if(count!==1||!input||![Object.prototype,null].includes(Object.getPrototypeOf(input)))throw 0;
+    const keys=Reflect.ownKeys(input),d=Object.getOwnPropertyDescriptor(input,'rightId');
+    if(keys.length!==1||keys[0]!=='rightId'||!d?.enumerable||!Object.hasOwn(d,'value')||typeof d.value!=='bigint'||d.value<=0n||d.value>=2n**256n)throw 0;
+    return d.value;
+  }catch{throw fail('PAYMENT_AVAILABILITY_INPUT_INVALID');}
+}
+
+// Eligibility observation before authentication. No journal, account, Storage
+// or Web Locks are constructed. This is neither a receipt nor a signing grant.
+export function createTestnetPaymentAvailability({profile:input},{rpcTransport=publicTestnetTransport}={}) {
+  const profile=validatePaymentProfile(input);
+  if(profile.chainId!==10143)throw fail('PAYMENT_TESTNET_REQUIRED');
+  const chain={id:10143,name:'Monad testnet payment availability',nativeCurrency:{name:'Test MON',symbol:'MON',decimals:18},rpcUrls:{default:{http:[...APPROVED_TESTNET_RPCS]}}};
+  const clients=APPROVED_TESTNET_RPCS.map(url=>createPublicClient({chain,ccipRead:false,cacheTime:0,transport:rpcTransport(url)}));
+  const guard=createPaymentGuard({profile,clients});
+  return Object.freeze({async check(input){
+    try{return await guard.availability(availabilityInput(input,arguments.length));}
+    catch(error){const code=verificationCode(error);throw fail(AVAILABILITY_ERRORS.has(code)?code:'PAYMENT_AVAILABILITY_FAILED');}
+  }});
+}

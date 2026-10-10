@@ -17,10 +17,12 @@ The account-free text reserve continues to work without blockchain transactions.
 ## Use it from an installed SDK
 
 The experimental `@continuitykit/account-reserve/payments` export includes
-TypeScript declarations and three factories: `createTestnetPaymentClient` accepts an
+TypeScript declarations and four factories: `createTestnetPaymentClient` accepts an
 existing recovered account; `createTestnetPaymentReader` checks an existing local
 transaction record without a credential or signer; `createTestnetPaymentVerifier`
-checks an explicit transaction reference without any local record. All use the same fixed Monad
+checks an explicit transaction reference without any local record;
+`createTestnetPaymentAvailability` checks whether an approved obligation is still
+collectable before authentication. All use the same fixed Monad
 testnet RPCs and policy checks as the demonstration. They accept no transport or
 endpoint override through the public entry.
 
@@ -41,6 +43,38 @@ distributed from the public source as a tarball; it is not published to npm.
 records a clean anonymous replay, strict TypeScript checks and the browser module
 graph. The separate consumer uses real disposable Mera signing sessions with mocked
 RPC responses; its simulated sends are not additional public transactions.
+
+## Check availability before opening a passkey
+
+The hosted payment view performs one bounded public read on load. It shows a
+separate existing-passkey action only after a successful, recent `funded`
+observation. Already-collected, not-issued, expired, fee/gas/nonce issues and failed
+verification do not request authentication. There is no automatic retry or polling;
+the user can deliberately refresh the read. Readiness lasts at most 30 seconds in
+the UI, with a local monotonic and profile-expiry check at the exact opening click.
+The native callback remains in that user gesture rather than following another
+awaited network request.
+
+```js
+import { createTestnetPaymentAvailability } from '@continuitykit/account-reserve/payments';
+const availability = createTestnetPaymentAvailability({ profile });
+const result = await availability.check({ rightId: 2n });
+// 'funded', 'already-collected', or 'not-available' with a bounded reason.
+// Show a separate deliberate existing-passkey action only for a recent funded result.
+```
+
+The result is an advisory state observation, never signing permission or a verified
+transaction receipt. A claimed right remains readable after signing-policy expiry.
+`paymentVerified` is always false; use the reference verifier for the exact receipt.
+An unavailable or disagreeing RPC read rejects rather than being interpreted as an
+unfunded payment. The local sending journal remains separate and unresolved attempts
+stay blocked. Existing transaction preflight still checks the right, nonce, fees and
+account immediately before signing and broadcasting; state can change after readiness.
+
+Every claim attempt now closes the parent signer in `finally`, including a later
+preflight failure. Refreshing availability, cancellation and page exit invalidate
+an earlier readiness observation. These checks require no account, passkey, browser
+storage or lock and never send a transaction.
 
 ## Check a reference from a fresh browser
 

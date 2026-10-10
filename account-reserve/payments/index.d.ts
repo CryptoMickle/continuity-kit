@@ -150,3 +150,41 @@ export interface PaymentVerifier {
 /** Stateless experimental verifier; exact profile-only options. Construction
  * performs no network or credential operation. No RPC override is accepted. */
 export declare function createTestnetPaymentVerifier(options: PaymentVerifierOptions): PaymentVerifier;
+
+export interface PaymentAvailabilityOptions {
+  readonly profile: PaymentProfile;
+}
+export interface PaymentAvailabilityInput {
+  readonly rightId: bigint;
+}
+export interface PaymentAvailabilityIdentity {
+  readonly chainId: 10143;
+  readonly contract: Address;
+  readonly beneficiary: Address;
+  readonly rightId: bigint;
+  /** Approved obligation; no status here establishes that it was delivered. */
+  readonly amount: bigint;
+  readonly readOnly: true;
+  readonly paymentVerified: false;
+  /** Local ISO completion time, not a chain timestamp or a validity promise. */
+  readonly observedAt: string;
+  /** Corroborated canonical finalized snapshot used for contract state. */
+  readonly blockNumber: bigint;
+  readonly blockHash: Hash;
+}
+export type PaymentAvailabilityReason = 'not-issued' | 'expired' | 'nonce-mismatch' | 'insufficient-gas' | 'fee-cap-exceeded' | 'gas-limit-exceeded' | 'state-changed';
+export type PaymentAvailabilityResult = PaymentAvailabilityIdentity & (
+  | { readonly status: 'funded' }
+  | { readonly status: 'already-collected' }
+  | { readonly status: 'not-available'; readonly reason: PaymentAvailabilityReason }
+);
+export interface PaymentAvailability {
+  /** No signer, credentials, Storage or Web Locks. A funded result observed a
+   * funded finalized right plus current nonce/fee/gas preflight; it does not
+   * reserve anything or authorize signing. Later signing rechecks all policy.
+   * Already-collected is contract state, not a verified payment receipt, and
+   * remains readable after expiry. RPC failure or disagreement rejects. */
+  check(input: PaymentAvailabilityInput): Promise<PaymentAvailabilityResult>;
+}
+/** Exact profile-only construction; fixed RPCs, no requests until check(). */
+export declare function createTestnetPaymentAvailability(options: PaymentAvailabilityOptions): PaymentAvailability;

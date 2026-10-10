@@ -3,6 +3,7 @@ import { decodeEventLog, encodeFunctionData, getAddress, keccak256, parseAbi, re
 export const PAYMENT_ABI = parseAbi([
   'function claim(uint256 id)',
   'function issuer() view returns (address)',
+  'function nextId() view returns (uint256)',
   'function rightForOwner(address owner) view returns (uint256)',
   'function getRight(uint256 id) view returns ((address beneficiary,uint256 amount,bool claimed))',
   'event RightClaimed(uint256 indexed id, address indexed beneficiary, uint256 amount)',
@@ -79,10 +80,10 @@ export function createPaymentGuard({profile: input, clients, now = Date.now}) {
   function requireRight(right, policy, claimed) {
     if (!right || !equal(right.beneficiary, profile.owner) || right.amount !== policy.amount || right.claimed !== claimed) throw fail('PAYMENT_RIGHT_MISMATCH');
   }
-  async function preflight(policy, requiredGas = 0n) {
+  async function preflight(policy, requiredGas = 0n, strict = false) {
     alive(); await environment();
     const data = encodeFunctionData({abi:PAYMENT_ABI,functionName:'claim',args:[policy.rightId]});
-    const observations = await Promise.all(clients.map(async c => {
+    const captured = await Promise.all(clients.map(async c => {
       const [code, latest, pending, right, finalizedRight, mapped, block, estimate, balance] = await Promise.all([
         c.getCode({address:profile.owner,blockTag:'latest'}),
         c.getTransactionCount({address:profile.owner,blockTag:'latest'}), c.getTransactionCount({address:profile.owner,blockTag:'pending'}),
@@ -93,6 +94,24 @@ export function createPaymentGuard({profile: input, clients, now = Date.now}) {
         c.estimateGas({account:profile.owner,to:profile.address,data,value:0n,nonce:policy.nonce,...PAYMENT_LIMITS}),
         c.getBalance({address:profile.owner}),
       ]);
+      return {code,latest,pending,right,finalizedRight,mapped,block,estimate,balance};
+    }));
+    // Availability observes the same preflight as signing, but must distinguish
+    // corroborated ineligibility from malformed or conflicting RPC responses.
+    // Legacy signing callers retain their existing validation/error semantics.
+    if (strict) {
+      for (const r of captured) {
+        if (r.code !== undefined && (typeof r.code !== 'string' || !/^0x(?:[0-9a-f]{2})*$/i.test(r.code)) || !Number.isSafeInteger(r.latest) || r.latest < 0 || !Number.isSafeInteger(r.pending) || r.pending < 0 || !uint(r.mapped) || typeof r.block?.baseFeePerGas !== 'bigint' || r.block.baseFeePerGas < 0n || typeof r.estimate !== 'bigint' || r.estimate <= 0n || typeof r.balance !== 'bigint' || r.balance < 0n) throw fail('PAYMENT_AVAILABILITY_RESPONSE_INVALID');
+        for (const right of [r.right,r.finalizedRight]) {
+          if (typeof right?.claimed !== 'boolean') throw fail('PAYMENT_AVAILABILITY_RESPONSE_INVALID');
+          requireRight(right,policy,right.claimed);
+        }
+      }
+      const shape = r => ({code:r.code??'0x',latest:r.latest,pending:r.pending,right:r.right,finalizedRight:r.finalizedRight,mapped:r.mapped,baseFeePerGas:r.block.baseFeePerGas,estimate:r.estimate,balance:r.balance});
+      if (canonical(shape(captured[0])) !== canonical(shape(captured[1]))) throw fail('PAYMENT_STATE_DISAGREEMENT');
+      if (captured[0].right.claimed || captured[0].finalizedRight.claimed || captured[0].mapped !== policy.rightId) throw fail('PAYMENT_STATE_CHANGED');
+    }
+    const observations = captured.map(({code,latest,pending,right,finalizedRight,mapped,block,estimate,balance}) => {
       if (code && code !== '0x') throw fail('PAYMENT_OWNER_CODE_UNEXPECTED');
       if (latest !== policy.nonce || pending !== policy.nonce) throw fail('PAYMENT_NONCE_MISMATCH');
       requireRight(right,policy,false); requireRight(finalizedRight,policy,false);
@@ -100,11 +119,58 @@ export function createPaymentGuard({profile: input, clients, now = Date.now}) {
       if (typeof block.baseFeePerGas !== 'bigint' || block.baseFeePerGas + policy.maxPriorityFeePerGas > policy.maxFeePerGas) throw fail('PAYMENT_FEE_CAP_EXCEEDED');
       if (typeof estimate !== 'bigint' || estimate <= 0n || estimate > policy.gas || typeof balance !== 'bigint') throw fail('PAYMENT_GAS_INVALID');
       return {estimate,balance};
-    }));
+    });
     const selected = (observations.reduce((max,r) => r.estimate > max ? r.estimate : max,0n) * 120n + 99n) / 100n;
     if (selected > policy.gas) throw fail('PAYMENT_GAS_INVALID');
     if (observations.some(r => r.balance < (selected > requiredGas ? selected : requiredGas) * policy.maxFeePerGas)) throw fail('PAYMENT_GAS_BALANCE_INSUFFICIENT');
     alive(); return selected;
+  }
+  const availabilityReasons = Object.freeze({PAYMENT_PROFILE_EXPIRED:'expired',PAYMENT_NONCE_MISMATCH:'nonce-mismatch',PAYMENT_GAS_BALANCE_INSUFFICIENT:'insufficient-gas',PAYMENT_FEE_CAP_EXCEEDED:'fee-cap-exceeded',PAYMENT_GAS_INVALID:'gas-limit-exceeded',PAYMENT_STATE_CHANGED:'state-changed'});
+  const validHash = hash => typeof hash === 'string' && hash.length === 66 && /^0x[0-9a-f]{64}$/i.test(hash);
+  async function availability(rightId) {
+    const policy = policyFor(rightId);
+    const heads = await Promise.all(clients.map(c => c.getBlock({blockTag:'finalized'})));
+    if (heads.some(h => typeof h?.number !== 'bigint' || h.number < 0n || !validHash(h.hash))) throw fail('PAYMENT_FINALIZED_HEAD_INVALID');
+    const blockNumber = heads[0].number < heads[1].number ? heads[0].number : heads[1].number;
+    const blocks = await Promise.all(clients.map(c => c.getBlock({blockNumber})));
+    if (blocks.some((b,i) => b?.number !== blockNumber || !validHash(b.hash) || heads[i].number === blockNumber && !equal(heads[i].hash,b.hash)) || !equal(blocks[0]?.hash,blocks[1]?.hash)) throw fail('PAYMENT_CANONICAL_BLOCK_MISMATCH');
+    const blockHash = blocks[0].hash.toLowerCase();
+    const observations = await Promise.all(clients.map(async c => {
+      const [chainId,code,issuer,nextId] = await Promise.all([
+        c.getChainId(),c.getCode({address:profile.address,blockNumber}),
+        c.readContract({address:profile.address,abi:PAYMENT_ABI,functionName:'issuer',blockNumber}),
+        c.readContract({address:profile.address,abi:PAYMENT_ABI,functionName:'nextId',blockNumber}),
+      ]);
+      if (chainId !== profile.chainId) throw fail('PAYMENT_CHAIN_MISMATCH');
+      if (!code || code === '0x' || keccak256(code) !== profile.expectedRuntimeCodeHash) throw fail('PAYMENT_RUNTIME_MISMATCH');
+      if (!equal(issuer,profile.issuer)) throw fail('PAYMENT_ISSUER_MISMATCH');
+      if (!uint(nextId)) throw fail('PAYMENT_AVAILABILITY_RESPONSE_INVALID');
+      if (rightId >= nextId) return {nextId,right:null};
+      const right = await c.readContract({address:profile.address,abi:PAYMENT_ABI,functionName:'getRight',args:[rightId],blockNumber});
+      if (typeof right?.claimed !== 'boolean') throw fail('PAYMENT_AVAILABILITY_RESPONSE_INVALID');
+      requireRight(right,policy,right.claimed);
+      return {nextId,right};
+    }));
+    if (canonical(observations[0]) !== canonical(observations[1])) throw fail('PAYMENT_STATE_DISAGREEMENT');
+    let status,reason;
+    if (observations[0].right?.claimed) status='already-collected';
+    else if (Date.parse(profile.expiresAt) <= now()) { status='not-available';reason='expired'; }
+    else if (!observations[0].right) { status='not-available';reason='not-issued'; }
+    else {
+      try { await preflight(policy,0n,true); status='funded'; }
+      catch (error) {
+        const descriptor = error && Object.getOwnPropertyDescriptor(error,'code');
+        const code = descriptor && Object.hasOwn(descriptor,'value') ? descriptor.value : undefined;
+        if (typeof code !== 'string' || !Object.hasOwn(availabilityReasons,code)) throw error;
+        status='not-available';reason=availabilityReasons[code];
+      }
+    }
+    const rechecks = await Promise.all(clients.map(c => c.getBlock({blockNumber})));
+    if (rechecks.some(b => b?.number !== blockNumber || !equal(b.hash,blockHash))) throw fail('PAYMENT_CANONICAL_BLOCK_MISMATCH');
+    const observed = now();
+    if (!Number.isFinite(observed)) throw fail('PAYMENT_AVAILABILITY_RESPONSE_INVALID');
+    if (status !== 'already-collected' && Date.parse(profile.expiresAt) <= observed) { status='not-available';reason='expired'; }
+    return Object.freeze({chainId:profile.chainId,contract:profile.address,beneficiary:profile.owner,rightId,amount:policy.amount,readOnly:true,paymentVerified:false,observedAt:new Date(observed).toISOString(),blockNumber,blockHash,status,...(reason?{reason}:{})});
   }
   const canonical = value => JSON.stringify(value,(_,v) => typeof v === 'bigint' ? v.toString() : typeof v === 'string' && /^0x[0-9a-f]+$/i.test(v) ? v.toLowerCase() : v);
   function receiptShape(r) {
@@ -163,7 +229,7 @@ export function createPaymentGuard({profile: input, clients, now = Date.now}) {
     if (observations.some(ok=>!ok)) return pendingReceipt();
     return receipt;
   }
-  return Object.freeze({profile,policyFor,
+  return Object.freeze({profile,policyFor,availability,
     forRight(rightId) {
       const policy=policyFor(rightId);
       return Object.freeze({policy,guards:Object.freeze({beforePrepare:()=>preflight(policy),beforeBroadcast:async({gas})=>{if(await preflight(policy,gas)>gas)throw fail('PAYMENT_GAS_CHANGED');},beforeCheck:environment}),getTransactionReceipt:args=>finalizedReceipt(policy,args)});

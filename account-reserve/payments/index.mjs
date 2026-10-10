@@ -2,6 +2,7 @@ import {
   createTestnetPaymentClient as internalClient,
   createTestnetPaymentReader as internalReader,
   createTestnetPaymentVerifier as internalVerifier,
+  createTestnetPaymentAvailability as internalAvailability,
 } from './testnet.mjs';
 
 const invalid = () => Object.assign(new Error('PAYMENT_OPTIONS_INVALID'), { code: 'PAYMENT_OPTIONS_INVALID' });
@@ -39,4 +40,10 @@ export function createTestnetPaymentReader(options) {
  * Construction performs no requests. Only check() reads the fixed RPCs. */
 export function createTestnetPaymentVerifier(options) {
   return internalVerifier(capture(options, ['profile'], [], arguments.length));
+}
+
+/** Observe an approved right before requesting an account. No persistence or
+ * authentication is used; signing still performs its own current checks. */
+export function createTestnetPaymentAvailability(options) {
+  return internalAvailability(capture(options, ['profile'], [], arguments.length));
 }
