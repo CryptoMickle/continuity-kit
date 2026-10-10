@@ -2,7 +2,7 @@
 
 A small editor you own, wired to the installed ContinuityKit public SDK. It prepares an encrypted, immutable text snapshot on B, reopens it after A is unavailable, and exports your continued draft. No wallet, account signing key, funds or provider account is needed.
 
-**Local simulation only.** This server emulates the credential; it does not invoke a physical passkey. B holds its synthetic credential and encrypted snapshot in disposable RAM. Stopping the server loses both. Never deploy this server or `synthetic-client.mjs`. The two listeners share one local process: this demonstrates original-origin independence, not independent infrastructure or providers.
+**Local simulation only.** This server emulates the credential; it does not invoke a physical passkey. The default mode keeps its encrypted snapshot in RAM. The optional replica mode below uses two temporary SQLite databases and separate storage processes. Both modes keep the synthetic credential in the parent server's RAM; stopping that server ends recovery. Never deploy these servers or `synthetic-client.mjs`. They do not establish independent infrastructure or providers.
 
 ## Run from this generated folder
 
@@ -28,6 +28,24 @@ npm run dev -- --primary-port=5975 --recovery-port=5976
 ```
 
 `npm run doctor -- --live` checks a running starter. Restore A in B first if you deliberately made A unavailable. A stopped local server cannot be recovered: this is intentionally disposable.
+
+## Optional two-store browser example
+
+Generate a separate empty folder with `npm run create:text-starter -- /absolute/empty/replica-demo --replicas` from the SDK repository. Run the same install/build/doctor/test/dev commands above in that folder. The generated package selects the replica server, doctor and smoke proof; it does not silently run the default single-store test.
+
+Open `http://text-starter-primary.localhost:6073/`. B is `http://text-starter-reserve.localhost:6074/`. Prepare a fictional draft in B and wait for **both** copies to verify. Then:
+
+1. Choose **Close this copy** so storage controls cannot replace visible edits.
+2. Choose **Make A unavailable**, expand **Test storage failures**, and **Stop Alpha**.
+3. Open B in a fresh tab and choose **Open my existing reserve**. Alpha is unavailable; Beta must pass client verification before any text opens.
+4. To test altered data, close the copy, corrupt the stopped Alpha copy and start Alpha again. Reopening must reject Alpha and use verified Beta.
+5. With the copy closed, stop Beta. Reopening now fails without displaying text. Start Beta again to recover the still-intact snapshot. No automatic repair occurs.
+
+The failure controls affect only this run's disposable files. SQLite writes survive a storage child process stopping/restarting. Stopping the parent deletes the temporary files and clears its simulated credential. B's frontend, gateway, authenticator and machine remain shared dependencies. This is a browser integration example, not separate-provider or disaster-recovery proof.
+
+The additive `/text-browser` helpers are `startTextReserveReplicaSetup` and `createTextReserveReplicaReceiver`. Both pages configure the same ordered `replicaIds`; B binds a separate single-use HTTP store capability to each ID. The handoff rejects a mismatched app or replica policy before a credential ceremony and only tells A “ready” after every intended copy passes independent verification. Fresh recovery calls `recoverTextReserveFromReplicas` without any upload capability.
+
+The replica `npm test` uses the installed public SDK, real child processes and separate SQLite files. Four fresh recovery processes receive only B's address and an export directory. They prove exact TXT/JSON exports with both copies, a stopped store, and an altered copy; when no valid copy remains, nothing is exported. Recovery transport rejects write attempts. This is automated synthetic evidence; browser tests and physical passkey tests have separate scopes.
 
 ## Connect your own editor
 

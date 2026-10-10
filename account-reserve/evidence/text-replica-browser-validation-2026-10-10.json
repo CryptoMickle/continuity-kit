@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-10",
+  "status": "passed",
+  "scope": "Local synthetic browser reference using installed SDK, fixed gateway, two separate SQLite child stores",
+  "automated": {
+    "finalReplicaSuite": {
+      "passed": 29,
+      "failed": 0,
+      "files": [
+        "tests/text-browser-replicas.mjs",
+        "tests/text-starter-replicas.mjs",
+        "tests/text-starter-replica-ui.mjs",
+        "tests/text-replica-starter-package.mjs"
+      ]
+    },
+    "legacyAndReplicaRegressionRun": {
+      "passed": 62,
+      "failed": 0,
+      "note": "Before the additional conservative failure-diagnostic test; existing default starter remains covered."
+    },
+    "independentInstalledBrowserSuite": {
+      "passed": 17,
+      "failed": 0,
+      "strictTypes": true,
+      "evidence": "text-replica-browser-installed-2026-10-10.json"
+    },
+    "installedGenerator": {
+      "offlineInstallBuildAndSmoke": true,
+      "unchangedOperatorModules": true,
+      "storageChildProcesses": 2,
+      "sqliteFiles": 2,
+      "freshRecoveryProcesses": 4,
+      "exactUtf8TxtAndJsonExports": true,
+      "recoveryTransportBlocksWrites": true,
+      "onlyCorruptedCopyRejectsWithoutExport": true
+    }
+  },
+  "browser": {
+    "origin": "http://text-starter-reserve.localhost:6074",
+    "nativeCredentials": false,
+    "setupAllCopiesVerifiedBeforeReady": true,
+    "setupTabsClosedThenFreshRecovery": true,
+    "oneStoreStoppedSurvivorOpened": true,
+    "alteredCopyRejectedSurvivorOpened": true,
+    "noValidCopyShowsNoPlaintext": true,
+    "restartHealthyStoreThenRecoverOriginal": true,
+    "continuedEditingAndTxtExportRequested": true,
+    "browserDownloadFileCompletionVerified": false,
+    "exportScope": "Exact TXT/JSON content verified by automated installed-consumer proof; UI export request observed, resulting browser file not confirmed.",
+    "mobileViewportWidth": 390,
+    "horizontalOverflow": false,
+    "screenshots": [
+      "text-replica-browser-2026-10-10.png",
+      "text-replica-mobile-2026-10-10.png"
+    ]
+  },
+  "reviews": [
+    "Independent SDK handoff review",
+    "Independent backend/transport review",
+    "Generator, doctor, installed package and evidence review"
+  ],
+  "limitations": [
+    "Simulated credential in parent RAM; never deploy the teaching server",
+    "Same machine, B frontend, gateway and parent remain shared dependencies",
+    "Not independent providers or physical passkey evidence",
+    "Public Sites and existing credentials/snapshots unchanged",
+    "No external adoption, security audit, prize probability or final submission claimed"
+  ]
+}

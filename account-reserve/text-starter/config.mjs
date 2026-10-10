@@ -23,6 +23,14 @@ export function validateEnvironment(value, href) {
   const config = validateConfiguration({ originalOrigin: value.originalOrigin, recoveryOrigin: value.recoveryOrigin, config: value.config });
   if (new URL(href).origin !== (value.role === 'primary' ? config.originalOrigin : config.recoveryOrigin)) fail('ORIGIN_MISMATCH');
   if (value.enrollmentToken !== undefined && (value.role !== 'recovery' || !/^[A-Za-z0-9_-]{43}$/.test(value.enrollmentToken))) fail('ENVIRONMENT_INVALID');
+  if (value.replicaMode !== undefined && typeof value.replicaMode !== 'boolean') fail('ENVIRONMENT_INVALID');
+  if (value.replicaMode === true) {
+    if (value.enrollmentToken !== undefined || !Array.isArray(value.replicas) || value.replicas.length !== 2) fail('ENVIRONMENT_INVALID');
+    for (const [index, id] of ['alpha', 'beta'].entries()) {
+      const replica = value.replicas[index];
+      if (!exact(replica, ['id','basePath']) || replica.id !== id || replica.basePath !== '/api/replicas/' + id + '/reserve') fail('ENVIRONMENT_INVALID');
+    }
+  } else if (value.replicas !== undefined) fail('ENVIRONMENT_INVALID');
   return config;
 }
 export function portsFromArgs(args) {

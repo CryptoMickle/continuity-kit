@@ -3,6 +3,7 @@
 import { createTextReserveCredential, selectTextReserveCredential, prepareTextReserve, recoverTextReserves, recoverTextReserveFromReplicas, prepareTextReserveReplicas } from '@continuitykit/account-reserve/text-reserve';
 import type { TextReserveConfig, TextReserveCredential, TextReserveStore, TextReserveReader, TextReserveCollectionResult } from '@continuitykit/account-reserve/text-reserve';
 import type { TextReserveReceiver, TextSetupState } from '@continuitykit/account-reserve/text-browser';
+import { startTextReserveReplicaSetup, createTextReserveReplicaReceiver } from '@continuitykit/account-reserve/text-browser';
 
 declare const config: TextReserveConfig;
 declare const store: TextReserveStore;
@@ -74,3 +75,29 @@ void prepareTextReserveReplicas({ config, recoveryCredential: credential, text: 
 void prepareTextReserveReplicas({ config, recoveryCredential: credential, text: 'Example', replicas: [{ id: 'alpha', store: reader }, { id: 'beta', store: reader }] });
 // @ts-expect-error Ordinary metadata cannot substitute for a private one-use handle.
 void prepareTextReserveReplicas({ config, recoveryCredential: { credentialId: 'copied', close() {} }, text: 'Example', replicas: [{ id: 'alpha', store }, { id: 'beta', store }] });
+
+const replicaOptions = { config, originalOrigin: 'https://primary.example', replicaIds: ['alpha', 'beta'] as const };
+const replicaReceiver = createTextReserveReplicaReceiver(replicaOptions);
+const replicaSetup = startTextReserveReplicaSetup({ ...replicaOptions, recoveryUrl: config.recoveryOrigin, text: 'Example' });
+const replicaTargets = [{ id: 'alpha', store }, { id: 'beta', store }] as const;
+void replicaReceiver.prepare({ replicas: replicaTargets, credentialMode: 'existing' });
+void replicaReceiver.prepare({ replicas: replicaTargets, user: { name: 'Example', displayName: 'Example' } });
+void replicaSetup.completion.then(result => {
+  const text: string = result.text;
+  const id: string = result.replicas[0].id;
+  void text; void id;
+  // @ts-expect-error Ready diagnostics remain readonly.
+  result.replicas[0].status = 'written';
+  // @ts-expect-error Handoff cannot expose account access.
+  result.openAccount();
+});
+// @ts-expect-error Both pages must supply their explicit replica ID policy.
+void createTextReserveReplicaReceiver({ config, originalOrigin: 'https://primary.example' });
+// @ts-expect-error Replica preparation cannot mix a single store with replica stores.
+void replicaReceiver.prepare({ replicas: replicaTargets, store, credentialMode: 'existing' });
+// @ts-expect-error Replica preparation needs writable stores.
+void replicaReceiver.prepare({ replicas: [{ id: 'alpha', store: reader }, { id: 'beta', store: reader }], credentialMode: 'existing' });
+// @ts-expect-error Creation still requires visible credential labels.
+void replicaReceiver.prepare({ replicas: replicaTargets });
+// @ts-expect-error Legacy receiver does not accept replica mode implicitly.
+void receiver.prepare({ replicas: replicaTargets, credentialMode: 'existing' });

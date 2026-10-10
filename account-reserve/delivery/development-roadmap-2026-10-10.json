@@ -1,0 +1,98 @@
+{
+  "updated": "2026-10-10",
+  "deadlineForFeatureDevelopment": "2026-10-12T08:00:00+02:00",
+  "direction": "Substantive development until Monday, then video and final polish with user. No prize probability or payout guarantee.",
+  "automationId": "continuitykit-utvikling-fram-til-mandag",
+  "boundaries": [
+    "No video or final submission before user resumes Monday",
+    "No Delveworn integration",
+    "Preserve existing passkeys, immutable snapshots and wire format",
+    "No money, wallet transactions, new accounts, domains or outreach",
+    "Avoid repeated human tests; label synthetic and builder-reported evidence correctly"
+  ],
+  "milestones": [
+    {
+      "id": "collection-recovery",
+      "priority": 1,
+      "status": "complete",
+      "value": "Open both prepared app snapshots from one deliberate passkey assertion, show missing/rejected separately, edit/export in one page.",
+      "acceptance": [
+        "Existing single-app recovery unchanged",
+        "Exactly one SDK assertion; no claim of one device prompt",
+        "Distinct app keys and authenticated text",
+        "No writes or persistent key session",
+        "Partial failures do not hide healthy sibling",
+        "Cancel, page exit, session expiry discard retained UI state",
+        "Typed public SDK, regression tests, mobile/browser QA and reviewed publication"
+      ],
+      "evidence": "evidence/collection-validation-2026-10-10.json",
+      "publishedSitesVersion": 8,
+      "publicCommit": "1db87a37610a165bff411ae76063940180622408"
+    },
+    {
+      "id": "replica-recovery",
+      "priority": 2,
+      "status": "complete",
+      "value": "A valid surviving encrypted copy can be recovered when another configured store is down or returns altered data.",
+      "acceptance": [
+        "Authenticate candidates inside SDK; never trust first HTTP 200",
+        "Bounded trusted stores and one key ceremony",
+        "Conflicting valid records fail closed",
+        "Explicit replication checks every intended copy before claiming readiness",
+        "No automatic retries of uncertain writes",
+        "Real local process/storage failures, not just visual switches",
+        "Do not claim independent providers without deployment evidence"
+      ],
+      "evidence": "evidence/text-replica-validation-2026-10-10.json",
+      "publicSitesChanged": false,
+      "publicCommit": "1073795b8868e8fedc003b46a6f625377261d966"
+    },
+    {
+      "id": "text-sdk-starter",
+      "priority": 3,
+      "status": "complete",
+      "value": "A clean developer can integrate private text without a wallet or account adapter.",
+      "acceptance": [
+        "Current create:starter targets legacy account flow; add clearly separate text starter",
+        "Use installed SDK public entry points",
+        "Fresh directory install/build/recover/export checks",
+        "Document owned recovery-origin/operator requirements",
+        "No artificial adoption or guessed onboarding times"
+      ],
+      "evidence": "evidence/text-starter-validation-2026-10-10.json",
+      "publicSitesChanged": false,
+      "publicCommit": "fedc6b9bd3592661e92d182f8449206fdd69510f"
+    },
+    {
+      "id": "replica-browser-reference",
+      "priority": 4,
+      "status": "complete",
+      "value": "Exercise authenticated surviving-copy recovery through a runnable browser integration using durable local stores, without making integrators write their own replica UI.",
+      "acceptance": [
+        "Preserve current public Sites, passkeys and snapshots",
+        "Use installed public SDK and the existing bounded gateway/SQLite operator hosts",
+        "Read-only recovery succeeds with one store down or corrupted; conflicting authenticated records stop",
+        "Preparation verifies every intended copy; no uncertain-write retries or extra automatic credential creation",
+        "Fresh browser flow, cancellation and exact export proof; distinguish synthetic local tests from native/provider operation"
+      ],
+      "evidence": "evidence/text-replica-browser-validation-2026-10-10.json",
+      "publicSitesChanged": false
+    },
+    {
+      "id": "native-replica-integration",
+      "priority": 5,
+      "status": "planned",
+      "value": "Provide a separately buildable native browser integration against configured operator storage without carrying the teaching authenticator into deployable assets.",
+      "acceptance": [
+        "Separate native build entrypoints from local synthetic server and fixtures",
+        "Validate exact owned recovery origin, RP and fixed replica policy before setup",
+        "Reuse SDK and distinct bounded operator admission; no open production admission endpoint",
+        "Clean installed consumer builds and security-boundary tests; no automatic native credential requests",
+        "Preserve existing public Sites, passkeys and immutable records; no accounts, funds, new domains or final submission",
+        "Native-device and independent-provider proof remain unclaimed unless actually performed"
+      ]
+    }
+  ],
+  "lastCompleted": "Replica browser reference completed with real local SQLite child failures, installed-package proof and browser QA.",
+  "next": "Build separately deployable native replica frontend with explicit operator configuration and no synthetic authenticator in its assets. Continue substantive development until Monday; video and final submission remain deferred."
+}

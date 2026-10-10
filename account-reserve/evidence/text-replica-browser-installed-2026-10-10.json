@@ -1,0 +1,21 @@
+{
+  "status": "PASSED",
+  "audit": "Installed public replica browser SDK runtime and strict types",
+  "temporaryDirectory": "/tmp/continuity-replica-browser-installed-V0nwEk",
+  "consumerDirectory": "/tmp/continuity-replica-browser-installed-V0nwEk/consumer",
+  "nodeVersion": "v24.19.0",
+  "nodePathEmpty": true,
+  "installedSdkSymlink": false,
+  "packageIntegrity": "sha512-UHWa/XZqpreu044iEkAAvrNqAzcUezA09qbKMFtmTBgvqOu5t2p9A4ClOhWWSXI2E2v7xNL/EWWpg4n1YtW5Fg==",
+  "packageFiles": 87,
+  "installedRuntimeTests": 17,
+  "runtimeFailures": 0,
+  "strictTypesPassed": true,
+  "publicEntryPoints": [
+    "@continuitykit/account-reserve/text-reserve",
+    "@continuitykit/account-reserve/text-browser"
+  ],
+  "offlineInstall": true,
+  "noRepositoryRelativeFixture": true,
+  "physicalPasskeyProof": false
+}

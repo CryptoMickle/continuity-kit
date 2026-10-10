@@ -145,6 +145,12 @@ This is optional developer functionality. The bundled two-app UI and the public
 Sites demo still use their existing single-store flow. Deploying the gateway alone
 does not replicate old records or enable replicas in that UI.
 
+For an installed browser example using these same runtime modules, generate the
+[text starter with `--replicas`](../text-starter/README.md#optional-two-store-browser-example).
+It includes the complete handoff, per-copy client verification and real local
+stop/corrupt controls. Its synthetic credential endpoint and disposable controller
+are teaching fixtures and must never be deployed with this operator package.
+
 Use separate database files and processes with the exact same `profile.json`.
 Give each store its own invitation file and single-use upload capability. A token
 issued by alpha cannot write to beta. Keep private files outside the served assets.

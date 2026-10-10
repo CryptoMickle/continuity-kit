@@ -1,4 +1,4 @@
-import { createTextReserveCredential, selectTextReserveCredential, prepareTextReserve, validateText, TEXT_PROTOCOL } from './text-reserve.mjs';
+import { createTextReserveCredential, selectTextReserveCredential, prepareTextReserve, prepareTextReserveReplicas, validateText, TEXT_PROTOCOL } from './text-reserve.mjs';
 import { createWebAuthnScope } from './webauthn-scope.mjs';
 
 const FIELDS = ['appId', 'recoveryOrigin', 'recoveryRpId'];
@@ -35,8 +35,79 @@ function ready(value, text, textDigest) {
     && typeof value.locator === 'string' && /^[A-Za-z0-9_-]{43}$/.test(value.locator) && value.independentlyVerified === true;
 }
 
+// Replica enrollment is additive. The legacy wire and ready shape stay exact.
+const REPLICA_STAGES = new Set(['preflight', 'write', 'readback', 'verify']);
+const REPLICA_STATUSES = new Set(['pending', 'missing', 'existing', 'written', 'verified', 'unavailable', 'rejected', 'unknown']);
+const REPLICA_CODES = new Set(['RESERVE_MISSING', 'RESERVE_EXISTS', 'STORE_UNAVAILABLE', 'STORE_WRITE_UNKNOWN', 'RECORD_INVALID', 'READBACK_FAILED', 'OPERATION_CANCELLED', 'MANIFEST_AUTH_FAILED', 'MANIFEST_INVALID', 'POLICY_MISMATCH', 'TEXT_AUTH_FAILED', 'TEXT_DIGEST_INVALID', 'TEXT_DIGEST_MISMATCH', 'TEXT_INVALID', 'CONFIG_INVALID', 'CREDENTIAL_MISMATCH']);
+const REPLICA_FAILURES = new Set(['SETUP_FAILED', 'HANDOFF_INVALID', 'HANDOFF_FAILED', 'REPLICA_IDS_MISMATCH', 'SETUP_EXPIRED', 'SETUP_WINDOW_CLOSED', 'OPERATION_CANCELLED', 'OPERATION_TIMED_OUT', 'CREDENTIAL_UNAVAILABLE', 'CREDENTIAL_MISMATCH', 'PRF_UNAVAILABLE', 'PASSKEY_OPERATION_FAILED', 'PASSKEY_DENIED', 'RESERVE_ALREADY_ATTEMPTED', 'REPLICA_PREPARATION_FAILED', 'REPLICA_CONFLICT', 'INDEPENDENT_CHECK_FAILED', 'RESERVE_MISSING', 'REPLICA_RECOVERY_FAILED', 'TEXT_INVALID']);
+function dataObject(value, fields) {
+  return exact(value, fields) && Object.getOwnPropertySymbols(value).length === 0
+    && Object.getOwnPropertyNames(value).length === fields.length
+    && fields.every(field => Object.hasOwn(Object.getOwnPropertyDescriptor(value, field), 'value'));
+}
+function replicaArray(value) {
+  check(Array.isArray(value) && value.length >= 2 && value.length <= 3, 'REPLICAS_INVALID');
+  check(Object.getOwnPropertySymbols(value).length === 0 && Object.getOwnPropertyNames(value).length === value.length + 1, 'REPLICAS_INVALID');
+  return Array.from({ length: value.length }, (_, index) => {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+    check(descriptor && Object.hasOwn(descriptor, 'value'), 'REPLICAS_INVALID'); return descriptor.value;
+  });
+}
+function replicaIdsCopy(value) {
+  const ids = replicaArray(value);
+  check(ids.every(id => typeof id === 'string' && /^[a-z][a-z0-9-]{0,31}$/.test(id)) && new Set(ids).size === ids.length, 'REPLICAS_INVALID');
+  return Object.freeze(ids);
+}
+function sameIds(value, ids) { return Array.isArray(value) && value.length === ids.length && ids.every((id, index) => value[index] === id); }
+function writeReplicasCopy(value, ids) {
+  const targets = replicaArray(value), stores = new Set();
+  const captured = targets.map((target, index) => {
+    check(dataObject(target, ['id', 'store']), 'REPLICAS_INVALID');
+    check(target.id === ids[index], 'REPLICA_IDS_MISMATCH');
+    const store = target.store;
+    check(store && !stores.has(store), 'REPLICAS_INVALID'); stores.add(store);
+    // Read each trusted adapter method once and preserve its receiver. Mutation
+    // during a pending passkey prompt cannot redirect the intended writes.
+    const get = store.get, put = store.putIfAbsent;
+    check(typeof get === 'function' && typeof put === 'function', 'STORE_INVALID');
+    return Object.freeze({ id: target.id, store: Object.freeze({ get: get.bind(store), putIfAbsent: put.bind(store) }) });
+  });
+  check(captured.length === ids.length, 'REPLICA_IDS_MISMATCH');
+  return Object.freeze(captured);
+}
+function diagnosticsCopy(value, ids, verified = false) {
+  try {
+    const values = replicaArray(value);
+    check(values.length === ids.length, 'HANDOFF_INVALID');
+    return Object.freeze(values.map((item, index) => {
+      const fields = item && Object.hasOwn(item, 'code') ? ['id', 'stage', 'status', 'code'] : ['id', 'stage', 'status'];
+      check(dataObject(item, fields) && item.id === ids[index] && REPLICA_STAGES.has(item.stage) && REPLICA_STATUSES.has(item.status), 'HANDOFF_INVALID');
+      check(!Object.hasOwn(item, 'code') || REPLICA_CODES.has(item.code), 'HANDOFF_INVALID');
+      check(!verified || item.stage === 'verify' && item.status === 'verified' && fields.length === 3, 'HANDOFF_INVALID');
+      return Object.freeze({ id: item.id, stage: item.stage, status: item.status, ...(fields.length === 4 ? { code: item.code } : {}) });
+    }));
+  } catch { return undefined; }
+}
+function pendingDiagnostics(ids) { return Object.freeze(ids.map(id => Object.freeze({ id, stage: 'preflight', status: 'pending' }))); }
+function replicaFailure(code, ids, recordMayExist, diagnostics) {
+  const error = fail(REPLICA_FAILURES.has(code) ? code : 'SETUP_FAILED');
+  error.replicas = diagnosticsCopy(diagnostics, ids) ?? pendingDiagnostics(ids);
+  // A contradictory peer flag cannot erase reported write-stage uncertainty.
+  error.recordMayExist = recordMayExist || error.replicas.some(item => item.stage !== 'preflight');
+  return error;
+}
+function replicaReady(value, text, digest, ids) {
+  if (!exact(value, ['status', 'protocol', 'text', 'textDigest', 'locator', 'independentlyVerified', 'replicas'])) return undefined;
+  const { replicas, ...single } = value;
+  const diagnostics = diagnosticsCopy(replicas, ids, true);
+  return ready(single, text, digest) && diagnostics ? Object.freeze({ ...single, replicas: diagnostics }) : undefined;
+}
+
 /** Call synchronously from a user click. This flow transports text only. */
-export function startTextReserveSetup({ config: supplied, originalOrigin, recoveryUrl, text: suppliedText, signal, onState, timeoutMs, window: suppliedWindow }) {
+export function startTextReserveSetup(options) { return startSetup(options); }
+/** Explicit replica enrollment; call synchronously from the original app click. */
+export function startTextReserveReplicaSetup(options) { return startSetup(options, replicaIdsCopy(options.replicaIds)); }
+function startSetup({ config: supplied, originalOrigin, recoveryUrl, text: suppliedText, signal, onState, timeoutMs, window: suppliedWindow }, replicaIds) {
   const config = configCopy(supplied), window = browser(suppliedWindow), timeout = duration(timeoutMs);
   const original = trustedOrigin(originalOrigin), current = trustedUrl(window.location.href), target = trustedUrl(recoveryUrl);
   check(current.origin === original.origin && original.origin !== config.recoveryOrigin && original.hostname !== config.recoveryRpId, 'ORIGIN_INVALID');
@@ -44,7 +115,7 @@ export function startTextReserveSetup({ config: supplied, originalOrigin, recove
   check(!signal?.aborted, 'OPERATION_CANCELLED');
   let text = validateText(suppliedText);
   const nonce = Array.from(crypto.getRandomValues(new Uint8Array(32)), value => value.toString(16).padStart(2, '0')).join('');
-  target.hash = 'text-enroll=' + nonce;
+  target.hash = replicaIds ? 'text-replica-enroll=' + nonce + ':' + config.appId + ':' + replicaIds.join(',') : 'text-enroll=' + nonce;
   const digestPromise = crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(value => Array.from(new Uint8Array(value), byte => byte.toString(16).padStart(2, '0')).join(''));
   digestPromise.catch(() => {});
   let popup;
@@ -57,17 +128,24 @@ export function startTextReserveSetup({ config: supplied, originalOrigin, recove
     text = undefined; clearTimeout(timer); clearInterval(poll); port?.close(); transferredPort?.close();
     window.removeEventListener('message', receive); window.removeEventListener('pagehide', pagehide); signal?.removeEventListener('abort', abort);
   };
-  const stop = code => {
+  const stop = (code, details) => {
     if (phase === 'ready' || phase === 'failed') return;
     const recordMayExist = phase === 'transferred'; phase = 'failed';
     try { popup.postMessage({ version: 1, kind: 'cancel', nonce }, target.origin); } catch { /* popup gone */ }
-    clean(); emit(onState, 'failed', code); const error = fail(code); error.recordMayExist = recordMayExist; reject(error);
+    const error = replicaIds ? replicaFailure(code, replicaIds, typeof details?.recordMayExist === 'boolean' ? details.recordMayExist : recordMayExist, details?.replicas) : fail(code);
+    if (!replicaIds) error.recordMayExist = recordMayExist;
+    clean(); emit(onState, 'failed', error.code); reject(error);
   };
   function abort() { stop('OPERATION_CANCELLED'); }
   function pagehide() { stop('OPERATION_CANCELLED'); }
   function receive(event) {
     if (phase !== 'waiting' || Date.now() >= expiresAt) return;
-    if (event.origin === target.origin && event.source === popup && exact(event.data, ['version', 'kind', 'nonce', 'code'])
+    if (replicaIds && event.origin === target.origin && event.source === popup && exact(event.data, ['version', 'kind', 'nonce', 'code', 'recordMayExist', 'replicas'])
+      && event.data.version === 1 && event.data.kind === 'failed' && event.data.nonce === nonce) {
+      if (!REPLICA_FAILURES.has(event.data.code) || typeof event.data.recordMayExist !== 'boolean' || !diagnosticsCopy(event.data.replicas, replicaIds)) { stop('HANDOFF_INVALID'); return; }
+      stop(event.data.code, event.data); return;
+    }
+    if (!replicaIds && event.origin === target.origin && event.source === popup && exact(event.data, ['version', 'kind', 'nonce', 'code'])
       && event.data.version === 1 && event.data.kind === 'failed' && event.data.nonce === nonce && /^[A-Z][A-Z0-9_]{1,63}$/.test(event.data.code)) {
       stop(event.data.code); return;
     }
@@ -78,17 +156,22 @@ export function startTextReserveSetup({ config: supplied, originalOrigin, recove
       port.onmessage = async event => {
         if (phase !== 'transferred' || Date.now() >= expiresAt) return;
         const message = event.data;
-        if (exact(message, ['kind', 'code']) && message.kind === 'failed' && /^[A-Z][A-Z0-9_]{1,63}$/.test(message.code)) { stop(message.code); return; }
+        if (replicaIds && message?.kind === 'failed') {
+          if (!exact(message, ['kind', 'code', 'recordMayExist', 'replicas']) || !REPLICA_FAILURES.has(message.code) || typeof message.recordMayExist !== 'boolean' || !diagnosticsCopy(message.replicas, replicaIds)) { stop('HANDOFF_INVALID'); return; }
+          stop(message.code, message); return;
+        }
+        if (!replicaIds && exact(message, ['kind', 'code']) && message.kind === 'failed' && /^[A-Z][A-Z0-9_]{1,63}$/.test(message.code)) { stop(message.code); return; }
         if (!exact(message, ['kind', 'result']) || message.kind !== 'prepared') return;
         let digest; try { digest = await digestPromise; } catch { stop('HANDOFF_FAILED'); return; }
         if (phase !== 'transferred') return;
         if (signal?.aborted) { stop('OPERATION_CANCELLED'); return; }
         if (Date.now() >= expiresAt) { stop('SETUP_EXPIRED'); return; }
-        if (!ready(message.result, text, digest)) { stop('HANDOFF_INVALID'); return; }
-        const result = Object.freeze({ ...message.result }); phase = 'ready'; clean(); emit(onState, 'ready'); resolve(result);
+        const result = replicaIds ? replicaReady(message.result, text, digest, replicaIds) : ready(message.result, text, digest) && Object.freeze({ ...message.result });
+        if (!result) { stop('HANDOFF_INVALID'); return; }
+        phase = 'ready'; clean(); emit(onState, 'ready'); resolve(result);
       };
       port.start(); popup.postMessage({ version: 1, kind: 'channel', nonce }, target.origin, [channel.port2]);
-      port.postMessage({ kind: 'text', config, text, expiresAt }); emit(onState, 'preparing');
+      port.postMessage({ kind: 'text', config, text, expiresAt, ...(replicaIds ? { replicaIds } : {}) }); emit(onState, 'preparing');
     } catch { stop('HANDOFF_FAILED'); }
   }
   window.addEventListener('message', receive); window.addEventListener('pagehide', pagehide, { once: true });
@@ -100,13 +183,19 @@ export function startTextReserveSetup({ config: supplied, originalOrigin, recove
 }
 
 /** Construct on B page load; creating/selecting a credential requires prepare(). */
-export function createTextReserveReceiver({ config: supplied, originalOrigin, onState, timeoutMs, window: suppliedWindow }) {
+export function createTextReserveReceiver(options) { return createReceiver(options); }
+/** B must configure the same ordered public replica labels as A. */
+export function createTextReserveReplicaReceiver(options) { return createReceiver(options, replicaIdsCopy(options.replicaIds)); }
+function createReceiver({ config: supplied, originalOrigin, onState, timeoutMs, window: suppliedWindow }, replicaIds) {
   const config = configCopy(supplied), window = browser(suppliedWindow), timeout = duration(timeoutMs);
   const original = trustedOrigin(originalOrigin);
   check(trustedUrl(window.location.href).origin === config.recoveryOrigin && original.origin !== config.recoveryOrigin && original.hostname !== config.recoveryRpId, 'ORIGIN_INVALID');
-  const hash = window.location.hash, nonce = /^#text-enroll=[a-f0-9]{64}$/.test(hash) ? hash.slice(13) : null;
+  const hash = window.location.hash;
+  const replicaMatch = replicaIds ? /^#text-replica-enroll=([a-f0-9]{64}):([A-Za-z0-9][A-Za-z0-9._-]{0,95}):([a-z][a-z0-9-]{0,31}(?:,[a-z][a-z0-9-]{0,31}){1,2})$/.exec(hash) : null;
+  const nonce = replicaIds ? replicaMatch?.[1] ?? null : /^#text-enroll=[a-f0-9]{64}$/.test(hash) ? hash.slice(13) : null;
+  const requestReplicaIds = replicaMatch?.[3].split(',');
   const opener = window.opener, isEnrollment = Boolean(nonce && opener);
-  if (hash.startsWith('#text-enroll=')) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  if (hash.startsWith('#text-enroll=') || hash.startsWith('#text-replica-enroll=')) window.history.replaceState(null, '', window.location.pathname + window.location.search);
   let expiresAt = Date.now() + timeout, attempted = false, received = false, payload, closed = false, completed = false, port, timer, resolvePayload, rejectPayload;
   let externalSignal, externalAbort;
   const controller = new AbortController();
@@ -115,14 +204,17 @@ export function createTextReserveReceiver({ config: supplied, originalOrigin, on
     window.removeEventListener('message', receiveChannel); window.removeEventListener('message', receiveCancel); window.removeEventListener('pagehide', dispose);
     externalSignal?.removeEventListener('abort', externalAbort);
   };
-  const stop = code => {
-    if (closed || completed) return;
-    closed = true; const error = fail(code); error.recordMayExist = received;
+  const stop = (code, details) => {
+    if (closed || completed) return controller.signal.reason;
+    closed = true;
+    const error = replicaIds ? replicaFailure(code, replicaIds, typeof details?.recordMayExist === 'boolean' ? details.recordMayExist : received, details?.replicas) : fail(code);
+    if (!replicaIds) error.recordMayExist = received;
     try {
-      if (port) port.postMessage({ kind: 'failed', code });
-      else if (isEnrollment) opener.postMessage({ version: 1, kind: 'failed', nonce, code }, original.origin);
+      const extra = replicaIds ? { recordMayExist: error.recordMayExist, replicas: error.replicas } : {};
+      if (port) port.postMessage({ kind: 'failed', code: error.code, ...extra });
+      else if (isEnrollment) opener.postMessage({ version: 1, kind: 'failed', nonce, code: error.code, ...extra }, original.origin);
     } catch { /* caller gone */ }
-    controller.abort(error); rejectPayload?.(error); clear(); emit(onState, 'failed', code);
+    controller.abort(error); rejectPayload?.(error); clear(); emit(onState, 'failed', error.code); return error;
   };
   function dispose() { stop('OPERATION_CANCELLED'); }
   function receiveCancel(event) { if (matches(event, original.origin, opener, nonce, 'cancel')) stop('OPERATION_CANCELLED'); }
@@ -132,8 +224,9 @@ export function createTextReserveReceiver({ config: supplied, originalOrigin, on
     port.onmessage = event => {
       if (closed || Date.now() >= expiresAt) return;
       const value = event.data;
-      if (!exact(value, ['kind', 'config', 'text', 'expiresAt']) || value.kind !== 'text'
+      if (!exact(value, ['kind', 'config', 'text', 'expiresAt', ...(replicaIds ? ['replicaIds'] : [])]) || value.kind !== 'text'
         || !exact(value.config, FIELDS) || !FIELDS.every(field => value.config[field] === config[field])
+        || replicaIds && !sameIds(value.replicaIds, replicaIds)
         || !Number.isSafeInteger(value.expiresAt) || value.expiresAt <= Date.now() || value.expiresAt > Date.now() + MAX_TIMEOUT) { stop('HANDOFF_INVALID'); return; }
       try { validateText(value.text); } catch { stop('TEXT_INVALID'); return; }
       received = true; payload = value; port.onmessage = () => {};
@@ -148,9 +241,18 @@ export function createTextReserveReceiver({ config: supplied, originalOrigin, on
     window.addEventListener('message', receiveCancel); window.addEventListener('pagehide', dispose, { once: true }); emit(onState, 'available');
   }
   function active() { if (closed || controller.signal.aborted) throw controller.signal.reason ?? fail('OPERATION_CANCELLED'); if (Date.now() >= expiresAt) throw fail('SETUP_EXPIRED'); }
-  async function prepare({ store, user, credentialMode = 'create', webAuthnClient, signal } = {}) {
+  async function prepare({ store, replicas: suppliedReplicas, user, credentialMode = 'create', webAuthnClient, signal } = {}) {
     check(isEnrollment, 'ENROLLMENT_UNAVAILABLE'); check(!attempted, 'RESERVE_ALREADY_ATTEMPTED'); active();
-    check(store && typeof store.get === 'function' && typeof store.putIfAbsent === 'function', 'STORE_INVALID');
+    let replicas;
+    if (replicaIds) {
+      check(store === undefined, 'REPLICAS_INVALID');
+      replicas = writeReplicasCopy(suppliedReplicas, replicaIds);
+      if (replicaMatch[2] !== config.appId) throw stop('HANDOFF_INVALID', { recordMayExist: false });
+      if (!sameIds(requestReplicaIds, replicaIds)) throw stop('REPLICA_IDS_MISMATCH', { recordMayExist: false });
+    } else {
+      check(suppliedReplicas === undefined, 'REPLICAS_INVALID');
+      check(store && typeof store.get === 'function' && typeof store.putIfAbsent === 'function', 'STORE_INVALID');
+    }
     check(credentialMode === 'create' || credentialMode === 'existing', 'CREDENTIAL_MODE_INVALID');
     if (credentialMode === 'create') check(user && typeof user.name === 'string' && user.name.trim() && user.name.length <= 128 && typeof user.displayName === 'string' && user.displayName.trim() && user.displayName.length <= 128, 'USER_INVALID');
     check(!signal?.aborted, 'OPERATION_CANCELLED'); attempted = true;
@@ -173,9 +275,11 @@ export function createTextReserveReceiver({ config: supplied, originalOrigin, on
           opener.postMessage({ version: 1, kind: 'receive', nonce }, original.origin);
         });
         rejectPayload = undefined; active(); emit(onState, 'preparing');
-        const result = await prepareTextReserve({ config, recoveryCredential: credential, text: receivedPayload.text, store, webAuthnClient, signal: controller.signal });
+        const result = replicaIds
+          ? await prepareTextReserveReplicas({ config, recoveryCredential: credential, text: receivedPayload.text, replicas, webAuthnClient, signal: controller.signal })
+          : await prepareTextReserve({ config, recoveryCredential: credential, text: receivedPayload.text, store, webAuthnClient, signal: controller.signal });
         active(); port.postMessage({ kind: 'prepared', result }); completed = true; clear(); emit(onState, 'ready'); return result;
-      } catch (error) { stop(codeOf(error)); throw error; }
+      } catch (error) { const stopped = stop(codeOf(error), error); throw replicaIds ? stopped ?? replicaFailure(codeOf(error), replicaIds, received, error?.replicas) : error; }
       finally { credential?.close(); receivedPayload = undefined; ceremony.close(); }
     })();
     try { return await Promise.race([work, cancelled]); }

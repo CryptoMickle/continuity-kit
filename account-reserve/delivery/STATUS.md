@@ -1,3 +1,41 @@
+# Replica browser reference — 10 October 2026
+
+The text starter now has an optional `--replicas` mode with a full A-to-B browser
+handoff and two actual SQLite child processes. Both configured copies must pass
+independent verification before preparation becomes ready. Recovery authenticates
+every candidate and can open a valid survivor while another store is stopped or
+returns altered ciphertext. Conflicting authenticated copies stop without text.
+
+The browser shows per-copy verification separately from process availability.
+Storage controls require the local draft to be closed first. Changing storage
+clears old verification results; unknown writes never trigger automatic retries,
+repair or new credential creation. Existing single-store APIs remain unchanged.
+
+Validation: 29 final replica browser/backend/UI/installed-generator cases passed.
+The default starter and existing browser/replica regressions also passed (62 cases
+before the final conservative diagnostic hardening). An independent clean package
+replay passed 17 browser tests plus strict TypeScript. The installed generator's
+consumer ran four fresh recovery processes using only B's address/output folder,
+with exact exports and write attempts blocked by the recovery transport.
+
+Browser QA completed setup, closed the setup tabs, recovered with A unavailable
+and Alpha stopped, rejected altered Alpha while opening Beta, and displayed no
+plaintext when only altered Alpha remained. Restarting Beta restored recovery.
+390px layout had no horizontal overflow. TXT export was requested in the browser;
+its resulting download file was not confirmed. Exact TXT/JSON exports are covered
+by the automated proof.
+
+[Validation scope](../evidence/text-replica-browser-validation-2026-10-10.json) ·
+[Installed SDK replay](../evidence/text-replica-browser-installed-2026-10-10.json) ·
+[Walkthrough](../text-starter/README.md#optional-two-store-browser-example).
+This is a disposable local synthetic reference, not a hosted/native credential
+service. The parent credential, B frontend, gateway and machine remain shared.
+Public Sites and existing reserves are unchanged. Next: a separately buildable
+native replica integration, with no synthetic endpoint in its deployable assets.
+Video and final submission remain deferred until Monday.
+
+---
+
 # Account-free developer starter — 10 October 2026
 
 The new `npm run create:text-starter -- /absolute/empty/directory` generates a

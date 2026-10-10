@@ -44,6 +44,18 @@ The [installed-generator replay](evidence/text-starter-installed-package-2026-10
 and [final validation](evidence/text-starter-validation-2026-10-10.json) record
 the clean install, deliberate A outage, fresh recovery and exact exports.
 
+For a runnable browser flow backed by **two separate SQLite storage processes**,
+generate with `npm run create:text-starter -- /absolute/empty/replica-demo --replicas`.
+It uses A on port 6073 and B on 6074, plus the same install/build/doctor/test/dev
+steps. The UI can stop a storage process and deliberately alter its disposable
+encrypted copy. It authenticates the survivor in the client; a running process
+alone is never shown as a verified copy. Both stores must verify before setup
+is complete. See the [two-store walkthrough](text-starter/README.md#optional-two-store-browser-example).
+
+This optional package reuses the operator gateway and unchanged SQLite runtime.
+It still simulates the credential locally and shares one machine, frontend and
+gateway. It does not change hosted Sites or establish independent providers.
+
 To run the repository's generator/UI regressions, first install the root and
 shared test harness dependencies into your normal npm cache:
 
@@ -51,6 +63,8 @@ shared test harness dependencies into your normal npm cache:
 npm ci --ignore-scripts --no-audit --no-fund
 npm --prefix integrations/multi-app ci --ignore-scripts --no-audit --no-fund
 npm run test:text-starter
+npm run test:replica-browser
+npm run test:replica-starter
 ```
 
 The regression suite installs generated consumers offline and respects npm's
@@ -171,6 +185,12 @@ showCopyStatus(checkedCopies);
 once. Full readiness requires exact readback and independent passkey verification
 of every copy. An uncertain or partial write is reported with `recordMayExist`;
 the integration must not retry automatically or create another key.
+
+For A-to-B setup, the additive browser helpers `startTextReserveReplicaSetup`
+and `createTextReserveReplicaReceiver` bind the exact ordered `replicaIds` on both
+pages. Different app IDs or replica policies fail before a credential prompt.
+The sender only becomes ready after every intended copy verifies. The ordinary
+single-store helpers and existing records retain their original behavior.
 
 The [operator package](operator/README.md#optional-replicas-for-a-custom-text-integration)
 includes an optional fixed-route gateway for separate SQLite store processes.
