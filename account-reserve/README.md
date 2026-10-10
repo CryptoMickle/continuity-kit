@@ -24,6 +24,13 @@ separates chain verification, the builder report and controlled HTTP observation
 The integration includes a wallet-free command for verifying either exact receipt.
 These are development payments, not external usage. The text API remains account-free.
 
+The experimental `@continuitykit/account-reserve/payments` entry lets a separate
+application import the typed client and credential-free receipt reader from the
+installed SDK. The [integration example](integrations/payment-client/README.md)
+connects an existing account session, separates authentication from collection,
+and demonstrates explicit signer cleanup. No issuer tools or deployment state are
+exposed through that browser entry.
+
 ## Start with your own text editor
 
 The [text starter](text-starter/README.md) generates a separate, installable

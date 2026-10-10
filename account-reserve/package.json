@@ -38,6 +38,10 @@
     "./text-browser": {
       "types": "./sdk/text-browser.d.ts",
       "import": "./sdk/text-browser.mjs"
+    },
+    "./payments": {
+      "types": "./payments/index.d.ts",
+      "import": "./payments/index.mjs"
     }
   },
   "files": [
@@ -85,7 +89,16 @@
     "text-native/operator-runtime/replica-gateway.mjs",
     "text-native/operator-runtime/cli.mjs",
     "scripts/create-native-text-starter.mjs",
-    "operator/cli.mjs"
+    "operator/cli.mjs",
+    "payments/index.mjs",
+    "payments/index.d.ts",
+    "payments/testnet.mjs",
+    "payments/guard.mjs",
+    "payments/pending.mjs",
+    "payments/executor.mjs",
+    "release/client-profile.mjs",
+    "release/paced-rpc.mjs",
+    "release/profile.mjs"
   ],
   "scripts": {
     "dev": "node server.mjs",

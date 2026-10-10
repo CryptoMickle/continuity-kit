@@ -14,6 +14,28 @@ This directory is an additive experiment. The earlier `PaymentRight` contract,
 legacy one-payment adapter, existing passkeys and ciphertext records are unchanged.
 The account-free text reserve continues to work without blockchain transactions.
 
+## Use it from an installed SDK
+
+The experimental `@continuitykit/account-reserve/payments` export includes
+TypeScript declarations and two factories: `createTestnetPaymentClient` accepts an
+existing recovered account; `createTestnetPaymentReader` checks an existing local
+transaction record without a credential or signer. Both use the same fixed Monad
+testnet RPCs and policy checks as the demonstration. They accept no transport or
+endpoint override through the public entry.
+
+Follow the [separate-app example](../integrations/payment-client/README.md) to
+install the SDK tarball and connect your existing account recovery action. Its
+copyable helper separates opening, explicit collection and receipt checking, and
+closes the parent signing session on completion, errors, cancellation and expiry.
+Raw client consumers must perform that cleanup themselves; closing an executor
+alone does not close the recovered signer. A reader can update the public local
+journal when a receipt is verified, but never signs or broadcasts.
+
+The package includes only the required payment runtime and browser-safe release
+helpers. Issuer tools, contract deployment, Sites workers and operational files
+are excluded from this npm entry. The package remains experimental and is
+distributed from the public source as a tarball; it is not published to npm.
+
 ## Local verification
 
 Use Node 24 or newer. From `account-reserve/` in the public repository:
