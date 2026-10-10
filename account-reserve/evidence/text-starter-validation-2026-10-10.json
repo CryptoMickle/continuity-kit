@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-10T14:04:41.806921+00:00",
+  "checkedAt": "2026-10-10T14:08:02.793160+00:00",
   "status": "PASSED",
   "scope": "Account-free installed-SDK teaching starter, synthetic localhost only; no public Sites deployment",
   "tests": {
@@ -8,7 +8,8 @@
       "failed": 0
     },
     "independentInstalledGeneratorReplay": "PASSED",
-    "finalBrowserBuild": "PASSED"
+    "finalBrowserBuild": "PASSED",
+    "npmConfiguredCacheReplay": "PASSED: final four-test suite with npm_config_cache and no SDK_TEST_NPM_CACHE override"
   },
   "installedReplay": "text-starter-installed-package-2026-10-10.json",
   "browser": {
@@ -52,8 +53,8 @@
     "text-starter/style.css": "5462f0b677d70d959f75a8845d277fd27547d4a3131c8002d8a9e647cb1b2b4b",
     "text-starter/synthetic-client.mjs": "683bb3e97bae69e9bcc7e842a968b069be9a52ada85589c1e0b668848bada45e",
     "text-starter/vite.config.mjs": "e89f0b27856019c90234c0dc562a09d0319b5af50de42006081949640003f68d",
-    "scripts/create-text-starter.mjs": "4b46345269b02502e2b883d52cccff5eeb9cad5e7dabd786b9f218495efacc9d",
-    "tests/text-starter-package.mjs": "7b30f9a84c127d88987615a7f7d9e94b06f8ab02b7920f3f01b713cb23b7bab9",
+    "scripts/create-text-starter.mjs": "67f27ec04946748f79efc85b0debca1dcf5fc10f45540b61ae2723b5ba24b996",
+    "tests/text-starter-package.mjs": "8abcfe87ecbac2a8559aef1285a99dcff9e9b7fbb22d0ff7d4570eb67eac3088",
     "package.json": "ef9da942ceba1d8b608a7c767b2ec8615e27fdf380ada0b6857b3bbd0a4dc16c"
   },
   "limits": [

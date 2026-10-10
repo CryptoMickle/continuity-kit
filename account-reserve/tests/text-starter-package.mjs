@@ -13,7 +13,7 @@ import { validateText } from '../sdk/text-reserve.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const npmCli = join(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js');
 const env = { ...process.env, PATH: dirname(process.execPath) + ':' + process.env.PATH,
-  npm_config_cache: process.env.SDK_TEST_NPM_CACHE ?? '/tmp/continuity-reserve-npm', npm_config_update_notifier: 'false', npm_config_offline: 'true' };
+  ...(process.env.SDK_TEST_NPM_CACHE ? { npm_config_cache: process.env.SDK_TEST_NPM_CACHE } : {}), npm_config_update_notifier: 'false', npm_config_offline: 'true' };
 function run(args, cwd, ok = true) {
   return new Promise((done, reject) => {
     const child = spawn(process.execPath, args, { cwd, env, stdio: ['ignore','pipe','pipe'] }); let stdout = '', stderr = '';

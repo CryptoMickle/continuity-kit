@@ -31,7 +31,7 @@ export async function createTextStarter(supplied) {
   const npmCli = join(dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js');
   const pack = spawnSync(process.execPath, [npmCli, 'pack', '--ignore-scripts', '--json', '--pack-destination', target], {
     cwd: root, encoding: 'utf8', maxBuffer: 5 * 1024 * 1024,
-    env: { ...process.env, npm_config_cache: process.env.SDK_TEST_NPM_CACHE ?? '/tmp/continuity-reserve-npm', npm_config_update_notifier: 'false', npm_config_offline: 'true' },
+    env: { ...process.env, ...(process.env.SDK_TEST_NPM_CACHE ? { npm_config_cache: process.env.SDK_TEST_NPM_CACHE } : {}), npm_config_update_notifier: 'false', npm_config_offline: 'true' },
   });
   if (pack.status !== 0) throw new Error('LOCAL_SDK_PACK_FAILED');
   const [packed] = JSON.parse(pack.stdout);

@@ -53,5 +53,5 @@
     "physicalPasskeyProof": false,
     "productionServer": false
   },
-  "note": "Independent installed-generator replay before the final heading-only close/reopen correction. The final source passed the root four-test suite again, including generated build and fresh processes."
+  "note": "Independent installed-generator replay before final heading-only close/reopen correction and npm cache-default correction. Final source passed the root four-test suite again, including installed generator, generated build and fresh processes, with npm_config_cache respected."
 }

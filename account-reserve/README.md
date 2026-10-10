@@ -44,6 +44,18 @@ The [installed-generator replay](evidence/text-starter-installed-package-2026-10
 and [final validation](evidence/text-starter-validation-2026-10-10.json) record
 the clean install, deliberate A outage, fresh recovery and exact exports.
 
+To run the repository's generator/UI regressions, first install the root and
+shared test harness dependencies into your normal npm cache:
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm --prefix integrations/multi-app ci --ignore-scripts --no-audit --no-fund
+npm run test:text-starter
+```
+
+The regression suite installs generated consumers offline and respects npm's
+configured cache. `SDK_TEST_NPM_CACHE` optionally selects a separate test cache.
+
 ## One reserve passkey, two real editor integrations
 
 [Open the two-app demo](https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/).
