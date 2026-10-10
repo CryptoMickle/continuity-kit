@@ -6,14 +6,16 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const files = ['package.json','package-lock.json','README.md','config.mjs','adapter.mjs','index.html','main.mjs','style.css','vite.config.mjs','server.mjs','doctor.mjs','loopback-fetch.mjs','synthetic-client.mjs','smoke.mjs','recover-process.mjs'];
 const replicaFiles = ['replica-server.mjs','replica-worker.mjs','replica-transport.mjs','replica-smoke.mjs','replica-recover-process.mjs'];
+const collectionFiles = ['collection-config.mjs','collection-server.mjs','collection-smoke.mjs','replica-worker.mjs','replica-transport.mjs'];
 const operatorFiles = ['profile.mjs','store.mjs','host.mjs','replica-gateway.mjs'];
 const within = (child, parent) => child === parent || child.startsWith(parent + sep);
 const ordered = value => JSON.stringify(Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.localeCompare(b))));
 
 /** Files only. No install, server, credential, wallet, provider or deployment. */
 export async function createTextStarter(supplied, options = {}) {
-  if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => key !== 'replicas') || (options.replicas !== undefined && typeof options.replicas !== 'boolean')) throw new Error('OPTIONS_INVALID');
-  const replicas = options.replicas === true;
+  if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['replicas','collectionReplicas'].includes(key))
+    || Object.values(options).some(value => value !== undefined && typeof value !== 'boolean') || options.replicas && options.collectionReplicas) throw new Error('OPTIONS_INVALID');
+  const replicas = options.replicas === true, collectionReplicas = options.collectionReplicas === true;
   if (typeof supplied !== 'string' || !supplied.trim()) throw new Error('TARGET_REQUIRED');
   const target = resolve(supplied), canonicalRoot = await realpath(root);
   if (within(target, resolve(root)) || within(target, canonicalRoot)) throw new Error('TARGET_MUST_BE_OUTSIDE_SOURCE');
@@ -40,11 +42,21 @@ export async function createTextStarter(supplied, options = {}) {
   if (pack.status !== 0) throw new Error('LOCAL_SDK_PACK_FAILED');
   const [packed] = JSON.parse(pack.stdout);
   if (!packed?.filename || !/^[a-z0-9][a-z0-9._-]+\.tgz$/.test(packed.filename) || !packed.integrity?.startsWith('sha512-')) throw new Error('LOCAL_SDK_PACK_INVALID');
-  for (const name of files) if (name !== 'package-lock.json') await cp(join(template, name), join(target, name), { errorOnExist: true });
-  if (replicas) {
-    for (const name of replicaFiles) await cp(join(template, name), join(target, name), { errorOnExist: true });
+  for (const name of files) if (name !== 'package-lock.json') {
+    const source = collectionReplicas && ['main.mjs','index.html','style.css'].includes(name) ? 'collection-' + name : name;
+    await cp(join(template, source), join(target, name), { errorOnExist: true });
+  }
+  if (replicas || collectionReplicas) {
+    for (const name of collectionReplicas ? collectionFiles : replicaFiles) await cp(join(template, name), join(target, name), { errorOnExist: true });
     await mkdir(join(target, 'operator-runtime'));
     for (const name of operatorFiles) await cp(join(root, 'operator', name), join(target, 'operator-runtime', name), { errorOnExist: true });
+  }
+  if (collectionReplicas) {
+    await cp(join(root, 'starter/prism-art.mjs'), join(target, 'prism-art.mjs'), { errorOnExist: true });
+    const main = await readFile(join(target, 'main.mjs'), 'utf8');
+    await writeFile(join(target, 'main.mjs'), main.replace("'../starter/prism-art.mjs'", "'./prism-art.mjs'"));
+    const index = await readFile(join(target, 'index.html'), 'utf8');
+    await writeFile(join(target, 'index.html'), index.replaceAll('collection-main.mjs', 'main.mjs').replaceAll('collection-style.css', 'style.css'));
   }
   await cp(join(root, 'LICENSE'), join(target, 'LICENSE'), { errorOnExist: true });
   await cp(join(root, 'delivery/THIRD_PARTY_NOTICES.md'), join(target, 'THIRD_PARTY_NOTICES.md'), { errorOnExist: true });
@@ -54,16 +66,22 @@ export async function createTextStarter(supplied, options = {}) {
     manifest.scripts.doctor = 'node doctor.mjs --replicas';
     manifest.scripts.test = 'node replica-smoke.mjs';
   }
+  if (collectionReplicas) {
+    manifest.scripts.dev = 'node collection-server.mjs';
+    manifest.scripts.doctor = 'node doctor.mjs --collection-replicas';
+    manifest.scripts.test = 'node collection-smoke.mjs';
+  }
   manifest.dependencies['@continuitykit/account-reserve'] = 'file:./' + packed.filename;
   lock.packages[''].dependencies = manifest.dependencies;
   sdkLock.integrity = packed.integrity; sdkLock.resolved = 'file:' + packed.filename; sdkLock.version = packed.version;
   await writeFile(join(target, 'package.json'), JSON.stringify(manifest, null, 2) + '\n');
   await writeFile(join(target, 'package-lock.json'), JSON.stringify(lock, null, 2) + '\n', { flag: 'wx' });
   await writeFile(join(target, 'sdk-package.json'), JSON.stringify({ name: packed.name, version: packed.version, filename: packed.filename, integrity: packed.integrity }, null, 2) + '\n', { flag: 'wx' });
-  return { directory: target, sdkIntegrity: packed.integrity, status: 'Files only; not installed or started', next: ['npm ci --ignore-scripts','npm run build','npm run doctor','npm test','npm run dev'], replicas, mode: 'Local synthetic credentials; never deploy this server' };
+  return { directory: target, sdkIntegrity: packed.integrity, status: 'Files only; not installed or started', next: ['npm ci --ignore-scripts','npm run build','npm run doctor','npm test','npm run dev'], replicas, collectionReplicas, mode: 'Local synthetic credentials; never deploy this server' };
 }
 if (process.argv[1] && await realpath(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2), replicas = args.includes('--replicas'), paths = args.filter(arg => arg !== '--replicas');
-  if (paths.length !== 1 || args.length !== (replicas ? 2 : 1) || paths[0].startsWith('--')) throw new Error('Usage: node scripts/create-text-starter.mjs /absolute/empty/directory [--replicas]');
-  console.log(JSON.stringify(await createTextStarter(paths[0], { replicas })));
+  const args = process.argv.slice(2), replicas = args.includes('--replicas'), collectionReplicas = args.includes('--collection-replicas');
+  const paths = args.filter(arg => !['--replicas','--collection-replicas'].includes(arg));
+  if (replicas && collectionReplicas || paths.length !== 1 || args.length !== (replicas || collectionReplicas ? 2 : 1) || paths[0].startsWith('--')) throw new Error('Usage: node scripts/create-text-starter.mjs /absolute/empty/directory [--replicas | --collection-replicas]');
+  console.log(JSON.stringify(await createTextStarter(paths[0], { replicas, collectionReplicas })));
 }

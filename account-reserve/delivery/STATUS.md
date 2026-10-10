@@ -1,3 +1,49 @@
+# Collection browser reference — 10 October 2026
+
+The text starter now has a `--collection-replicas` mode: two app drafts,
+one deliberate recovery action, and two authenticated storage copies per app.
+It runs as an installed public-SDK consumer with the existing Prism design.
+Each app has its own editor, TXT/JSON exports and per-store outcome. A missing,
+corrupt or conflicting app stays closed without hiding the healthy sibling.
+
+Both app policies, recovery origins and store routes are fixed and validated.
+Whole-batch result validation precedes any text rendering. Close, cancel, page
+exit and expiry clear exact-byte editor adapters and retained export URLs.
+Late operation and process-status responses cannot repopulate a closed view.
+There is no automatic key creation, retry, repair or browser persistence.
+
+The actual browser flow prepared both examples with one shared simulated key,
+then recovered both in a fresh document while A returned HTTP 503 and Alpha's
+storage process was stopped. Altering one app's only available ciphertext kept
+that app closed while the other remained usable. Bringing the intact store back
+made both drafts recoverable again. Responsive checks at 390 and 1280 CSS pixels
+showed no horizontal overflow. Browser export buttons were exercised; exact
+export bytes are established by the separate installed UI tests, not by a
+verified browser download file.
+
+Validation passed 75 relevant top-level tests: 19 UI behavioral cases, one
+installed-package integration, five new host-boundary cases and 50 existing
+focused regressions. An internal reviewer independently replayed the UI and
+installed package; those repetitions are not counted again.
+
+The installed proof generates the package from an installed SDK, installs
+without network, builds and runs its doctor. Four fresh recovery processes and
+six fresh DOM UI sessions exercise actual B HTTP routes, gateway and separate
+SQLite processes with A unavailable. Exact original and edited TXT/JSON exports,
+no recovery writes and unchanged database bytes/counters are verified. Internal
+review also covers result validation, lifecycle races and the new host bounds.
+
+This remains a local synthetic reference. It adds no hosted deployment, native
+multi-app device proof, independent-provider claim or external adoption.
+Published Sites, existing physical passkeys and immutable records are unchanged.
+The next step is a native collection package with explicit fixed app/storage
+configuration; video and final submission remain deferred until Monday.
+
+[Collection walkthrough](../text-starter/README.md#two-apps-one-recovery-action-two-stores) ·
+[Validation](../evidence/text-collection-browser-validation-2026-10-10.json).
+
+---
+
 # Collection recovery from surviving copies — 10 October 2026
 
 The additive `recoverTextReservesFromReplicas` API opens 1–8 prepared app

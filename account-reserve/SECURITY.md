@@ -132,3 +132,26 @@ archive can roll back or fork effective counts; no anti-rollback/global quota is
 claimed. Private operator-owned directories, disk, TLS, domain retention, trusted
 code and backup/retention operations remain the operator's responsibilities.
 See operator/README.md for stop-before-export and same-origin requirements.
+
+## Local collection browser reference (10 October 2026)
+
+The optional `--collection-replicas` text starter validates two fixed app
+namespaces, ordered replica routes and its local origin before mounting. A URL
+selector can select only one of these policies for the existing SDK setup
+handshake; it cannot introduce an origin, app configuration or storage target.
+Each app's upload permissions are single-attempt and store-bound. Local fault
+controls operate only on a recorded successful upload while that store is stopped.
+
+One deliberate recovery calls the installed combined API. The entire result
+batch is validated before any text is rendered. Conflicting authenticated
+records never enable that app's editor or exports. Only plaintext textareas are
+used, including for Markdown. Closing, cancelling, page exit and session expiry
+clear the exact-byte editor adapters and revoke retained Blob URLs; generation
+checks ignore late operation and status responses. No browser persistence or
+automatic recovery, credential creation, write retry or repair occurs.
+
+This is application cleanup, not guaranteed physical erasure of JavaScript
+strings or downloads. The teaching authenticator is intentionally synthetic and
+must never be deployed. Local SQLite processes share the same machine, gateway
+and B origin. Its tests do not establish physical passkey behavior, separate
+providers, audit or external adoption. Existing hosted flows remain unchanged.

@@ -56,6 +56,14 @@ This optional package reuses the operator gateway and unchanged SQLite runtime.
 It still simulates the credential locally and shares one machine, frontend and
 gateway. It does not change hosted Sites or establish independent providers.
 
+For **two apps in one recovery view**, use `--collection-replicas` instead.
+The [collection walkthrough](text-starter/README.md#two-apps-one-recovery-action-two-stores)
+uses A on 6173 and B on 6174, one shared simulated credential and separate
+per-app encryption. It shows the actual outcome for every app and storage copy,
+supports local editing and export, and includes deliberate A/storage failures.
+This is a runnable installed-SDK reference with the existing Prism design;
+it does not add a hosted native collection deployment.
+
 For an integration using **real browser passkeys**, the separate
 [native text package](text-native/README.md) builds A and B against explicit
 origins, an exact recovery hostname and two or three fixed storage routes:

@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-10",
+  "checkedAt": "2026-10-10T15:58:37.657201+00:00",
+  "status": "passed",
+  "milestone": "collection-replica-browser",
+  "scope": "Installed public-SDK local browser reference; hosted Sites unchanged.",
+  "tests": {
+    "newUiBehavioral": 19,
+    "newInstalledPackage": 1,
+    "newHostBoundaries": 5,
+    "existingFocusedRegressions": 50,
+    "topLevelPassed": 75,
+    "failed": 0,
+    "skipped": 0,
+    "independentAgentRepeatedUiAndPackage": true,
+    "repeatedTestsCountedAgain": false
+  },
+  "newTestFiles": [
+    "tests/text-collection-browser.mjs",
+    "tests/text-collection-browser-package.mjs",
+    "tests/text-collection-browser-host.mjs"
+  ],
+  "regressionFiles": [
+    "tests/text-starter-package.mjs",
+    "tests/text-starter-replicas.mjs",
+    "tests/text-starter-replica-ui.mjs",
+    "tests/text-replica-starter-package.mjs",
+    "tests/text-collection-replicas.mjs",
+    "tests/text-browser-replicas.mjs"
+  ],
+  "installed": {
+    "generatorFromInstalledPackage": true,
+    "offlineInstallBuildDoctor": true,
+    "actualGatewayAndSqliteProcesses": 2,
+    "appNamespaces": 2,
+    "freshRecoveryProcesses": 4,
+    "freshDomUiMounts": 6,
+    "originalPageAndApiHttp503": true,
+    "terminatedStoragePidConfirmed": true,
+    "oneSdkAssertionPerCollection": true,
+    "exactOriginalAndEditedTxtJson": true,
+    "bomCrlfUnicodePreserved": true,
+    "databaseBytesAndCountersUnchangedDuringRecovery": true,
+    "readOnlyReserveRequests": true,
+    "nativeCalls": 0,
+    "allOwnedTemporaryProcessesAndFilesCleaned": true
+  },
+  "uiScenarios": [
+    "both apps healthy",
+    "both apps after one store stops",
+    "one app corrupt while sibling recovers",
+    "one app missing while sibling recovers",
+    "different authenticated ciphertext with equal text rejects only conflicting app",
+    "both stores unavailable: no exports"
+  ],
+  "lifecycle": [
+    "no credentials or recovery on load",
+    "whole result validated before any plaintext",
+    "text-only rendering including HTML-like Markdown",
+    "close clears exact-byte adapter buffers and Blob URLs",
+    "cancel ignores late completion and allows deliberate new read",
+    "page exit clears view and cannot resurrect text",
+    "expiry clears view and disables exports",
+    "late initial status cannot replace newer status or change result messaging",
+    "cancelled setup cannot erase a newer recovery",
+    "controls locked while edits remain open"
+  ],
+  "hostBoundaries": [
+    "fixed namespaces and selector routes",
+    "per-app one-attempt admission",
+    "cross-store grant denial and dispatch consumption",
+    "app-scoped stopped-store corruption only for confirmed uploads",
+    "foreign-origin and arbitrary-target rejection",
+    "occupied startup closes only owned resources"
+  ],
+  "realBrowser": {
+    "tool": "Codex integrated browser through CUA",
+    "installedGeneratedConsumer": true,
+    "actualTwoOriginSetup": true,
+    "firstAppCreatesSyntheticCredential": true,
+    "secondAppExplicitlyReusesSameCredential": true,
+    "freshDocumentRecovery": true,
+    "originalPageAndApiHttp503": true,
+    "actualStorageProcessStopped": true,
+    "bothRecoveredFromSurvivingCopy": true,
+    "corruptAppIsolatedFromHealthySibling": true,
+    "intactStoreRestartRestoresBoth": true,
+    "exportButtonsExercised": true,
+    "browserDownloadedFilesVerified": false,
+    "exactExportProof": "Separate installed DOM UI tests validate Blob bytes and output files; browser downloads were requested, not independently read back.",
+    "consoleErrors": 0,
+    "responsiveChecks": [
+      {
+        "requestedWidth": 390,
+        "observedInnerWidth": 390,
+        "documentScrollWidth": 375,
+        "horizontalOverflow": false,
+        "cards": "stacked"
+      },
+      {
+        "requestedWidth": 1280,
+        "observedInnerWidth": 1280,
+        "documentScrollWidth": 1265,
+        "horizontalOverflow": false,
+        "cards": "side by side"
+      }
+    ],
+    "temporaryViewportReset": true,
+    "localScreenshots": [
+      "collection-browser-mobile-2026-10-10.png",
+      "collection-browser-desktop-2026-10-10.png"
+    ]
+  },
+  "securityReview": {
+    "internalAgentReview": true,
+    "findingFixed": "Generation guard prevents an older process-status response from overwriting current state. Whole-batch strict result and accessor checks prevent partial display of malformed results.",
+    "externalAudit": false
+  },
+  "sourceSha256": {
+    "README.md": "a6a45e1bfa5de61c933b6705cf70692fb8714dcc58d229647615b4861560fb55",
+    "SECURITY.md": "5a784607da0f50d41e8c399a8886515f70aa972f89ddc7c87dc8e662a05daa82",
+    "package.json": "3f2db0231606709b3bd837e849ef8b1ec6ebba5c13b4c865b8ba956a309e3f27",
+    "sdk/COLLECTION_REPLICAS.md": "210f1aea1605ee2d76a38ed30c7d519ebbed0996bbf233c2ab816f357a8783ed",
+    "scripts/create-text-starter.mjs": "c00dced773198e795defe86fac91bbcae97b207ae3288b638d0b543a24492437",
+    "text-starter/README.md": "609bf70035d7ce278e7cf057e40a031683ae6248d87c0edf0cfa867b15c6bcce",
+    "text-starter/doctor.mjs": "b9c656b137b4bd6d43ca70079f9612418a7adfa6874a3b837d46518cb7056030",
+    "text-starter/collection-config.mjs": "5dd6016aa05c5596c26703f675d73b1c18b8c4bb6b6b3812691fb94d574c71ab",
+    "text-starter/collection-server.mjs": "a4633fa674c38e0b9c234ae4c6cc3d8e6ad8fed9dde2f534f9c14fb2f5273862",
+    "text-starter/collection-main.mjs": "252723b8a39a590aadf2a8b16228006353e4e644bc7ad0687ad9a1f76d40b8ea",
+    "text-starter/collection-index.html": "677582b22ab1bf39d5376fe1db93ffafeb52213b4224989a1e7192d3ddb806ce",
+    "text-starter/collection-style.css": "362451ad1bface5618a7aa52850c62d4dabd0bf9d5192fe6820895da40af10eb",
+    "text-starter/collection-smoke.mjs": "3fb064471b88bc88a759f8531609456a322fbd3483a08c6985673da773337626",
+    "tests/text-collection-browser.mjs": "e85f2b985da3e0f0ccb9596c0b5647b9dda83f768154144659b20dcbdc3938f2",
+    "tests/text-collection-browser-package.mjs": "5a701f879679e1f357ec4b94a8c0c32a3b4541138534c4945122332ffa4d29ae",
+    "tests/text-collection-browser-host.mjs": "dd18bd506fefaffc0c424129fa8fbd6ba6deb431e7537c3f0792c6a3a38dc31a"
+  },
+  "publicSitesChanged": false,
+  "nativeMultiAppUiVerified": false,
+  "physicalPasskeyVerified": false,
+  "independentProvidersVerified": false,
+  "externalAdoptionClaimed": false,
+  "limits": [
+    "Synthetic authenticator must never be deployed",
+    "Local stores share a machine, gateway and B origin",
+    "One SDK assertion does not promise one device confirmation",
+    "Plain JavaScript text and downloaded files cannot be guaranteed erased",
+    "Immutable snapshots are not live synchronization",
+    "Native starter remains single-app; hosted collection remains single-store"
+  ]
+}

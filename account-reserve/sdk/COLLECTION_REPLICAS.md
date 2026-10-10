@@ -11,6 +11,12 @@ must retain the exact `appId`, recovery origin and RP used during preparation.
 The current native starter still presents one app, and the hosted collection
 still uses its existing single-store configuration.
 
+For an installed, runnable local browser reference, generate the
+[collection text starter](../text-starter/README.md#two-apps-one-recovery-action-two-stores)
+with `--collection-replicas`. It binds two app policies to two real disposable
+SQLite storage processes and presents per-app editors and copy diagnostics.
+It uses a simulated credential; the native and hosted boundaries above remain.
+
 ## Connect the existing stores
 
 Configure the app list and routes in trusted client code. Do not take either

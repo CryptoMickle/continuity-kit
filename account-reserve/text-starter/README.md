@@ -2,7 +2,7 @@
 
 A small editor you own, wired to the installed ContinuityKit public SDK. It prepares an encrypted, immutable text snapshot on B, reopens it after A is unavailable, and exports your continued draft. No wallet, account signing key, funds or provider account is needed.
 
-**Local simulation only.** This server emulates the credential; it does not invoke a physical passkey. The default mode keeps its encrypted snapshot in RAM. The optional replica mode below uses two temporary SQLite databases and separate storage processes. Both modes keep the synthetic credential in the parent server's RAM; stopping that server ends recovery. Never deploy these servers or `synthetic-client.mjs`. They do not establish independent infrastructure or providers.
+**Local simulation only.** These servers emulate the credential; they do not invoke a physical passkey. The default mode keeps its encrypted snapshot in RAM. The optional replica and collection modes below use two temporary SQLite databases and separate storage processes. All modes keep the synthetic credential in the parent server's RAM; stopping that server ends recovery. Never deploy these servers or `synthetic-client.mjs`. They do not establish independent infrastructure or providers.
 
 ## Run from this generated folder
 
@@ -47,6 +47,60 @@ The additive `/text-browser` helpers are `startTextReserveReplicaSetup` and `cre
 
 The replica `npm test` uses the installed public SDK, real child processes and separate SQLite files. Four fresh recovery processes receive only B's address and an export directory. They prove exact TXT/JSON exports with both copies, a stopped store, and an altered copy; when no valid copy remains, nothing is exported. Recovery transport rejects write attempts. This is automated synthetic evidence; browser tests and physical passkey tests have separate scopes.
 
+## Two apps, one recovery action, two stores
+
+From the SDK repository, generate a new empty folder:
+
+```sh
+npm run create:text-starter -- /absolute/empty/collection-demo --collection-replicas
+```
+
+Run the same install, build, doctor, test and dev commands above in that folder.
+This mode uses A at `http://text-starter-primary.localhost:6173/` and B at
+`http://text-starter-reserve.localhost:6174/`. The `--replicas` and
+`--collection-replicas` options are mutually exclusive.
+
+1. In A, choose **Prepare in B** for Text draft. In B, choose **Create the first
+   simulation key**. Wait until preparation completes before returning to A.
+2. Prepare Markdown draft from A. This time choose **Prepare with the existing
+   simulated key** in B. Both copies must independently verify for each app.
+3. Choose **Open my app reserves** in B. Both app namespaces are checked in one
+   SDK assertion. Each app has its own editor and per-store result.
+4. Close the copies, expand **Try a failure**, make A unavailable and stop Alpha.
+   Open a fresh B tab and recover again: Beta must authenticate both drafts.
+5. Edit either draft and export TXT or JSON. Close the copies before using any
+   further failure controls; this prevents a status change from replacing edits.
+
+The two editors present text, including Markdown source; neither renders HTML
+from the recovered content. A missing, corrupt or conflicting app stays closed
+without suppressing the healthy app. Two verified but different authenticated
+records are a conflict, even if they contain equal text. Running processes are
+shown separately from cryptographic verification.
+
+`main.mjs` exports `mountCollection(document, window, options)` and uses the
+installed `recoverTextReservesFromReplicas` API. The two fixed app policies live
+in `collection-config.mjs`. Read-only adapters share two fixed B routes;
+recovery has no upload capability. Whole-batch result validation precedes any
+text rendering. Cancellation ignores late results. Close, page exit and the
+session deadline clear the adapters, visible drafts and retained export URLs.
+This is best-effort application cleanup, not guaranteed erasure of browser RAM
+or already downloaded files.
+
+Each app gets at most one admission attempt in a run. There is no automatic
+key creation, write retry, repair or background recovery. To test corrupt data,
+stop the chosen store, select an app and use **Alter this stopped copy**; the
+control can only alter that app's recorded disposable snapshot. It cannot
+restore a damaged copy. Starting the store does not repair its contents.
+
+This mode's `npm test` checks the installed SDK against the real local stack and
+four fresh recovery processes: both stores, one stopped store, one app's only
+surviving copy corrupted, and both stores unavailable. A returns HTTP 503 in all
+four phases. Exact exports and unchanged stored bytes/counters are checked.
+The repository's `npm run test:collection-browser` additionally exercises the UI
+lifecycle and installed UI with corrupt, missing and authentic-conflict fixtures.
+These automated DOM tests are distinct from real-browser and physical-device
+tests. The native starter and existing hosted collection are unchanged.
+
 ## Connect your own editor
 
 `adapter.mjs` is the editor boundary:
@@ -63,7 +117,7 @@ const editor = {
 
 `main.mjs` shows the complete integration. Call `startTextReserveSetup` directly inside A's click handler so its B popup is allowed. On B, `createTextReserveReceiver().prepare(...)` handles the explicit setup. Fresh B uses `recoverTextReserve(...)` and a read-only HTTP store with no enrollment capability. Imports use only the installed `/text-browser`, `/text-reserve` and `/http-store` entrypoints.
 
-Text is limited to 16 KiB raw UTF-8. Unedited recovered text, including a leading BOM and CRLF, is exported exactly. Actual textarea edits follow the browser's newline behavior. Edits do not update the prepared snapshot; export them. Each server run permits one local credential and one immutable snapshot. A failed or uncertain write consumes its grant: check the existing reserve, never retry setup automatically.
+Text is limited to 16 KiB raw UTF-8 per app. Unedited recovered text, including a leading BOM and CRLF, is exported exactly. Actual textarea edits follow the browser's newline behavior. Edits do not update the prepared snapshot; export them. Each server run permits one local credential and one immutable snapshot per configured app. A failed or uncertain write consumes its grant: check the existing reserve, never retry setup automatically.
 
 ## What the automated proof establishes
 

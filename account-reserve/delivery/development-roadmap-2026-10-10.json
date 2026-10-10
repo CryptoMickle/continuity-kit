@@ -133,7 +133,7 @@
     {
       "id": "collection-replica-browser",
       "priority": 8,
-      "status": "pending",
+      "status": "complete",
       "value": "Expose the combined SDK in a runnable recovery view so a developer can inspect several recovered drafts and per-copy failures without building the interaction from scratch.",
       "acceptance": [
         "Use the installed combined public SDK, explicit app/replica policy and existing design language",
@@ -142,9 +142,26 @@
         "Close, cancel, page exit and expiry clear retained UI state; no hidden key creation, retry or persistence",
         "Real local process/storage failure drill and exact per-app export through the browser reference",
         "Preserve existing public Sites, native passkeys and immutable records; no native-device or provider claims from synthetic tests"
+      ],
+      "evidence": "evidence/text-collection-browser-validation-2026-10-10.json",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
+    },
+    {
+      "id": "native-collection-package",
+      "priority": 9,
+      "status": "pending",
+      "value": "Make the multi-app recovery view usable by a native WebAuthn integrator with an explicit fixed profile and durable operator state, without copying the synthetic teaching server.",
+      "acceptance": [
+        "Fixed multi-app profile with original app IDs, B RP/origin and explicit replica policy",
+        "Generated deployed assets exclude synthetic credentials and failure controls",
+        "Explicit existing-key enrollment for subsequent apps with no create fallback",
+        "One deliberate collection recovery and per-app editor/export behavior",
+        "Installed package and lifecycle/security tests with synthetic test injection kept outside deployed assets",
+        "Preserve existing native single-app packages and published Sites; no inferred physical multi-app acceptance"
       ]
     }
   ],
-  "lastCompleted": "Combined collection/replica SDK completed: 231 passing top-level tests, strict TypeScript, four fresh installed recovery processes and internal security review.",
-  "next": "Build a runnable combined collection/replica recovery view using the installed SDK and existing design. Video and final submission remain deferred until Monday."
+  "lastCompleted": "Collection browser reference completed: 75 relevant passing tests, installed real-storage UI proof and actual browser checks at mobile and desktop widths.",
+  "next": "Build the native collection integration package with fixed multi-app policy and existing-key preparation. Keep hosted flows unchanged; video and final submission remain deferred until Monday."
 }
