@@ -314,10 +314,29 @@
       "publicCommit": "3afd9acd26ae87a1e253ad65d709983e546ee582",
       "publicSitesChanged": false,
       "physicalPasskeyVerified": false
+    },
+    {
+      "id": "generated-payment-survival-proof",
+      "status": "complete",
+      "observedGap": "The new generated UI is tested with controlled renderer/bootstrap fixtures, while actual SDK recovery/signing and local-chain survival are proven in separate integrations. These component proofs do not yet prove the complete generated page together.",
+      "value": "Demonstrate that the distributable developer template, not only the private reference app or isolated helper, preserves payment access after original-app unavailability.",
+      "acceptance": [
+        "Start from a clean installed generated consumer and its unchanged public SDK/helper; no private repository imports in production entrypoints.",
+        "Use disposable local encrypted reserve data and a local EVM with explicit isolated authenticator/RPC test adapters outside all production assets.",
+        "Make A unavailable, open the existing reserve through B, verify the same beneficiary and claim one previously funded obligation exactly once.",
+        "Verify post-claim receipt, pending/reconciliation behavior and signer closure through the generated page; no retry by changing payment.",
+        "Preserve published Sites, all actual credentials/ciphertext/origin bindings and contract policies. No public wallet transaction or human/native authentication is required for this local proof.",
+        "Publish exact replay evidence with clear internal/synthetic limits; reassess actual product value before further scaffolding."
+      ],
+      "priority": 18,
+      "evidence": "evidence/payment-starter-continuity-2026-10-10.json",
+      "publicCommit": "bb1c5eeb7ee66c30c1698b90ac055e81ba6cd676",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
     }
   ],
-  "lastCompleted": "Published a separately installable existing-reserve payment page, strict configuration doctor and bounded build/preview. Exact anonymous public source replay passed 79 top-level tests including installed-to-installed generator, browser lifecycle and existing payment regressions. No hosted flow, credential, ciphertext, SDK export, contract or public transaction changed.",
-  "next": "Close the remaining whole-template evidence gap: one generated installed consumer must recover real encrypted reserve data through the unchanged SDK and settle a disposable local obligation while its original app is unavailable. Do not add another general-purpose tooling layer.",
+  "lastCompleted": "Published and anonymously replayed the full generated-source payment survival proof. All85 top-level tests pass after clean installation and builds. Real encrypted reserve, actual closed Mera signer, A503, one real local EVM claim with lost reply, and fresh credential-free reconciliation. No hosted or public-network change.",
+  "next": "Add isolated read-only transaction-reference verification to the generated payment page using the existing public verifier. Keep reference results separate from local uncertainty; do not broaden contracts or add another generic tooling layer.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -413,8 +432,24 @@
     }
   },
   "nextDevelopmentAssessment": {
-    "id": "generated-payment-survival-proof",
+    "id": "generated-stateless-payment-receipt",
     "status": "planned",
+    "observedGap": "The generated page can reconcile only this browser journal. A different browser/device can see already-collected availability but cannot verify a supplied transaction reference, although the public SDK and hosted reference page already support stateless verification.",
+    "value": "Let the receiver check an exact payment reference from another browser without reopening the signer or importing a transaction journal.",
+    "acceptance": [
+      "Use the existing public createTestnetPaymentVerifier({profile}).check({rightId,hash}) API through a separate generated-page control/result; do not change protocol, contracts, signing or the helper.",
+      "Construct without I/O and verify only on deliberate input/action; empty-journal verification must not access Storage/Locks, credentials, signing or sending.",
+      "Close/invalidate any current or late-opening account session before reference checking; refuse while a claim is in progress.",
+      "Only paymentVerified:true is a confirmed payment; preserve pending-or-unknown/reverted/mismatch distinctions and verify exact selected right, beneficiary, amount and profile.",
+      "Input edits, selection changes and page exit fence late bounded results; expired profiles may still read historical receipts.",
+      "Reference results stay separate from the local receipt and uncertainty state. Never clear an unresolved journal/blocker, enable retry, or mutate the journal.",
+      "Clean installed consumer tests, actual local EVM receipt check, mobile/browser QA, internal review and exact anonymous replay; no public transaction or native authentication required.",
+      "After this concrete gap, stop adding general features until an observed failure or specific integration requirement justifies one. Do not infer demand or prize probabilities from internal tests."
+    ]
+  },
+  "lastCompletedAssessment": {
+    "id": "generated-payment-survival-proof",
+    "status": "complete",
     "observedGap": "The new generated UI is tested with controlled renderer/bootstrap fixtures, while actual SDK recovery/signing and local-chain survival are proven in separate integrations. These component proofs do not yet prove the complete generated page together.",
     "value": "Demonstrate that the distributable developer template, not only the private reference app or isolated helper, preserves payment access after original-app unavailability.",
     "acceptance": [
@@ -424,25 +459,10 @@
       "Verify post-claim receipt, pending/reconciliation behavior and signer closure through the generated page; no retry by changing payment.",
       "Preserve published Sites, all actual credentials/ciphertext/origin bindings and contract policies. No public wallet transaction or human/native authentication is required for this local proof.",
       "Publish exact replay evidence with clear internal/synthetic limits; reassess actual product value before further scaffolding."
-    ]
-  },
-  "lastCompletedAssessment": {
-    "id": "installed-payment-recovery-template",
-    "status": "complete",
-    "observedGap": "integrations/payment-client includes only a helper and README with host UI placeholders. They are not in the SDK tarball; the hosted payment page depends on repository-private configuration. The existing account starter creates its own example reserve and has no payment flow.",
-    "value": "A developer can generate and build a separate consumer with complete selected-payment controls and explicit existing-reserve configuration, instead of assembling the demo from private repository internals.",
-    "acceptance": [
-      "Generate into an empty external directory with pinned SDK dependency, reviewed helper, complete UI and config template; provide build, doctor and test commands.",
-      "Use only public SDK exports and preserve all existing published Sites, credentials, ciphertext and profile bindings.",
-      "Configure the existing reserve, same-origin read store and explicit bounded trusted payment profile; do not create a reserve, key, issuer, contract or payment.",
-      "Doctor rejects missing configuration and RP/origin mismatch before authentication; moving B to localhost cannot reuse an origin-bound existing passkey.",
-      "Expose selection, availability, explicit existing-key open, collect, pending reconciliation and close with the helper lifecycle intact.",
-      "Prove clean installation and working browser controls with isolated test doubles outside production assets; no new funding, native authentication or hosting required.",
-      "Keep the evidence as internal integration proof, not demand or external adoption; reassess the value of further tooling after this bounded template."
     ],
-    "priority": 17,
-    "evidence": "evidence/payment-starter-validation-2026-10-10.json",
-    "publicCommit": "3afd9acd26ae87a1e253ad65d709983e546ee582",
+    "priority": 18,
+    "evidence": "evidence/payment-starter-continuity-2026-10-10.json",
+    "publicCommit": "bb1c5eeb7ee66c30c1698b90ac055e81ba6cd676",
     "publicSitesChanged": false,
     "physicalPasskeyVerified": false
   }

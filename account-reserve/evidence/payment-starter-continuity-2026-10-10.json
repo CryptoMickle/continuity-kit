@@ -1,0 +1,153 @@
+{
+  "verifiedAt": "2026-10-10T21:58:32.036453+00:00",
+  "status": "published-source-and-anonymous-replay-verified",
+  "milestone": "generated-payment-survival-proof",
+  "sourceCommit": "bb1c5eeb7ee66c30c1698b90ac055e81ba6cd676",
+  "sourceTree": "87b626a20ec7044b86a5301e0cf2a221bdc5966c",
+  "verifiedSourceFiles": {
+    "README.md": {
+      "sha256": "14130792e2e613c729ef293d33fe26393150775d7d2824a612b587930c775ad6",
+      "gitBlob": "e60ab51e612165e384f92424e0cc1aabd2e3383a"
+    },
+    "package.json": {
+      "sha256": "97c51b0adec51546d25c9a320135aa2d934f305adb11713c90efa8976d71ba24",
+      "gitBlob": "45cd9ddb2f463b1800b6541bef919b67fc766829"
+    },
+    "payment-starter/README.md": {
+      "sha256": "269c32edec6980d33534c193fbeee41ed5f2eb76735a3c2614c3b039ec3375fe",
+      "gitBlob": "fe0d731b3d3b10e8cbb1a27492a41263da157a8f"
+    },
+    "payments/harness.mjs": {
+      "sha256": "9d69aa40b24990ebd0e32153486000468b573169484b5d7f039c156c8447744d",
+      "gitBlob": "ed45225a9b23d97563c5f8b904f59d38e9c5b897"
+    },
+    "tests/payments-chain.mjs": {
+      "sha256": "1e2706b5edc31e233966a81afcefbf6ad2275d8ee2928d2218081e2c5a0f3c7d",
+      "gitBlob": "96c0f234d620fa7b2df85a340af9bade5eaf5de4"
+    },
+    "tests/payment-starter-continuity.mjs": {
+      "sha256": "b69517008ff7ac85959c30677b41a28da06a636d2153c176296a8a15a803d188",
+      "gitBlob": "55cd2942245175a2b09d5f93954769d2a7c13e41"
+    },
+    "tests/payment-starter-continuity-worker.mjs": {
+      "sha256": "11a26692587be6caaf191ade308bfb7d239c28a405d6931f08382e2ed6106861",
+      "gitBlob": "390286eee6ebbdf0ede2e7348c246ea5cfff354c"
+    },
+    "tests/source-candidate-current.mjs": {
+      "sha256": "ad8ebf017b6f99556e3012f7c296bf58f01648955bd4685d4b1dbb3e4ae7a46d",
+      "gitBlob": "c3d751845409ac32ef19087eba77c5699e086786"
+    }
+  },
+  "onlyExpectedPathsChanged": true,
+  "value": "Verify that the distributable generated payment page can recover the same beneficiary and settle an already funded obligation after the original app is unavailable, including reconciliation after a lost response.",
+  "implementationScope": "Test-only integration and bounded disposable harness chain-ID option; generated production main, renderer, helper, SDK exports, guards, journals and contracts unchanged.",
+  "anonymousReplay": {
+    "verifiedAt": "2026-10-10T21:57:20.829Z",
+    "commit": "bb1c5eeb7ee66c30c1698b90ac055e81ba6cd676",
+    "anonymousArchive": true,
+    "archiveSha256": "67399aef74d1e0f5fa331eca24bc7afec8ec101e00e38ad40d6d221f0a03695b",
+    "archiveBytes": 2664681,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 85,
+    "failed": 0,
+    "skipped": 0,
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true,
+    "generatedConsumerReport": {
+      "experiment": "generated-payment-survival-proof",
+      "generatedPaymentSurvival": true,
+      "installedSdk": true,
+      "generatedMainAndPageBodiesUnchanged": true,
+      "canonicalHelperBytesUnchanged": true,
+      "productionAssetsUnchanged": true,
+      "originalHttpStatus": 503,
+      "originalRequestsDuringRecoveryAndClaim": 0,
+      "existingReserveCiphertextPreserved": true,
+      "actualDefaultWebAuthnAdapter": true,
+      "browserCredentialOracle": true,
+      "actualMeraSigner": true,
+      "chainId": 10143,
+      "localEvm": true,
+      "claimBroadcasts": 1,
+      "acceptedReplyDeliberatelyLost": true,
+      "signedHashStoredBeforeSend": true,
+      "exactBeneficiaryAmountNonceAndEvent": true,
+      "beneficiaryBalanceMatchesPaymentMinusGas": true,
+      "originalAndRecoveredSignerEnded": true,
+      "freshProcessReconciliation": true,
+      "freshProcessCredentials": 0,
+      "freshProcessBroadcasts": 0,
+      "durableJournalConfirmed": true,
+      "publicNetwork": false,
+      "physicalPasskeyVerified": false,
+      "deployed": false,
+      "limits": [
+        "generated source modules executed; built bundle verified but not executed",
+        "Node/JSDOM with CSS loader and transparent helper-session observer",
+        "synthetic existing WebAuthn PRF credential; no physical device",
+        "fixed public RPC names redirected to one owned local EVM; no provider independence",
+        "disposable local payment funding; no customer demand"
+      ]
+    }
+  },
+  "reproduction": [
+    "Download the anonymous GitHub archive for the exact sourceCommit, enter account-reserve with Node24+ and an installed local Anvil/Forge.",
+    "npm ci --ignore-scripts",
+    "npm ci --prefix integrations/multi-app --ignore-scripts",
+    "npm run build",
+    "npm run test:payment-survival",
+    "The full replay runs 85 top-level tests: the new survival case, five disposable-chain cases, and the 79 previously selected starter/helper/public SDK/source-package cases. Nested and repeated runs are not added.",
+    "npm run build:payments"
+  ],
+  "checkedBoundaries": [
+    "Fresh installed generated consumer; production entry/helper bytes match source and compiled assets remain byte-identical.",
+    "Installed public reserve SDK prepares an authenticated encrypted record. The runtime uses its unchanged default native WebAuthn adapter and same-origin read-only HTTP store.",
+    "The original signing session is ended and A returns503 before B loads; no request to A during recovery, claim or reconciliation.",
+    "Startup reads configuration only: no RPC, credential, reserve access, journal read/write or lock. Availability reads do not authenticate or access persistence.",
+    "One deliberate existing-reserve action invokes the credential API synchronously from the click. No credential creation or store write.",
+    "The signed transaction hash is durably journaled before one unchanged raw transaction is sent; its response is dropped only after actual local EVM acceptance.",
+    "Changing selection cannot trigger another authentication or send while uncertainty remains. The actual recovered Mera signer rejects signing with SESSION_ENDED.",
+    "A fresh process receives only the public journal/profile and reconciles through the generated page after local finality, with no credential material, reserve read or broadcast.",
+    "Exact claim calldata, transaction chain/nonce/value, beneficiary/amount/event, finalized receipt, gas-adjusted beneficiary balance, claimed state and contract balance are checked.",
+    "Encrypted reserve bytes, origin/config/protocol binding and production asset digests remain unchanged. Owned servers, worker processes and Anvil are closed."
+  ],
+  "internalReview": {
+    "independentReadOnlyReviews": 2,
+    "remainingBlockers": [],
+    "scope": "Internal agent review, not an external security audit.",
+    "clarifications": [
+      "Source ESM main/page execute under Node/JSDOM; compiled bundle is built and hashed, not executed in a physical browser.",
+      "Test-only CSS loader and transparent helper-session observer live outside production assets and preserve the exact SDK/native recovery object.",
+      "The alternate selected right is unissued; funded-next-payment uncertainty blocking is covered by the existing helper suite, not independently by this one local-chain case."
+    ]
+  },
+  "limits": [
+    "generated source modules executed; built bundle verified but not executed",
+    "Node/JSDOM with CSS loader and transparent helper-session observer",
+    "synthetic existing WebAuthn PRF credential; no physical device",
+    "fixed public RPC names redirected to one owned local EVM; no provider independence",
+    "disposable local payment funding; no customer demand",
+    "The restored journal models reopening the same browser persistence, not a journal-free second device.",
+    "Anvil uses actual chain ID10143 to keep SDK signatures unchanged. This is not the Monad testnet network.",
+    "No new public payment, physical authentication, hosted release, user test, external adoption or commercial demand is established."
+  ],
+  "publicSitesChanged": false,
+  "publicTransactionsSent": 0,
+  "physicalPasskeyVerified": false,
+  "videoOrFinalSubmissionPerformed": false,
+  "curatedSourceCandidate": {
+    "status": "local-reviewed-source-archive",
+    "fileCount": 486,
+    "sha256": "69ad4de97ebf44319978f02b5141703cd451a84fdbb03a4bf49186247494efab",
+    "reviewedSourceBytesPreserved": true,
+    "bothIntegrationTestFilesIncluded": true,
+    "operationalFilesExcluded": true,
+    "transformed": [
+      "delivery/PHYSICAL_TEST.md"
+    ],
+    "notPublishedAsArchive": true
+  }
+}

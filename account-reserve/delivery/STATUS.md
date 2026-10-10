@@ -1,3 +1,40 @@
+# Generated payment page survives A outage — 10 October 2026
+
+The complete generated consumer's source entry and renderer now have one combined
+integration proof with the actual installed public SDK, authenticated encrypted
+reserve, default native WebAuthn adapter, Mera signing session and disposable local
+EVM. A returns503 before the page opens; B makes no request to A and recovers the
+same beneficiary. Exactly one approved payment is sent with its hash persisted
+before dispatch. Its response is deliberately lost only after EVM acceptance.
+
+A fresh process then checks the stored public journal through the same generated
+page with no credential, reserve read or new broadcast. The receipt, exact
+beneficiary/amount/nonce/calldata/event, gas-adjusted balance and once-only claimed
+state match. Both original and recovered signing sessions reject later signing.
+Ciphertext and production source/build bytes stay unchanged. Startup and availability
+checks do not access credentials, journal persistence or locks.
+
+Exact anonymous replay of `bb1c5eeb7ee66c30c1698b90ac055e81ba6cd676` passed **85 top-level tests**,
+zero failures/skips, after clean offline installation and app/payment builds.
+Nested and repeated runs are not added. The curated candidate includes both new
+test files and the bounded harness mode; only eight reviewed source paths changed.
+
+Two independent internal read-only reviews found no remaining blocker. This is
+not an external audit. The proof executes source ESM under Node/JSDOM with a
+disclosed CSS loader and transparent session observer. The compiled bundle is
+built/hashed but not executed. Passkey responses are synthetic; both fixed public
+RPC names map to the same local Anvil with actual chain ID10143. No public RPC or
+payment, native authentication, hosted change, adoption or demand is established.
+Existing public Sites, keys, ciphertext, SDK exports and payment policies remain
+unchanged. Video and final submission remain deferred.
+
+[Validation and exact replay](../evidence/payment-starter-continuity-2026-10-10.json). Next: separate credential-free
+verification of a supplied transaction reference in the generated page. Its current
+journal check alone cannot verify a receipt from a journal-free second device.
+Reference results must never clear local uncertainty or enable another sending attempt.
+
+---
+
 # Installable payment-recovery page — 10 October 2026
 
 A developer can now generate a separate consumer with the public SDK, canonical
