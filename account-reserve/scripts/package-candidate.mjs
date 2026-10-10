@@ -12,6 +12,7 @@ const directories=['sdk','starter','work','work-release','chain','tests','script
 // capable templates: private/ and arbitrary JSON can contain live grants/state.
 // The two EasyMDE dist files are immutable upstream inputs with pinned hashes.
 const sourceAdditions={
+  'payment-starter':['README.md','package.json','profile.mjs','profile.example.json','doctor.mjs','build.mjs','serve.mjs','smoke.mjs','index.html','main.mjs','page.mjs','style.css','prism-art.mjs'],
   'text-native':[
     '.gitignore','.npmignore','README.md','package.json','profile.mjs','profile.example.json','profile.collection.example.json','ports.example.json',
     'adapter.mjs','index.html','main.mjs','style.css','collection-index.html','collection-main.mjs','collection-style.css','prism-art.mjs',

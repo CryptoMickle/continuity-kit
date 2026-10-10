@@ -47,6 +47,13 @@ signer on completion, cancellation and expiry. No issuer tools or deployment sta
 exposed through that browser entry. [A clean public-source replay](evidence/payments-sdk-validation-2026-10-10.json)
 passed the installed consumer, strict types, browser build and session-lifecycle checks.
 
+The [existing-reserve payment starter](payment-starter/README.md) adds a complete
+page and explicit public configuration around this helper. Generate it with
+`npm run create:payment-starter -- /absolute/empty/payment-consumer`, then install,
+check and build it separately. It requires an already prepared reserve and funded
+approved payments; it creates neither. The exact recovery origin and passkey
+bindings must stay unchanged.
+
 ## Start with your own text editor
 
 The [text starter](text-starter/README.md) generates a separate, installable

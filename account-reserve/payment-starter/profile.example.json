@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "originalOrigin": "https://primary.example.org",
+  "recoveryOrigin": "https://reserve.example.org",
+  "reserve": {
+    "appId": "existing-example-account-v1",
+    "originalRpId": "primary.example.org",
+    "recoveryRpId": "reserve.example.org",
+    "derivation": "eoa:v1"
+  },
+  "storeBasePath": "/api/reserve",
+  "payment": {
+    "chainId": 10143,
+    "address": "0x1111111111111111111111111111111111111111",
+    "owner": "0x2222222222222222222222222222222222222222",
+    "issuer": "0x3333333333333333333333333333333333333333",
+    "expectedRuntimeCodeHash": "0x4444444444444444444444444444444444444444444444444444444444444444",
+    "expiresAt": "2090-01-01T00:00:00.000Z",
+    "claims": [{ "rightId": "1", "amount": "10000000000000000", "nonce": 0 }]
+  }
+}
