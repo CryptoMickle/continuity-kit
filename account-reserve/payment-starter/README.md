@@ -116,3 +116,17 @@ A second funded obligation can generate another useful settlement transaction to
 the same beneficiary. Opening the reserve itself generates no transaction and
 creates no demand or income. Developers must establish the actual payment use
 case and operate a trusted recovery origin and storage service.
+
+## Repository regression checks
+
+The generated consumer's `npm test` has no DOM-test dependency. To run the separate
+repository UI regressions, install their pinned test-only dependency too:
+
+```sh
+npm ci --ignore-scripts
+npm ci --prefix integrations/multi-app --ignore-scripts
+npm run test:payment-starter
+```
+
+Those UI tests run controlled fixtures. They are not included in the generated
+page or its runtime dependencies and do not invoke native credentials or payments.
