@@ -9,7 +9,7 @@ function fixture(t,{verify,role='recovery'}={}){
  const dom=new JSDOM('<div id="app"></div>',{url:'https://fresh.example.test/payments/'}),root=dom.window.document.querySelector('#app');
  const calls={open:0,client:0,reader:0,verify:0,close:0,claim:0};
  const profile={chainId:10143,owner:'0x'+'2'.repeat(40),address:'0x'+'3'.repeat(40),expiresAt:'2100-01-01T00:00:00.000Z',claims:[{rightId:1n,amount:10n**16n},{rightId:2n,amount:10n**16n}]};
- const result={status:'finalized',paymentVerified:true,finalized:true,rightId:2n,amount:10n**16n,beneficiary:'0x'+'2'.repeat(40),contract:'0x'+'3'.repeat(40),blockNumber:123n,hash};
+ const result={status:'finalized',paymentVerified:true,finalized:true,rightId:1n,amount:10n**16n,beneficiary:'0x'+'2'.repeat(40),contract:'0x'+'3'.repeat(40),blockNumber:123n,hash};
  const mounted=mountPaymentPage(root,{role,profile,window:dom.window,openAccount:async()=>{calls.open++;return {};},createClient:()=>{calls.client++;return {forRight:()=>({hash,close(){},claim:async()=>{calls.claim++;throw Object.assign(Error(),{code:'PAYMENT_BROADCAST_UNKNOWN'});}}),close(){calls.close++;}};},createAvailability:()=>({check:async({rightId})=>({status:'funded',chainId:10143,beneficiary:'0x'+'2'.repeat(40),contract:'0x'+'3'.repeat(40),rightId,amount:10n**16n,readOnly:true,paymentVerified:false})}),createReader:()=>{calls.reader++;throw Error('JOURNAL_MUST_NOT_BE_USED');},createVerifier:()=>({check:async input=>{calls.verify++;return verify?verify(input):result;}})});
  const $=id=>root.querySelector('#'+id);
  const submit=()=>{$('reference-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));};

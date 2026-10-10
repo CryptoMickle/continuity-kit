@@ -44,6 +44,29 @@ records a clean anonymous replay, strict TypeScript checks and the browser modul
 graph. The separate consumer uses real disposable Mera signing sessions with mocked
 RPC responses; its simulated sends are not additional public transactions.
 
+## Select an approved payment from either origin
+
+The payment page lists only the trusted profile's approved obligations (one to
+eight), starting with the first one. A and B can each collect any selected
+approved payment. The reserve no longer requires a payment numbered 2, so it can
+collect the first payment if A disappears before that claim.
+
+Changing **Payment to collect** closes the current signer, clears displayed
+receipt details, selects the same payment in the reference form, and performs one
+fresh credential-free availability check. It never authenticates or sends. Stale
+availability, journal, reference and native replies cannot affect the new selection.
+A cancelled native request must settle before another native opening is allowed.
+Selection is locked during collection because an already-sent transaction cannot
+be cancelled by changing the view.
+
+Known unresolved attempts block the account across all choices, including a
+reserved attempt without a transaction hash. Selecting an older confirmed payment
+or verifying an explicit hash does not reconcile that blocker. Exact journal
+checking remains separate. If an account-wide blocker cannot be assigned to a
+known payment, this view keeps it blocked for its lifetime: inspect the original
+payment and reload only after reconciliation. No journal is cleared or rewritten
+by switching. The final SDK checks remain authoritative.
+
 ## Check availability before opening a passkey
 
 The hosted payment view performs one bounded public read on load. It shows a

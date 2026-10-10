@@ -5,9 +5,9 @@ const tick=()=>new Promise(r=>setImmediate(r));
 function fixture(t,options={}){
  const dom=new JSDOM('<div id="app"></div>',{url:'https://fresh.example.test/payments/'}),root=dom.window.document.getElementById('app');
  const profile={chainId:10143,owner:'0x'+'2'.repeat(40),address:'0x'+'3'.repeat(40),expiresAt:'2100-01-01T00:00:00.000Z',claims:[{rightId:1n,amount:10n**16n},{rightId:2n,amount:10n**16n}],...options.profile};
- const calls={read:0,open:0,claim:0,close:0,reader:0},identity={chainId:profile.chainId,contract:profile.address,beneficiary:profile.owner,rightId:2n,amount:10n**16n,readOnly:true,paymentVerified:false};let current=0;
+ const calls={read:0,open:0,claim:0,close:0,reader:0},identity={chainId:profile.chainId,contract:profile.address,beneficiary:profile.owner,rightId:1n,amount:10n**16n,readOnly:true,paymentVerified:false};let current=0;
  const deps={profile,role:'recovery',window:dom.window,monotonicNow:()=>current,
-  createAvailability:()=>({check:async input=>{calls.read++;assert.deepEqual(input,{rightId:2n});return options.read?options.read(identity):{...identity,status:'funded'};}}),
+  createAvailability:()=>({check:async input=>{calls.read++;assert.deepEqual(input,{rightId:1n});return options.read?options.read(identity):{...identity,status:'funded'};}}),
   openAccount:async()=>{calls.open++;return {close(){calls.close++;}};},
   createClient:()=>({forRight:()=>({close(){},claim:async()=>{calls.claim++;if(options.claim)return options.claim();return {hash:'0x'+'1'.repeat(64)};}}),close(){calls.close++;}}),
   createReader:()=>({check:async()=>{calls.reader++;return {hash:'0x'+'1'.repeat(64)};}}),

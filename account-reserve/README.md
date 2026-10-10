@@ -24,6 +24,10 @@ separates chain verification, the builder report and controlled HTTP observation
 The integration includes a wallet-free command for verifying either exact receipt.
 These are development payments, not external usage. The text API remains account-free.
 
+Either origin can now select any approved payment in the trusted profile.
+Changing payment closes the signer and refreshes readiness; known unresolved
+attempts keep the entire account blocked until exact reconciliation.
+
 The payment view checks availability before offering an existing-passkey action.
 Already-collected or unverifiable obligations do not ask the user to authenticate.
 This advisory read preserves all final transaction checks.
