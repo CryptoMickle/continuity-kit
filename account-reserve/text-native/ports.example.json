@@ -1,0 +1,9 @@
+{
+  "primary": 8786,
+  "recovery": 8788,
+  "gateway": 8790,
+  "replicas": [
+    { "id": "alpha", "port": 8787 },
+    { "id": "beta", "port": 8789 }
+  ]
+}

@@ -98,7 +98,7 @@
     {
       "id": "native-operator-onboarding",
       "priority": 6,
-      "status": "pending",
+      "status": "complete",
       "value": "Reduce operator configuration errors with a repeatable local launch and read-only readiness check for the native package.",
       "acceptance": [
         "Explicit existing profile and private state directory; preserve records and passkey bindings",
@@ -106,9 +106,28 @@
         "No credentials or upload grants on page load; no automatic native prompt",
         "Actionable bounded errors and clean owned-process shutdown",
         "Clean installed replay and exact documented commands; no hosted/provider proof inferred"
+      ],
+      "evidence": "evidence/native-operator-onboarding-2026-10-10.json",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
+    },
+    {
+      "id": "collection-replica-recovery",
+      "priority": 7,
+      "status": "pending",
+      "value": "Combine the existing collection and replica capabilities: open multiple prepared app reserves using one existing passkey assertion, while tolerating an unavailable or altered storage copy for each app.",
+      "acceptance": [
+        "Preserve existing single-app, collection and replica APIs, records and protocol bindings",
+        "Validate the full bounded app and replica policy before the deliberate credential call",
+        "Exactly one SDK assertion for the collection; no promise of one physical device prompt",
+        "Authenticate every candidate and reject conflicting valid records per app",
+        "A missing, failed or conflicting app does not hide a healthy sibling",
+        "Read-only recovery with cancellation and no retained persistent key session or writes",
+        "Installed public SDK proof with real local store failures, exact per-app exports and independent review",
+        "Keep public Sites unchanged until a reviewed publication scope is explicit; no inferred native/provider/adoption proof"
       ]
     }
   ],
-  "lastCompleted": "Native text package completed with 30 passing tests, independent replay and pre-authentication browser QA.",
-  "next": "Implement native operator onboarding and read-only readiness checks. Continue substantive development until Monday; video and final submission remain deferred."
+  "lastCompleted": "Native operator onboarding completed with 60 passing tests, independent installed CLI replay and authenticated surviving-copy recovery using a synthetic test credential.",
+  "next": "Combine collection recovery with authenticated replicas, preserving one existing passkey assertion and per-app failure isolation. Video and final submission remain deferred until Monday."
 }

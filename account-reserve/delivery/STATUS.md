@@ -1,3 +1,42 @@
+# Native operator onboarding — 10 October 2026
+
+The native text package now creates private storage once and starts its frontends,
+gateway and separate SQLite storage processes with one documented command. It
+checks the original profile, private files, ports, assets and full configured read
+path before reporting ready. It never automatically creates a passkey, issues an
+upload permission, resets a database or repairs a snapshot.
+
+A store failure after readiness leaves B and healthy storage running. Status
+changes to degraded, or unavailable if every store stops. Initial incomplete
+startup closes only owned resources; ordinary stop/restart preserves existing
+ciphertext, invitations and quota. Repeated terminal signals and occupied ports
+are covered, including a regression for five consecutive signal-heavy restarts.
+
+The final native suite passed **60/60**. A separate installed-package replay ran
+the documented initialization, build, start, read-only check and stop/restart
+commands with unchanged stored bytes, counters and private-file timestamps. Agent
+review is internal review, not an external security audit or developer adoption.
+
+A separate integration used the installed public SDK and real encrypted text,
+terminated one actual owned store, then recovered and exported exact TXT/JSON in
+a fresh process using only B GET requests. No original-app request or upload
+grant was used during recovery. A was not shut down in this particular drill.
+When both stores stopped, recovery failed without exporting text. This test used
+a synthetic credential; no physical passkey ceremony occurred.
+
+Readiness checks compare stored responses and configuration; empty or identical
+responses do not prove store identity or authenticated plaintext. The local stack
+still shares a machine, gateway and recovery origin. Public Sites, their passkeys
+and saved reserves are unchanged; the new package is not a hosted deployment.
+
+[Operator guide](../text-native/README.md) ·
+[Final validation](../evidence/native-operator-onboarding-2026-10-10.json) ·
+[Independent installed replay](../evidence/native-operator-independent-2026-10-10.json).
+Next: combine multiple-app recovery with authenticated replicas. Video and final
+submission remain deferred until Monday.
+
+---
+
 # Native text integration package — 10 October 2026
 
 The new `create:native-text` generator creates a standalone installed-SDK consumer

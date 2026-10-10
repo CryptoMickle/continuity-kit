@@ -4,7 +4,7 @@ import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const files = ['package.json','README.md','profile.mjs','profile.example.json','adapter.mjs','index.html','main.mjs','style.css','build.mjs','doctor.mjs','operator.mjs','native-host.mjs'];
+const files = ['package.json','README.md','profile.mjs','profile.example.json','ports.example.json','adapter.mjs','index.html','main.mjs','style.css','build.mjs','doctor.mjs','operator.mjs','native-host.mjs','operator-state.mjs','operator-readiness.mjs','operate.mjs','operator-worker.mjs'];
 const operatorFiles = ['profile.mjs','store.mjs','host.mjs','replica-gateway.mjs','cli.mjs'];
 const within = (child, parent) => child === parent || child.startsWith(parent + sep);
 const ordered = value => JSON.stringify(Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.localeCompare(b))));

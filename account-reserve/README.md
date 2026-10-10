@@ -74,11 +74,15 @@ browser checks the bundle before a separate, deliberate passkey action; fresh
 recovery needs no upload permission. Deployable assets exclude the teaching
 authenticator and failure controls. The host exposes only fixed reserve routes.
 The doctor verifies profile, role, asset hashes and referenced files without
-requesting a credential. Follow the guide to run the actual stores and TLS proxy.
+requesting a credential. The package now initializes private storage once, starts
+its frontends and separate storage processes with one command, and checks the
+whole configured read path without writing. A failed store after startup leaves
+the surviving recovery route running. Follow the guide for owned origins and TLS.
 
 This is a separately buildable native integration, **not a newly deployed or
 physically verified service**. Existing public Sites and passkeys are unchanged.
-[Validation and limitations](evidence/text-native-package-validation-2026-10-10.json).
+[Native integration validation](evidence/text-native-package-validation-2026-10-10.json) ·
+[Operator startup and recovery validation](evidence/native-operator-onboarding-2026-10-10.json).
 
 To run the repository's generator/UI regressions, first install the root and
 shared test harness dependencies into your normal npm cache:

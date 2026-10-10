@@ -10,7 +10,10 @@
     "build": "node build.mjs",
     "doctor": "node doctor.mjs",
     "serve": "node native-host.mjs",
-    "issue:grants": "node operator.mjs"
+    "issue:grants": "node operator.mjs",
+    "operator:init": "node operator-state.mjs init",
+    "operator:start": "node operate.mjs",
+    "operator:check": "node operator-readiness.mjs"
   },
   "dependencies": {
     "@continuitykit/account-reserve": "file:./continuitykit-account-reserve-0.0.1-experimental.tgz"

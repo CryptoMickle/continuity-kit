@@ -25,39 +25,48 @@ The build writes `dist/primary` and `dist/recovery`, each with its role-bound pu
 
 The generator only creates files. It does not install, issue grants, create passkeys, configure TLS or deploy. The doctor checks configuration, role bindings, every asset hash and HTML asset references; it rejects missing, changed or symlinked assets. These are consistency checks, not a signed supply-chain attestation. It does not invoke an authenticator or contact storage. Native PRF support and device prompts remain unverified until an explicit physical test succeeds.
 
-## Operate storage behind B
+## Start the operator stack
 
-Use the generated `operator-runtime` modules unchanged. Keep each store in its own process and database, bound to the same generated operator profile. This example uses local ports; place the public frontend behind your configured TLS reverse proxy, preserving its original Host and Origin. Loopback listeners are not a public TLS service.
+Copy `ports.example.json` to `ports.json` and choose five distinct free loopback ports (six for three stores). Replica IDs and order must match `profile.json`. With HTTP localhost, the A and B URL ports must match the frontend ports. With HTTPS, your existing TLS proxy forwards to the chosen loopback frontend ports while preserving Host and Origin.
 
-```sh
-mkdir -m 700 private
-node operator-runtime/cli.mjs init --profile dist/operator-profile.json --database private/alpha.db
-node operator-runtime/cli.mjs init --profile dist/operator-profile.json --database private/beta.db
-node operator-runtime/cli.mjs invite --file private/alpha-invitation.txt
-node operator-runtime/cli.mjs invite --file private/beta-invitation.txt
-node operator-runtime/host.mjs --profile dist/operator-profile.json --database private/alpha.db --invitation-file private/alpha-invitation.txt --role recovery --port 8787
-# In separate processes:
-node operator-runtime/host.mjs --profile dist/operator-profile.json --database private/beta.db --invitation-file private/beta-invitation.txt --role recovery --port 8789
-node operator-runtime/replica-gateway.mjs --configuration private/gateway.json --port 8790
-```
-
-`private/gateway.json` contains B's exact `recoveryOrigin` and `replicas: [{"id":"alpha","port":8787},{"id":"beta","port":8789}]`. Its IDs/order must match the native profile. The gateway has fixed targets and does not select or authenticate ciphertext. The browser SDK does that.
+After building and checking the assets, initialize a **new** private state directory once:
 
 ```sh
-npm run serve -- --profile profile.json --role primary --assets dist/primary --port 8786
-npm run serve -- --profile profile.json --role recovery --assets dist/recovery --gateway-port 8790 --port 8788
+npm run operator:init -- --profile profile.json --ports ports.json --state private/operator
 ```
 
-The native recovery host forwards only GET/PUT for configured reserve routes. It does not expose enrollment issuance, simulated credentials, store controls or arbitrary upstream requests. Route only the appropriate frontend listener through each origin's TLS proxy. Do not proxy the operator stores' invitation endpoints to the public internet.
+This creates separate SQLite databases, distinct local administrator invitation files and the bound operator configuration. Files are private (`0600`), directories are private (`0700`), and the manifest is committed last. The command refuses any existing target; it does not reset, repair or adopt another database. It creates no passkey, upload grant, service or account. Keep this original state directory and profile for subsequent starts.
 
-Two stores on one computer share the machine, gateway and B frontend. This reference does not establish separate providers. Loss of B's origin or the usable passkey can still prevent recovery. Configure retention and ownership deliberately before inviting other users; automatic snapshot updates, key migration and automatic repair are outside this protocol.
+Start the frontend, gateway and each store with one command:
+
+```sh
+npm run operator:start -- --profile profile.json --state private/operator --out dist
+```
+
+The launcher checks the installed SDK, built asset hashes and original state, reserves every port, starts each store in a separate child process, then verifies the configured read paths. An occupied port or incomplete startup closes only resources owned by this launch. It never stops a process found through a PID file. No grant is issued or native credential requested during startup.
+
+Once ready, an individual store failure reports `degraded` while the gateway, B and surviving stores stay running. If every store stops, status becomes `unavailable`. The launcher never remaps a failed route or automatically restarts a store. Initial setup still needs all intended copies; recovery can use an authenticated survivor. This is one managed local stack, not a deployment to independent providers.
+
+In a second terminal, run the read-only check:
+
+```sh
+npm run operator:check -- --profile profile.json --state private/operator --out dist
+```
+
+The check verifies the frontend role/profile and served asset bytes, each store's profile, and reads through the direct store, gateway and B. Where a stored record exists, responses must match the private local database bytes. An empty store is reported only as `emptyRouteReachable`. Identical or empty responses do not establish store identity; process ownership and bound launch configuration supply the local wiring. This is not authenticated plaintext recovery, native passkey proof, public TLS validation or a security audit. The check sends only GET requests and never issues a grant, repairs a copy or prints locators, ciphertext or invitations.
+
+Press Ctrl+C in the launch terminal to stop its owned services cleanly. A normal restart uses the same databases and invitations, preserving immutable records and quota. The private `runtime.lock` prevents two launchers using the same state. A lock left after a forced process termination is deliberately not removed automatically: inspect the owned services before deciding whether to remove a stale lock. The tool will not guess or kill an unrelated process.
+
+Only the A and B frontend listeners belong behind your public TLS proxy. **Do not expose the gateway or internal store ports**, including their invitation endpoints. The native recovery host exposes only fixed reserve GET/PUT paths and built assets. The lower-level `operator-runtime` commands remain available for deliberate manual operation; do not run them concurrently against the managed stack.
+
+Two stores on one computer still share the machine, gateway and B frontend. Loss of B's origin or the usable passkey can prevent recovery. Configure retention and ownership deliberately before inviting other users; automatic snapshot updates, key migration and automatic repair remain outside this protocol.
 
 ## Issue one setup permission
 
-The operator, not a public browser endpoint, issues short-lived upload grants. Create a private file with mode `0600` containing `{"replicas":[{"id":"alpha","port":8787,"invitation":"<alpha invitation>"},{"id":"beta","port":8789,"invitation":"<beta invitation>"}]}`. Read invitation values from your private files without putting them in shell arguments, logs, tracked files or public assets. Every invitation is distinct.
+The operator, not a public browser endpoint, issues short-lived upload grants. The initialization step creates the private `invitations.json` with the exact replica ports and distinct invitations, so no bearer values need to be copied into configuration by hand.
 
 ```sh
-npm run issue:grants -- --profile profile.json --invitations private/invitations.json --out private/setup-grants.json
+npm run issue:grants -- --profile profile.json --invitations private/operator/invitations.json --out private/operator/setup-grants.json
 ```
 
 The issuer contacts the fixed local store ports once each. It writes a new mode-0600 bundle in an existing mode-0700 directory, and never prints tokens. Each grant permits one upload attempt at its store and expires within five minutes (or earlier at profile expiry). Do this only when the recipient is ready. The bundle is a private bearer permission, **not** public configuration or a decryption key. Deliver it privately to the intended setup session. It is not a signed attestation of user identity or server ownership.
@@ -72,4 +81,4 @@ Fresh B needs only its existing passkey and one intact encrypted copy. No grant 
 
 `adapter.mjs` remains the two-function editor boundary, `getText()` and `applyText(text)`. `main.mjs` calls only the installed public `/text-browser`, `/text-reserve` and `/http-store` entrypoints. It supplies no synthetic WebAuthn override. Native authentication is initiated only by explicit buttons, and page exit aborts pending operations and clears the opened local copy.
 
-The parent repository's `npm run test:native-text` checks configuration, grant expiry and binding, frontend lifecycle/gesture boundaries, actual temporary operator databases, routing denials and a clean installed-generator build. Browser rendering checks do not authenticate. These checks are distinct from a user-run native passkey acceptance test.
+The parent repository's `npm run test:native-text` checks configuration, grant expiry and binding, frontend lifecycle/gesture boundaries, actual temporary operator databases, routing denials, safe initialization, managed process failures, read-only readiness and clean installed-generator behavior. Browser rendering checks do not authenticate. These checks are distinct from a user-run native passkey acceptance test.

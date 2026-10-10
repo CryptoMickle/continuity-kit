@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-10",
+  "checkedAt": "2026-10-10T15:17:55.076394+00:00",
+  "status": "passed",
+  "scope": "Native package operator onboarding and managed local surviving-copy recovery; source-only improvement.",
+  "finalSuite": {
+    "passed": 60,
+    "failed": 0,
+    "skipped": 0,
+    "files": [
+      "tests/text-native-profile.mjs",
+      "tests/text-native-ui.mjs",
+      "tests/text-native-operator.mjs",
+      "tests/text-native-package.mjs",
+      "tests/text-native-state.mjs",
+      "tests/text-native-readiness.mjs",
+      "tests/text-native-operate.mjs",
+      "tests/text-native-managed-recovery.mjs"
+    ]
+  },
+  "initialization": {
+    "newPrivateStateOnly": true,
+    "manifestCommittedLast": true,
+    "noOverwriteOrRepair": true,
+    "profileAndPortsBound": true,
+    "fileMode": "0600",
+    "directoryMode": "0700",
+    "noPasskeysOrUploadGrantsCreated": true
+  },
+  "managedOperation": {
+    "fixedOwnedStoreChildren": true,
+    "allPortsPreflighted": true,
+    "startupVerifiesConfiguredReadPaths": true,
+    "lostStoreKeepsRecoveryAndSurvivorsAvailable": true,
+    "allStoresLostReportsUnavailable": true,
+    "noAutomaticRestartOrRemapping": true,
+    "existingCiphertextAndQuotaPreservedAcrossRestart": true,
+    "repeatedSigtermStartsAndStops": 5,
+    "runtimeLockRemovedOnlyAfterOwnedCleanup": true
+  },
+  "readiness": {
+    "readOnly": true,
+    "checks": "Frontend roles and asset hashes, direct store profiles, direct/gateway/B reads against local stored bytes",
+    "emptyStoreResult": "emptyRouteReachable",
+    "populatedStoreResult": "storedReadMatched",
+    "noGrantOrCredentialCalls": true,
+    "boundedResponsesAndTimeout": true,
+    "noUpstreamBodyOrLocatorInDiagnostics": true,
+    "provesTargetIdentity": false,
+    "provesAuthenticatedPlaintext": false
+  },
+  "managedRecoveryDrill": {
+    "installedPublicSdk": true,
+    "actualFrontendBuild": true,
+    "actualSqliteStoreProcesses": true,
+    "realSdkEncryptedText": true,
+    "testOnlySyntheticCredential": true,
+    "ownedAlphaProcessTerminated": true,
+    "freshRecoveryProcessUsesOnlyBGetRequests": true,
+    "betaAuthenticatedAndRecovered": true,
+    "alphaReportedUnavailable": true,
+    "exactBomCrlfUnicodeTxtAndJsonExports": true,
+    "localEditsExportedWithoutSnapshotMutation": true,
+    "allStoresLostReturnsReplicaRecoveryFailedAndNoExport": true,
+    "databaseBytesAndIssuanceRecordUsageCountsUnchangedDuringRecovery": true,
+    "nativeCredentialCalls": 0,
+    "originalAppRequestsDuringFreshRecovery": 0,
+    "originalAppWasStopped": false
+  },
+  "independentReplay": "native-operator-independent-2026-10-10.json",
+  "reviewFindingsFixed": [
+    "Store death after readiness previously stopped the surviving recovery route",
+    "Startup readiness variable shadowed the ready flag",
+    "Child completion differed for failed spawn and disconnected IPC",
+    "Repeated terminal and npm-forwarded termination could interrupt cleanup or default-terminate during Node teardown",
+    "Failed initialization must preserve replacement directories and competing files",
+    "Read transport must stop collecting bytes after cancellation or overflow"
+  ],
+  "physicalPasskeyVerified": false,
+  "independentProvidersVerified": false,
+  "publicSitesChanged": false,
+  "deployed": false,
+  "limitations": [
+    "Local processes still share one machine, gateway, recovery frontend and origin",
+    "Native device compatibility and public TLS ownership are not proven by this package replay",
+    "Readiness consistency is distinct from authenticated plaintext recovery",
+    "No external adoption, human usability study, external security audit or prize likelihood claimed",
+    "Immutable snapshots require exporting later edits; no automatic repair or key migration"
+  ]
+}

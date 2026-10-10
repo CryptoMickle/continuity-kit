@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-10",
+  "result": "passed",
+  "scope": "Independent installed-package replay of the native operator developer workflow against isolated temporary loopback services.",
+  "runtime": "Node.js 24.19.0",
+  "packageReplay": {
+    "sourceGeneratorCreatedBootstrap": true,
+    "bootstrapInstalledWithOfflineNpmCi": true,
+    "installedSdkGeneratorCreatedFreshConsumer": true,
+    "consumerInstalledWithOfflineNpmCi": true,
+    "nodePathDisabled": true,
+    "actualNativeBuildCompleted": true,
+    "builtAssetsPassedDoctor": true,
+    "documentedNpmCommandsUsed": [
+      "build",
+      "doctor",
+      "operator:init",
+      "operator:start",
+      "operator:check"
+    ]
+  },
+  "assertions": {
+    "twoReplicaStateInitializedOnce": true,
+    "emptyStartupReachedReady": true,
+    "emptyStartupAndReadinessIssuedNoGrants": true,
+    "readinessUsedOnlyReadPaths": true,
+    "ownedNpmProcessGroupTerminatedWithSigterm": true,
+    "cleanShutdownRemovedOwnedRuntimeLock": true,
+    "sameStateRestartsWithStoredFixtures": 3,
+    "storedResponsesMatchedBothDatabaseFixtures": true,
+    "allPrivateFileHashesAndModificationTimesPreservedAfterShutdown": true,
+    "databaseCountersPreservedAcrossBothRestarts": true,
+    "finalReplicaCounters": [
+      {
+        "id": "alpha",
+        "records": 1,
+        "issued": 1,
+        "capabilities": 0
+      },
+      {
+        "id": "beta",
+        "records": 1,
+        "issued": 1,
+        "capabilities": 0
+      }
+    ],
+    "installedDirectCliRepeatedSigtermEveryMillisecondExitedZero": true,
+    "cleanTerminalAndDirectCliShutdownExitCode": 0
+  },
+  "stateTests": {
+    "file": "tests/text-native-state.mjs",
+    "passed": 14,
+    "failed": 0,
+    "coverage": [
+      "Two and three stores with frozen non-secret outputs",
+      "Exact profile, ordered replicas and distinct listener ports checked before mutation",
+      "Accessor rejection without invoking getters",
+      "No overwrite or automatic repair of existing and incomplete state",
+      "Source and public asset boundaries, private modes, symlinks and hardlinks",
+      "MacOS system path aliases and package private subtree",
+      "Read-only SQLite profile, schema, ciphertext envelope and counter validation",
+      "Ciphertext, hashes, modification times and journal absence preserved",
+      "Unrelated private grants and launcher lock ignored by state reader",
+      "Failed initialization preserves competing files and replacement directories",
+      "Concurrent CLI initialization has exactly one winner"
+    ]
+  },
+  "reviewFixesVerified": [
+    "Renamed the startup readiness report so it cannot shadow the mutable ready flag.",
+    "Kept CLI SIGINT and SIGTERM handlers installed for its full lifetime and exited only after awaited cleanup; final installed npm process-group SIGTERM and direct CLI SIGTERM every millisecond both exit zero and release the owned lock.",
+    "Source review confirmed worker completion observes exit or close; installed shutdown and restart passed. Separate IPC failure paths are not asserted by this replay.",
+    "Failed state initialization checks directory identity before removing an empty directory."
+  ],
+  "currentSourceMatchesInstalledReplay": true,
+  "sourceReplayStatus": "Final launcher independently replayed through a fresh installed generator and consumer after the shutdown fixes.",
+  "verifiedSourceSha256": {
+    "text-native/operate.mjs": "9fc56d84c360a1a0cf1707fd79f0ad4f8c7aa44a980bb2b38b61aa57cb94d4c9",
+    "text-native/operator-worker.mjs": "0c8cb4b4c300c075f011b5ec5b50fba1cca7d10b9c3f9869b327d3200bbc6c5b",
+    "text-native/operator-state.mjs": "5158a3256605450c91a9c08d8fd478d6de7cc41dc0eb582d10f12dd57a0e23c7",
+    "text-native/operator-readiness.mjs": "d998ae7883d07be735411eea7b285391dbf45264c724cd05b376e03e693aeecd",
+    "text-native/native-host.mjs": "831c7d8d9446b79e73542ece29512fd24268ee985e243b42b2b6326b5e1f2be3",
+    "text-native/build.mjs": "e169f9faadc2460403519debbc249b7cbf40b7027bc9c74147912e079a3e6846",
+    "text-native/doctor.mjs": "197288fe6aa88a3e9e525790ad169a46335f37525a0240f4cf6e98925f2d61ac",
+    "text-native/profile.mjs": "8ea4aebbe0a605a169a856d7680cd02283f316b9cec4e68052a57d26e7cc4d12",
+    "text-native/operator.mjs": "0275ce02acce6462c6635a3357bf8fc22c8f84b86d93a4c138fc131bed98fe2b"
+  },
+  "limitations": {
+    "fixture": "Locally seeded opaque v1 ciphertext envelopes test stored-response consistency; they are not authenticated plaintext recovery.",
+    "nativePasskeyInvoked": false,
+    "cryptographicRecoveryVerified": false,
+    "physicalDeviceVerified": false,
+    "publicTlsOrOriginOwnershipVerified": false,
+    "independentProvidersVerified": false,
+    "publicDeploymentChanged": false,
+    "securityAudit": false,
+    "sharedFailurePoints": [
+      "machine",
+      "gateway",
+      "recovery origin"
+    ]
+  }
+}
