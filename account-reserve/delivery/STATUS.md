@@ -1,3 +1,42 @@
+# Receipt reader no longer requires account-recovery APIs — 11 October 2026
+
+A concrete compatibility defect is fixed: generated main used the full recovery
+preflight to block the whole page, so a trusted secure browser lacking WebAuthn
+could not use the independent supplied-reference reader. The page now requires
+every core origin/role/binding/security/transport check, but treats missing
+WebAuthn or recovery encryption as a limited read-only view. Any unexpected failed
+check still rejects mounting. Full recovery .ok and signing policies are unchanged.
+
+Opening and collection default disabled and have independent handler and SDK-call
+guards. The limited-view notice explains why these actions are unavailable. A
+reference lookup still closes sessions and never clears local uncertainty.
+Availability wording now also covers deliberate readiness invalidation.
+
+The clean installed generated-source proof removes WebAuthn entirely from its
+fresh journal-free historical reference process. It verifies the actual local
+receipt, rejects the wrong approved payment and leaves an absent hash pending,
+with zero credential/journal/lock/persistence/broadcast calls. Prior A503, one
+accepted local claim, lost response, reconciliation and actual signer closure
+remain covered. Missing crypto uses separate static/UI and mock-RPC evidence.
+
+Exact anonymous replay of `1f809dd088db0e6527f8a8367caac66ec3ff2422` passed **108 targeted top-level tests**
+after fresh offline install and app/payment builds, zero failures/skips. Nested
+and repeated runs are not added. Nine reviewed source paths changed; no SDK,
+helper, contract or hosted source change. Internal review found no release blocker.
+Desktop/mobile renderer checks show disabled signing and readable reference output.
+
+Separately, Sites reports current account A8/B7 and text A8/B8 deployments succeeded;
+six declared public page/config GETs returned200. This is read-only reachability,
+not a new native recovery or payment test. Existing public flows, keys and copies
+are unchanged. Complete payment integration uses source ESM/JSDOM, synthetic
+credentials and one local EVM; the visual fixture uses labeled fake actions.
+
+[Correction and exact evidence](../evidence/payment-starter-capability-2026-10-11.json). All19 feature milestones
+remain complete. Further work is only observed-defect maintenance or a concrete
+requested integration until the saved deadline. Video and final submission wait.
+
+---
+
 # Journal-free payment reference in generated page — 11 October 2026
 
 The generated payment starter can verify a supplied transaction reference from a

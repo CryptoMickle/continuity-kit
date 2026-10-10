@@ -1,0 +1,319 @@
+{
+  "verifiedAt": "2026-10-10T22:25:06.351232+00:00",
+  "status": "published-source-and-anonymous-replay-verified",
+  "correction": "payment-reference-capability-gate",
+  "sourceCommit": "1f809dd088db0e6527f8a8367caac66ec3ff2422",
+  "sourceTree": "b89dccb28290f908e53317f2435c7f086d4a50d3",
+  "verifiedSourceFiles": {
+    "README.md": {
+      "sha256": "c2b32ce2945a0465367e084c2ae0bc071db0f2892589990f266437508ef45e44",
+      "gitBlob": "b0d74f8f39147c32242339ae07a56dee86acfdf6"
+    },
+    "payment-starter/profile.mjs": {
+      "sha256": "29167705d37746f39bf183ff58764584e753f9d4ace61ac312c0f7c7df9a47e2",
+      "gitBlob": "dbf73e62d47b2fe52c173d1fa3f1f289cc7abc34"
+    },
+    "payment-starter/main.mjs": {
+      "sha256": "43dca98e5e853248140fc3ffea954aad4b932e6f91b8a3365f63ebdba1f8d5a1",
+      "gitBlob": "151b2add8eed50d81dbd151e035285d69c56f4e0"
+    },
+    "payment-starter/page.mjs": {
+      "sha256": "754477b04efd4c82ea6851d5f312bad31bb9f6df464985371450454f9ca5eb1a",
+      "gitBlob": "01fea466b3cf4aa17611a865d1dc3b63778cd346"
+    },
+    "payment-starter/README.md": {
+      "sha256": "46922e94b39846efafffd5f02fc383769be5fe5747c0366ce8f516457f868e62",
+      "gitBlob": "2a7a1047721cc097a114ff1829858c76caab1cee"
+    },
+    "tests/payment-starter-profile.mjs": {
+      "sha256": "db273e9068113b574212145f434ec9eee2f87a563af136241e969d1be368cca4",
+      "gitBlob": "6e736ba14a6856f7907ccd6b91b6eb58da9f390f"
+    },
+    "tests/payment-starter-ui.mjs": {
+      "sha256": "2a9bde584533c6e6d61c0bfd7ae43401ac4656fca75ba2fd8660ce044d99936e",
+      "gitBlob": "f391cf83059f9a68fbec36963c8b868c778045da"
+    },
+    "tests/payment-starter-continuity.mjs": {
+      "sha256": "2a2f04e5803fed63081d4bb361cbaab1c9d0b81ea3df6c82ca171cef3aaf7359",
+      "gitBlob": "3bfc9c71bc6e98eb86e88e9d0f1e9a0add0673dd"
+    },
+    "tests/payment-starter-continuity-worker.mjs": {
+      "sha256": "89c8bd08e47baf68190df6d6d17b3769d745c056e398d857584c74b2f0118b95",
+      "gitBlob": "570f4fd4df31edd387502e296d43f37c51957c56"
+    }
+  },
+  "only9ExpectedPathsChanged": true,
+  "observedDefect": "The generated main previously required recovery-only WebAuthn/encryption capabilities before mounting any control, hiding the independent supplied-reference reader in a valid secure browser lacking WebAuthn.",
+  "value": "A valid trusted recovery page can read an exact payment reference in a browser without account-recovery capabilities, while account opening and collection remain disabled.",
+  "implementationScope": "Generated preflight aggregation/main/renderer/documentation and targeted tests. Existing SDK preflight .ok, helper, SDK verifier, contracts and signing policy unchanged. No hosted source or runtime changes.",
+  "anonymousReplay": {
+    "verifiedAt": "2026-10-10T22:24:26.675Z",
+    "commit": "1f809dd088db0e6527f8a8367caac66ec3ff2422",
+    "anonymousArchive": true,
+    "archiveSha256": "c2b6cde1d5feb493d48fdebf7c61d47bcf8f7547f20e05827b39fd09772497e1",
+    "archiveBytes": 2682469,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 108,
+    "failed": 0,
+    "skipped": 0,
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true,
+    "generatedConsumerReport": {
+      "experiment": "generated-payment-survival-proof",
+      "generatedPaymentSurvival": true,
+      "installedSdk": true,
+      "generatedMainAndPageBodiesUnchanged": true,
+      "canonicalHelperBytesUnchanged": true,
+      "productionAssetsUnchanged": true,
+      "originalHttpStatus": 503,
+      "originalRequestsDuringRecoveryAndClaim": 0,
+      "existingReserveCiphertextPreserved": true,
+      "actualDefaultWebAuthnAdapter": true,
+      "browserCredentialOracle": true,
+      "actualMeraSigner": true,
+      "chainId": 10143,
+      "localEvm": true,
+      "claimBroadcasts": 1,
+      "acceptedReplyDeliberatelyLost": true,
+      "signedHashStoredBeforeSend": true,
+      "exactBeneficiaryAmountNonceAndEvent": true,
+      "beneficiaryBalanceMatchesPaymentMinusGas": true,
+      "originalAndRecoveredSignerEnded": true,
+      "freshProcessReconciliation": true,
+      "freshProcessCredentials": 0,
+      "freshProcessBroadcasts": 0,
+      "durableJournalConfirmed": true,
+      "journalFreeReferenceProcess": true,
+      "journalFreeReferenceVerified": true,
+      "journalFreeReferenceWithoutWebAuthn": true,
+      "historicalExpiredProfileVerified": true,
+      "wrongApprovedRightRejected": true,
+      "unknownReferencePending": true,
+      "referenceCredentials": 0,
+      "referenceJournalReads": 0,
+      "referenceLocks": 0,
+      "referenceBroadcasts": 0,
+      "referencePersistenceAccesses": 0,
+      "referenceDidNotMutateJournal": true,
+      "historicalConfigServedOnlyByTestHost": true,
+      "publicNetwork": false,
+      "physicalPasskeyVerified": false,
+      "deployed": false,
+      "limits": [
+        "generated source modules executed; built bundle verified but not executed",
+        "Node/JSDOM with CSS loader and transparent helper-session observer",
+        "synthetic existing WebAuthn PRF credential; no physical device",
+        "fixed public RPC names redirected to one owned local EVM; no provider independence",
+        "expired public configuration served only by the test host; built assets unchanged",
+        "disposable local payment funding; no customer demand"
+      ]
+    }
+  },
+  "requiredWholePageChecks": [
+    "config",
+    "role",
+    "origins",
+    "rp-origin-binding",
+    "current-origin",
+    "secure-context",
+    "transport-apis"
+  ],
+  "recoveryOnlyFailedChecksAllowedForReadOnlyMount": [
+    "web-crypto",
+    "webauthn-api"
+  ],
+  "checkedBoundaries": [
+    "Every named core check must exist and pass. Unexpected failed checks reject the whole page; exact current origin, role, configuration, RP binding, secure context and transport remain mandatory.",
+    "The original SDK report .ok remains the full recovery gate. Main passes an exact recoveryAvailable boolean; its recovery callback rejects before invoking recoverReserve when unavailable.",
+    "Renderer defaults recovery disabled, independently disables and guards Open/Collect handlers even if disabled DOM controls are forced. A clear limited-view notice remains visible.",
+    "Missing WebAuthn, missing recovery crypto, both missing, missing/failed core checks, unexpected failures, wrong origin, insecure context and missing transport are covered by11 profile and31 UI cases.",
+    "Readiness expiry and deliberate reference-check invalidation still require a new availability check; display text no longer wrongly calls every deliberate invalidation an expiry.",
+    "Fresh installed generated-source reference phase removes PublicKeyCredential and navigator.credentials entirely in actual browser/global snapshots, verifies the exact real local historical receipt, rejects the wrong approved right and leaves absent hash pending.",
+    "Reference phase performs zero credential requests, reserve operations, persistence/journal/lock accesses or broadcasts. Source/helper/compiled assets and ciphertext stay unchanged during execution.",
+    "Existing original503, same beneficiary, one accepted real local claim, lost reply, durable pre-send hash, credential-free journal reconciliation and actual signer closure remain tested.",
+    "Compiled isolated renderer shows disabled authentication/collection and successful fake reference result on desktop/mobile, no horizontal overflow and minimum48px button targets."
+  ],
+  "browserReview": {
+    "scope": "Compiled isolated actual renderer with recoveryAvailable:false, fake actions/verifier and no native auth/wallet/network payments; not full SDK or physical device",
+    "desktopLimitedNoticeVisible": true,
+    "openingDisabled": true,
+    "collectionDisabled": true,
+    "referenceState": "verified",
+    "availabilityCopyIncludesDeliberateInvalidation": true,
+    "mobileViewportRequested": {
+      "width": 390,
+      "height": 844
+    },
+    "documentWidth": 375,
+    "minimumButtonHeight": 48,
+    "noHorizontalOverflow": true,
+    "screenshots": [
+      "desktop-verified.png",
+      "mobile-verified.png"
+    ],
+    "temporaryTabClosed": true,
+    "viewportReset": true,
+    "ownedPreviewStopped": true
+  },
+  "internalReview": {
+    "remainingBlockers": [],
+    "scope": "Independent internal agent read-only review, not an external security audit.",
+    "independentProbe": "Executed unchanged main/renderer/helper/public SDK with both crypto and WebAuthn absent and trapped Storage/Locks; two in-memory approved RPC reads yielded pending. No native operation, filesystem mutation or network. This is separate from the real local EVM receipt proof removing WebAuthn only.",
+    "postReviewPresentationOnlyChange": "Availability wording changed from has expired to is no longer valid; final31-case UI rerun and exact anonymous replay include it."
+  },
+  "unchangedHostedReadOnlyCheck": {
+    "deployments": [
+      {
+        "slug": "continuitykit-try-reserve",
+        "projectId": "appgprj_6ac9114fc7d88191a7f181adf1e3a195",
+        "versionId": "appgprj_6ac9114fc7d88191a7f181adf1e3a195~appgver_11dbad87252081919416f51a18ee26fd",
+        "versionNumber": 8,
+        "sourceCommit": "0931415a7a2e457988d1ee59d3ec02a3ebc0776b",
+        "deploymentId": "appgdep_6aca34981a688191a5f0a36498bcd02a",
+        "status": "succeeded",
+        "url": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site",
+        "environmentRevision": 0,
+        "updatedAt": "2026-10-10T12:51:29.731009+00:00"
+      },
+      {
+        "slug": "continuitykit-try-primary",
+        "projectId": "appgprj_6ac9113ba81c81919442d44fd700e639",
+        "versionId": "appgprj_6ac9113ba81c81919442d44fd700e639~appgver_b724181a8d7c8191a16750d1bc13febe",
+        "versionNumber": 8,
+        "sourceCommit": "3f27a8837511b31adad8433ca627e50798bb08f5",
+        "deploymentId": "appgdep_6aca3481d6b48191bce7aad9a43acfab",
+        "status": "succeeded",
+        "url": "https://continuitykit-try-primary.cryptomickle.chatgpt.site",
+        "environmentRevision": 0,
+        "updatedAt": "2026-10-10T12:51:06.766130+00:00"
+      },
+      {
+        "slug": "continuitykit-account-reserve",
+        "projectId": "appgprj_6ac78aa73a208191a5d2b5441b961416",
+        "versionId": "appgprj_6ac78aa73a208191a5d2b5441b961416~appgver_fbf29f9893188191a4fd1707c6a249c2",
+        "versionNumber": 7,
+        "sourceCommit": "a1dbf78c115e369db6039c47f15528d37b279b6c",
+        "deploymentId": "appgdep_6acaa86246748191b5b90af13a2a526d",
+        "status": "succeeded",
+        "url": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site",
+        "environmentRevision": 1,
+        "updatedAt": "2026-10-10T21:05:30.273805+00:00"
+      },
+      {
+        "slug": "continuitykit-account-primary",
+        "projectId": "appgprj_6ac78a8c349c819185815701e765f8be",
+        "versionId": "appgprj_6ac78a8c349c819185815701e765f8be~appgver_35fdebcd08508191b8a1ac2ea1b420cb",
+        "versionNumber": 8,
+        "sourceCommit": "331a52311452435711b4c775d12b1d97fe6c9dfd",
+        "deploymentId": "appgdep_6acaa83fff208191aa9807bfa3b149e2",
+        "status": "succeeded",
+        "url": "https://continuitykit-account-primary.cryptomickle.chatgpt.site",
+        "environmentRevision": 4,
+        "updatedAt": "2026-10-10T21:04:56.907671+00:00"
+      }
+    ],
+    "publicHttp": {
+      "verifiedAt": "2026-10-10T22:18:22.453Z",
+      "scope": "One bounded GET per declared public page/config; no native authentication, storage writes, payment or user flow claim",
+      "rows": [
+        {
+          "url": "https://continuitykit-account-primary.cryptomickle.chatgpt.site/payments/",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8",
+          "bytes": 1649,
+          "sha256": "ee99d4f89371b6744b6b2cc9519efa9d3ae6c83cf39cb20d2d7782522e00665c",
+          "authenticationRequested": false,
+          "walletAction": false
+        },
+        {
+          "url": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8",
+          "bytes": 1649,
+          "sha256": "105e5fe750de1cbe432cac9269176e376b8ce979a83d39538ba0e4bc74c87cc6",
+          "authenticationRequested": false,
+          "walletAction": false
+        },
+        {
+          "url": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/profile.json",
+          "status": 200,
+          "contentType": "application/json; charset=utf-8",
+          "bytes": 434,
+          "sha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+          "authenticationRequested": false,
+          "walletAction": false
+        },
+        {
+          "url": "https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8",
+          "bytes": 1769,
+          "sha256": "85a434df28c5482d81d01217e85e4991356c94e2870499b5f3d508018b8f856c",
+          "authenticationRequested": false,
+          "walletAction": false
+        },
+        {
+          "url": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8",
+          "bytes": 1769,
+          "sha256": "423a3ec7e96e5d1bf3d0bb0fa7ec4ab16e7c9dc12cb3fda4663bc59fbd3983d2",
+          "authenticationRequested": false,
+          "walletAction": false
+        },
+        {
+          "url": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/markdown/",
+          "status": 200,
+          "contentType": "text/html; charset=utf-8",
+          "bytes": 1830,
+          "sha256": "e642f3e9c022831210395cd14a46adc079fe37fcb09dd3e39844ba210ba99866",
+          "authenticationRequested": false,
+          "walletAction": false
+        }
+      ]
+    },
+    "scope": "Sites reports these saved deployments succeeded; six declared public page/config GETs returned200. No authenticated recovery/payment execution is inferred."
+  },
+  "reproduction": [
+    "Download the anonymous GitHub archive at sourceCommit with Node24+ and installed local Anvil/Forge.",
+    "npm ci --ignore-scripts",
+    "npm ci --prefix integrations/multi-app --ignore-scripts",
+    "npm run build",
+    "npm run test:payment-survival",
+    "Full targeted replay runs108 top-level tests with zero failures/skips; nested/repeated runs are not added.",
+    "npm run build:payments"
+  ],
+  "limits": [
+    "generated source modules executed; built bundle verified but not executed",
+    "Node/JSDOM with CSS loader and transparent helper-session observer",
+    "synthetic existing WebAuthn PRF credential; no physical device",
+    "fixed public RPC names redirected to one owned local EVM; no provider independence",
+    "expired public configuration served only by the test host; built assets unchanged",
+    "disposable local payment funding; no customer demand",
+    "Complete SDK payment proof executes generated source ESM in Node/JSDOM; built assets are checked but not executed by that proof.",
+    "Missing recovery crypto is covered by static/UI tests and a separately disclosed mock-RPC probe. Real local EVM historical proof removes WebAuthn but retains Web Crypto.",
+    "The visual renderer uses deliberately labeled fake actions/verifier, not an actual receipt or physical browser capability test.",
+    "Both RPC aliases map to one actual local Anvil with chain ID10143; this is not Monad testnet or provider independence.",
+    "The known original503 is controlled app unavailability, not hosting failure.",
+    "No new physical-device test, public payment, hosted release, adoption, demand or prize probability is established."
+  ],
+  "publicSitesChanged": false,
+  "publicTransactionsSent": 0,
+  "physicalPasskeyVerified": false,
+  "videoOrFinalSubmissionPerformed": false,
+  "curatedSourceCandidate": {
+    "status": "local-reviewed-source-archive",
+    "fileCount": 486,
+    "sha256": "a4083563923e8fbebc2be3b1aa9d4bb5d412874496a0177c9432403f026a958e",
+    "all9ReviewedSourceBytesPreserved": true,
+    "operationalFilesExcluded": true,
+    "transformed": [
+      "delivery/PHYSICAL_TEST.md"
+    ],
+    "notPublishedAsArchive": true,
+    "assembledBeforeAddingThisCandidateMetadata": true
+  }
+}

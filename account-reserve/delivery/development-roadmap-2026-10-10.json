@@ -356,8 +356,8 @@
       "physicalPasskeyVerified": false
     }
   ],
-  "lastCompleted": "Published and anonymously replayed generated journal-free payment reference verification. All104 targeted top-level tests pass after fresh install/builds. Historical actual local receipt verified without credential requests, journal, locks or broadcast; wrong payment rejected and unknown reference unconfirmed.",
-  "next": "Bounded maintenance only until an observed defect or concrete integration requirement justifies more work. Do not add speculative feature layers, repeatedly run unchanged passing tests or start video/submission.",
+  "lastCompleted": "Corrected the generated payment reference capability gate. Exact anonymous108-test replay passed; browser without WebAuthn verifies the actual local receipt without auth/journal/locks/broadcast. Exact origin/security and full recovery/signing guards preserved; public Sites unchanged.",
+  "next": "Bounded maintenance only for another observed defect or explicit concrete integration requirement until the saved deadline. Do not add speculative features, repeat unchanged passing suites or start video/submission.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -484,5 +484,24 @@
     "publicCommit": "bdf7f76eee8b3fdefd465e3048780b32521105c0",
     "publicSitesChanged": false,
     "physicalPasskeyVerified": false
+  },
+  "latestMaintenance": {
+    "id": "payment-reference-capability-gate",
+    "status": "complete",
+    "observedDefect": "Generated main rejects the whole page when recovery-only WebAuthn or encryption capabilities are unavailable, hiding the credential-free supplied-reference verifier.",
+    "scope": "Confirmed compatibility defect correction; all19 feature milestones remain complete.",
+    "acceptance": [
+      "Missing WebAuthn still permits exact supplied-reference verification with zero credential/journal/lock/broadcast calls.",
+      "Missing recovery crypto disables authentication/signing rather than receipt reading.",
+      "Wrong origin, insecure context, missing transport and unexpected failed checks still reject the whole page.",
+      "Recovery callback and UI controls fail closed before any native authentication; existing uncertain journal stays blocked.",
+      "Relevant local tests, internal review, browser design check and anonymous exact-source replay."
+    ],
+    "newFeature": false,
+    "publicSitesChanged": false,
+    "publicTransactionsSent": 0,
+    "evidence": "evidence/payment-starter-capability-2026-10-11.json",
+    "sourceCommit": "1f809dd088db0e6527f8a8367caac66ec3ff2422",
+    "tests": 108
   }
 }
