@@ -1,4 +1,4 @@
-# New evaluation path: one key across two apps — 10 October 2026
+# Current evaluation path: one key across two apps — 10 October 2026
 
 Open [the app chooser](https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/).
 Use fictional text only. Textarea and Markdown Studio contain independently authored
@@ -10,20 +10,27 @@ editor runtimes; neither author has adopted or endorsed ContinuityKit.
 2. Wait for independent verification. In Markdown Studio, use a different draft
    (`APP-B — second fictional draft`) and **Use existing reserve passkey** in B.
    Select exactly the same key. This must not create a second credential.
-3. Close A. Open [the B chooser](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/)
-   in a fresh page, select each app and recover with that key. Edit/export each
-   result. No new snapshot is written during recovery or export.
+3. Close A. Open [the B collection](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/)
+   in a fresh page and choose **Open my app reserves** with that key. Both app
+   namespaces are checked in one SDK assertion. Choose either recovered draft,
+   edit/export it, then switch to the other in the same page. Missing or rejected
+   copies are reported separately. No new snapshot is written during recovery or
+   export. One assertion is not a guarantee of one device prompt.
 
 On 10 October, the builder reported recovering and exporting both reserves in Safari
 on iPhone after following the existing-passkey reuse flow. The Markdown marker
 `Test B fra iPhone` was explicitly confirmed; the final report covered both checks.
 Credential identity and exported file bytes were not independently inspected.
 [Native acceptance report](../evidence/apps-native-acceptance-2026-10-10.json).
+This physical report predates the combined collection interface; it does not
+establish the new interface's physical prompt count. The combined flow has
+[scoped synthetic SDK/browser validation](../evidence/collection-validation-2026-10-10.json).
 Native confirmation counts vary and were not recorded for this run. A closed tab is
 not an HTTP outage. The public demo retains one operator/provider and a finite expiry.
 
 For agent-replayable host replacement: `npm ci --ignore-scripts`,
-`npm run build:apps`, then `npm run test:operator`. The test creates a separate
+`npm --prefix integrations/multi-app ci --ignore-scripts`, `npm run build:apps`,
+then `npm run test:operator`. The test creates a separate
 SDK consumer and SQLite host, stops/removes the original, imports ciphertext to a
 new database and recovers both exact app documents in a fresh process. The
 [report](../evidence/operator-portability-2026-10-10.json) labels its synthetic
@@ -33,6 +40,29 @@ it does not prove retaining the current public hostname on another provider.
 The [operator guide](../operator/README.md) includes the runnable package, explicit
 invitation gate, storage limits, migration commands and exact-domain requirement.
 Both additions target developer reuse and continuity; neither is demand evidence.
+
+For the optional storage-survival capability, run `npm run test:replicas` after
+the same installs/build. This tests the installed text SDK with two separate
+SQLite databases and real storage/gateway processes: stop one store, recover
+from the other; corrupt one stored ciphertext, reject it and recover from the
+healthy copy; leave only the corrupt copy, reject with no export. Each recovery
+uses one synthetic assertion in a fresh client given neither expected plaintext
+nor a locator. [Process proof](../evidence/text-replica-process-proof-2026-10-10.json).
+Different authenticated ciphertext fails as a conflict. Preparation verifies
+every intended copy and never automatically retries uncertain writes.
+
+Replicas are an optional developer SDK/gateway capability. The published demo
+and packaged editor UI still use one store. Separate local processes do not
+prove independent providers, recovery-domain survival or native authentication.
+
+For the smallest editor integration, use
+`npm run create:text-starter -- /absolute/empty/text-demo`, then follow
+the [generated starter guide](../text-starter/README.md). This is a separate,
+installable public-SDK consumer with a two-method editor adapter, setup doctor
+and runnable A-offline recovery/export test. It uses disposable synthetic
+credentials and RAM, requires no wallet, and must not be deployed as a real
+reserve service. [Installed-generator replay](../evidence/text-starter-installed-package-2026-10-10.json)
+and [browser/package scope](../evidence/text-starter-validation-2026-10-10.json).
 
 The [public-source replay](../evidence/apps-public-replay-2026-10-10.json) records
 the exact anonymous source archive, fresh installs, all 24 app/editor and six

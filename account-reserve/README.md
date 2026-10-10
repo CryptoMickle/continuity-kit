@@ -10,6 +10,40 @@ snapshot. Later edits must be exported. A competent encrypted export also protec
 the narrower benefit here is finding and opening a prepared copy without retaining that
 export file. The reserve service and compatible passkey must still be available.
 
+## Start with your own text editor
+
+The [text starter](text-starter/README.md) generates a separate, installable
+consumer of the public text SDK. Its editor boundary is two functions:
+`getText()` captures the document; `applyText(text)` restores it. It includes
+the two-origin setup handoff, recovery, continued editing and TXT/JSON export.
+
+```sh
+npm run create:text-starter -- /absolute/empty/text-demo
+cd /absolute/empty/text-demo
+npm ci --ignore-scripts --no-audit --no-fund
+npm run build
+npm run doctor
+npm test
+npm run dev
+```
+
+The generated package uses a pinned local SDK tarball and dependency lock.
+The doctor checks the installed package, configuration and build; `npm test`
+checks recovery/export from a fresh client while the original origin returns
+HTTP 503. The browser gives the same deliberate outage control.
+
+This is a **synthetic, disposable localhost example**. It never creates a native
+passkey, and restarting its server discards its simulated credential and snapshot.
+Do not deploy the teaching server. A real integration needs an owned recovery
+origin, native WebAuthn and operated storage/admission; the
+[operator package](operator/README.md) is the separate durable-storage reference.
+The starter does not silently migrate existing reserves or turn the public demo
+into a production service.
+
+The [installed-generator replay](evidence/text-starter-installed-package-2026-10-10.json)
+and [final validation](evidence/text-starter-validation-2026-10-10.json) record
+the clean install, deliberate A outage, fresh recovery and exact exports.
+
 ## One reserve passkey, two real editor integrations
 
 [Open the two-app demo](https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/).

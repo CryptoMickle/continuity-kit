@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-10-10T14:04:41.806921+00:00",
+  "status": "PASSED",
+  "scope": "Account-free installed-SDK teaching starter, synthetic localhost only; no public Sites deployment",
+  "tests": {
+    "finalPackageAndUiTests": {
+      "passed": 4,
+      "failed": 0
+    },
+    "independentInstalledGeneratorReplay": "PASSED",
+    "finalBrowserBuild": "PASSED"
+  },
+  "installedReplay": "text-starter-installed-package-2026-10-10.json",
+  "browser": {
+    "engine": "Codex in-app browser",
+    "syntheticCredentialsOnly": true,
+    "setupHandoffAndIndependentRead": "PASSED",
+    "freshBTabWithBothSetupTabsClosed": "PASSED",
+    "primaryPageHttpStatus": 503,
+    "primaryConfigHttpStatus": 503,
+    "recoveredOriginalText": "EXACT",
+    "editedTxtDownload": {
+      "status": "READ_BACK_EXACT",
+      "utf8Bytes": 132,
+      "note": "Downloaded from browser before lifecycle/heading-only corrections; exporter is unchanged."
+    },
+    "jsonDownload": "Button requested export; browser file completion not confirmed. Exact JSON file content is covered by fresh-process automated tests.",
+    "clearThenReopenRestoresOriginal": "PASSED",
+    "mobileViewport": {
+      "width": 390,
+      "documentScrollWidth": 375,
+      "horizontalPageOverflow": false
+    },
+    "finalBuildScript": "/assets/index-B86lL45Y.js",
+    "consoleErrorsOrWarnings": 0,
+    "screenshot": "text-starter-browser-2026-10-10.png"
+  },
+  "review": "Two separate agents reviewed lifecycle/server/generator and replayed installed packaging. A late-config/pagehide bug and macOS /tmp realpath CLI bug were fixed and regression-tested. This is not an independent security audit.",
+  "sourceHashes": {
+    "text-starter/README.md": "dc69fbf5c5c80e30cd0d7b448867a404964ca6664609c310bf0176b92f276691",
+    "text-starter/adapter.mjs": "d2f2bc4e64fe21dedea2272df391f91871696b3db94364b45e5ce930f0fc494d",
+    "text-starter/config.mjs": "5fd14a9aa71e3d028efd94973fdfd9a21467321eb2b380c2e00ff7d9c9786219",
+    "text-starter/doctor.mjs": "aeab50603f6e09b389a2a4ff1f86f2a4040e5e4946014b37bb95f2539eb09dfa",
+    "text-starter/index.html": "41c7546be9877c84b3d7adeea931d9c56d2a18a80bbcd6580c2737933107bed4",
+    "text-starter/loopback-fetch.mjs": "b668ad180628b8b8c5cf84ae77ffcb209225de315a9f5ce4d1cc04231a468a82",
+    "text-starter/main.mjs": "67f2faee0afadaf73bb0ae7653c7adefacff034aae0212d1a5671c8647d07820",
+    "text-starter/package-lock.json": "ecd05227dcb4516868654ff49f1cf3b10306316a7bebe9be8ae98e730f063e8e",
+    "text-starter/package.json": "776596ef88d6a8f5764c336b205ff39b5fd638cbe8b3609d2ddf7fc31ba31be9",
+    "text-starter/recover-process.mjs": "09f5328bd8840b380e92ff422f46026f6186c0960beeb705f5101f5c147a4562",
+    "text-starter/server.mjs": "cbda2be3c8ed9db0d41dafcdd9ea587f83756f21a053436dbc7993631f1fb2ad",
+    "text-starter/smoke.mjs": "0df4c65afd31c84ff38bf525d3d9fde5ab3242995b0ff9fe04b426ce785b4885",
+    "text-starter/style.css": "5462f0b677d70d959f75a8845d277fd27547d4a3131c8002d8a9e647cb1b2b4b",
+    "text-starter/synthetic-client.mjs": "683bb3e97bae69e9bcc7e842a968b069be9a52ada85589c1e0b668848bada45e",
+    "text-starter/vite.config.mjs": "e89f0b27856019c90234c0dc562a09d0319b5af50de42006081949640003f68d",
+    "scripts/create-text-starter.mjs": "4b46345269b02502e2b883d52cccff5eeb9cad5e7dabd786b9f218495efacc9d",
+    "tests/text-starter-package.mjs": "7b30f9a84c127d88987615a7f7d9e94b06f8ab02b7920f3f01b713cb23b7bab9",
+    "package.json": "ef9da942ceba1d8b608a7c767b2ec8615e27fdf380ada0b6857b3bbd0a4dc16c"
+  },
+  "limits": [
+    "Synthetic credential and ciphertext are disposable server RAM; stopping server destroys both",
+    "A and B are separate origins in one local process; no provider-independence claim",
+    "No physical passkeys, native prompt count, external adoption or production security established",
+    "Only getText/applyText editor wiring and public text entrypoints; shared SDK package retains other APIs and transitive dependencies",
+    "No live public storage changes, credential migration, wallet or chain action"
+  ]
+}

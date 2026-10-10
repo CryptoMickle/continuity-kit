@@ -48,7 +48,9 @@
     "work",
     "scripts/create-starter.mjs",
     "LICENSE",
-    "delivery/THIRD_PARTY_NOTICES.md"
+    "delivery/THIRD_PARTY_NOTICES.md",
+    "text-starter",
+    "scripts/create-text-starter.mjs"
   ],
   "scripts": {
     "dev": "node server.mjs",
@@ -87,7 +89,9 @@
     "create:operator": "node operator/create.mjs",
     "test:collection": "node --test tests/text-collection.mjs tests/self-service-collection-ui.mjs",
     "test:replicas": "node --test tests/text-replicas.mjs tests/operator-replica-gateway.mjs tests/text-replica-drill.mjs",
-    "drill:replicas": "node scripts/text-replica-drill.mjs"
+    "drill:replicas": "node scripts/text-replica-drill.mjs",
+    "create:text-starter": "node scripts/create-text-starter.mjs",
+    "test:text-starter": "node --test tests/text-starter-package.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

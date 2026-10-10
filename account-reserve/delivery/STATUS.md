@@ -1,3 +1,34 @@
+# Account-free developer starter — 10 October 2026
+
+The new `npm run create:text-starter -- /absolute/empty/directory` generates a
+standalone consumer of the public text SDK with pinned tarball and lockfile.
+Its editor contract is `getText()` / `applyText(text)`. It includes A-to-B setup,
+independent opening, continued editing and TXT/JSON export, plus a doctor that
+checks configuration, installed SDK, build, live origins and port conflicts.
+
+Final validation passed four package/UI cases, including two fresh recovery
+processes given only B's origin/output directory, A returning HTTP 503, exact
+UTF-8 exports and unchanged snapshots. A separate agent packed/installed the SDK
+and ran the installed generator, offline install/build/doctor/test in empty
+folders. Review found and fixed a macOS path-alias CLI bug and late pagehide
+configuration state; cancellation and uncertain-write behavior are covered.
+
+Browser QA completed the popup handoff, closed both setup tabs, reopened B while
+A's page/API returned 503, recovered the original text, edited it and read back
+the downloaded TXT exactly. JSON export was requested in the browser; its local
+file completion was not confirmed, and exact JSON is covered by automated tests.
+The final build also passed close/reopen and 390px layout checks.
+
+[Validation scope](../evidence/text-starter-validation-2026-10-10.json) ·
+[Installed-package replay](../evidence/text-starter-installed-package-2026-10-10.json) ·
+[Starter guide](../text-starter/README.md).
+This is a disposable synthetic local example, not a hosted/native passkey server.
+The two origins share a process and RAM. Public Sites and existing reserves are
+unchanged. Next: a runnable replica browser reference using durable local stores.
+Video and final submission remain deferred until the user's Monday review.
+
+---
+
 # Authenticated replica SDK and operator gateway — 10 October 2026
 
 Added optional preparation/recovery across two or three configured stores using

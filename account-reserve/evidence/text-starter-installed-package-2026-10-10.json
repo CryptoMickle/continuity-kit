@@ -1,0 +1,57 @@
+{
+  "status": "PASSED",
+  "audit": "independent installed package generator and generated consumer",
+  "sourcePackageIntegrity": "sha512-xXwfc3o2NDbIqudRim/urQQ1n5dRCkvKH8KFdS5XlgRLaYciyASzh9OnjDgZVod3j5kBDyfuc0XgnpkiduJo7g==",
+  "sourcePackageFiles": 73,
+  "generatedSdkIntegrity": "sha512-xXwfc3o2NDbIqudRim/urQQ1n5dRCkvKH8KFdS5XlgRLaYciyASzh9OnjDgZVod3j5kBDyfuc0XgnpkiduJo7g==",
+  "generatedSourceFiles": 11,
+  "nodePathEmpty": true,
+  "installedSdkSymlink": false,
+  "directDependencies": {
+    "@continuitykit/account-reserve": "file:./continuitykit-account-reserve-0.0.1-experimental.tgz"
+  },
+  "lockPackageEntries": 70,
+  "buildAssets": [
+    "index-Bn7WjQBq.css",
+    "index-_9WICfGh.js"
+  ],
+  "doctorChecks": [
+    {
+      "name": "Node.js 24+",
+      "ok": true
+    },
+    {
+      "name": "Two distinct local origins and exact B RP ID",
+      "ok": true
+    },
+    {
+      "name": "Installed public SDK entrypoints",
+      "ok": true
+    },
+    {
+      "name": "Built local frontend",
+      "ok": true
+    },
+    {
+      "name": "Local port 64838 is free",
+      "ok": true
+    },
+    {
+      "name": "Local port 64839 is free",
+      "ok": true
+    }
+  ],
+  "smoke": {
+    "ok": true,
+    "mode": "synthetic local only",
+    "publicSdk": true,
+    "freshRecoveryProcesses": 2,
+    "primaryHttp503": true,
+    "noPrimaryRecoveryRequests": true,
+    "exactUtf8Exports": true,
+    "immutableSnapshotUnchanged": true,
+    "physicalPasskeyProof": false,
+    "productionServer": false
+  },
+  "note": "Independent installed-generator replay before the final heading-only close/reopen correction. The final source passed the root four-test suite again, including generated build and fresh processes."
+}
