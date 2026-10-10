@@ -1,6 +1,6 @@
 # Metropolis entry — two-app/operator update, 10 October 2026
 
-**Current update saved:** 10 October 2026, 10:18 UTC. Description, judge instructions and Mera explanation were updated. All 13 text fields matched after reload; ten were preserved. Checklist remains 5/6. New native two-app acceptance remains pending. See `evidence/apps-portal-draft-2026-10-10.json`.
+**Native-acceptance update saved:** 10 October 2026, 11:44 UTC (13:44 Europe/Oslo). Description, judge instructions and Mera explanation now include builder-reported recovery/export of both app reserves on iPhone. All 13 fields matched after reload, including ten preserved fields. Checklist remains 5/6. Video and final submission remain deferred. See `evidence/apps-native-portal-saved-2026-10-10.json`.
 
 **Earlier text-v1 version saved to the portal and verified after reload at 21:52 UTC, 9 October 2026.**
 Five changed fields matched this draft; all 13 text fields were read back, with the
@@ -33,7 +33,7 @@ or account key. ContinuityKit also has a separately demonstrated Monad account r
 
 ContinuityKit gives unfinished private work a prepared way back when its original app is unavailable. A developer connects its text document to a separate recovery client. The user can reopen, edit and export the prepared snapshot with a reserve passkey, without a wallet or account key.
 
-The new published entry is https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/ with recovery at https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/. Textarea runs its pinned upstream editor; Markdown Studio runs EasyMDE/CodeMirror. The second app explicitly reuses the existing reserve passkey. Fixed app namespaces derive separate lookup and encryption keys, so one app's stored ciphertext cannot substitute for the other's. These are builder-made integrations of independently authored components, not outside adoption or endorsements. Human acceptance of the new two-app reuse sequence is still pending.
+The new published entry is https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/ with recovery at https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/. Textarea runs its pinned upstream editor; Markdown Studio runs EasyMDE/CodeMirror. The second app explicitly reuses the existing reserve passkey. Fixed app namespaces derive separate lookup and encryption keys, so one app's stored ciphertext cannot substitute for the other's. These are builder-made integrations of independently authored components, not outside adoption or endorsements. On 10 October 2026, the builder reported recovering and exporting both app reserves in Safari on iPhone after following the setup flow that reuses an existing reserve passkey. The Markdown marker Test B fra iPhone was explicitly confirmed; the final report covered both recovery/export checks. Credential identity and exported file contents were not independently inspected. An initially incomplete Textarea setup was resumed before completion. See evidence/apps-native-acceptance-2026-10-10.json.
 
 The operator package serves the same browser client with durable SQLite storage, private invitation-gated admissions and immutable encrypted records. Its reproducible installed-SDK drill prepares two texts with one synthetic credential, stops the original host before export, removes the test database, imports ciphertext into a new database and recovers both exact documents from fresh OS processes. It rejects wrong-origin access and altered ciphertext. Migration requires retaining the exact recovery origin/RP and application bindings. This is a local host/storage replacement, not a completed public-provider migration; the current chatgpt.site hostname is not proved transferable.
 
@@ -80,7 +80,7 @@ https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/
 https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/
 1. Choose Textarea, write a fictional draft and prepare it in B. Use an existing reserve passkey on this B site, or create a first one. Wait for independent verification.
 2. Choose Markdown Studio, write a different draft and choose USE EXISTING RESERVE PASSKEY in B. Select exactly the same key; do not create another.
-3. Close A and open the B chooser in a fresh page. Select each app, recover with the same key, edit and export. Recovery/export does not update the saved snapshot. Native confirmations may be multiple. New two-app native acceptance is pending; the software isolation and failure tests pass.
+3. Close A and open the B chooser in a fresh page. Select each app, recover with the same key, edit and export. Recovery/export does not update the saved snapshot. Native confirmations may be multiple. The builder reported completing both recovery/export checks in Safari on iPhone on 10 October, following the same-existing-passkey instructions. The Markdown marker was explicitly confirmed. Credential identity and downloaded bytes were not independently inspected. See evidence/apps-native-acceptance-2026-10-10.json; software isolation and failure tests also pass.
 
 EARLIER NATIVE TEXT RESULT
 https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/
@@ -109,13 +109,13 @@ Preparation receives an explicit short-lived one-use key handle, writes at most 
 
 Automated proof: one synthetic credential creates two distinct immutable app records; substitution fails; both reopen after the original operator process/store are replaced. The installed public SDK runs in fresh processes; transfer contains ciphertext/public binding, never plaintext, passkey secrets or PRF output. This is local software evidence, not native passkey or provider-independence proof.
 
-Native evidence retained separately: on 10 October the builder reported iPhone recovery/export of text-v1 after the instructed Mac Safari-to-iPhone same-key sequence. Logs corroborate Mac upload/reads then iPhone reads. Same-key identity, marker and exported bytes were not independently inspected; redacted locators cannot link those requests. New two-app native reuse remains pending. See evidence/text-native-acceptance-2026-10-10.json and evidence/operator-portability-2026-10-10.json.
+Native two-app acceptance: on 10 October, the builder reported recovering and exporting both Textarea and Markdown Studio reserves in Safari on iPhone after following the existing-passkey reuse flow. Test B fra iPhone was explicitly confirmed; the final report covered both recovery/export checks. An initial incomplete Textarea setup was resumed before completion. Logs corroborate write/readback sequences and a later successful Textarea read. Credential identity and downloaded bytes were not independently inspected; redacted locators cannot establish same-key identity. This is a builder-run acceptance report, not an independent tester or cross-device proof for this two-app flow. See evidence/apps-native-acceptance-2026-10-10.json. Earlier text-v1 Mac-to-iPhone evidence and the synthetic operator drill remain separate.
 
 This is a prepared immutable snapshot, not automatic sync or lost-passkey recovery. Compatible PRF, the surviving key, exact B origin, trusted client and surviving ciphertext remain required.
 
 ## Remaining submission boundary
 
-The two-app/operator update was saved at 10:18 UTC on 10 October; all 13 fields matched after reload.
+The native two-app acceptance update was saved at 11:44 UTC on 10 October; all 13 fields matched after reload. The 10:18 UTC update is retained as earlier evidence.
 Text sites are published; source commands refer
 to the current tree. Native text-v1 iPhone recovery/export is builder-reported with
 the server corroboration and limitations above. Technical demo and

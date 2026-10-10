@@ -1,0 +1,133 @@
+{
+  "recordedAt": "2026-10-10T11:43:33.546Z",
+  "status": "NATIVE_ACCEPTANCE_COMPLETED_BY_BUILDER_REPORT",
+  "flow": "Two real editor integrations on the published /apps/ routes",
+  "runtimeSourceCommit": "4d62d98685327b95c71bcec2b252476cca2039ed",
+  "sitesVersionAtFinalTextareaRun": 7,
+  "device": "Safari on iPhone, as stated in the test instructions and preceding user replies",
+  "userReport": [
+    {
+      "answer": "Ja, Test B fra iPhone vises",
+      "context": "Direct Markdown Studio reserve recovery using the existing key; requested marker explicitly confirmed."
+    },
+    {
+      "answer": "textarea klar",
+      "context": "User was instructed to prepare Test A fra iPhone using the key that opened Markdown and wait for Your snapshot is ready / Stored, reopened and independently checked."
+    },
+    {
+      "answer": "begge gjenopprettet og eksportert",
+      "context": "Final instruction required closing the original Textarea tab, reopening its B page, checking Test A fra iPhone and exporting; this report confirms both requested recovery/export checks."
+    }
+  ],
+  "samePasskeyScope": "Reported completion of a flow explicitly instructing reuse of the same existing key. Credential identity was not independently inspected or correlated.",
+  "serverCorroboration": {
+    "source": "Sanitized Sites Worker metadata, not decrypted content",
+    "earlierIncident": "apps-native-missing-2026-10-10.json",
+    "earlierSequence": "At 10:47 UTC, Markdown preparation was followed by PUT 201 and two GET 200 responses. Initial Textarea preparation had no recorded upload; fresh Textarea lookup returned 404.",
+    "laterSequence": [
+      {
+        "at": "2026-10-10T11:36:03.858Z",
+        "path": "/apps/markdown/",
+        "method": "GET",
+        "status": 200,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:39:17.995Z",
+        "path": "/apps/textarea/",
+        "method": "GET",
+        "status": 200,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:39:18.603Z",
+        "path": "/api/enrollment/start",
+        "method": "POST",
+        "status": 201,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:39:30.296Z",
+        "path": "/api/reserve/REDACTED",
+        "method": "GET",
+        "status": 404,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:39:30.448Z",
+        "path": "/api/reserve/REDACTED",
+        "method": "PUT",
+        "status": 201,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:39:30.556Z",
+        "path": "/api/reserve/REDACTED",
+        "method": "GET",
+        "status": 200,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:39:32.941Z",
+        "path": "/api/reserve/REDACTED",
+        "method": "GET",
+        "status": 200,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:40:21.808Z",
+        "path": "/apps/textarea/",
+        "method": "GET",
+        "status": 200,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:41:05.384Z",
+        "path": "/apps/textarea/",
+        "method": "GET",
+        "status": 200,
+        "iphone": true,
+        "outcome": "ok"
+      },
+      {
+        "at": "2026-10-10T11:41:20.990Z",
+        "path": "/api/reserve/REDACTED",
+        "method": "GET",
+        "status": 200,
+        "iphone": true,
+        "outcome": "ok"
+      }
+    ],
+    "limits": "Locators are redacted; events are associated by route/timing, not linked to verified credential IDs. HTTP responses do not prove client decryption or downloaded bytes."
+  },
+  "acceptance": {
+    "builderReportedBothRecovered": true,
+    "builderReportedBothExported": true,
+    "markdownMarkerExplicitlyConfirmed": "Test B fra iPhone",
+    "textareaMarkerRequested": "Test A fra iPhone",
+    "textareaMarkerScope": "Covered by final completion report, not a separate transcript or file inspection",
+    "independentCredentialIdentityVerified": false,
+    "exportedFileBytesInspected": false,
+    "nativePromptCountKnown": false
+  },
+  "earlierFailure": "Preserved as historical evidence. Follow-up completed by builder report after resuming Textarea setup and correcting misleading progress UI.",
+  "notClaimed": [
+    "An independent tester or external adoption",
+    "Mac-to-iPhone proof for this new two-app sequence",
+    "Same-credential identity established by server telemetry",
+    "Production readiness or an audit",
+    "Public provider/domain migration or HTTP outage"
+  ],
+  "submission": {
+    "video": "deferred by user",
+    "finalSubmission": false
+  }
+}

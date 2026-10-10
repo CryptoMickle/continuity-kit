@@ -1,0 +1,18 @@
+{
+  "savedAt": "2026-10-10T11:44:00Z",
+  "localTime": "2026-10-10 13:44 Europe/Oslo",
+  "url": "https://hackathon.monad.xyz/project?tab=submission",
+  "updatedFields": [
+    "description",
+    "accessInstructions",
+    "Mera non-account explanation"
+  ],
+  "readbackFields": 13,
+  "mismatches": 0,
+  "unchangedFields": 10,
+  "checklist": "5/6",
+  "nativeTwoAppStatus": "completed by builder report; credential identity and exported bytes not independently inspected",
+  "video": "deferred by user",
+  "finalSubmission": false,
+  "runtimeSourceCommit": "4d62d98685327b95c71bcec2b252476cca2039ed"
+}

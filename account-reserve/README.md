@@ -22,8 +22,12 @@ Textarea runs the pinned upstream editor; Markdown Studio runs EasyMDE 2.20.0 an
 CodeMirror. Both are builder-made integrations of independently authored components,
 not external customers or endorsements. No wallet or chain action is added.
 The protocol's format, fixed PRF salt and old derivation inputs are unchanged.
-Native same-key preparation across these two integrations is **not yet human-verified**;
-the earlier text-v1 iPhone report does not establish this new composed flow.
+On 10 October, the builder reported recovering and exporting both app reserves in
+Safari on iPhone after following the setup flow that reuses an existing passkey.
+The Markdown marker `Test B fra iPhone` was explicitly confirmed; the final report
+covered both recovery/export checks. Credential identity and exported file contents
+were not independently inspected. An initial incomplete Textarea setup was resumed
+before this completion report. [Scoped native evidence](evidence/apps-native-acceptance-2026-10-10.json).
 
 An [operator package](operator/README.md) serves the same client and durable SQLite
 storage without Sites/Vercel/D1. Its installed-SDK [replacement drill](evidence/operator-portability-2026-10-10.json)

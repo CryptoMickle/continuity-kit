@@ -14,9 +14,13 @@ editor runtimes; neither author has adopted or endorsed ContinuityKit.
    in a fresh page, select each app and recover with that key. Edit/export each
    result. No new snapshot is written during recovery or export.
 
-Native confirmation counts vary. Human acceptance of this new two-app sequence is
-pending; prior text-v1 iPhone acceptance below is narrower. A closed tab is not an
-HTTP outage. The public demo retains one operator/provider and a finite expiry.
+On 10 October, the builder reported recovering and exporting both reserves in Safari
+on iPhone after following the existing-passkey reuse flow. The Markdown marker
+`Test B fra iPhone` was explicitly confirmed; the final report covered both checks.
+Credential identity and exported file bytes were not independently inspected.
+[Native acceptance report](../evidence/apps-native-acceptance-2026-10-10.json).
+Native confirmation counts vary and were not recorded for this run. A closed tab is
+not an HTTP outage. The public demo retains one operator/provider and a finite expiry.
 
 For agent-replayable host replacement: `npm ci --ignore-scripts`,
 `npm run build:apps`, then `npm run test:operator`. The test creates a separate

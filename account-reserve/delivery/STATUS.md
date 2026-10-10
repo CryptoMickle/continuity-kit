@@ -1,6 +1,24 @@
 # Two-app reuse and operator replacement — 10 October 2026
 
-## Native two-app test is incomplete — 12:48 Oslo time
+## Native two-app acceptance completed by builder report
+
+The builder explicitly confirmed `Test B fra iPhone` in the Markdown reserve,
+then reported `textarea klar` after instructions to wait for independent setup
+verification. Following fresh-B recovery, marker checks and export instructions,
+the final report was **“begge gjenopprettet og eksportert”**. This completes the
+builder-reported Safari-on-iPhone acceptance sequence for both editor integrations.
+The flow instructed reuse of the same existing key; credential identity and
+downloaded file bytes were not independently inspected.
+
+Later iPhone server metadata corroborates a Textarea preparation sequence at
+11:39 UTC (PUT 201 and two GET 200 responses) and a fresh Textarea page plus
+successful read at 11:41 UTC. The earlier Markdown write/readback is retained in
+the missing-snapshot incident. Redacted locators prevent cross-request identity
+correlation. This is not external adoption or independent usability testing.
+See [native acceptance evidence](../evidence/apps-native-acceptance-2026-10-10.json).
+No runtime changed for this evidence update. Video and final submission remain deferred. The description, judge instructions and Mera explanation were saved to the portal at 11:44 UTC (13:44 Oslo). All 13 text fields matched after reload; ten were preserved. Checklist remains 5/6. [Portal readback](../evidence/apps-native-portal-saved-2026-10-10.json).
+
+## Historical interruption — 12:48 Oslo time; followed by completion above
 
 The builder supplied an iPhone screenshot showing a missing snapshot. Recent
 server metadata shows Textarea setup admission without a subsequent reserve read
