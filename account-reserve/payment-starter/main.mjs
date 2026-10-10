@@ -37,17 +37,21 @@ try {
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
   const profile = parsePaymentStarterProfile(new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes));
   const environment = checkPaymentStarterEnvironment(profile);
-  if (!environment.ok) throw new Error('PAYMENT_ENVIRONMENT_UNAVAILABLE');
+  if (environment.readOnlyOk !== true) throw new Error('PAYMENT_ENVIRONMENT_UNAVAILABLE');
+  const recoveryAvailable = environment.ok === true;
   if (dead || controller.signal.aborted) throw new Error('PAYMENT_PAGE_CLOSED');
   const transport = createReserveHttpStore({ basePath: profile.storeBasePath });
   // Expose only a reader. This entry has no enrollment capability or write path.
   const store = Object.freeze({ get: locator => transport.get(locator) });
   const actions = createPaymentActions({ profile: profile.payment, lifetimeTarget: window,
-    openExistingAccount: ({ signal }) => recoverReserve({ config: profile.reserve, store, signal }),
+    openExistingAccount: ({ signal }) => {
+      if (!recoveryAvailable) throw Object.assign(new Error('PAYMENT_RECOVERY_UNAVAILABLE'), { code: 'PAYMENT_RECOVERY_UNAVAILABLE' });
+      return recoverReserve({ config: profile.reserve, store, signal });
+    },
   });
   try {
     const verifier = createTestnetPaymentVerifier({ profile: profile.payment });
-    mounted = mountPaymentStarter(root, { profile, actions, verifier, window });
+    mounted = mountPaymentStarter(root, { profile, actions, verifier, recoveryAvailable, window });
   }
   catch (error) { actions.dispose(); throw error; }
 } catch {

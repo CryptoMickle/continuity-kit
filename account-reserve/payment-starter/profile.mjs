@@ -131,7 +131,12 @@ export function parsePaymentStarterProfile(text) {
  */
 export function checkPaymentStarterEnvironment(input, environment) {
   const profile = validatePaymentStarterProfile(input);
-  return checkReserveEnvironment({ config: profile.reserve, role: 'recovery',
+  const report = checkReserveEnvironment({ config: profile.reserve, role: 'recovery',
     originalOrigin: profile.originalOrigin, recoveryOrigin: profile.recoveryOrigin,
     ...(environment === undefined ? {} : { environment }) });
+  const required = ['config', 'role', 'origins', 'rp-origin-binding', 'current-origin', 'secure-context', 'transport-apis'];
+  const recoveryOnly = ['web-crypto', 'webauthn-api'];
+  const readOnlyOk = required.every(id => report.checks.some(check => check.id === id && check.status === 'pass'))
+    && report.checks.every(check => check.status !== 'fail' || recoveryOnly.includes(check.id));
+  return Object.freeze({ ...report, readOnlyOk });
 }

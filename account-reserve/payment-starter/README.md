@@ -105,7 +105,11 @@ vary; one deliberate action is not a promise of one native confirmation.
 Choose the approved payment, paste its full transaction hash under **Check a
 transaction reference**, then press **Verify reference**. This separate public
 read needs no local transaction history, reserve opening or passkey. It stays
-available after the signing deadline.
+available after the signing deadline. A browser without WebAuthn or the recovery
+cryptography APIs can still check references on the exact configured secure B
+origin. Account opening and collection remain disabled there; a notice explains
+the missing recovery support. Wrong origins, insecure contexts and missing
+required HTTP/text APIs still stop the page before it mounts.
 
 Only an exact finalized payment is shown as verified. Pending or unknown,
 unsuccessful transactions, mismatched evidence and unavailable verification have

@@ -71,7 +71,12 @@ unchanged. The [journal-free reference proof](evidence/payment-starter-reference
 checks an actual local receipt with an expired public profile, rejects the same
 hash for a different approved payment, and leaves an absent hash unconfirmed.
 No credential request, journal access, lock or broadcast occurs in that phase.
-The page retains its existing WebAuthn-capability preflight. These are synthetic
+Full recovery still requires the existing WebAuthn and encryption preflight.
+A browser missing these recovery capabilities can use the supplied-reference
+reader while account opening and collection stay disabled; trusted origin,
+secure context, binding and transport checks still gate the page. The
+[capability correction](evidence/payment-starter-capability-2026-10-11.json)
+checks this limited view without a native credential request. These are synthetic
 source-module checks, with the same local-node and physical-device limits above.
 
 ## Start with your own text editor

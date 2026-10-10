@@ -89,6 +89,12 @@ export async function runGeneratedPaymentProof(input) {
   for (const [name, value] of Object.entries({ window: dom.window, document: dom.window.document, location: dom.window.location,
     navigator: { credentials, locks }, localStorage: storage, PublicKeyCredential: class {}, isSecureContext: true })) Object.defineProperty(globalThis, name, { configurable: true, value });
   if (input.phase === 'reference') {
+    // Historical receipt checking has no signing prerequisite. This fresh
+    // browser snapshot supplies neither WebAuthn API nor credential material.
+    delete globalThis.PublicKeyCredential;
+    delete globalThis.navigator.credentials;
+    Object.defineProperty(dom.window, 'PublicKeyCredential', { configurable: true, value: undefined });
+    Object.defineProperty(dom.window.navigator, 'credentials', { configurable: true, value: undefined });
     const forbidden = () => { counts.persistenceAccess++; throw new Error('REFERENCE_PERSISTENCE_FORBIDDEN'); };
     Object.defineProperty(globalThis, 'localStorage', { configurable: true, get: forbidden });
     Object.defineProperty(globalThis.navigator, 'locks', { configurable: true, get: forbidden });
@@ -162,6 +168,12 @@ export async function runGeneratedPaymentProof(input) {
       assert.equal(journal().entries[0].phase, 'confirmed'); assert.equal(counts.journalWrites, 1); assert.equal(counts.sends, 0);
     } else {
       assert.equal(input.credential, undefined); assert.equal(input.journal, undefined);
+      assert.equal(typeof globalThis.PublicKeyCredential, 'undefined');
+      assert.equal(typeof globalThis.navigator.credentials, 'undefined');
+      assert.equal(typeof dom.window.PublicKeyCredential, 'undefined');
+      assert.equal(typeof dom.window.navigator.credentials, 'undefined');
+      assert.equal($('payment-recovery-notice').hidden, false);
+      assert.equal($('open').disabled, true); assert.equal($('collect').disabled, true);
       assert.ok(Date.parse(input.profile.payment.expiresAt) < Date.now());
       await verifyReference(input.hash, 'verified');
       $('payment-right').value = '2'; $('payment-right').dispatchEvent(new dom.window.Event('change'));
@@ -183,6 +195,7 @@ export async function runGeneratedPaymentProof(input) {
     for (const session of globalThis.__paymentProofObservation.sessions) await assert.rejects(session.account.signMessage({ message: 'closed after page exit' }), error => error.code === 'SESSION_ENDED');
     return { phase: input.phase, counts, ...(input.phase === 'reference' ? {} : { journal: [...values] }), hash: acceptedHash ?? input.hash ?? journal().entries[0].hash,
       historicalReferenceVerified: input.phase === 'reference', wrongApprovedRightRejected: input.phase === 'reference', unknownReferencePending: input.phase === 'reference',
+      journalFreeReferenceWithoutWebAuthn: input.phase === 'reference',
       originalRequests: 0, signerEnded: input.phase === 'claim', sourceBodiesUnchanged: true, cssLoaderAndTransparentSessionObserver: true, nativePasskey: false, publicNetwork: false };
   } finally {
     dom.window.dispatchEvent(new dom.window.Event('pagehide'));

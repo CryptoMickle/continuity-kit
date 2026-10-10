@@ -63,7 +63,7 @@ async function hosts(records) {
     stats, offline() { offline = true; }, setConfig(bytes) { configBytes = Buffer.from(bytes); }, close: () => Promise.all([closeServer(primary), closeServer(recovery)]) };
 }
 
-test('clean generated payment page survives A503, reconciles its real local payment and independently verifies a reference without a journal', { timeout: 180000 }, async t => {
+test('clean generated payment page survives A503, reconciles its real local payment and independently verifies a reference without a journal or WebAuthn', { timeout: 180000 }, async t => {
   const directory = await mkdtemp(join(tmpdir(), 'payment-starter-survival-')), consumer = join(directory, 'consumer');
   let chain, servers, originalSession, originalAccount;
   const privateKey = new Uint8Array(randomBytes(32)), credentialId = randomBytes(24), credentialSecret = randomBytes(32), records = new Map();
@@ -148,6 +148,7 @@ test('clean generated payment page survives A503, reconciles its real local paym
   servers.setConfig(Buffer.from(JSON.stringify(historicalProfile)));
   const reference = await freshPage(consumer, { ...base, profile: historicalProfile, phase: 'reference', hash: attempted.hash });
   assert.equal(reference.hash, attempted.hash); assert.equal(reference.historicalReferenceVerified, true);
+  assert.equal(reference.journalFreeReferenceWithoutWebAuthn, true);
   assert.equal(reference.wrongApprovedRightRejected, true); assert.equal(reference.unknownReferencePending, true);
   for (const name of ['nativeGet', 'nativeCreate', 'reserveGets', 'reserveWrites', 'sends', 'journalReads', 'journalWrites', 'locks', 'persistenceAccess']) assert.equal(reference.counts[name], 0, name);
   servers.setConfig(await readFile(join(consumer, 'dist/payment-config.json')));
@@ -172,7 +173,8 @@ test('clean generated payment page survives A503, reconciles its real local paym
     claimBroadcasts: attempted.counts.sends, acceptedReplyDeliberatelyLost: true, signedHashStoredBeforeSend: true, exactBeneficiaryAmountNonceAndEvent: true,
     beneficiaryBalanceMatchesPaymentMinusGas: true, originalAndRecoveredSignerEnded: true, freshProcessReconciliation: true,
     freshProcessCredentials: confirmed.counts.nativeGet, freshProcessBroadcasts: confirmed.counts.sends, durableJournalConfirmed: true,
-    journalFreeReferenceProcess: true, journalFreeReferenceVerified: true, historicalExpiredProfileVerified: true, wrongApprovedRightRejected: true, unknownReferencePending: true,
+    journalFreeReferenceProcess: true, journalFreeReferenceVerified: true, journalFreeReferenceWithoutWebAuthn: true,
+    historicalExpiredProfileVerified: true, wrongApprovedRightRejected: true, unknownReferencePending: true,
     referenceCredentials: reference.counts.nativeGet, referenceJournalReads: reference.counts.journalReads, referenceLocks: reference.counts.locks, referenceBroadcasts: reference.counts.sends,
     referencePersistenceAccesses: reference.counts.persistenceAccess, referenceDidNotMutateJournal: true, historicalConfigServedOnlyByTestHost: true,
     publicNetwork: false, physicalPasskeyVerified: false, deployed: false,

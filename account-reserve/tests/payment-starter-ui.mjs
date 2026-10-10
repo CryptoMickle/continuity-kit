@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createRequire } from 'node:module';
+import { createRequire, registerHooks } from 'node:module';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { mountPaymentStarter, showPaymentStarterError } from '../payment-starter/page.mjs';
@@ -28,7 +28,7 @@ test('configuration response validation aborts the fetch before opening any body
   }
 });
 
-function fixture(t, changes = {}) {
+function fixture(t, changes = {}, capabilities = {}) {
   const dom = new JSDOM('<div id="app"></div>', { url: 'https://reserve.example.test/' });
   const root = dom.window.document.getElementById('app');
   const profile = { payment: { chainId: 10143, address: '0x' + '2'.repeat(40), owner: '0x' + '3'.repeat(40), expiresAt: new Date(Date.now() + 3600000).toISOString(), claims: [{ rightId: 1n, amount: 10n ** 16n }, { rightId: 2n, amount: 2n * 10n ** 16n }] }, ...changes };
@@ -73,7 +73,7 @@ function fixture(t, changes = {}) {
     blockNumber: 10n, blockHash: '0x' + 'a'.repeat(64), ...overrides,
   });
   const verifier = { check(query) { references.push(query); return behavior.reference ? behavior.reference(query) : Promise.resolve(referenceResult(query)); } };
-  const mounted = mountPaymentStarter(root, { profile, actions, verifier, window: dom.window });
+  const mounted = mountPaymentStarter(root, { profile, actions, verifier, recoveryAvailable: true, ...capabilities, window: dom.window });
   t.after(() => { mounted.dispose(); dom.window.close(); });
   return { dom, root, profile, counts, behavior, state, actions, verifier, references, referenceResult, observation, intervals, mounted, $: id => root.querySelector('#' + id),
     select(id) { const control = root.querySelector('#payment-right'); control.value = String(id); control.dispatchEvent(new dom.window.Event('change')); },
@@ -185,7 +185,7 @@ test('dynamic profile and transaction fields use literal text rather than HTML',
   const attack = '<img src=x onerror=alert(1)>', original = fixture(t);
   original.profile.payment.owner = attack; original.profile.payment.address = attack;
   const otherRoot = original.dom.window.document.createElement('div'); original.root.after(otherRoot);
-  const page = mountPaymentStarter(otherRoot, { profile: original.profile, actions: original.actions, window: original.dom.window });
+  const page = mountPaymentStarter(otherRoot, { profile: original.profile, actions: original.actions, recoveryAvailable: true, window: original.dom.window });
   t.after(() => page.dispose());
   assert.equal(otherRoot.querySelector('#payment-owner').textContent, attack); assert.equal(otherRoot.querySelector('img'), null);
   original.state.payment = { confirmed: false, unresolved: true, hash: attack };
@@ -229,9 +229,9 @@ test('valid main bootstrap constructs an inert public verifier separately from t
   const actions = { dispose: forbidden }, verifier = { check: forbidden };
   await new AsyncFunction(...names, source)({ getElementById: () => root }, win,
     { href: 'https://reserve.example.test/', origin: 'https://reserve.example.test' },
-    async () => new Response('{}'), forbidden, () => profile, () => ({ ok: true }),
+    async () => new Response('{}'), forbidden, () => profile, () => ({ ok: true, readOnlyOk: true }),
     () => ({ get: forbidden }), options => { calls.push('actions'); assert.equal(options.profile, payment); return actions; }, forbidden,
-    (target, options) => { calls.push('mount'); assert.equal(target, root); assert.equal(options.actions, actions); assert.equal(options.verifier, verifier); return { dispose: forbidden }; },
+    (target, options) => { calls.push('mount'); assert.equal(target, root); assert.equal(options.actions, actions); assert.equal(options.verifier, verifier); assert.equal(options.recoveryAvailable, true); return { dispose: forbidden }; },
     options => { calls.push('verifier'); assert.deepEqual(options, { profile: payment }); return verifier; });
   assert.deepEqual(calls, ['actions', 'verifier', 'mount']);
 });
@@ -355,4 +355,64 @@ test('historical reference verification remains available after the signing dead
   f.reference(); await tick();
   assert.equal(f.$('payment-reference-status').dataset.state, 'verified'); assert.equal(f.$('payment-status').dataset.state, 'expired');
   assert.equal(f.counts.open, 0); assert.equal(f.counts.collect, 0); assert.equal(f.counts.check, 0);
+});
+
+test('read-only renderer keeps references available and guards disabled recovery handlers', async t => {
+  const f = fixture(t, {}, { recoveryAvailable: false });
+  assert.equal(f.$('payment-recovery-notice').hidden, false);
+  assert.match(f.$('payment-recovery-notice').textContent, /Read-only checks work here/);
+  await f.funded();
+  for (const id of ['open', 'collect']) {
+    assert.equal(f.$(id).disabled, true);
+    f.$(id).disabled = false; f.$(id).onclick();
+  }
+  assert.equal(f.counts.open, 0); assert.equal(f.counts.collect, 0);
+  f.state.canOpen = false; f.dom.window.dispatchEvent(new f.dom.window.Event('focus'));
+  assert.equal(f.$('payment-status').dataset.state, 'stale');
+  f.reference(); await tick(); assert.equal(f.$('payment-reference-status').dataset.state, 'verified');
+  assert.equal(f.counts.open, 0); assert.equal(f.counts.collect, 0); assert.equal(f.counts.check, 0);
+});
+
+test('real profile preflight mounts reference-only main without recovery APIs and still rejects unsafe environments', async t => {
+  const publicParent = new URL('../package.json', import.meta.url).href;
+  const hook = registerHooks({ resolve(specifier, context, next) { return next(specifier, specifier.startsWith('@continuitykit/account-reserve') ? { ...context, parentURL: publicParent } : context); } });
+  const { parsePaymentStarterProfile, checkPaymentStarterEnvironment } = await import('../payment-starter/profile.mjs');
+  hook.deregister();
+  const source = (await readFile(new URL('../payment-starter/main.mjs', import.meta.url), 'utf8')).replace(/^import .+;\n/gm, '');
+  const names = ['document', 'window', 'location', 'fetch', 'showPaymentStarterError', 'parsePaymentStarterProfile', 'checkPaymentStarterEnvironment', 'createReserveHttpStore', 'createPaymentActions', 'recoverReserve', 'mountPaymentStarter', 'createTestnetPaymentVerifier'];
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+  for (const mode of ['no-webauthn', 'no-recovery-crypto', 'both-missing', 'wrong-origin', 'insecure', 'missing-transport']) {
+    const f = fixture(t); f.mounted.dispose();
+    const raw = JSON.parse(await readFile(new URL('../payment-starter/profile.example.json', import.meta.url), 'utf8'));
+    raw.originalOrigin = 'https://primary.example.test'; raw.recoveryOrigin = 'https://reserve.example.test';
+    raw.reserve.originalRpId = 'primary.example.test'; raw.reserve.recoveryRpId = 'reserve.example.test';
+    Object.assign(raw.payment, { address: f.profile.payment.address, owner: f.profile.payment.owner, issuer: '0x' + '4'.repeat(40),
+      claims: f.profile.payment.claims.map((claim, nonce) => ({ rightId: String(claim.rightId), amount: String(claim.amount), nonce })) });
+    const forbidden = () => assert.fail('bootstrap/reference must not recover, request credentials or use recovery crypto');
+    const environment = { origin: raw.recoveryOrigin, isSecureContext: true, PublicKeyCredential() {}, navigator: { credentials: { get: forbidden, create: forbidden } },
+      crypto: { getRandomValues: forbidden, subtle: Object.fromEntries(['digest', 'importKey', 'deriveBits', 'deriveKey', 'encrypt', 'decrypt'].map(name => [name, forbidden])) },
+      fetch: forbidden, AbortController, TextEncoder, TextDecoder };
+    if (mode === 'no-webauthn' || mode === 'both-missing') { delete environment.PublicKeyCredential; delete environment.navigator.credentials; }
+    if (mode === 'no-recovery-crypto' || mode === 'both-missing') delete environment.crypto;
+    if (mode === 'wrong-origin') environment.origin = raw.originalOrigin;
+    if (mode === 'insecure') environment.isSecureContext = false;
+    if (mode === 'missing-transport') delete environment.fetch;
+    let mounts = 0, stores = 0, factories = 0, callback, page;
+    await new AsyncFunction(...names, source)(f.dom.window.document, f.dom.window,
+      { href: raw.recoveryOrigin + '/', origin: raw.recoveryOrigin }, async () => new Response(JSON.stringify(raw)), showPaymentStarterError,
+      parsePaymentStarterProfile, profile => checkPaymentStarterEnvironment(profile, environment),
+      () => { stores++; return { get: forbidden }; }, options => { factories++; callback = options.openExistingAccount; return f.actions; }, forbidden,
+      (root, options) => { mounts++; assert.equal(options.recoveryAvailable, false); page = mountPaymentStarter(root, options); return page; },
+      () => { factories++; return f.verifier; });
+    if (['wrong-origin', 'insecure', 'missing-transport'].includes(mode)) {
+      assert.equal(mounts, 0); assert.equal(stores, 0); assert.equal(factories, 0); assert.equal(f.root.querySelector('button'), null);
+    } else {
+      assert.equal(mounts, 1); assert.equal(factories, 2); assert.equal(f.$('payment-recovery-notice').hidden, false);
+      assert.throws(() => callback({ signal: new AbortController().signal }), { code: 'PAYMENT_RECOVERY_UNAVAILABLE' });
+      f.reference(); await tick(); assert.equal(f.$('payment-reference-status').dataset.state, 'verified');
+      assert.equal(f.$('open').disabled, true); assert.equal(f.$('collect').disabled, true);
+      assert.equal(f.counts.open, 0); assert.equal(f.counts.collect, 0); assert.equal(f.counts.check, 0);
+      page.dispose();
+    }
+  }
 });

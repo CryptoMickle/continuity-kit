@@ -111,9 +111,11 @@ test('actual browser globals and explicit test snapshots must match B before aut
   const value = validatePaymentStarterProfile(profile());
   const good = checkPaymentStarterEnvironment(value, snapshot(value.recoveryOrigin));
   assert.equal(good.ok, true); assert.equal(good.physicalPasskey, 'unverified');
+  assert.equal(good.readOnlyOk, true);
   for (const origin of [value.originalOrigin, value.recoveryOrigin + ':8443', 'https://reserve.example.org.attacker', undefined]) {
     const result = checkPaymentStarterEnvironment(value, snapshot(origin));
     assert.equal(result.ok, false); assert.equal(result.checks.find(item => item.id === 'current-origin').status, 'fail');
+    assert.equal(result.readOnlyOk, false);
   }
   const originals = new Map(), env = snapshot(value.originalOrigin);
   try {
@@ -126,6 +128,42 @@ test('actual browser globals and explicit test snapshots must match B before aut
     globalThis.location.origin = value.recoveryOrigin;
     assert.equal(checkPaymentStarterEnvironment(value).ok, true);
   } finally { for (const [key, descriptor] of originals) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; } }
+});
+
+test('missing recovery-only browser APIs permit receipt reads without weakening origin, security or transport checks', () => {
+  const value = validatePaymentStarterProfile(profile());
+  for (const remove of [environment => { delete environment.PublicKeyCredential; delete environment.navigator.credentials; },
+    environment => { delete environment.crypto; },
+    environment => { delete environment.crypto.subtle.decrypt; },
+    environment => { delete environment.crypto; delete environment.PublicKeyCredential; delete environment.navigator.credentials; }]) {
+    const environment = snapshot(value.recoveryOrigin); remove(environment);
+    const report = checkPaymentStarterEnvironment(value, environment);
+    assert.equal(report.ok, false, 'full reserve preflight must still fail'); assert.equal(report.readOnlyOk, true);
+    assert.ok(report.checks.filter(check => check.status === 'fail').every(check => ['web-crypto', 'webauthn-api'].includes(check.id)));
+    assert.ok(Object.isFrozen(report));
+    for (const invalidate of [env => { env.origin = value.originalOrigin; }, env => { env.isSecureContext = false; },
+      env => { delete env.fetch; }, env => { delete env.AbortController; }, env => { delete env.TextEncoder; }, env => { delete env.TextDecoder; }]) {
+      const invalid = { ...environment }; invalidate(invalid);
+      assert.equal(checkPaymentStarterEnvironment(value, invalid).readOnlyOk, false);
+    }
+  }
+});
+
+test('read-only aggregation requires every named core check and refuses unexpected failures', async () => {
+  // Exercise future/malformed SDK report boundaries without changing production
+  // imports or claiming that a current SDK can emit these missing-check reports.
+  const source = await readFile(new URL('../payment-starter/profile.mjs', import.meta.url), 'utf8');
+  const functionSource = source.slice(source.indexOf('export function checkPaymentStarterEnvironment')).replace('export function', 'function');
+  const evaluate = new Function('validatePaymentStarterProfile', 'checkReserveEnvironment', `${functionSource}; return checkPaymentStarterEnvironment;`);
+  const required = ['config', 'role', 'origins', 'rp-origin-binding', 'current-origin', 'secure-context', 'transport-apis'];
+  const checks = required.map(id => ({ id, status: 'pass' }));
+  const check = report => evaluate(value => value, () => report)({ reserve: {}, originalOrigin: 'https://a.example', recoveryOrigin: 'https://b.example' }, {});
+  assert.equal(check({ ok: false, checks: [...checks, { id: 'web-crypto', status: 'fail' }, { id: 'webauthn-api', status: 'fail' }] }).readOnlyOk, true);
+  for (const id of required) {
+    assert.equal(check({ ok: true, checks: checks.filter(item => item.id !== id) }).readOnlyOk, false);
+    assert.equal(check({ ok: false, checks: checks.map(item => item.id === id ? { ...item, status: 'unverified' } : item) }).readOnlyOk, false);
+  }
+  assert.equal(check({ ok: false, checks: [...checks, { id: 'future-security-check', status: 'fail' }] }).readOnlyOk, false);
 });
 
 test('doctor demands declared B, preserves historical profiles and never claims browser, chain or credential proof', async t => {
