@@ -1,0 +1,39 @@
+{
+  "format": "continuitykit/payment-receipt-replay/v1",
+  "checkedAt": "2026-10-10T19:25:38.239Z",
+  "sourceCommit": "174d68012819abf63406486ecf04cff788e0c21a",
+  "archiveSha256": "eda86240bfaa9349500927c020b00080f56790426ac3cef6d08bc7522d496551",
+  "archiveBytes": 2539010,
+  "anonymousSourceDownload": true,
+  "freshDirectory": true,
+  "install": "npm ci --offline --ignore-scripts --no-audit --no-fund",
+  "localSourceLinks": false,
+  "tests": {
+    "command": "node --test tests/payments-verify-claim.mjs tests/payments-guard.mjs",
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "notAdditionalToLocalPaymentSuite": true
+  },
+  "liveRead": {
+    "profileUrl": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/profile.json",
+    "hash": "0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600",
+    "rightId": "1",
+    "blockNumber": "69905019",
+    "status": "finalized",
+    "paymentVerified": true,
+    "chainId": 10143,
+    "amountWei": "10000000000000000",
+    "fixedRpcCount": 2,
+    "walletLoaded": false,
+    "credentialRequested": false,
+    "transactionSent": false
+  },
+  "sourceSha256": "f7efeb310260ee4d40193545f7122019c23d59fc1f3a48f0c7602fc36c4e9990",
+  "limits": [
+    "Public profile and RPC providers remain trust inputs.",
+    "This is internal reproduction, not an external audit or adoption.",
+    "A chain receipt does not identify the browser, device or native passkey ceremony.",
+    "Second funding and public recovery-after-outage proof remain pending."
+  ]
+}

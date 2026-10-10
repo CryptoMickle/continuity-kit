@@ -272,6 +272,8 @@
       "firstClaimVerified": true,
       "newWalletTransactionsSent": 0,
       "scope": "Read-only chain verification during the 19:09 heartbeat, which says not to execute wallet transactions. Existing direct testnet authorization is retained above; no new funding was attempted in this run."
-    }
+    },
+    "receiptVerifierPublicCommit": "174d68012819abf63406486ecf04cff788e0c21a",
+    "receiptVerifierReplayEvidence": "evidence/payment-receipt-replay-2026-10-10.json"
   }
 }
