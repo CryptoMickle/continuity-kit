@@ -1,8 +1,9 @@
-# Account-free text candidate — 9 October 2026
+# Account-free text candidate — updated 10 October 2026
 
 The preferred new candidate lives at [A/text/](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)
 and [B/text/](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/).
-It is published on the existing public Sites; native acceptance is pending. The dated records below
+It is published on the existing public Sites. The builder has reported native iPhone
+recovery and export, with the evidence boundary recorded below. The dated Work records below
 refer to the earlier five-field Work mode at the homepages, not this new protocol.
 
 1. In A, edit the single fictional text document. Choose **Prepare this text in B**.
@@ -19,11 +20,18 @@ key/locator derivation from Work v1. The earlier Work homepages, keys and encryp
 remain available without migration. Because both modes use the existing D1 store, the
 64-record and 256-admission bounds below are **shared**, not additional capacity.
 
-One bundled native check remains: prepare recognizable fictional text in Safari on Mac,
-then recover in Safari on iPhone using that same passkey, edit and inspect an export.
-Do not reuse the earlier Work passkey as evidence for this new protocol. A fresh page is
-not a fresh browser profile; second-device success must be reported as such. Native
-success is not inferred from synthetic tests or earlier Work acceptance.
+On 10 October, the builder reported “Gjenopprettet og eksportert på iphone” after the
+bundled instructions to prepare `TEXT-TEST-09` in Mac Safari and recover with the same
+new text passkey, edit and export TXT in iPhone Safari. Worker logs corroborate Mac
+Safari admission/upload and later iPhone Safari text-page access and a successful reserve
+read. Record locators are redacted, so those requests cannot independently establish
+that both devices opened the same record. The device screens, same-key identity,
+requested marker and edited export bytes were not independently inspected.
+[Native acceptance report](../evidence/text-native-acceptance-2026-10-10.json).
+This records the builder's result without requiring a repeat of the same acceptance
+test. Judge-visible video remains deferred. It is not an independently observed
+full sequence, an A outage, external adoption or a measured prompt-count improvement.
+The earlier Work results remain separate.
 
 Local checks:
 

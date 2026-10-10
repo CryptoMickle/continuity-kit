@@ -31,9 +31,14 @@ recovery in this format. A retained encrypted export is a competent alternative.
 The hosted `/text/` candidate shares the older self-service Work database, schema,
 64-record limit, 256-admission lifetime limit and 10 November 2026 access deadline.
 PRF/record namespaces stay separate; old reserves are not migrated. Both Sites and
-storage have one operator. Native text-v1 and same-passkey second-device acceptance
-remain pending; prior Work and Account results do not establish them. Synthetic
-consumer servers and authenticators are loopback-only teaching fixtures and must
+storage have one operator. On 10 October, the builder reported native text-v1 recovery
+and export on iPhone following the instructed Mac Safari → iPhone Safari same-passkey
+sequence. Worker logs corroborate a Mac Safari upload and an iPhone Safari reserve
+read; redacted locators prevent independently linking them to the same record. The
+device screens, credential identity, requested marker and exported bytes were not
+independently inspected. See [the scoped report](evidence/text-native-acceptance-2026-10-10.json).
+Prior Work and Account results remain separate. Synthetic consumer servers and
+authenticators are loopback-only teaching fixtures and must
 never be deployed as production services. No independent audit is claimed.
 
 ---

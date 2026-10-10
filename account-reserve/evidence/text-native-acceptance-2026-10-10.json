@@ -1,0 +1,229 @@
+{
+  "recordedAt": "2026-10-10 09:34:29 UTC",
+  "date": "2026-10-10",
+  "protocol": "account-continuity/text-reserve-v1",
+  "sitesVersion": 3,
+  "runtimeSourceCommit": "55321fa53f389d6772c699deb382bbfe9c0328e3",
+  "status": "BUILDER_REPORTED_IPHONE_RECOVERY_EXPORT_WITH_SERVER_CORROBORATION",
+  "userReport": {
+    "original": "Gjenopprettet og eksportert på iphone",
+    "translation": "Recovered and exported on iPhone",
+    "context": "Response to a bundled Mac Safari to iPhone Safari test of the new text URLs, using the same new My text reserve passkey, marker TEXT-TEST-09, then editing and Export TXT.",
+    "directlyConfirmed": [
+      "recovery on iPhone",
+      "export on iPhone"
+    ]
+  },
+  "routes": {
+    "primary": "https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/",
+    "reserve": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/"
+  },
+  "corroboration": {
+    "source": "Read-only Sites Worker logs, requested 120 minutes / limit 70; 28 returned",
+    "events": [
+      {
+        "utc": "2026-10-10T09:30:50.808Z",
+        "method": "GET",
+        "path": "/api/reserve/[record]",
+        "status": 200,
+        "device": "iPhone",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:30:34.703Z",
+        "method": "GET",
+        "path": "/api/text-config",
+        "status": 200,
+        "device": "iPhone",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:30:34.483Z",
+        "method": "GET",
+        "path": "/text/",
+        "status": 200,
+        "device": "iPhone",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:30:33.534Z",
+        "method": "GET",
+        "path": "/api/text-config",
+        "status": 200,
+        "device": "iPhone",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:30:33.062Z",
+        "method": "GET",
+        "path": "/text/",
+        "status": 200,
+        "device": "iPhone",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:29:36.890Z",
+        "method": "GET",
+        "path": "/api/reserve/[record]",
+        "status": 200,
+        "device": "Mac",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:29:22.574Z",
+        "method": "GET",
+        "path": "/api/reserve/[record]",
+        "status": 200,
+        "device": "Mac",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:29:22.467Z",
+        "method": "PUT",
+        "path": "/api/reserve/[record]",
+        "status": 201,
+        "device": "Mac",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:29:22.346Z",
+        "method": "GET",
+        "path": "/api/reserve/[record]",
+        "status": 404,
+        "device": "Mac",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:29:10.721Z",
+        "method": "POST",
+        "path": "/api/enrollment/start",
+        "status": 201,
+        "device": "Mac",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:29:10.585Z",
+        "method": "GET",
+        "path": "/api/text-config",
+        "status": 200,
+        "device": "Mac",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:29:10.387Z",
+        "method": "GET",
+        "path": "/text/",
+        "status": 200,
+        "device": "Mac",
+        "uaFamily": "Safari",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:28:39.062Z",
+        "method": "GET",
+        "path": "/api/reserve/[record]",
+        "status": 200,
+        "device": "Mac",
+        "uaFamily": "Chromium",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:28:38.954Z",
+        "method": "PUT",
+        "path": "/api/reserve/[record]",
+        "status": 201,
+        "device": "Mac",
+        "uaFamily": "Chromium",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:28:38.840Z",
+        "method": "GET",
+        "path": "/api/reserve/[record]",
+        "status": 404,
+        "device": "Mac",
+        "uaFamily": "Chromium",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:28:03.049Z",
+        "method": "POST",
+        "path": "/api/enrollment/start",
+        "status": 201,
+        "device": "Mac",
+        "uaFamily": "Chromium",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:28:02.845Z",
+        "method": "GET",
+        "path": "/api/text-config",
+        "status": 200,
+        "device": "Mac",
+        "uaFamily": "Chromium",
+        "outcome": "ok"
+      },
+      {
+        "utc": "2026-10-10T09:28:00.963Z",
+        "method": "GET",
+        "path": "/text/",
+        "status": 200,
+        "device": "Mac",
+        "uaFamily": "Chromium",
+        "outcome": "ok"
+      }
+    ],
+    "browserClassification": "Derived from request User-Agent; not physical-device attestation",
+    "sameRecordCorrelation": "Unavailable: provider redacts reserve locators, so successful Mac and iPhone requests cannot be linked to one ciphertext record.",
+    "macSafari": {
+      "admissionStatus": 201,
+      "writeStatus": 201,
+      "writeUtc": "2026-10-10T09:29:22.467Z",
+      "subsequentReadStatuses": [
+        200,
+        200
+      ]
+    },
+    "iphoneSafari": {
+      "textPageStatus": 200,
+      "textConfigStatus": 200,
+      "reserveReadStatus": 200,
+      "reserveReadUtc": "2026-10-10T09:30:50.808Z"
+    }
+  },
+  "additionalObservation": {
+    "macIntegratedBrowser": "An earlier Chromium/Mac setup uploaded a record at 09:28:38 UTC; its open setup tab later displayed closed/preparation not confirmed. This attempt is not counted as a confirmed preparation. No retry or new key was initiated by the agent.",
+    "physicalScreensInspected": false,
+    "exportedFileInspected": false,
+    "markerIndependentlyVerified": false,
+    "credentialIdentityIndependentlyVerified": false,
+    "promptCount": null,
+    "editedLineIndependentlyVerified": false,
+    "actualPrimaryOutageTested": false
+  },
+  "scope": "Builder-run acceptance report with supporting HTTP activity, not independently observed completion of every ceremony or comparison of cross-device plaintext/export bytes.",
+  "notClaimed": [
+    "independent external adoption",
+    "security audit",
+    "native prompt reduction",
+    "verified same-record or credential identity from redacted logs",
+    "general device compatibility",
+    "actual primary HTTP outage in this run",
+    "sponsor eligibility or prize probability"
+  ],
+  "deferredByUser": [
+    "video",
+    "final submission"
+  ]
+}

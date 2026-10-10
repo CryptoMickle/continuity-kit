@@ -1,4 +1,4 @@
-# Metropolis entry — text-v1 draft, 9 October 2026
+# Metropolis entry — text-v1 draft, updated 10 October 2026
 
 **Saved to the portal and verified after reload at 21:52 UTC, 9 October 2026.**
 Five changed fields matched this draft; all 13 text fields were read back, with the
@@ -7,8 +7,15 @@ installation to judge instructions, then all 13 fields were checked again. Check
 absent. Final submission has not been performed. Evidence:
 `evidence/portal-text-draft-saved-2026-10-09.json`.
 
-The text pages are published; native text-v1 setup and same-passkey Mac-to-iPhone
-recovery/export remain pending. That gap is explicit in the saved entry.
+The text pages are published. On 10 October the builder reported successful recovery
+and export on iPhone after the instructed Mac Safari → iPhone Safari text-v1 sequence.
+Worker logs corroborate a Mac Safari upload and subsequent reads, followed by an
+iPhone Safari reserve read. Same-key identity, the requested marker and exported bytes
+were not independently inspected. See `evidence/text-native-acceptance-2026-10-10.json`.
+The dated 9 October portal evidence above retains its original scope. This update
+was saved at 09:36 UTC on 10 October; all 13 text fields were checked after reload,
+the three updated values matched, and the other ten fields were preserved.
+Evidence: `evidence/portal-text-native-draft-saved-2026-10-10.json`.
 
 Project: ContinuityKit. Solo builder: Mikkel / CryptoMickle. Track: Trust, Identity &
 AI Infrastructure. Sponsor: Mera: One Passkey, Many Keys. The Monad live-product URL
@@ -32,11 +39,14 @@ https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/ and its reserv
 https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/. Both pages were
 observed live. A rendered at mobile width and exported edited TXT/JSON that matched
 exactly; admission and cancellation before native creation were checked. No passkey
-ceremony was called in those checks. The native judge sequence remains pending:
-write fictional text, prepare it explicitly in B,
-wait for independent verification, close A, then reopen B with the same passkey and
-finish/export the draft. Closing A tests independence from that window, not an HTTP
-outage. The already published synthetic playground remains an immediate preview.
+ceremony was called in those automated UI checks. On 10 October the builder reported
+successful iPhone recovery and export after the instructed Mac Safari → iPhone Safari
+same-passkey text-v1 sequence. Server logs corroborate admission, upload and two reads
+from Mac Safari at 09:29 UTC, then a successful iPhone Safari reserve read at 09:30 UTC.
+The device screens, same-key identity, requested marker and exported bytes were not
+independently inspected; redacted log locators cannot link both devices to one record.
+See evidence/text-native-acceptance-2026-10-10.json. This is builder acceptance with
+server corroboration, not external adoption. Closing A is not an HTTP outage.
 
 The packaged text SDK is integrated into an isolated copy of Anton Medvedev's
 MIT-licensed Textarea editor. The actual editor supplies one document, without
@@ -110,13 +120,19 @@ planning rates and the explicit unknowns.
 
 ## Judge access instructions
 
-PREFERRED PUBLISHED TEXT ENTRY — NATIVE ACCEPTANCE PENDING
+PREFERRED PUBLISHED TEXT ENTRY — BUILDER-REPORTED IPHONE RECOVERY AND EXPORT
 https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/
 https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/
 Edit fictional text in A; prepare in B with one new
 reserve passkey; wait for the independent check; close/discard A's window state;
 open fresh B and recover, continue and export. No operator code, account key, wallet,
 faucet or funds. Multiple native confirmations may occur. Closing A is not an outage.
+
+10 October acceptance: the builder reported successful iPhone recovery and export
+after the instructed Mac Safari → iPhone Safari same-passkey text sequence. Server
+logs corroborate Mac Safari upload/reads and a subsequent iPhone Safari reserve read.
+The screens, marker, same-key identity and exported bytes were not independently
+inspected; record locators are redacted. See evidence/text-native-acceptance-2026-10-10.json.
 
 PUBLISHED SYNTHETIC PREVIEW
 https://continuitykit-playground.cryptomickle.chatgpt.site/
@@ -151,8 +167,8 @@ The 0.1 test-MON right is already claimed; this is not an open faucet or text ac
 
 Text-v1 and homepage self-service Work share 64 encrypted records and 256 lifetime
 admissions, not separate quotas per mode. Access ends 10 November 2026 at 00:00 UTC.
-Expiry does not establish deletion. Both sites/storage have one operator. Native
-text-v1 proof, video and final submission remain pending.
+Expiry does not establish deletion. Both sites/storage have one operator. The native
+text report is builder-run and scoped above. Video and final submission remain deferred.
 
 ## Mera non-account explanation
 
@@ -173,9 +189,13 @@ readiness uses a new discoverable assertion, not retained creation keys.
 No account leaf, secret account vault, owner address or signing session exists in
 text-v1. One passkey supports distinct useful non-wallet cryptographic purposes.
 Prompt count varies by device; creation may require a fallback assertion, and the
-independent check requires another assertion. Native text-v1 and cross-device
-acceptance have not yet been recorded and cannot be inferred from synthetic tests
-or the older Work result.
+independent check requires another assertion. On 10 October the builder reported
+iPhone recovery and export after the instructed Mac Safari → iPhone Safari same-key
+sequence. Worker logs corroborate Mac Safari upload/reads and a later iPhone Safari
+reserve read. This is a separate text-v1 acceptance report, not evidence inherited
+from Work or synthetic tests. Same-key identity, marker and exported bytes were not
+independently inspected; redacted locators prevent server-side same-record linkage.
+The report is in evidence/text-native-acceptance-2026-10-10.json.
 
 Storage receives encrypted records and enrollment metadata. The editors see plaintext
 in memory, and intentional exports create plaintext local copies. The recovery origin
@@ -184,10 +204,10 @@ with no automatic sync, lost-passkey recovery or guaranteed provider independenc
 
 ## Remaining submission boundary
 
-This revised draft was saved and verified after reload at 21:52 UTC on 9 October. Text sites are published;
-source commands refer to the current tree without an inferred new commit hash.
-Native text-v1 setup and Mac-to-iPhone
-recovery/export still need evidence for the exact release. Technical demo and
+The 10 October acceptance update was saved at 09:36 UTC and verified after reload.
+Text sites are published; source commands refer
+to the current tree. Native text-v1 iPhone recovery/export is builder-reported with
+the server corroboration and limitations above. Technical demo and
 pitch videos remain absent; final submission is explicitly deferred. No external
 adoption, measured human onboarding time, independent audit or demand proof is claimed.
 

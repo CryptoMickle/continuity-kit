@@ -1,3 +1,20 @@
+# Text-v1 iPhone acceptance report — 10 October 2026
+
+The builder reported **“Gjenopprettet og eksportert på iphone”** after instructions
+for Mac Safari preparation and iPhone Safari recovery using the same new text passkey.
+Worker logs corroborate Mac Safari admission/upload/reads at 09:29 UTC and an iPhone
+Safari reserve read at 09:30 UTC. This is a builder-run acceptance report with server
+corroboration, not an independently observed comparison of passkey identity, marker
+or exported bytes. Record locators are redacted, so server logs cannot link the two
+devices to one record. An earlier Mac integrated-browser setup ended unconfirmed;
+it is not counted as successful preparation. No runtime or deployment changed.
+
+Evidence: [text-native-acceptance-2026-10-10.json](../evidence/text-native-acceptance-2026-10-10.json).
+The description, judge instructions and Mera explanation were saved to the portal at
+09:36 UTC; all 13 text fields matched after reload, including ten unchanged fields.
+Checklist remains 5/6 with videos absent. [Portal save](../evidence/portal-text-native-draft-saved-2026-10-10.json).
+Video and final submission remain deferred. External adoption and demand remain unproved.
+
 # Account-free text pages published — 9 October 2026
 
 The preferred new entry is [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)

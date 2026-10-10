@@ -1,6 +1,7 @@
 # Adoption hypothesis and operating plan
 
-Research checkpoint: **9 October 2026**. This is a proposed pilot, not evidence of
+Research checkpoint: **9 October 2026**; native acceptance status updated **10 October**.
+This is a proposed pilot, not evidence of
 customer demand. No external maintainer has adopted ContinuityKit, and no outreach,
 recruitment, customer test or willingness-to-pay interview was performed for this plan.
 The machine-readable sources and assumptions are in
@@ -25,7 +26,12 @@ and locally tested. The preferred published URLs are [A/text/](https://continuit
 and [B/text/](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/);
 both Sites version 3 pages have been observed live. A editing/TXT/JSON download,
 mobile rendering, admission and cancellation before passkey creation were checked.
-Native text-v1 setup and Mac-to-iPhone recovery/export remain pending.
+On 10 October, the builder reported recovery and export on iPhone after the instructed
+Mac Safari → iPhone Safari same-passkey text-v1 sequence. Worker logs corroborate a Mac
+Safari upload and an iPhone Safari reserve read. Redacted locators prevent linking
+them independently to the same record; device screens, credential identity, the requested
+marker and exported bytes were not independently inspected. See the
+[scoped acceptance report](../evidence/text-native-acceptance-2026-10-10.json).
 The retained Work v1 path still requires an account leaf during preparation.
 
 ## Evidence we have, and what it does not prove
@@ -36,7 +42,8 @@ The retained Work v1 path still requires an account leaf during preparation.
   not upstream adoption or an external developer experience measurement. This current
   integration requires only the document, with no invented fields or account key.
   Clean-package, synthetic recovery and JSDOM TXT/JSON readback checks passed;
-  physical text-v1 browser acceptance remains pending. The older Work adapter with
+  the separate hosted text-v1 iPhone recovery/export is builder-reported, with the
+  scope above. It does not establish a native trial of the Textarea consumer. The older Work adapter with
   its disposable account remains a separate reference in `integrations/textarea/`.
 - [The text-v1 recovery drill](EXPORT_COMPARISON.md) executes a competent encrypted-file
   baseline. Both approaches recover when their required bytes and credential survive.

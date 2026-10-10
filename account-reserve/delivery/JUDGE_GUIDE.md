@@ -8,9 +8,13 @@ with its recovery passkey. It creates no wallet, EOA, account vault or signing s
 observed live. A rendered at 390-pixel mobile width; edited text was downloaded as
 TXT and JSON and matched exactly. The A-to-B admission reached **Create reserve
 passkey**; cancellation before that action closed setup without calling native
-WebAuthn. Fresh B offered **Open my existing reserve**. Native text-v1 preparation
-and Mac-to-iPhone recovery/export remain pending. Earlier Work/Account native
-results do not establish this new protocol's physical-device support.
+WebAuthn. Fresh B offered **Open my existing reserve**. On 10 October the builder
+reported successful iPhone recovery and export after the instructed Mac Safari →
+iPhone Safari same-passkey text-v1 sequence. Worker logs corroborate Mac Safari
+upload/reads followed by an iPhone Safari reserve read. Screens, same-key identity,
+marker and exported bytes were not independently inspected; redacted locators cannot
+link both devices to one record. [Scoped native report](../evidence/text-native-acceptance-2026-10-10.json).
+Earlier Work/Account results remain separate.
 
 [Public HTTP verification](../evidence/text-public-http-2026-10-09.json) passed
 22/22 checks, including configuration, preserved older routes and exact compiled
@@ -26,11 +30,14 @@ This is agent evaluation, not outside adoption or native-device proof.
 Current text runtime and integration source: [commit `55321fa`](https://github.com/CryptoMickle/continuity-kit/tree/55321fa53f389d6772c699deb382bbfe9c0328e3/account-reserve).
 The text entry was saved to the competition portal and verified after reload at
 21:52 UTC on 9 October; the clean-install result was added and rechecked at 21:58 UTC.
-Native text acceptance, videos and final submission remain pending.
+The 10 October native report updates builder acceptance; videos and final submission
+remain deferred.
+The corresponding three portal fields were saved at 09:36 UTC on 10 October and
+all 13 text fields matched their intended values after reload. [Save record](../evidence/portal-text-native-draft-saved-2026-10-10.json).
 
 ## Start here
 
-1. Preferred published entry: [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/) and [text reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/). Write fictional text, choose **Prepare this text in B**, then explicitly create the reserve passkey in B. Wait for independent verification, close or discard A's window state, reopen a fresh B page and recover, edit and export TXT/JSON. This native sequence still needs acceptance evidence. Closing A does not prove an HTTP outage. This text namespace does not migrate earlier Work reserves.
+1. Preferred published entry: [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/) and [text reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/). Write fictional text, choose **Prepare this text in B**, then explicitly create the reserve passkey in B. Wait for independent verification, close or discard A's window state, reopen a fresh B page and recover, edit and export TXT/JSON. The builder's iPhone recovery/export report is scoped above. Closing A does not prove an HTTP outage. This text namespace does not migrate earlier Work reserves.
 2. For a quick preview, use the published [interactive playground](https://continuitykit-playground.cryptomickle.chatgpt.site/). It offers the edit → prepare → recover → finish → export sequence without a setup code, wallet or native passkey. It runs real Work encryption with fictional, browser-local credentials; it does not simulate a physical authentication success or prove an HTTP outage.
 3. Earlier account-bound paths remain separate: the [self-service Work A homepage](https://continuitykit-try-primary.cryptomickle.chatgpt.site/) and [Work B homepage](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/) still use an unfunded example account. The older [Work Primary](https://continuitykit-work-primary.cryptomickle.chatgpt.site) and [Work Reserve](https://continuitykit-work-reserve.cryptomickle.chatgpt.site) require their existing passkey or operator-issued enrollment code. Their recorded native results appear below.
 4. For the Monad live product, inspect [Account Reserve Primary](https://continuitykit-account-primary.cryptomickle.chatgpt.site/?model=iris) and its [Account Reserve recovery client](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/?model=iris). Their separate testnet result demonstrates preserved account authority. The recorded payment is already claimed. Text recovery sends no blockchain transaction.
@@ -47,8 +54,8 @@ live Sites deployment. The earlier core Work implementation and physical
 proof are [published at commit `3e309345`](https://github.com/CryptoMickle/continuity-kit/tree/3e3093456ebbf7765e40967b83b120a1cbc54b97/account-reserve);
 the [8 October commit `fdfd817`](https://github.com/CryptoMickle/continuity-kit/tree/fdfd817176c87a760cd026f95bb449aad4d57195/account-reserve)
 is the earlier Account snapshot. New commands apply to this current revision, not
-those immutable commits. The saved portal draft predates the text candidate; this
-documentation update does not change it. Videos and final submission remain deferred.
+those immutable commits. The saved 9 October portal draft already leads with the text
+candidate. Videos and final submission remain deferred.
 
 Live page views: [desktop A](../evidence/text-public-primary-2026-10-09.png) and
 [390-pixel A](../evidence/text-public-mobile-2026-10-09.png). These images show the
@@ -110,8 +117,8 @@ The server and credential are synthetic and memory-backed; this remains **local 
 The build removes upstream's document-in-URL subscriptions and service worker, preserving
 the editor itself. Its first-line tab title remains and may appear in browser history.
 See [the text integration instructions](../integrations/textarea-text/README.md) for
-every modification and limit. These local synthetic checks passed; native text-v1
-setup, recovery and export remain pending.
+every modification and limit. These local synthetic checks passed. The separate hosted
+text-v1 iPhone acceptance report does not establish native testing of this editor adapter.
 
 ## What Mera does for the text
 

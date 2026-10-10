@@ -18,9 +18,13 @@ export file. The reserve service and compatible passkey must still be available.
 passkey → continue and export. No operator code is needed. Keep both windows open until
 the independent check finishes. The device may require several confirmations.
 
-The candidate's native Safari and same-passkey second-device acceptance are **pending**.
-Earlier physical Work tests below are different protocols and do not establish this
-candidate's success. The public Sites retain the old Work flow at `/`; existing records,
+On 10 October, the builder reported **recovery and export on iPhone** after receiving
+the Mac Safari → iPhone Safari same-passkey test instructions. Worker logs corroborate
+a Mac Safari upload and later iPhone Safari reserve read. The device screens, same-key
+identity, requested text marker and exported bytes were not independently inspected;
+redacted record locators prevent independently linking those requests to the same record.
+[Scoped native acceptance report](evidence/text-native-acceptance-2026-10-10.json).
+Earlier physical Work tests below are different protocols. The public Sites retain the old Work flow at `/`; existing records,
 credentials, database schema and limits are preserved. Text mode has a separate format
 and PRF domain. Both modes share 64 snapshots and 256 lifetime upload permissions.
 Access ends 10 November 2026 at 00:00 UTC. [Instructions and limits](self-service/README.md).

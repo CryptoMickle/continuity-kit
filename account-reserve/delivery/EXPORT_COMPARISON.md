@@ -9,8 +9,14 @@ The [text-v1 report](../evidence/text-drill-2026-10-09.json) records six conditi
 across both recovery paths, each in a fresh Node process: **12 matrix recovery
 processes**, with actual loopback A=503 checks before and after every attempt. It uses
 the current text SDK and a synthetic HMAC WebAuthn adapter. Four regression tests
-passed. This is separate from the published `/text/` page/UI checks; native passkey
-setup and Mac-to-iPhone recovery remain pending.
+passed. This is separate from the published `/text/` page/UI checks and the
+[10 October builder-reported iPhone recovery/export](../evidence/text-native-acceptance-2026-10-10.json).
+That report followed the instructed Mac Safari → iPhone Safari same-passkey sequence;
+Worker logs corroborate a Mac Safari upload and an iPhone Safari reserve read. Redacted
+locators prevent linking them independently to the same record. Device screens,
+credential identity, the requested marker and exported bytes were not independently
+inspected. The report is not a native trial of this two-method comparison or evidence
+of lower human effort.
 
 ## Same document, credential and readiness requirement
 

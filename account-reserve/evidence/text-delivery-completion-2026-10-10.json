@@ -1,0 +1,49 @@
+{
+  "finishedAt": "2026-10-09T22:01:13.777707+00:00",
+  "runtimeCommit": "55321fa53f389d6772c699deb382bbfe9c0328e3",
+  "cleanInstallVerifiedCommit": "27df242f16dc96f9752f5e6b0bd918c85ca60467",
+  "completed": [
+    "account-free text protocol and typed APIs",
+    "native hosted text mode on existing public Sites v3",
+    "actual Textarea package consumer",
+    "targeted security review and compatibility checks",
+    "fair functional encrypted-file comparison",
+    "fresh public-source install and recovery replay",
+    "adoption and cost analysis",
+    "consistent source and judge documentation",
+    "competition draft saved and all13 fields read back",
+    "builder-reported text-v1 iPhone recovery/export with Mac Safari upload and iPhone Safari read corroboration"
+  ],
+  "pending": [],
+  "deferredByUser": [
+    "video",
+    "final submission"
+  ],
+  "notClaimed": [
+    "external adoption or demand",
+    "independent security audit",
+    "probability of winning prizes",
+    "native prompt reduction",
+    "provider independence",
+    "independently inspected cross-device credential identity, marker or export bytes"
+  ],
+  "routes": {
+    "primary": "https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/",
+    "recovery": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/"
+  },
+  "updatedAt": "2026-10-10T09:38:00.412842+00:00",
+  "nativeAcceptance": {
+    "status": "builder-reported with server corroboration",
+    "report": "text-native-acceptance-2026-10-10.json",
+    "independentDeviceAndFileInspection": false,
+    "sameCredentialIdentityIndependentlyVerified": false,
+    "recordedVideo": "deferred by user"
+  },
+  "priorDocumentationCommit": "201f76e3d2d941e09d34ff91c40ee89e90c5e9fd",
+  "portalUpdate": {
+    "savedAt": "2026-10-10T09:36:00Z",
+    "record": "portal-text-native-draft-saved-2026-10-10.json",
+    "readbackFields": 13,
+    "updatedFields": 3
+  }
+}
