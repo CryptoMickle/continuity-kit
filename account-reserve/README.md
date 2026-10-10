@@ -10,6 +10,15 @@ snapshot. Later edits must be exported. A competent encrypted export also protec
 the narrower benefit here is finding and opening a prepared copy without retaining that
 export file. The reserve service and compatible passkey must still be available.
 
+## Repeated payments through the same account
+
+The separate [sequential-payment integration](payments/README.md) exercises a
+recurring onchain obligation: collect a funded payment in A, then collect a second
+payment through B with the same prepared account after A is unavailable. The local
+SDK/EVM proof passes. The new contract and first 0.01 test-MON obligation are now
+confirmed on Monad testnet; the new public beneficiary claims are still pending.
+These are development payments, not external usage. The text API remains account-free.
+
 ## Start with your own text editor
 
 The [text starter](text-starter/README.md) generates a separate, installable

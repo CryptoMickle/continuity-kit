@@ -1,3 +1,54 @@
+# Sequential payments: public funding ready — 10 October 2026
+
+The additive payment integration passed 72 relevant tests. An actual local EVM
+and SDK test collected two independently funded payments with the same account;
+A returned HTTP 503 before a fresh recovery in B. No recovery credential was
+created and stored ciphertext was unchanged. This is synthetic local evidence.
+
+The new SequentialPayment contract is deployed on Monad testnet at
+`0x47C8c753295AC4fBe4c23D9BD2dC899F61b66564`. Its first 0.01 test-MON obligation is
+funded for the existing beneficiary. Both issuer transactions are finalized and
+corroborated on the two fixed RPCs. No beneficiary claim in this new flow has yet
+been verified. The second obligation is not issued until the first claim finalizes.
+
+The existing Account Primary and Reserve Sites now serve additive `/payments/`
+pages. Legacy code, origin/RP/namespace bindings, passkeys and stored records remain
+unchanged. Unknown signed outcomes close the signer and leave read-only checking;
+there is no automatic resend. Native authentication with the existing primary key
+is the next required user action. Public-source replay is being completed.
+
+This closes an implementation gap, not the demand gap. Test funding and claims do
+not establish organic transactions, customers, sponsor acceptance or prize odds.
+
+---
+
+# Transaction value takes priority — 10 October 2026
+
+The user reiterated that the previous hackathon loss was caused, in their account,
+by a product that did not generate transactions. This is a user-reported lesson,
+not independently verified judge feedback or a formal current eligibility rule.
+
+The current text collection/replica work generates no blockchain transactions.
+The separate Account Reserve proof records one historical testnet payment already
+claimed. Code inspection confirms the demonstration is bounded to one right per
+beneficiary and a right-1/nonce-0 executor. It cannot presently demonstrate recurring
+transactions for the same account. Recent operator improvements do not close this gap.
+
+Product priority now precedes further general operator polish: evaluate and build
+a narrowly scoped recurring payment integration using account continuity. The
+candidate is multiple separately funded obligations to the same beneficiary, with
+an ordinary claim before an outage and an outstanding claim through the reserve
+after A is unavailable. This is a hypothesis, not proven demand. Preserve the old
+contract/executor and all public credentials; use a separate validated adapter if
+the candidate proceeds. Text recovery remains a useful account-free Mera example.
+
+The testnet authorization permits necessary development transactions. Repeated test
+claims, deployment counts and arbitrary chain receipts are not external activity.
+Clean public-source replay remains a release gate. No wallet transaction, hosted
+change, video, pitch or final submission was performed during this priority update.
+
+---
+
 # Actionable operator diagnostics — 10 October 2026
 
 The native integration now explains why an existing operator cannot start. A

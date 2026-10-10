@@ -1,0 +1,67 @@
+{
+  "format": "continuitykit/sequential-payment-validation/v1",
+  "recordedAt": "2026-10-10T19:02:00Z",
+  "state": "public-contract-and-first-obligation-finalized-beneficiary-claims-pending",
+  "tests": {
+    "paymentSuites": 72,
+    "failed": 0,
+    "skipped": 0,
+    "legacyTransactionRegression": 44,
+    "sourcePackaging": 15,
+    "cleanExtractedPaymentSubset": 55,
+    "countsAreNotAdditiveAcrossRepeatedSuites": true
+  },
+  "localProof": {
+    "actualSdk": true,
+    "syntheticCredential": true,
+    "disposableEvm": true,
+    "distinctPayments": 2,
+    "sameBeneficiary": true,
+    "primaryHttpStatus": 503,
+    "recoveryStoreWrites": 0,
+    "newRecoveryCredentials": 0,
+    "exactBalancesIncludingGas": true,
+    "duplicateBroadcasts": 0
+  },
+  "publicProof": {
+    "chainId": 10143,
+    "contract": "0x47C8c753295AC4fBe4c23D9BD2dC899F61b66564",
+    "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+    "deploy": {
+      "hash": "0x5829b6367ef123c844b74f77cd7b5bb74f77724fcb4a9475113f832c21bfda44",
+      "block": "69901959",
+      "finalized": true
+    },
+    "firstFunding": {
+      "hash": "0xfb467962c3f41d49a20f30ffe5885abb69aac450ce6cc9e7d2f5fd827b45681a",
+      "block": "69902415",
+      "amountTestMon": "0.01",
+      "finalized": true
+    },
+    "corroboratedByBothPinnedRpcs": true,
+    "firstClaimVerified": false,
+    "secondFundingIssued": false,
+    "secondClaimVerified": false,
+    "physicalPasskeyVerifiedForNewFlow": false
+  },
+  "sites": {
+    "primary": {
+      "version": 5,
+      "url": "https://continuitykit-account-primary.cryptomickle.chatgpt.site/payments/"
+    },
+    "reserve": {
+      "version": 4,
+      "url": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/"
+    },
+    "legacyRootAndConfigUnchangedInCompiledWorker": true,
+    "publicConfigByteIdentical": true,
+    "newPasskeysCreatedByAgent": 0
+  },
+  "limits": [
+    "Developer-funded testnet activity is not organic use, external adoption, revenue, demand or prize eligibility.",
+    "Two RPC observations are not a light-client proof.",
+    "Browser journal locks coordinate one origin only, not separate devices or origins.",
+    "Native claims and public original-app outage proof remain unfinished.",
+    "Source-package reproduction is local until exact anonymous public replay is recorded."
+  ]
+}

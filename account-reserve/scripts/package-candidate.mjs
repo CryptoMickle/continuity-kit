@@ -8,6 +8,34 @@ import {tmpdir} from 'node:os';
 const defaultRoot=fileURLToPath(new URL('..',import.meta.url));
 const top=['LICENSE','README.md','SECURITY.md','package.json','package-lock.json','index.html','vite.config.mjs','app.mjs','app-session.mjs','app-setup.mjs','app-progress.mjs','style.css','server.mjs','handoff.mjs','transaction.mjs','pending-ticket.mjs'];
 const directories=['sdk','starter','work','work-release','chain','tests','scripts','release','deploy','delivery'];
+// Reviewed source-only additions. Do not recursively walk these operationally
+// capable templates: private/ and arbitrary JSON can contain live grants/state.
+// The two EasyMDE dist files are immutable upstream inputs with pinned hashes.
+const sourceAdditions={
+  'text-native':[
+    '.gitignore','.npmignore','README.md','package.json','profile.mjs','profile.example.json','profile.collection.example.json','ports.example.json',
+    'adapter.mjs','index.html','main.mjs','style.css','collection-index.html','collection-main.mjs','collection-style.css','prism-art.mjs',
+    'build.mjs','doctor.mjs','operator.mjs','native-host.mjs','operator-state.mjs','operator-backup.mjs','operator-readiness.mjs','operator-diagnostics.mjs','operate.mjs','operator-worker.mjs',
+    ...['profile.mjs','store.mjs','host.mjs','replica-gateway.mjs','cli.mjs'].map(name=>'operator-runtime/'+name),
+  ],
+  'text-starter':[
+    'README.md','package.json','package-lock.json','adapter.mjs','index.html','main.mjs','style.css','config.mjs','server.mjs','doctor.mjs','vite.config.mjs','synthetic-client.mjs','loopback-fetch.mjs','smoke.mjs','recover-process.mjs',
+    'replica-server.mjs','replica-worker.mjs','replica-transport.mjs','replica-smoke.mjs','replica-recover-process.mjs',
+    'collection-config.mjs','collection-index.html','collection-main.mjs','collection-server.mjs','collection-smoke.mjs','collection-style.css',
+    ...['profile.mjs','store.mjs','host.mjs','replica-gateway.mjs'].map(name=>'operator-runtime/'+name),
+  ],
+  operator:['README.md','package.json','profile.example.json','replicas.example.json','profile.mjs','store.mjs','host.mjs','replica-gateway.mjs','cli.mjs','create.mjs','drill-worker.mjs'],
+  integrations:[
+    ...['textarea','textarea-text'].flatMap(name=>['.gitignore','LICENSE','README.md','adapter.mjs','config.mjs','controls.html','create.mjs','editor-test-host.mjs','index.html','loopback-fetch.mjs','main.mjs','package-lock.json','package.json','plain-text-editing.mjs','provenance.json','server.mjs','smoke.mjs','style.css','synthetic-client.mjs','upstream-build.mjs','upstream/LICENSE','upstream/index.html','vite.config.mjs'].map(file=>name+'/'+file)),
+    ...['.gitignore','README.md','THIRD_PARTY_NOTICES.txt','build.mjs','package-lock.json','package.json','provenance.json','src/easymde-editor.mjs','src/editors.css','src/plain-text-editing.mjs','src/textarea-shell.mjs','tests/editors.mjs','vendor/textarea/LICENSE','vendor/textarea/index.html','vendor/easymde/LICENSE','vendor/easymde/codemirror-LICENSE','vendor/easymde/codemirror-spell-checker-LICENSE','vendor/easymde/marked-LICENSE','vendor/easymde/typo-js-LICENSE','vendor/easymde/package.json','vendor/easymde/src/js/easymde.js','vendor/easymde/dist/easymde.min.js','vendor/easymde/dist/easymde.min.css'].map(file=>'multi-app/'+file),
+  ],
+  'self-service':['.gitignore','README.md','apps/config.mjs','apps/app.mjs','apps/style.css','apps/collection.mjs','apps/index.html','client/config.mjs','client/app.mjs','client/style.css','client/public/favicon.svg','client/index.html','text/config.mjs','text/app.mjs','text/style.css','text/index.html','backend/profile.mjs','backend/store.mjs','backend/host.mjs','backend/entry.mjs','backend/schema.sql','backend/db/schema.ts','backend/drizzle.config.mjs','backend/drizzle/0000_self_service_judge.sql','backend/drizzle/meta/_journal.json','backend/drizzle/meta/0000_snapshot.json'],
+  payments:['SequentialPayment.sol','SequentialPayment.artifact.json','build.mjs','harness.mjs','pending.mjs','executor.mjs','guard.mjs','testnet.mjs','proposal.mjs','operator.mjs','operator-journal.mjs','operator-runner.mjs','index.html','main.mjs','page.mjs','style.css','build-browser.mjs','build-sites.mjs','site-handler.mjs'],
+};
+const optionalSourceDocuments=['payments/README.md'];
+const excludedDirectories=new Set(['cache','out','node_modules','dist','build','artifacts','private','runtime','state','journals','backups']);
+const legacyDataFiles=new Set(['deploy/PaymentRight.paris.json','deploy/local-validation.json','deploy/operator-validation.json','deploy/proposal-input.template.json','release/disabled-profile.json']);
+
 // Operational logs, cloud responses, native session IDs and personal paths stay local.
 const optionalEvidence=['verification.json','native-proof-public.json','design-review.json','prism-integration.json','onboarding-browser.json','starter-design-review.json','prephysical-browser.json'];
 const mandatoryEvidence=['public-proof.json'];
@@ -62,15 +90,35 @@ export async function packageCandidate({root=defaultRoot,artifactDirectory,targe
     await inspect(join(root,relative),relative,{directory:true});
     for(const item of await readdir(join(root,relative),{withFileTypes:true})){
       const file=relative+'/'+item.name;
-      if(relative==='deploy'&&item.name.startsWith('work-public-'))continue;
+      if(relative==='deploy'&&(item.isDirectory()||item.name.startsWith('work-public-')))continue;
       if(suspiciousName(item.name)&&file!=='work-release/drizzle/meta/_journal.json')fail('SUSPICIOUS_FILENAME_IN_EXPORT',file);
-      if(item.name.startsWith('.')||['cache','out','node_modules','dist'].includes(item.name))continue;
+      if(item.name.startsWith('.')||excludedDirectories.has(item.name)||item.name.startsWith('dist-'))continue;
+      if(relative==='work-release/db'&&item.name!=='schema.ts')continue;
+      if((relative==='deploy'||relative==='release')&&item.name.endsWith('.json')&&!legacyDataFiles.has(file))continue;
       if(item.isSymbolicLink())fail('SYMLINK_REJECTED',file);
       if(item.isDirectory())await collect(file);
       else if(publicBinaryAssets.has(file)||file==='work/public/favicon.svg'||/\.(mjs|ts|json|sol|sql|sb|txt|md|html|css|toml)$/.test(item.name))files.push(file);
     }
   }
   for(const directory of directories)await collect(directory);
+  for(const [directory,selected] of Object.entries(sourceAdditions)){
+    try{await inspect(join(root,directory),directory,{directory:true});}
+    catch(error){if(error.code==='ENOENT')continue;throw error;}
+    for(const name of selected){
+      const file=directory+'/'+name;
+      // Each selected ancestor is checked as well as the final file. A symlink
+      // to an outside vendor/runtime directory must not bypass source guards.
+      let parent=directory;
+      for(const component of name.split('/').slice(0,-1)){
+        parent+='/'+component;await inspect(join(root,parent),parent,{directory:true});
+      }
+      await inspect(join(root,file),file);files.push(file);
+    }
+  }
+  for(const file of optionalSourceDocuments){
+    try{await inspect(join(root,file),file);files.push(file);}
+    catch(error){if(error.code!=='ENOENT')throw error;}
+  }
   await inspect(join(root,'evidence'),'evidence',{directory:true});
   for(const name of mandatoryEvidence){
     try{await inspect(join(root,'evidence',name),'evidence/'+name);}
@@ -117,7 +165,7 @@ export async function packageCandidate({root=defaultRoot,artifactDirectory,targe
     const packed=spawnSync('/usr/bin/tar',['-czf',archive,'-C',staging,...files],{encoding:'utf8',env:{...process.env,COPYFILE_DISABLE:'1'}});
     if(packed.status!==0)fail(packed.stderr||'ARCHIVE_FAILED');
     const archiveSha256=sha256(await readFile(archive));
-    const manifest={generatedAt:new Date().toISOString(),status:'local-unpublished-candidate',target,archive:output.archive,archiveSha256,fileCount:files.length,files:hashes,sourceHashes,transformed,transform:'Only delivery-document workstation paths are replaced in export copies; originals preserved.',excluded:['node_modules','dist','private credentials','operator journals','deploy/work-public-* operational deployments','raw operational evidence/logs and authenticated portal captures','old data-only demo','user attachments'],secretAudit:'Reviewed input directories, mandatory public proof, suspicious data-filename rejection, no symbolic/hard links, a private-path guard and operational-field rejection in selected Work proof JSON; not a guarantee that arbitrary source is secret-free. Review before publication.'};
+    const manifest={generatedAt:new Date().toISOString(),status:'local-unpublished-candidate',target,archive:output.archive,archiveSha256,fileCount:files.length,files:hashes,sourceHashes,transformed,transform:'Only delivery-document workstation paths are replaced in export copies; originals preserved.',excluded:['node_modules','generated dist/build outputs (except two pinned EasyMDE vendor inputs)','unselected files in reviewed new source trees','private operator state/backups/grants/databases/runtime locks','Site deployment workers and live proposal/approval/journal files','private credentials','operator journals','deploy/work-public-* operational deployments','raw operational evidence/logs and authenticated portal captures','old data-only demo','user attachments'],secretAudit:'Reviewed legacy input directories and exact source additions, mandatory public proof, suspicious data-filename rejection, no symbolic/hard links, a private-path guard and operational-field rejection in selected Work proof JSON; not a guarantee that arbitrary source is secret-free. Review before publication.'};
     await writeFile(manifestPath,JSON.stringify(manifest,null,2)+'\n');
     return {archive,manifestPath,target,fileCount:files.length,sha256:archiveSha256,transformed};
   }finally{await rm(staging,{recursive:true,force:true});}

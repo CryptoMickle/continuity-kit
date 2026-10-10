@@ -1,7 +1,7 @@
 {
   "updated": "2026-10-10",
   "deadlineForFeatureDevelopment": "2026-10-12T08:00:00+02:00",
-  "direction": "Substantive development until Monday, then video and final polish with user. No prize probability or payout guarantee.",
+  "direction": "Prioritize a useful repeatable Monad transaction flow and demonstrate that it survives original-app unavailability. Preserve the account-free Mera text use case. Video and final submission remain deferred to user review; no prize probability or payout guarantee.",
   "automationId": "continuitykit-utvikling-fram-til-mandag",
   "boundaries": [
     "No video or final submission before user resumes Monday",
@@ -199,11 +199,12 @@
       ],
       "evidence": "evidence/native-operator-diagnostics-2026-10-10.json",
       "publicSitesChanged": false,
-      "physicalPasskeyVerified": false
+      "physicalPasskeyVerified": false,
+      "publicCommit": "38b06b9e65d5281105d0413c1b1d439e9321299b"
     }
   ],
   "lastCompleted": "Actionable native operator diagnostics completed: 119 native tests passed; installed CLI/API diagnostics distinguish binding, permissions, locks and ports without state changes or service interference.",
-  "next": "Check clean public-source reproducibility of the native integration and operator commands after publication; continue from observed failures, not new speculative features. Video and final submission remain deferred.",
+  "next": "Finish the separate bounded sequential-payment adapter and verify its issuer deployment and first funded obligation on Monad testnet, then use the existing beneficiary passkeys for the A-to-B payment continuity proof. No video or final submission.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -212,5 +213,58 @@
       "spending real money",
       "unrelated asset transfers"
     ]
+  },
+  "deferredReleaseAssessment": {
+    "id": "public-native-release-reproducibility",
+    "status": "planned",
+    "observedGap": "Historical candidate archive omits text-native, text-starter, operator and integrations. Existing anonymous replay predates native milestones; recent installed tests start from the local development checkout.",
+    "evidence": [
+      "scripts/package-candidate.mjs",
+      "evidence/apps-public-replay-2026-10-10.json",
+      "tests/native-installed-fixture.mjs",
+      "tests/text-native-package.mjs"
+    ],
+    "acceptance": [
+      "Exact anonymous public commit download, archive digest and fresh directory",
+      "Documented installation, build and relevant native tests without local source references",
+      "Generated native consumer builds and diagnoses from published package only",
+      "Candidate archive deliberately scoped and free of private runtime files",
+      "No hosted flow changes, native prompts, spending, video or final submission"
+    ]
+  },
+  "transactionPriority": {
+    "recordedAt": "2026-10-10T18:34:33.466764+00:00",
+    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet vårt ikke genererte transaksjoner",
+    "evidenceBoundary": "User-reported reason for the prior loss; not independently verified judge feedback or a formal current eligibility rule.",
+    "currentGap": "Current text collection/replica product sends no blockchain transactions. The separate Account Reserve proof is a historical single claimed payment. The current PaymentRight contract permits only one right per beneficiary, and the release executor pins right 1 and nonce 0. Recurring usage is not demonstrated.",
+    "priority": "Before further general operator polish, establish a narrowly scoped useful recurring transaction loop using the account-reserve capability.",
+    "candidate": "A developer integration for receiving multiple separately funded payments with the same account, with an outstanding payment still claimable through the independent reserve after the original app is unavailable.",
+    "candidateBoundary": "Product hypothesis and next development scope, not external adoption or demonstrated demand. Do not modify the already-published one-time contract or remove its existing transaction safety checks to generalize it.",
+    "acceptance": [
+      "Describe the user, recurring need, and why the state transition needs blockchain settlement.",
+      "Show at least two distinct funded obligations and user-initiated claims with the same account; keep test data labeled synthetic.",
+      "Demonstrate one ordinary claim before outage and an outstanding claim after loss of A, preserving the beneficiary.",
+      "Use a separate explicitly validated transaction adapter and replay/duplicate protection; never remove legacy right/nonce limits in place.",
+      "Corroborate testnet receipts, contract state and amounts. Distinguish development transactions from real user volume.",
+      "Keep text recovery account-free and read-only; do not add arbitrary per-edit receipts or simulated volume.",
+      "Do not claim market demand, prize odds or sponsor acceptance from transaction counts alone."
+    ]
+  },
+  "nextAssessment": {
+    "id": "repeatable-monad-transaction-value",
+    "status": "in_progress",
+    "basis": "Direct user steering on 10 October 2026; see transactionPriority",
+    "releaseGate": "public-native-release-reproducibility remains required before a source release, not the main product objective.",
+    "localProgress": {
+      "contractTests": 4,
+      "guardTestsBeforeReceiptHardening": 9,
+      "journalAndExecutorTests": 25,
+      "pageTests": 7,
+      "routeTests": 3,
+      "realSdkContinuityTests": 1,
+      "publicTransactionsExecuted": false,
+      "nativeProof": false,
+      "evidenceBoundary": "Local EVM and synthetic credential tests; not public transaction completion, adoption, demand or eligibility."
+    }
   }
 }
