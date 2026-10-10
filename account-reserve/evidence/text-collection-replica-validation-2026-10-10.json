@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-10",
+  "checkedAt": "2026-10-10T15:36:04.532817+00:00",
+  "status": "passed",
+  "api": "recoverTextReservesFromReplicas",
+  "scope": "Additive installed public SDK capability, not a new hosted or native multi-app UI.",
+  "finalTests": {
+    "existingRegressionTests": 213,
+    "newTopLevelTests": 18,
+    "totalTopLevelTests": 231,
+    "failed": 0,
+    "skipped": 0,
+    "newFiles": [
+      "tests/text-collection-replicas.mjs",
+      "tests/text-collection-replica-package.mjs"
+    ],
+    "newUnitTests": 17,
+    "installedIntegrationTests": 1,
+    "installedUnitReplayCountedSeparately": false,
+    "strictTypeScript": true
+  },
+  "behavior": {
+    "appsMin": 1,
+    "appsMax": 8,
+    "replicasPerAppMin": 2,
+    "replicasPerAppMax": 3,
+    "maximumConcurrentReads": 24,
+    "sdkAssertionsPerCollection": 1,
+    "newCredentialsDuringRecovery": 0,
+    "fullPolicyCapturedBeforeCredential": true,
+    "rawPrfErasedBeforeReads": true,
+    "perAppKeyDerivationUnchanged": true,
+    "wireFormatUnchanged": true,
+    "allCandidatesAuthenticated": true,
+    "conflictRejectsOnlyAffectedApp": true,
+    "equalPlaintextCiphertextConflictRejected": true,
+    "missingUnavailableRejectedDoNotHideHealthyApps": true,
+    "cancelOrExpiryReturnsNoPartialCollection": true,
+    "noWritesRepairsOrAutomaticRetries": true,
+    "returnedPlaintextIsCallerOwned": true
+  },
+  "installedProof": {
+    "publicPackageExportsOnly": true,
+    "actualSqliteStorageProcesses": 2,
+    "actualGatewayAndRecoveryHost": true,
+    "appNamespaces": 2,
+    "sameTestCredentialPreparedBothApps": true,
+    "freshRecoveryProcesses": 4,
+    "scenarios": [
+      "Both apps recover with both stores healthy",
+      "Both apps recover and export after Alpha is terminated",
+      "Corrupt surviving Textarea ciphertext rejects that app while Markdown still recovers",
+      "Both stores stopped: both apps unavailable, no TXT or JSON exported"
+    ],
+    "exactUnicodeBomCrlfTxtJsonExports": true,
+    "databaseBytesAndCountersUnchangedDuringEveryRecoveryPhase": true,
+    "recoveryGetOnly": true,
+    "originalAppAccessForbidden": true,
+    "actualOriginalAppOutageTested": false,
+    "physicalAuthenticator": "synthetic test-only"
+  },
+  "independentReview": {
+    "agentSourceTypesDocsReview": true,
+    "focusedLegacyAndCombinedTestsPassed": 89,
+    "additionalNewUnitTestsPassed": 17,
+    "externalSecurityAudit": false
+  },
+  "reviewFindingFixed": "A hostile provider exception accessor could reject a replica callback early. All bounded callbacks now settle before result selection, with a fixed sanitized diagnostic for unexpected failures.",
+  "developerRecipe": "sdk/COLLECTION_REPLICAS.md",
+  "installedEvidence": "text-collection-replica-installed-2026-10-10.json",
+  "publicSitesChanged": false,
+  "nativeMultiAppUiVerified": false,
+  "physicalPasskeyVerified": false,
+  "independentProvidersVerified": false,
+  "externalAdoptionClaimed": false,
+  "limitations": [
+    "One assertion request is not a one-device-confirmation promise",
+    "B origin and compatible passkey remain shared recovery dependencies",
+    "Two local storage processes are not two independent providers",
+    "Native starter still presents one app; public collection still uses its single-store configuration",
+    "Immutable snapshots, no migration or automatic synchronization",
+    "Returned plaintext strings cannot be guaranteed erased by the SDK"
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-10",
+  "result": "passed",
+  "runtime": "Node.js 24.19.0",
+  "scope": "Installed public SDK collection recovery across explicitly selected app namespaces and authenticated replicas, using test-only synthetic WebAuthn and real loopback operator processes.",
+  "automatedResults": {
+    "sourceUnitTests": {
+      "passed": 17,
+      "failed": 0
+    },
+    "installedUnitReplay": {
+      "passed": 17,
+      "failed": 0,
+      "sourceImportReplacedWithPublicPackageExport": true,
+      "ordinaryTapReporter": true,
+      "nodePathDisabled": true
+    },
+    "installedPackageIntegration": {
+      "passed": 1,
+      "failed": 0
+    },
+    "strictTypeScript": {
+      "passed": true,
+      "positivePublicApiUsage": true,
+      "negativeMissingAppsAndInvalidReaderUsage": true,
+      "failedResultsExposeNoReserve": true,
+      "readonlyResultsEnforced": true,
+      "skipThirdPartyLibraryDeclarationCheck": true
+    }
+  },
+  "protocolAssertions": {
+    "maxAppsTested": 8,
+    "maxReplicasPerAppTested": 3,
+    "maxConcurrentReadPolicyCovered": 24,
+    "discoverableAssertionsPerCollection": 1,
+    "rawPrfErasedBeforeStorageReads": true,
+    "orderedFrozenResults": true,
+    "crossAppStoreAdaptersSupported": true,
+    "perAppDerivationAndCiphertextIsolation": true,
+    "legacyTextV1RecordCompatibility": true,
+    "allCandidatesAuthenticatedBeforeSelection": true,
+    "equalPlaintextButDifferentAuthenticatedCiphertextRejectsOnlyConflictingApp": true,
+    "invalidPoliciesAndAccessorsRejectedBeforeNativeAccess": true,
+    "lateCancellationReturnsNoPartialCollection": true,
+    "hostileProviderErrorWaitsForSiblingReads": true,
+    "noPendingDiagnosticsReturned": true,
+    "noAutomaticCredentialCreationWriteRepairOrRetry": true
+  },
+  "installedInfrastructure": {
+    "offlineInstalledSdk": true,
+    "publicSdkEntrypointsOnly": true,
+    "actualNativeAssetBuild": true,
+    "appNamespaces": 2,
+    "configuredStores": 2,
+    "separateSqliteFiles": true,
+    "separateStorageChildProcesses": true,
+    "separateGatewayAndRecoveryHostProcesses": true,
+    "oneSyntheticCredentialUsedForBothApps": true,
+    "nativeMultiAppUiVerified": false
+  },
+  "freshRecoveryCases": [
+    {
+      "name": "both-stores-healthy",
+      "appStatuses": [
+        "recovered",
+        "recovered"
+      ],
+      "assertions": 1,
+      "newCredentials": 0,
+      "storageRequests": 4,
+      "methods": [
+        "GET"
+      ],
+      "byteExactTxtAndJsonExportsForRecoveredApps": true
+    },
+    {
+      "name": "one-store-process-killed",
+      "processExitObserved": "SIGKILL",
+      "appStatuses": [
+        "recovered",
+        "recovered"
+      ],
+      "replicaStatusesPerApp": [
+        "unavailable",
+        "verified"
+      ],
+      "assertions": 1,
+      "newCredentials": 0,
+      "storageRequests": 4,
+      "methods": [
+        "GET"
+      ],
+      "byteExactTxtAndJsonExportsForRecoveredApps": true
+    },
+    {
+      "name": "one-app-ciphertext-corrupted-in-surviving-store",
+      "survivingStoreRestarted": true,
+      "appStatuses": [
+        "rejected",
+        "recovered"
+      ],
+      "rejectedAppCode": "REPLICA_RECOVERY_FAILED",
+      "rejectedReplicaCode": "MANIFEST_AUTH_FAILED",
+      "assertions": 1,
+      "newCredentials": 0,
+      "storageRequests": 4,
+      "methods": [
+        "GET"
+      ],
+      "failedAppHasNeitherTxtNorJsonExport": true,
+      "healthySiblingHasByteExactExports": true
+    },
+    {
+      "name": "all-store-processes-stopped",
+      "appStatuses": [
+        "unavailable",
+        "unavailable"
+      ],
+      "assertions": 1,
+      "newCredentials": 0,
+      "storageRequests": 4,
+      "methods": [
+        "GET"
+      ],
+      "neitherAppHasTxtOrJsonExport": true
+    }
+  ],
+  "persistence": {
+    "databaseBytesAndCountersComparedBeforeAndAfterEveryFreshRecovery": true,
+    "recoveryChangedNoStoredBytesOrCounters": true,
+    "counterValuesPerStore": {
+      "records": 2,
+      "issued": 2,
+      "used": 2
+    },
+    "explicitCorruptionOnlyBetweenRecoveryPhases": true,
+    "databasesContainNoFixturePlaintextCredentialIdPrfKeyOrAdministratorInvitation": true
+  },
+  "originalAppBoundary": {
+    "primaryServerStarted": false,
+    "recoveryTransportRestrictedToExactBLoopbackPortAndReplicaPaths": true,
+    "globalFetchOutsideTrustedTransportTrapped": true,
+    "forbiddenNetworkCalls": 0,
+    "claim": "No original-app access was possible in the fresh recovery clients; this is not an observed outage of a deployed A service."
+  },
+  "deviceBoundary": {
+    "freshRecoveryProcesses": 4,
+    "expectedPlaintextNotPassedToFreshClients": true,
+    "nativeCredentialCalls": 0,
+    "syntheticWebAuthnOnly": true,
+    "osPromptCountVerified": false,
+    "physicalPasskeyOrCrossDeviceCompatibilityVerified": false
+  },
+  "cleanup": {
+    "ownedChildProcessesStopped": true,
+    "disposableGeneratedPackagesAndDatabasesRemoved": true,
+    "publicDeploymentChanged": false
+  },
+  "sourceSha256": {
+    "sdk/text-reserve.mjs": "95e02d87347394a815e1f06011e1308e2d0c221177f998572d87bb9cc1352ff8",
+    "sdk/text-reserve.d.ts": "e534fc383e196c109fdca4c305fdcec96809bde2e955f6563b5730723c59a17a",
+    "tests/text-collection-replicas.mjs": "cecef7fb84f65edf6a3889b61274b368fc89e41fd4fa18785884abb966444ca8",
+    "tests/text-collection-replica-package.mjs": "745c123c4c685bca2b2d0012bd977692f8f7cd7840373cccf04db49877329cd9"
+  },
+  "limitations": [
+    "SDK and installed reference integration proof, not external developer adoption",
+    "Synthetic credential assertions do not establish native browser or physical-device behavior",
+    "Explicit app policy supplied to SDK; no new native multi-app UI is claimed",
+    "Loopback Host and Origin routing does not prove public TLS or domain ownership",
+    "Two local stores do not establish independent providers, machines or operators",
+    "B origin, gateway and local host remain shared failure points",
+    "No domain migration, automatic snapshot updates, repair, rollback guarantee or security audit"
+  ]
+}

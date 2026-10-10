@@ -114,7 +114,7 @@
     {
       "id": "collection-replica-recovery",
       "priority": 7,
-      "status": "pending",
+      "status": "complete",
       "value": "Combine the existing collection and replica capabilities: open multiple prepared app reserves using one existing passkey assertion, while tolerating an unavailable or altered storage copy for each app.",
       "acceptance": [
         "Preserve existing single-app, collection and replica APIs, records and protocol bindings",
@@ -125,9 +125,26 @@
         "Read-only recovery with cancellation and no retained persistent key session or writes",
         "Installed public SDK proof with real local store failures, exact per-app exports and independent review",
         "Keep public Sites unchanged until a reviewed publication scope is explicit; no inferred native/provider/adoption proof"
+      ],
+      "evidence": "evidence/text-collection-replica-validation-2026-10-10.json",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
+    },
+    {
+      "id": "collection-replica-browser",
+      "priority": 8,
+      "status": "pending",
+      "value": "Expose the combined SDK in a runnable recovery view so a developer can inspect several recovered drafts and per-copy failures without building the interaction from scratch.",
+      "acceptance": [
+        "Use the installed combined public SDK, explicit app/replica policy and existing design language",
+        "One deliberate recovery action, explicit per-app status and safe text rendering",
+        "Missing, corrupt or conflicting apps remain separate from healthy results",
+        "Close, cancel, page exit and expiry clear retained UI state; no hidden key creation, retry or persistence",
+        "Real local process/storage failure drill and exact per-app export through the browser reference",
+        "Preserve existing public Sites, native passkeys and immutable records; no native-device or provider claims from synthetic tests"
       ]
     }
   ],
-  "lastCompleted": "Native operator onboarding completed with 60 passing tests, independent installed CLI replay and authenticated surviving-copy recovery using a synthetic test credential.",
-  "next": "Combine collection recovery with authenticated replicas, preserving one existing passkey assertion and per-app failure isolation. Video and final submission remain deferred until Monday."
+  "lastCompleted": "Combined collection/replica SDK completed: 231 passing top-level tests, strict TypeScript, four fresh installed recovery processes and internal security review.",
+  "next": "Build a runnable combined collection/replica recovery view using the installed SDK and existing design. Video and final submission remain deferred until Monday."
 }

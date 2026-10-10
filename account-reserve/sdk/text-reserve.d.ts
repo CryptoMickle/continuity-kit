@@ -172,6 +172,55 @@ export declare function recoverTextReserveFromReplicas(options: {
   signal?: AbortSignal;
   onProgress?: (stage: 'find-text' | 'open-text') => void;
 }): Promise<Readonly<RecoveredTextReserveReplicas>>;
+
+export interface TextReserveReplicaCollectionApp {
+  readonly config: TextReserveConfig;
+  readonly replicas: readonly TextReserveReadReplica[];
+}
+export type TextReserveReplicaCollectionResult = Readonly<{
+  appId: string;
+  status: 'recovered';
+  reserve: Readonly<RecoveredTextReserve>;
+  replicas: readonly Readonly<TextReserveReplicaDiagnostic>[];
+}> | Readonly<{
+  appId: string;
+  status: 'missing' | 'unavailable' | 'rejected';
+  code: 'RESERVE_MISSING' | 'REPLICA_RECOVERY_FAILED' | 'REPLICA_CONFLICT';
+  replicas: readonly Readonly<TextReserveReplicaDiagnostic>[];
+}>;
+/** Recover 1–8 explicit app namespaces, each from 2–3 configured copies, with
+ * exactly one discoverable PRF assertion. Call directly from a user action;
+ * this is one SDK assertion request, not a promise of one OS confirmation.
+ * Every config, replica ID and bound read method is captured before the prompt.
+ * Configs require unique appIds and the same exact recovery origin/RP. IDs and
+ * store references must be distinct within each app; adapters may be reused
+ * across apps. get must be a data-function property (own or ordinary prototype
+ * method); accessor methods are rejected without evaluating their getters.
+ * Store adapters remain trusted; distinct references do not prove distinct
+ * operators, processes, machines or providers.
+ *
+ * The unchanged v1 derivation isolates each app. Every returned candidate is
+ * authenticated; differing valid ciphertext rejects only that app, even if
+ * its plaintext agrees. A surviving valid copy opens despite corrupt/offline
+ * peers. All missing => missing; no valid with any rejected copy => rejected;
+ * remaining no-valid cases => unavailable. Results retain input app/replica
+ * order and include only bounded diagnostics. No failed app exposes text,
+ * locator, credential ID, raw ciphertext or provider messages.
+ *
+ * At most 24 concurrent reads, each timed at ten seconds; five-minute overall
+ * scope. Raw PRF buffers are wiped before reads. No write, repair, credential
+ * creation, domain migration or live key/session is returned. Acquisition
+ * failure (CREDENTIAL_UNAVAILABLE), abort or expiry rejects the whole call
+ * without partial plaintext. Previously returned JS strings cannot be erased.
+ */
+export declare function recoverTextReservesFromReplicas(options: {
+  apps: readonly TextReserveReplicaCollectionApp[];
+  webAuthnClient?: WebAuthnClient;
+  signal?: AbortSignal;
+  /** find-text once; open-text per authenticated candidate manifest. No app
+   * identity or plaintext is passed to this observational callback. */
+  onProgress?: (stage: 'find-text' | 'open-text') => void;
+}): Promise<readonly TextReserveReplicaCollectionResult[]>;
 /** Consume one existing credential handle to encrypt one immutable record and
  * explicitly attempt at most one PUT at each of 2–3 stores. Every store must
  * first report absence; all writes and exact byte readbacks must succeed.

@@ -238,6 +238,43 @@ durable databases, including process shutdown, corrupted ciphertext and exact
 export. It uses synthetic credentials on one machine. Independent hosting
 providers, native-device acceptance and protection against loss of the recovery
 domain are not established by this local test.
+
+## Open several apps when storage copies fail
+
+`recoverTextReservesFromReplicas` combines collection recovery with authenticated
+replicas. Configure 1–8 prepared apps on the same exact recovery origin/RP, each
+with two or three storage adapters. One discoverable assertion derives the
+existing per-app keys and checks every candidate. A failed or conflicting app
+does not hide healthy siblings; cancellation rejects the whole operation.
+
+```js
+import { recoverTextReservesFromReplicas } from '@continuitykit/account-reserve/text-reserve';
+
+// Call directly from B's deliberate recovery button. Bind routes and configs
+// in trusted client code; no upload permission is needed for this read.
+const results = await recoverTextReservesFromReplicas({
+  apps: trustedApps.map(app => ({ config: app.config, replicas: app.replicas })),
+  signal: pageLifetime.signal,
+});
+for (const result of results) {
+  if (result.status === 'recovered') showDraft(result.appId, result.reserve.text);
+  else showReadFailure(result.appId, result.status);
+  showCopyStatus(result.appId, result.replicas);
+}
+```
+
+[Integration recipe and result handling](sdk/COLLECTION_REPLICAS.md) covers
+same-origin routes, user actions, cancellation, text-only rendering and limits.
+This adds no enrollment, synchronization, repair or key migration. Conflicting
+authenticated records fail for that app, even if their text is equal. Existing
+APIs, passkeys and text-v1 records are unchanged. It makes one SDK assertion;
+device confirmation counts may differ.
+
+The native starter remains single-app and the hosted collection remains
+single-store. The combined capability is verified through installed-SDK local
+storage tests; it is not a new hosted multi-app deployment or native acceptance.
+Run `npm run test:collection-replicas` for the combined API and installed replay.
+[Validation scope](evidence/text-collection-replica-validation-2026-10-10.json).
 [Recorded process-failure proof](evidence/text-replica-process-proof-2026-10-10.json)
 and [scoped validation](evidence/text-replica-validation-2026-10-10.json).
 

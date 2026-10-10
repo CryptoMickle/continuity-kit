@@ -1,3 +1,46 @@
+# Collection recovery from surviving copies — 10 October 2026
+
+The additive `recoverTextReservesFromReplicas` API opens 1–8 prepared app
+namespaces with one existing passkey assertion, checking two or three configured
+storage copies per app. Per-app key derivation and immutable text-v1 records are
+unchanged. Healthy siblings remain available when another app is missing,
+unavailable, corrupt or has conflicting authenticated records. Cancellation or
+credential failure rejects the entire call without returning partial text.
+
+All app policies and read methods are captured before the credential operation.
+At most 24 bounded reads run concurrently; raw PRF bytes are erased before they
+begin. Every candidate is authenticated inside the SDK. The operation performs
+no writes, repairs, new-key creation or automatic retry. One API assertion does
+not establish one physical device confirmation.
+
+Final validation passed **231 top-level tests**: 213 existing regressions plus
+17 new unit tests and one installed-package integration. The installed package
+also replays those unit tests and strict TypeScript examples; they are not added
+to the top-level count. Four fresh recovery processes use the actual B host,
+gateway and separate SQLite storage processes. Both apps export exact TXT/JSON
+after one store is terminated. Corruption of the remaining copy for one app
+rejects only that app; loss of both stores produces no exports. Every recovery
+phase preserves database bytes and counters and uses only B GET requests.
+Original-app access was forbidden, but this test did not run an A outage server.
+
+Internal review found and fixed an error-handling edge where a hostile provider
+exception could stop waiting for sibling reads. All bounded replica callbacks
+now settle before results are selected. A separate agent reviewed source, types,
+integration guidance and the existing preparation guarantees. This is internal
+engineering validation, not external adoption or an independent security audit.
+
+The tests use synthetic credentials with real SDK cryptography. The native
+starter still presents one app and the published collection still uses one
+store. Public Sites, existing passkeys and saved reserves are unchanged. The next
+milestone makes the combined capability usable in a runnable browser reference.
+Video and final submission remain deferred until Monday.
+
+[Developer recipe](../sdk/COLLECTION_REPLICAS.md) ·
+[Final validation](../evidence/text-collection-replica-validation-2026-10-10.json) ·
+[Installed proof](../evidence/text-collection-replica-installed-2026-10-10.json).
+
+---
+
 # Native operator onboarding — 10 October 2026
 
 The native text package now creates private storage once and starts its frontends,

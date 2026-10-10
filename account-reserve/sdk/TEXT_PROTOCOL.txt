@@ -206,6 +206,31 @@ automatically enable replication. Device confirmations may still exceed one
 even when SDK recovery makes one assertion call. Replica transport sees opaque
 locators and ciphertext, not the passkey-derived decryption keys or plaintext.
 
+Collection recovery with replicas (additive API, unchanged wire format)
+----------------------------------------------------------------------
+recoverTextReservesFromReplicas accepts apps: [{config, replicas}]. The bounded
+list contains 1-8 unique appIds with the same exact origin/RP. Each app has 2-3
+replicas with unique IDs and store references within that app; different apps
+may share the same adapters. Configuration and bound read methods are copied
+before the single discoverable assertion. No untrusted response chooses policy.
+
+One PRF result derives each app's original HKDF-separated locator and keys.
+Raw PRF bytes are erased before the at-most-24 concurrent, timed reads begin.
+Every candidate is authenticated by the same internal verifier as single-app
+replica recovery. Results preserve app order and include per-copy diagnostics.
+At least one authentic candidate, with no conflicting authentic bytes, recovers
+that app. All missing gives missing/RESERVE_MISSING. No survivor plus any rejected
+candidate gives rejected/REPLICA_RECOVERY_FAILED. Otherwise no survivor gives
+unavailable/REPLICA_RECOVERY_FAILED. Different authentic ciphertexts produce
+rejected/REPLICA_CONFLICT only for that app; no plaintext is returned for it.
+
+An unavailable or rejected app does not suppress healthy siblings. Credential
+acquisition failure rejects globally as CREDENTIAL_UNAVAILABLE; cancellation or
+operation timeout rejects globally with its bounded code and no partial result.
+There is no write, repair, key creation, reusable key context or automated retry.
+The ordinary collection and single-app APIs keep their existing behavior. This
+composition does not prepare replicas automatically or change text-v1 bytes.
+
 Availability and proof boundaries
 ---------------------------------
 A surviving credential, recovery RP/origin and encrypted record are required.

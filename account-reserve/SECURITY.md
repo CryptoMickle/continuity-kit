@@ -28,6 +28,19 @@ hiding an existing record nor loss of B/storage/provider is solved by this proto
 There is no latest-version registry, synchronization, credential rotation or lost-key
 recovery in this format. A retained encrypted export is a competent alternative.
 
+The additive `recoverTextReservesFromReplicas` combines a trusted list of at most
+eight app namespaces with two or three configured stores per app. One assertion
+derives separate per-app keys; raw PRF buffers are erased before reads. All
+candidate bytes must authenticate inside the SDK. An authentic survivor can
+open despite failed peers, but different authentic ciphertexts reject that app.
+The protocol cannot elect the newest or correct conflicting record. Failures
+stay isolated per app; credential failure or cancellation rejects the whole
+call without partial results. The API never writes, repairs or creates a key.
+Caller-supplied adapters are trusted, and distinct references cannot establish
+independent infrastructure. Opening several namespaces grants the same trusted
+B code access to all of their returned plaintext, not separate origin isolation.
+Existing single-app and collection behavior and wire bindings remain unchanged.
+
 The hosted `/text/` candidate shares the older self-service Work database, schema,
 64-record limit, 256-admission lifetime limit and 10 November 2026 access deadline.
 PRF/record namespaces stay separate; old reserves are not migrated. Both Sites and

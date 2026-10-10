@@ -102,7 +102,8 @@
     "test:replica-browser": "node --test tests/text-browser-replicas.mjs",
     "test:replica-starter": "node --test tests/text-starter-replicas.mjs tests/text-starter-replica-ui.mjs tests/text-replica-starter-package.mjs",
     "create:native-text": "node scripts/create-native-text-starter.mjs",
-    "test:native-text": "node --test tests/text-native-profile.mjs tests/text-native-ui.mjs tests/text-native-operator.mjs tests/text-native-package.mjs tests/text-native-state.mjs tests/text-native-readiness.mjs tests/text-native-operate.mjs tests/text-native-managed-recovery.mjs"
+    "test:native-text": "node --test tests/text-native-profile.mjs tests/text-native-ui.mjs tests/text-native-operator.mjs tests/text-native-package.mjs tests/text-native-state.mjs tests/text-native-readiness.mjs tests/text-native-operate.mjs tests/text-native-managed-recovery.mjs",
+    "test:collection-replicas": "node --test tests/text-collection-replicas.mjs tests/text-collection-replica-package.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",
