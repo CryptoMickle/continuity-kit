@@ -218,10 +218,28 @@
       "publicCommit": "39d23cee9a3b798fd88283f6baffddfcc476bb84",
       "publicSitesChanged": false,
       "physicalPasskeyVerified": false
+    },
+    {
+      "id": "stateless-payment-receipt",
+      "priority": 13,
+      "status": "complete",
+      "value": "Verify a previously settled payment in a fresh browser or recovery origin using an explicit transaction reference, without requiring the local journal or opening a passkey.",
+      "acceptance": [
+        "One additive typed stateless public verifier: trusted profile, approved right and explicit transaction hash",
+        "No signer, native credential, browser storage or Web Lock needed",
+        "Preserve fixed RPCs and exact signed transaction, beneficiary, amount, contract and finality verification",
+        "Never create, clear or bypass journal entries or unblock an unresolved signing attempt; never broadcast",
+        "Small deliberate transaction-reference UI with verified, pending, reverted and mismatch outcomes in fresh-browser tests",
+        "This is explicit-hash verification, not history discovery or device synchronization"
+      ],
+      "evidence": "evidence/payment-reference-validation-2026-10-10.json",
+      "publicCommit": "311c2878f2b146185068e98d35cedb26cb006d26",
+      "publicSitesChanged": true,
+      "physicalPasskeyVerified": false
     }
   ],
-  "lastCompleted": "Typed public payment API plus a separate installed consumer are published. Anonymous source replay passed all 13 new cases, app/payment builds and clean package/browser integration. Existing hosted flows and credentials unchanged; no new public transactions or native prompts.",
-  "next": "Implement a stateless exact-hash receipt check for fresh browsers, using the existing verified receipt guard, then expose a deliberate transaction-reference UI. Do not infer history, mutate journal state or request credentials.",
+  "lastCompleted": "Stateless typed payment reference verifier and explicit-hash UI published on existing A v6/B v5. Anonymous replay passed 36 tests; public B verifies the existing second payment and rejects a mismatched right without native authentication or new transactions. Legacy assets/config/profiles preserved.",
+  "next": "Reduce observed payment friction: show whether the approved obligation is available or already collected before asking for a passkey. Preserve final transaction preflight and do not interpret an unavailable read as permission to sign.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -247,9 +265,9 @@
   },
   "transactionPriority": {
     "recordedAt": "2026-10-10T18:34:33.466764+00:00",
-    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet vårt ikke genererte transaksjoner",
+    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet v\u00e5rt ikke genererte transaksjoner",
     "evidenceBoundary": "User-reported reason for the prior loss; not independently verified judge feedback or a formal current eligibility rule.",
-    "currentGap": "Bounded repeated settlement now demonstrated through two finalized claims to the same beneficiary, with claim2 during a controlled A outage and builder-reported B completion. Installed payment SDK consumption and demand remain unproven.",
+    "currentGap": "Two exact testnet claims demonstrated recurring settlement through the same beneficiary, including a controlled original-app outage. Installed SDK integration and fresh-browser receipt verification are now tested; external adoption and demand remain unproven.",
     "priority": "Before further general operator polish, establish a narrowly scoped useful recurring transaction loop using the account-reserve capability.",
     "candidate": "A developer integration for receiving multiple separately funded payments with the same account, with an outstanding payment still claimable through the independent reserve after the original app is unavailable.",
     "candidateBoundary": "Product hypothesis and next development scope, not external adoption or demonstrated demand. Do not modify the already-published one-time contract or remove its existing transaction safety checks to generalize it.",
@@ -317,8 +335,22 @@
     }
   },
   "nextDevelopmentAssessment": {
-    "id": "stateless-payment-receipt",
+    "id": "payment-readiness-before-authentication",
     "status": "planned",
+    "observedGap": "Both public example obligations are already claimed, but the payment page still initially invites opening a passkey before the signing guard can report PAYMENT_RIGHT_MISMATCH.",
+    "value": "Avoid unnecessary native authentication for already-collected, unfunded or unavailable payments.",
+    "acceptance": [
+      "Credential-free bounded readiness check for the exact approved payment and expected beneficiary.",
+      "Show funded, already collected, not available and verification unavailable as distinct states.",
+      "Do not auto-authenticate, auto-send, discover history, mutate a local journal or retry transactions.",
+      "A readiness observation is not signing authority; preserve the existing final guard, nonce, fees, expiry and once-only behavior.",
+      "Avoid losing the native user gesture or encouraging a new credential; use an explicit existing-key action after readiness.",
+      "Verify through public installed SDK and UI tests without new native credentials or public wallet transactions."
+    ]
+  },
+  "lastCompletedAssessment": {
+    "id": "stateless-payment-receipt",
+    "status": "complete",
     "value": "Verify a previously settled payment in a fresh browser or recovery origin using an explicit transaction reference, without requiring the local journal or opening a passkey.",
     "observedGap": "createTestnetPaymentReader.check(rightId) throws PAYMENT_TRANSACTION_MISSING before RPC when the current origin has no journal entry. The payment page exposes only that check. Existing CLI already verifies explicit hashes through the exact guard.",
     "acceptance": [
@@ -335,6 +367,8 @@
       "No new public transactions or native tests required",
       "Keep account-free text recovery unchanged",
       "Existing journal reconciliation remains distinct from stateless viewing"
-    ]
+    ],
+    "evidence": "evidence/payment-reference-validation-2026-10-10.json",
+    "publicCommit": "311c2878f2b146185068e98d35cedb26cb006d26"
   }
 }

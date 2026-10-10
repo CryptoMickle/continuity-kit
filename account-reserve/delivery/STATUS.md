@@ -1,3 +1,42 @@
+# Payment references from a fresh browser — 10 October 2026
+
+The typed public payment entry now includes `createTestnetPaymentVerifier`.
+A trusted profile, approved right and explicit hash are sufficient. No account,
+passkey, local journal, browser Storage or Web Lock is required. Fixed RPC checks
+reuse the existing signed-envelope, beneficiary, amount, contract, runtime, event
+and canonical-finality guard. Expired signing profiles can still verify old receipts.
+
+Existing public A version 6 and B version 5 expose **Verify transaction reference**.
+Verified, pending/unknown, reverted and mismatched outcomes are distinct. Edits clear
+old results; stopping or leaving the page suppresses late responses. A reference check
+closes an open signer and never clears a local attempt or enables retrying it.
+Stopping the UI does not abort already-started bounded read-only RPC requests.
+
+Anonymous replay of `311c2878f2b146185068e98d35cedb26cb006d26` passed **36 tests**,
+zero failures or skips, after clean installation and both builds. This includes a
+fresh installed consumer process with no account/journal/browser state, strict types
+and browser bundle checks. Fifteen tests are new (five verifier and ten UI cases);
+the remaining cases preserve existing public API and payment behavior. One additional
+source packaging check passed. Repeated review runs are not summed.
+
+The actual published B view verified the existing second 0.01 test-MON claim at block
+69914955 and rejected that same hash when the first payment was selected. It also
+verified the correct first-payment hash at block 69905019 from B. No new
+transaction or native authentication was requested. Local 390×844 rendering and input
+validation were checked; this is not a physical iPhone test. Independent internal
+review found no remaining blocker; it is not an external audit or adoption evidence.
+
+All eight A/B routes return HTTP 200. Public configuration and payment-profile bytes
+are identical, and the application HTML plus ten legacy asset responses match the
+pinned old Worker. Raw HTML hashes vary because the host injects a per-request
+Cloudflare script. No origin, credentials, records or runtime environment changed.
+
+[Validation and exact replay](../evidence/payment-reference-validation-2026-10-10.json).
+Next: avoid asking for a passkey when the approved payment is already collected.
+Video and final submission remain deferred.
+
+---
+
 # Installed payment SDK and independent consumer — 10 October 2026
 
 A separate application can now import the experimental typed

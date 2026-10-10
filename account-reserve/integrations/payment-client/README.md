@@ -91,3 +91,12 @@ The installed-package tests use fictional accounts and mocked RPC responses.
 They prove package consumption and boundary behavior, not native authentication,
 live provider independence, external adoption or customer demand. The earlier public
 two-payment testnet evidence remains a separate result.
+
+## A receipt from another browser
+
+Use the separate typed `createTestnetPaymentVerifier({ profile }).check({ rightId, hash })`
+API for an explicit reference that is not in this browser's journal. It does not
+need this example's signing helper or an opened account. Only `paymentVerified: true`
+establishes the exact payment. See the [reference example](../../payments/README.md#check-a-reference-from-a-fresh-browser)
+and [validation](../../evidence/payment-reference-validation-2026-10-10.json).
+This read must never be used to clear or bypass an unresolved local attempt.

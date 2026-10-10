@@ -75,6 +75,8 @@ a local attempt record or enables retrying an unresolved payment. Use the existi
 `createTestnetPaymentReader` for that browser's journal reconciliation. It checks a
 reference you supply; it neither discovers history nor synchronizes devices.
 
+[Reference validation and public replay](../evidence/payment-reference-validation-2026-10-10.json).
+
 ## Local verification
 
 Use Node 24 or newer. From `account-reserve/` in the public repository:

@@ -1,0 +1,156 @@
+{
+  "format": "continuitykit/stateless-payment-reference-validation/v1",
+  "recordedAt": "2026-10-10T20:36:23.191286+00:00",
+  "state": "published-and-replayed",
+  "publicSourceCommit": "311c2878f2b146185068e98d35cedb26cb006d26",
+  "publicEntry": "@continuitykit/account-reserve/payments",
+  "factory": "createTestnetPaymentVerifier({profile}).check({rightId,hash})",
+  "publicReplay": {
+    "verifiedAt": "2026-10-10T20:34:43.305Z",
+    "commit": "311c2878f2b146185068e98d35cedb26cb006d26",
+    "anonymousArchive": true,
+    "archiveSha256": "77cf30fe82e287b29c7ae8063f2878a6337413ccd43d8d91bdd00a5c5c411868",
+    "archiveBytes": 2571385,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 36,
+    "failed": 0,
+    "skipped": 0,
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true,
+    "installedConsumerReport": {
+      "experiment": "installed-public-payment-adapter",
+      "strictTypes": true,
+      "browserBundle": true,
+      "publicModules": [
+        "payments/executor.mjs",
+        "payments/guard.mjs",
+        "payments/index.mjs",
+        "payments/pending.mjs",
+        "payments/testnet.mjs",
+        "release/client-profile.mjs",
+        "release/paced-rpc.mjs"
+      ],
+      "scenarios": [
+        "strict public boundary and inert construction",
+        "account lock and unknown send never replay",
+        "unknown-send helper finally and explicit client closure end actual Mera signers",
+        "credential-free reconciliation survives signer closure",
+        "prior receipt rechecked, next approved nonce settles once and helper success closes signer",
+        "persistence failure closes safely and no native credentials"
+      ],
+      "nativeCalls": 0,
+      "publicNetwork": false,
+      "rpcSimulated": true,
+      "actualEvm": false,
+      "signatures": 2,
+      "sends": 2,
+      "closures": 5,
+      "maxConcurrentLockOwners": 1,
+      "fixedRpcNames": true,
+      "journalEntries": 2,
+      "stateless": {
+        "freshProcess": true,
+        "noJournal": true,
+        "noAccount": true,
+        "forbiddenBrowserAccess": 0,
+        "observations": [
+          "finalized",
+          "pending-or-unknown",
+          "reverted",
+          "mismatch-rejected"
+        ],
+        "expiredProfileRead": true,
+        "fixedRpcNames": true,
+        "publicNetwork": false,
+        "persistenceUntouched": true
+      },
+      "limits": [
+        "simulated RPC responses",
+        "disposable local Mera signing sessions",
+        "no native passkey",
+        "no EVM or public transaction",
+        "same-origin in-memory lock adapter"
+      ]
+    }
+  },
+  "newTests": {
+    "statelessVerifier": 5,
+    "referenceUi": 10
+  },
+  "additionalPackagingCheck": {
+    "passed": 1,
+    "scope": "curated source includes new files and excludes private operational sentinels"
+  },
+  "independentInternalReview": "passed; not an external security audit",
+  "sites": {
+    "primaryVersion": 6,
+    "reserveVersion": 5,
+    "primaryUrl": "https://continuitykit-account-primary.cryptomickle.chatgpt.site/payments/",
+    "reserveUrl": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/",
+    "publicAudienceUnchanged": true,
+    "environmentRevisionsUnchanged": true,
+    "oldConfigurationByteIdentical": true,
+    "paymentProfilesByteIdentical": true,
+    "legacyHtmlMatchesPinnedWorkerApartFromHostInjection": true,
+    "legacyAssetsExactMatches": 10,
+    "allEightRoutesHttp200": true
+  },
+  "browser": {
+    "publicReserveSecondPaymentVerified": {
+      "rightId": "2",
+      "hash": "0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2",
+      "blockNumber": "69914955",
+      "amountWei": "10000000000000000"
+    },
+    "realWrongRightRejected": true,
+    "nativePromptRequested": false,
+    "newTransactionSent": false,
+    "localResponsiveWidth": 390,
+    "localResponsiveHeight": 844,
+    "physicalIPhoneTest": false,
+    "publicReserveFirstPaymentVerified": {
+      "rightId": "1",
+      "hash": "0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600",
+      "blockNumber": "69905019",
+      "amountWei": "10000000000000000"
+    }
+  },
+  "sourceSha256": {
+    "payments/index.mjs": "2fb15500c1809980947f8c7cab6f3494a4324cc7a3060fe7f23592b12c76f614",
+    "payments/index.d.ts": "219d1786b53f1ce44950aaf6dac399bf8dfa74b6f652811ecbe9d2bf0a6b1754",
+    "payments/testnet.mjs": "832cf7e7da5735e98a3942c089caf76556c3834ee872aee28298d5bc340bdca1",
+    "payments/page.mjs": "fd71e7a07fa38180e1766685620d08183d309aad9a2c116c3019f72c83b52cd5",
+    "payments/main.mjs": "f8a5f055a042077a776eca89556c8e22e13266c6281122f4b89899f7c127d7f1",
+    "payments/style.css": "c76eb8f265038dc008951f4a61b7834c1a46e4645bcd35f275bd5a337df089dc",
+    "tests/payments-public-api.mjs": "45538aa188b3fafcf403b15a2c7f916c083c1d8055d81987e340c4de289b9ee4",
+    "tests/payments-stateless.mjs": "67f7668b6c4b6b365783452957a8a015f0e0b982917e2f29f5feb4e4b7eef425",
+    "tests/payments-reference-page.mjs": "9d38bdbaddf817e32de9ad9c02f82fcf1b6c448ff0b1a20581c5a875b97ab06f",
+    "tests/payments-installed-package.mjs": "1b42b5d18ec653cba7aab9d387c53698b27e9741d97c8622f5418b94e57b1b2f"
+  },
+  "preserved": {
+    "passkeys": true,
+    "storedReserves": true,
+    "protocolBindings": true,
+    "signingJournalAndReconciliation": true,
+    "contractAndFeePolicy": true,
+    "accountFreeTextRecovery": true
+  },
+  "newPublicWalletTransactions": 0,
+  "newNativeTestsRequested": 0,
+  "limits": [
+    "Explicit-hash verification; no payment discovery or synchronization.",
+    "Fixed trusted RPC corroboration, not a light-client proof or independent-provider guarantee.",
+    "Pending-or-unknown does not establish that the supplied hash belongs to the expected payment.",
+    "Stateless success never clears a journal or permits retrying an unresolved send.",
+    "Stopping the view suppresses late results; already-started bounded read-only RPC calls can finish.",
+    "The hosted read verifies existing testnet receipts; it does not establish native device use or new customer activity.",
+    "Installed-consumer RPC behavior is simulated and does not create new public transactions."
+  ],
+  "verificationNotes": [
+    "Initial anonymous replay runner inherited a present NODE_TEST_CONTEXT variable and skipped test execution. That runner configuration was corrected; the recorded successful run contains all 36 tests, no failures or skips.",
+    "Raw hosted HTML hashes vary because of the observed Cloudflare-injected script. Exact application HTML, all 10 referenced legacy assets and configuration/payment-profile bytes were compared instead."
+  ]
+}
