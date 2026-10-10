@@ -1,3 +1,47 @@
+# Approved payments from either app — 10 October 2026
+
+Existing public A version 8 and B version 7 now offer **Payment to collect** from
+only the trusted profile's approved payments. Both start with the first approved
+payment. B can therefore handle payment 1 when A disappears before it is collected;
+its interface no longer assumes recovery always starts with payment 2.
+
+Changing payment closes the signer, clears the old receipt and readiness, and runs
+one fresh credential-free availability check. Late authentication or read results
+cannot affect the new selection. An unresolved attempt blocks the whole account,
+including no-hash uncertainty; another payment's receipt cannot clear that block.
+Selection is locked during collection. The existing journal, final transaction
+guards, account lock, fee/nonce/expiry limits and once-only behavior remain intact.
+
+Anonymous replay of `32b65852d7f97d52b1ff06b3fd06535f0c50f19d` passed **85 tests**,
+zero failures or skips, after fresh installation and both builds. The run includes
+43 UI cases, a fresh installed public consumer and a local EVM/page recovery case.
+Eighteen tests are new. Two additional source-package checks passed; their overlapping
+runs are not added to the count. Independent internal review found no remaining
+blocker; this is not an external audit.
+
+The local EVM case made A unavailable before payment 1, opened the same prepared
+reserve through B, and collected exactly once for the expected beneficiary and
+amount. It preserved ciphertext, created no credential, and made no request to A
+during recovery/collection. This uses JSDOM and a synthetic authenticator on a
+local chain. It does not establish a new physical-device or public-network claim.
+
+The published browser views both select payments 1 and 2 without requesting a
+passkey for already-collected payments. B verified the exact existing payment-1
+receipt at block 69905019; switching to payment 2 cleared that old result and hash.
+The public 390×844 responsive view has no horizontal overflow and a usable selector;
+this is viewport testing, not a new iPhone test. All **22 HTTP/preservation checks**
+passed, including all 14 byte-identical legacy assets and four unchanged public
+configuration/profile responses. Known per-request Cloudflare HTML injection is
+accounted for. Origins, environment revisions, keys, ciphertext and contracts are
+unchanged. No new public transaction or native authentication occurred.
+
+[Validation and exact replay](../evidence/payment-selection-validation-2026-10-10.json).
+Next: bring the copyable installed payment helper and its README up to the same
+selected-payment and readiness lifecycle. External adoption and demand remain
+unproven. Video and final submission remain deferred.
+
+---
+
 # Payment availability before passkey — 10 October 2026
 
 The existing public A version 7 and B version 6 now check the approved payment

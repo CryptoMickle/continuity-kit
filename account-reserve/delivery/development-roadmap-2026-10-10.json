@@ -255,10 +255,29 @@
       "publicSitesChanged": true,
       "physicalPasskeyVerified": false,
       "priority": 14
+    },
+    {
+      "id": "role-independent-approved-payment-selection",
+      "status": "complete",
+      "observedGap": "payments/page.mjs hardcodes A to right 1 and B to right 2. A recovery profile containing only approved right 1 throws PAYMENT_NOT_APPROVED before UI mount, even though the SDK supports approved policies independently of role.",
+      "value": "Collect any explicitly approved obligation through the reserve if A disappears before that payment was claimed.",
+      "acceptance": [
+        "List only the trusted profile's bounded 1-8 approved payments; no chain history discovery or arbitrary right input.",
+        "Changing payment closes any signer, invalidates readiness and old displayed receipt state, and requires a fresh availability check.",
+        "Late authentication, availability and receipt results cannot affect another selected payment.",
+        "Each selected payment preserves nonce, owner locks, fee/expiry policy, local journal reconciliation and once-only guards.",
+        "Prove reserve collection of approved payment 1 with original app unavailable using installed/local fixtures; no new native key or public transaction required.",
+        "Keep existing credentials, ciphertext, contract and published configuration unchanged."
+      ],
+      "priority": 15,
+      "evidence": "evidence/payment-selection-validation-2026-10-10.json",
+      "publicCommit": "32b65852d7f97d52b1ff06b3fd06535f0c50f19d",
+      "publicSitesChanged": true,
+      "physicalPasskeyVerified": false
     }
   ],
-  "lastCompleted": "Payment availability SDK/UI published on existing A v7/B v6. Anonymous source replay passed 67 tests, installed public consumer and both builds. Public A/B show already-collected without passkey; 22 HTTP/preservation checks passed with all 14 legacy assets unchanged. No new native authentication or public transactions.",
-  "next": "Collect any explicitly approved obligation through the reserve if A disappears before that payment was claimed.",
+  "lastCompleted": "Approved-payment selection published on existing A v8/B v7. Exact anonymous source replay passed 85 tests, installed consumer and both builds. A local EVM/page test collected payment 1 through B with A unavailable and unchanged ciphertext. Public browser selection and receipt checks passed, with all 22 HTTP preservation checks. No new native authentication or public transaction.",
+  "next": "Align the copyable installed payment integration helper with approved selection and credential-free readiness before authentication.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -354,8 +373,23 @@
     }
   },
   "nextDevelopmentAssessment": {
-    "id": "role-independent-approved-payment-selection",
+    "id": "payment-integration-helper-readiness",
     "status": "planned",
+    "observedGap": "integrations/payment-client/actions.mjs still exposes open() before a selected payment or fresh availability observation; its README teaches opening the existing account first. Integrators must reconstruct the lifecycle already implemented in the public page.",
+    "value": "Let an installed SDK consumer reuse approved payment selection, readiness and safe cancellation rather than copying the application page.",
+    "acceptance": [
+      "Use only installed public SDK imports and the existing trusted bounded payment profile.",
+      "Explicit approved payment selection and fresh credential-free availability precede native authentication; readiness is advisory, never payment proof.",
+      "Keep the native call within the deliberate user gesture; never auto-authenticate, auto-send or create a key.",
+      "Changing payment or cancelling closes the signer, clears readiness and rejects stale asynchronous completion; do not allow overlapping native prompts.",
+      "Preserve account-wide unresolved-attempt blocking, journal reconciliation, final guard, nonce, fees, expiry and once-only behavior.",
+      "Exercise the documented helper through a clean installed consumer with asynchronous cancellation and uncertainty cases.",
+      "No new SDK surface, contract, public transaction or native device test is required unless implementation evidence shows a concrete need."
+    ]
+  },
+  "lastCompletedAssessment": {
+    "id": "role-independent-approved-payment-selection",
+    "status": "complete",
     "observedGap": "payments/page.mjs hardcodes A to right 1 and B to right 2. A recovery profile containing only approved right 1 throws PAYMENT_NOT_APPROVED before UI mount, even though the SDK supports approved policies independently of role.",
     "value": "Collect any explicitly approved obligation through the reserve if A disappears before that payment was claimed.",
     "acceptance": [
@@ -365,23 +399,10 @@
       "Each selected payment preserves nonce, owner locks, fee/expiry policy, local journal reconciliation and once-only guards.",
       "Prove reserve collection of approved payment 1 with original app unavailable using installed/local fixtures; no new native key or public transaction required.",
       "Keep existing credentials, ciphertext, contract and published configuration unchanged."
-    ]
-  },
-  "lastCompletedAssessment": {
-    "id": "payment-readiness-before-authentication",
-    "status": "complete",
-    "observedGap": "Both public example obligations are already claimed, but the payment page still initially invites opening a passkey before the signing guard can report PAYMENT_RIGHT_MISMATCH.",
-    "value": "Avoid unnecessary native authentication for already-collected, unfunded or unavailable payments.",
-    "acceptance": [
-      "Credential-free bounded readiness check for the exact approved payment and expected beneficiary.",
-      "Show funded, already collected, not available and verification unavailable as distinct states.",
-      "Do not auto-authenticate, auto-send, discover history, mutate a local journal or retry transactions.",
-      "A readiness observation is not signing authority; preserve the existing final guard, nonce, fees, expiry and once-only behavior.",
-      "Avoid losing the native user gesture or encouraging a new credential; use an explicit existing-key action after readiness.",
-      "Verify through public installed SDK and UI tests without new native credentials or public wallet transactions."
     ],
-    "evidence": "evidence/payment-availability-validation-2026-10-10.json",
-    "publicCommit": "7c38843c9bbe299f9cb45d5d18dbbf9e67eebcc6",
+    "priority": 15,
+    "evidence": "evidence/payment-selection-validation-2026-10-10.json",
+    "publicCommit": "32b65852d7f97d52b1ff06b3fd06535f0c50f19d",
     "publicSitesChanged": true,
     "physicalPasskeyVerified": false
   }
