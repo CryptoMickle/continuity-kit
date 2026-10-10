@@ -1,3 +1,37 @@
+# New evaluation path: one key across two apps — 10 October 2026
+
+Open [the app chooser](https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/).
+Use fictional text only. Textarea and Markdown Studio contain independently authored
+editor runtimes; neither author has adopted or endorsed ContinuityKit.
+
+1. In Textarea, change the draft to `APP-A — first fictional draft` and prepare it
+   in B. Create a first reserve passkey only if you have no suitable key on this B
+   origin; otherwise explicitly select the existing reserve key.
+2. Wait for independent verification. In Markdown Studio, use a different draft
+   (`APP-B — second fictional draft`) and **Use existing reserve passkey** in B.
+   Select exactly the same key. This must not create a second credential.
+3. Close A. Open [the B chooser](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/)
+   in a fresh page, select each app and recover with that key. Edit/export each
+   result. No new snapshot is written during recovery or export.
+
+Native confirmation counts vary. Human acceptance of this new two-app sequence is
+pending; prior text-v1 iPhone acceptance below is narrower. A closed tab is not an
+HTTP outage. The public demo retains one operator/provider and a finite expiry.
+
+For agent-replayable host replacement: `npm ci --ignore-scripts`,
+`npm run build:apps`, then `npm run test:operator`. The test creates a separate
+SDK consumer and SQLite host, stops/removes the original, imports ciphertext to a
+new database and recovers both exact app documents in a fresh process. The
+[report](../evidence/operator-portability-2026-10-10.json) labels its synthetic
+credential/local-host scope. This is stronger operational portability evidence;
+it does not prove retaining the current public hostname on another provider.
+
+The [operator guide](../operator/README.md) includes the runnable package, explicit
+invitation gate, storage limits, migration commands and exact-domain requirement.
+Both additions target developer reuse and continuity; neither is demand evidence.
+
+---
+
 # Inspect ContinuityKit Text Reserve
 
 **Recover the draft and finish the work, without an account key.** The preferred

@@ -86,7 +86,7 @@ async function fixture(t, { primary = false, enrolling = !primary, delayedRespon
     navigator: { clipboard: { async writeText(text) { copies.push(text); } } },
     crypto: { getRandomValues(bytes) { bytes.fill(7); return bytes; } },
     prismBackdrop: '', prismSculpture: '', MAX_TEXT_BYTES: 16384,
-    validateEnvironment, validateCapability, performance: { now: () => time.Date.now() - Date.UTC(2026, 9, 9) },
+    validateEnvironment: (env, href) => validateEnvironment(env, href, time.Date.now()), validateCapability, performance: { now: () => time.Date.now() - Date.UTC(2026, 9, 9) },
     validateText(value) { assert.equal(typeof value, 'string'); return value; },
     startTextReserveSetup(options) {
       counts.setups++; assert.ok(!('privateKey' in options)); assert.ok(!('expectedOwner' in options)); setupOptions = options;

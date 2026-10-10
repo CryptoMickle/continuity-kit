@@ -36,6 +36,9 @@ export interface CreatedTextReserveCredential extends PasskeyCredentialMetadata 
    * Does not delete a credential from the authenticator or a stored record. */
   close(): void;
 }
+/** A created or explicitly selected credential, bound to one config and one
+ * preparation. Kept compatible with the original created-handle type. */
+export type TextReserveCredential = CreatedTextReserveCredential;
 export declare function createTextReserveCredential(options: {
   config: TextReserveConfig;
   user: { name: string; displayName: string };
@@ -44,6 +47,16 @@ export declare function createTextReserveCredential(options: {
   /** Creation and handle deadline, 1–300000 ms; defaults to five minutes. */
   timeoutMs?: number;
 }): Promise<Readonly<CreatedTextReserveCredential>>;
+/** Call directly from a user action on B. Discover/authenticate an existing
+ * credential; no creation fallback or storage access. Derives private state for
+ * this config only. The returned handle cannot be copied or reused. */
+export declare function selectTextReserveCredential(options: {
+  config: TextReserveConfig;
+  webAuthnClient?: WebAuthnClient;
+  signal?: AbortSignal;
+  /** Selection and handle deadline, 1–300000 ms; defaults to five minutes. */
+  timeoutMs?: number;
+}): Promise<Readonly<TextReserveCredential>>;
 export interface RecoveredTextReserve {
   readonly protocol: typeof TEXT_PROTOCOL;
   readonly text: string;
@@ -57,9 +70,10 @@ export interface TextReserveReady extends RecoveredTextReserve {
 }
 export declare function prepareTextReserve(options: {
   config: TextReserveConfig;
-  /** Exact, unexpired handle from createTextReserveCredential; consumed once.
+  /** Exact, unexpired handle from createTextReserveCredential or
+   * selectTextReserveCredential; consumed once.
    * Copied metadata and handles from another module instance are rejected. */
-  recoveryCredential: CreatedTextReserveCredential;
+  recoveryCredential: TextReserveCredential;
   text: string;
   store: TextReserveStore;
   webAuthnClient?: WebAuthnClient;

@@ -20,6 +20,14 @@ export function selfServiceTextConfig(profile) {
     recoveryRpId: new URL(recoveryOrigin).hostname });
 }
 
+export function selfServiceAppsConfig(profile) {
+  const { recoveryOrigin, recoveryRpId } = selfServiceTextConfig(profile);
+  return [
+    { id: 'textarea', label: 'Textarea', config: { appId: 'continuity-textarea-v1', recoveryOrigin, recoveryRpId } },
+    { id: 'markdown', label: 'Markdown Studio', config: { appId: 'continuity-markdown-v1', recoveryOrigin, recoveryRpId } },
+  ];
+}
+
 export function validateSelfServiceProfile(input, now = Date.now()) {
   if (exact(input, ['enabled']) && input.enabled === false) return undefined;
   if (!exact(input, FIELDS) || input.version !== 1 || input.enabled !== true || !/^[0-9a-f]{32}$/.test(input.releaseId ?? '') || !Number.isSafeInteger(now) || now <= 0) throw fail('DEMO_CONFIGURATION_INVALID');

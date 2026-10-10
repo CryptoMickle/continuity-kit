@@ -174,16 +174,24 @@ async function discovery(config, client, signal) {
   } finally { result?.prfOutput.fill(0); prfSalt.fill(0); }
 }
 
-/** Only an exact, one-use handle can carry create-time PRF material into setup.
- * Creating one preserves the caller's synchronous native-click boundary. */
-export async function createTextReserveCredential({ config: suppliedConfig, user, webAuthnClient, signal, timeoutMs = MAX_TIMEOUT_MS }) {
+/** Only an exact, one-use handle carries private PRF-derived material into
+ * setup. Both acquisition paths preserve the caller's native-click boundary. */
+export function createTextReserveCredential(options) { return credentialHandle(options, false); }
+
+/** Explicit discoverable selection of an existing passkey. Never creates a
+ * credential, writes storage or falls back to a new credential on failure. */
+export function selectTextReserveCredential(options) { return credentialHandle(options, true); }
+
+async function credentialHandle({ config: suppliedConfig, user, webAuthnClient, signal, timeoutMs = MAX_TIMEOUT_MS }, existing) {
   const config = freezeConfig(suppliedConfig);
-  exact(user, ['name', 'displayName'], 'USER_INVALID');
-  for (const field of ['name', 'displayName']) check(typeof user[field] === 'string' && user[field].trim().length > 0 && user[field].length <= 128, 'USER_INVALID');
+  if (!existing) {
+    exact(user, ['name', 'displayName'], 'USER_INVALID');
+    for (const field of ['name', 'displayName']) check(typeof user[field] === 'string' && user[field].trim().length > 0 && user[field].length <= 128, 'USER_INVALID');
+  }
   check(Number.isSafeInteger(timeoutMs) && timeoutMs > 0 && timeoutMs <= MAX_TIMEOUT_MS, 'TIMEOUT_INVALID');
   assertOrigin(config); active(signal);
   const controller = new AbortController();
-  const record = { config, controller, expiresAt: Date.now() + timeoutMs, state: 'creating', found: undefined };
+  const record = { config, controller, expiresAt: Date.now() + timeoutMs, state: existing ? 'selecting' : 'creating', found: undefined };
   let timer;
   const stop = code => {
     if (record.state !== 'consumed') { record.state = 'closed'; record.error = code; }
@@ -202,7 +210,9 @@ export async function createTextReserveCredential({ config: suppliedConfig, user
   try {
     ceremony = createWebAuthnScope({ webAuthnClient, signal: controller.signal, timeoutMs });
     ceremony.assertActive();
-    created = await createPasskeyWithPrfOutput({ rp: { id: config.recoveryRpId, name: 'Continuity text reserve' }, user: { name: user.name, displayName: user.displayName }, prfSalt, timeout: timeoutMs, webAuthnClient: boundClient(ceremony.client, config) });
+    created = existing
+      ? await getPasskeyPrfOutput({ rpId: config.recoveryRpId, prfSalt, webAuthnClient: boundClient(ceremony.client, config) })
+      : await createPasskeyWithPrfOutput({ rp: { id: config.recoveryRpId, name: 'Continuity text reserve' }, user: { name: user.name, displayName: user.displayName }, prfSalt, timeout: timeoutMs, webAuthnClient: boundClient(ceremony.client, config) });
     ceremony.assertActive();
     const metadata = validateCredential(created);
     record.found = await discoveryMaterial(created, config, controller.signal);

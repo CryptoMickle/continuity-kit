@@ -74,13 +74,47 @@ returns a frozen, unforgeable-by-copy, in-memory one-use handle. Its deadline
 is at most five minutes. close() cancels outstanding work and drops key refs;
 it cannot delete the system passkey. Failed enrollment may leave a passkey.
 
+selectTextReserveCredential validates config/deadline and explicitly requests
+a discoverable assertion for an existing credential, synchronously in the
+caller's user-action stack. It returns the same kind of one-use private handle,
+bound to that config and chosen credential. It never creates a credential,
+reads/writes storage or falls back to creation when selection fails. Selection
+requires no user label; labels are only inputs for new credential creation.
+No raw PRF result or derived key is returned through either handle.
+
 prepareTextReserve requires that exact handle from the same module instance.
 It captures validated immutable inputs and bound store functions, consumes the
 handle, checks absence, dispatches at most one atomic putIfAbsent, compares an
 independent byte-for-byte readback and then calls recoverTextReserve with a
 fresh discoverable PRF assertion. Readiness requires equal text, digest and
-locator from that independent read. No create-time derived key is supplied to
+locator from that independent read. No acquired derived key is supplied to
 the independent read. Typical storage counts: one write and three reads.
+
+One existing credential may protect a second appId on the same recovery origin
+and RP. Selecting it under the second config derives separate locator/manifest/
+text keys, with the unchanged v1 wire format and PRF salt. Each app namespace
+still permits one immutable snapshot per credential, not updates or history.
+Preparing an already occupied namespace cannot overwrite its stored record.
+Selecting another credential during the independent check prevents readiness;
+the initially written snapshot may still exist and must be checked with the
+credential used for preparation. Selection cannot know a human's intended key
+in advance: choosing an existing key is an explicit user action.
+
+App namespace separation is cryptographic domain separation, not protection
+from a malicious recovery client on the shared origin. That client can request
+other appIds after authentication. App configurations/original origins must be
+allowed by the integrator, not accepted from untrusted query parameters. The
+original app receives only the readiness result and sends only its own text;
+the browser handoff never sends credential metadata or derived key material.
+
+createTextReserveReceiver.prepare defaults to credentialMode:'create', which
+preserves existing callers and requires creation labels. Explicit mode
+'existing' calls selection instead; it emits selecting-credential rather than
+creating-credential. An invalid mode fails before native work. Each receiver
+permits one attempt only. Failure before channel establishment is sent back to
+the original window with an exact origin, source, nonce and bounded-code check;
+it does not leave that window waiting for the whole setup deadline. A failed
+existing selection does not request the text or automatically start creation.
 
 putIfAbsent must be truly atomic and immutable; a storage interface promise
 cannot enforce that on a dishonest provider. A local attempted-locator guard

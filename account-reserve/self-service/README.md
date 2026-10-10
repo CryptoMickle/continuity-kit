@@ -91,3 +91,14 @@ node --test tests/work-reserve.mjs tests/work-browser.mjs tests/native-cancellat
 ```
 
 The backend suite uses local Miniflare/D1 and needs loopback access. These checks use test doubles for credentials and do not establish physical-passkey success. The builder has reported completing the physical iPhone setup, fresh-page recovery and edited-export sequence. This report is separate from the automated checks; the exported bytes and device screen were not independently inspected. Cross-device recovery and an actual A service outage require their own observed evidence.
+
+
+## Two-app route (10 October 2026)
+
+`/apps/` selects Textarea or Markdown Studio; `/apps/textarea/` and
+`/apps/markdown/` use distinct fixed appIds from `/api/apps-config`. B explicitly
+offers reuse of an existing passkey, or first-key creation. There is no automatic
+fallback, migration or overwrite. Both editors and all older routes share the
+existing record/admission capacity. Source is `self-service/apps/` plus pinned
+`integrations/multi-app/`; `npm run build:apps` creates the standalone client.
+The generic operator package is documented in `../operator/README.md`.

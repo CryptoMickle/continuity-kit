@@ -1,5 +1,5 @@
 import { base64url, decode64, enrollmentTicketHash, exact, validLocator } from '../../release/profile.mjs';
-import { LIMITS, selfServiceConfig, selfServiceTextConfig, validateSelfServiceProfile } from './profile.mjs';
+import { LIMITS, selfServiceAppsConfig, selfServiceConfig, selfServiceTextConfig, validateSelfServiceProfile } from './profile.mjs';
 import { createSelfServiceStore } from './store.mjs';
 
 const MAX_BODY_BYTES = 87400;
@@ -150,13 +150,14 @@ export function createSelfServiceHostedClient({ profile: supplied, role, assets 
         } catch { return error(503, 'STORE_WRITE_UNKNOWN'); }
       }
       if (request.method !== 'GET') return error(405, 'METHOD_BLOCKED');
-      if (['/api/config', '/api/text-config'].includes(url.pathname) && !url.search && !url.hash) {
+      if (['/api/config', '/api/text-config', '/api/apps-config'].includes(url.pathname) && !url.search && !url.hash) {
         if (role === 'recovery') { try { store(env, trusted); } catch { return error(503, 'STORE_CONFIGURATION_UNAVAILABLE'); } }
+        if (url.pathname === '/api/apps-config') return reply(200, { hosted: true, synthetic: false, physicalEnabled: true, selfService: true, fictionalOnly: true, operatorHosted: false, enrollmentRequiresInvitation: false, role, originalOrigin: trusted.primaryOrigin, recoveryOrigin: trusted.recoveryOrigin, apps: selfServiceAppsConfig(trusted), expiresAt: trusted.expiresAt, limits: LIMITS });
         const config = url.pathname === '/api/text-config' ? selfServiceTextConfig(trusted) : selfServiceConfig(trusted);
         return reply(200, { hosted: true, synthetic: false, physicalEnabled: true, selfService: true, fictionalOnly: true, role, originalOrigin: trusted.primaryOrigin, recoveryOrigin: trusted.recoveryOrigin, config, expiresAt: trusted.expiresAt, limits: LIMITS });
       }
       if (/^\/(api|rpc|control)(\/|$)/.test(url.pathname)) return error(404, 'ROUTE_UNAVAILABLE');
-      const path = url.pathname === '/' ? '/index.html' : ['/text', '/text/'].includes(url.pathname) ? '/text/index.html' : url.pathname;
+      const path = url.pathname === '/' ? '/index.html' : ['/text', '/text/'].includes(url.pathname) ? '/text/index.html' : /^\/apps(?:\/(?:textarea|markdown))?\/?$/.test(url.pathname) ? '/apps/index.html' : url.pathname;
       if (!Object.hasOwn(assets, path)) return error(404, 'NOT_FOUND');
       const asset = assets[path];
       try {

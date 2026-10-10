@@ -70,7 +70,7 @@ function authenticator({ creationPrf = true } = {}) {
 }
 function setup(pair, overrides = {}) {
   const sender = startTextReserveSetup({ config, originalOrigin: pair.a.location.origin, text, recoveryUrl: config.recoveryOrigin + '/reserve?mode=synthetic', window: pair.a, ...overrides });
-  const receiver = createTextReserveReceiver({ config, originalOrigin: pair.a.location.origin, window: pair.b });
+  const receiver = createTextReserveReceiver({ config: overrides.config ?? config, originalOrigin: pair.a.location.origin, window: pair.b });
   return { sender, receiver };
 }
 
@@ -93,6 +93,78 @@ test('missing creation PRF uses fallback and still independently verifies one im
   const pair = browserPair(), { sender, receiver } = setup(pair), auth = authenticator({ creationPrf: false }), store = memoryStore();
   const [a, b] = await Promise.all([sender.completion, receiver.prepare({ store, user, webAuthnClient: auth.client })]);
   assert.deepEqual(a, b); assert.equal(a.text, text); assert.equal(auth.creates, 1); assert.equal(store.calls.put, 1);
+});
+
+test('two app handoffs use one passkey and transmit only text with their bound configurations', async () => {
+  const auth = authenticator(), store = memoryStore(), firstPair = browserPair(), first = setup(firstPair);
+  const [, firstReady] = await Promise.all([first.sender.completion, first.receiver.prepare({ store, user, webAuthnClient: auth.client })]);
+  const secondConfig = { ...config, appId: 'text-browser-second-app' }, secondText = '# A different application\n';
+  const secondPair = browserPair(), states = [];
+  const sender = startTextReserveSetup({ config: secondConfig, originalOrigin: secondPair.a.location.origin, recoveryUrl: secondConfig.recoveryOrigin + '/second/', text: secondText, window: secondPair.a });
+  const receiver = createTextReserveReceiver({ config: secondConfig, originalOrigin: secondPair.a.location.origin, window: secondPair.b, onState: value => states.push(value) });
+  const before = auth.gets;
+  const preparing = receiver.prepare({ store, credentialMode: 'existing', webAuthnClient: auth.client });
+  assert.equal(auth.gets, before + 1, 'existing mode preserves the native click boundary');
+  const [a, b] = await Promise.all([sender.completion, preparing]);
+  assert.deepEqual(a, b); assert.equal(b.text, secondText); assert.notEqual(firstReady.locator, b.locator);
+  assert.equal(auth.creates, 1); assert.equal(auth.gets, 3); assert.equal(store.calls.put, 2);
+  assert.deepEqual(states.map(value => value.state), ['available', 'selecting-credential', 'preparing', 'ready']);
+  assert.deepEqual(secondPair.transfers, [{ kind: 'text', config: secondConfig, text: secondText, expiresAt: secondPair.transfers[0].expiresAt }]);
+  assert.ok(secondPair.packets.every(value => !['credentialId', 'prfOutput', 'manifestKey', 'textKey'].some(key => key in value)));
+  assert.equal((await recoverTextReserve({ config, store, webAuthnClient: auth.client })).text, text);
+  assert.equal((await recoverTextReserve({ config: secondConfig, store, webAuthnClient: auth.client })).text, secondText);
+  assert.equal(secondPair.a.count(), 0); assert.equal(secondPair.b.count(), 0);
+});
+
+test('invalid credential mode and missing create labels fail before a native attempt', async t => {
+  const pair = browserPair(), { sender, receiver } = setup(pair), auth = authenticator(), store = memoryStore();
+  t.after(() => { sender.cancel(); receiver.dispose(); });
+  await assert.rejects(receiver.prepare({ store, user, credentialMode: 'automatic', webAuthnClient: auth.client }), { code: 'CREDENTIAL_MODE_INVALID' });
+  await assert.rejects(receiver.prepare({ store, webAuthnClient: auth.client }), { code: 'USER_INVALID' });
+  assert.equal(auth.creates, 0); assert.equal(auth.gets, 0); assert.equal(pair.transfers.length, 0);
+  await Promise.all([sender.completion, receiver.prepare({ store, user, webAuthnClient: auth.client })]);
+  assert.equal(auth.creates, 1);
+});
+
+test('denied existing selection cannot create, receive text or retry the receiver', async () => {
+  const pair = browserPair(), { sender, receiver } = setup(pair), store = memoryStore(); let creates = 0, gets = 0;
+  const client = { createCredential() { creates++; throw Error('UNEXPECTED_CREATE'); }, getCredential() { gets++; throw Object.assign(Error('No credential selected'), { code: 'PASSKEY_DENIED' }); } };
+  const results = await Promise.allSettled([sender.completion, receiver.prepare({ store, credentialMode: 'existing', webAuthnClient: client })]);
+  assert.ok(results.every(value => value.status === 'rejected'));
+  assert.equal(creates, 0); assert.equal(gets, 1); assert.equal(pair.transfers.length, 0); assert.equal(store.calls.put, 0);
+  await assert.rejects(receiver.prepare({ store, user, webAuthnClient: client }), { code: 'RESERVE_ALREADY_ATTEMPTED' });
+  assert.equal(creates, 0); assert.equal(pair.a.count(), 0); assert.equal(pair.b.count(), 0);
+});
+
+test('native existing selection cancellation releases the click operation and never transmits text', async t => {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  t.after(() => { if (descriptor) Object.defineProperty(globalThis, 'navigator', descriptor); else delete globalThis.navigator; });
+  let options, release, creates = 0; const pending = new Promise(resolve => { release = resolve; });
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { credentials: {
+    get(value) { options = value; return pending; }, create() { creates++; throw Error('UNEXPECTED_CREATE'); },
+  } } });
+  const pair = browserPair(), { sender, receiver } = setup(pair), store = memoryStore();
+  t.after(() => { sender.cancel(); receiver.dispose(); });
+  const preparing = receiver.prepare({ store, credentialMode: 'existing' }); assert.ok(options.signal instanceof AbortSignal); sender.cancel();
+  await Promise.all([assert.rejects(preparing, { code: 'OPERATION_CANCELLED' }), assert.rejects(sender.completion, { code: 'OPERATION_CANCELLED' })]);
+  assert.equal(options.signal.aborted, true);
+  const output = new Uint8Array(32).fill(19);
+  release({ type: 'public-key', rawId: new ArrayBuffer(24), getClientExtensionResults: () => ({ prf: { results: { first: output.buffer } } }) });
+  await tick(); await tick(); assert.ok(output.every(value => value === 0));
+  assert.equal(creates, 0); assert.equal(pair.transfers.length, 0); assert.equal(store.calls.put, 0);
+});
+
+test('existing-mode unknown write keeps its one record and can be recovered without creation', async () => {
+  const auth = authenticator(), createdPair = browserPair(), first = setup(createdPair);
+  await Promise.all([first.sender.completion, first.receiver.prepare({ store: memoryStore(), user, webAuthnClient: auth.client })]);
+  const secondConfig = { ...config, appId: 'text-browser-unknown-write' }, pair = browserPair(), { sender, receiver } = setup(pair, { config: secondConfig });
+  const backing = memoryStore(), store = { get: backing.get, async putIfAbsent(locator, bytes) { await backing.putIfAbsent(locator, bytes); throw Error('lost response'); } };
+  const results = await Promise.allSettled([sender.completion, receiver.prepare({ store, credentialMode: 'existing', webAuthnClient: auth.client })]);
+  assert.ok(results.every(value => value.status === 'rejected' && value.reason.code === 'STORE_WRITE_UNKNOWN' && value.reason.recordMayExist));
+  assert.equal(auth.creates, 1); assert.equal(backing.calls.put, 1);
+  await assert.rejects(receiver.prepare({ store, credentialMode: 'existing', webAuthnClient: auth.client }), { code: 'RESERVE_ALREADY_ATTEMPTED' });
+  assert.equal((await recoverTextReserve({ config: secondConfig, store: backing, webAuthnClient: auth.client })).text, text);
+  assert.equal(auth.creates, 1); assert.equal(backing.calls.put, 1);
 });
 
 test('invalid origins, extra config, oversized text and blocked popup fail before a credential', () => {
@@ -122,6 +194,21 @@ test('forged origin, source, nonce, version and additional fields cannot request
   const valid = { data: { version: 1, kind: 'receive', nonce }, origin: pair.b.location.origin, source: pair.bRef };
   for (const event of [{ ...valid, origin: 'https://evil.example' }, { ...valid, source: {} }, { ...valid, data: { ...valid.data, nonce: '0'.repeat(64) } }, { ...valid, data: { ...valid.data, version: 2 } }, { ...valid, data: { ...valid.data, extra: true } }]) pair.a.dispatch('message', event);
   assert.equal(pair.transfers.length, 0); sender.cancel(); await assert.rejects(sender.completion, { code: 'OPERATION_CANCELLED' }); receiver.dispose();
+});
+
+test('forged early failure messages cannot cancel the waiting original app', async () => {
+  const pair = browserPair(), { sender, receiver } = setup(pair), nonce = new URL(pair.a.openCalls[0].url).hash.slice(13);
+  const valid = { data: { version: 1, kind: 'failed', nonce, code: 'PASSKEY_DENIED' }, origin: pair.b.location.origin, source: pair.bRef };
+  for (const event of [
+    { ...valid, origin: 'https://evil.example' }, { ...valid, source: {} },
+    { ...valid, data: { ...valid.data, nonce: '0'.repeat(64) } },
+    { ...valid, data: { ...valid.data, version: 2 } },
+    { ...valid, data: { ...valid.data, extra: true } },
+    { ...valid, data: { ...valid.data, code: 'Arbitrary message text' } },
+  ]) pair.a.dispatch('message', event);
+  const auth = authenticator();
+  const [a, b] = await Promise.all([sender.completion, receiver.prepare({ store: memoryStore(), user, webAuthnClient: auth.client })]);
+  assert.deepEqual(a, b); assert.equal(a.status, 'ready'); assert.equal(auth.creates, 1);
 });
 
 test('a mismatched transferred configuration cannot be stored', async () => {

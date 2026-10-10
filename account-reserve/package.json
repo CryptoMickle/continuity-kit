@@ -79,7 +79,12 @@
     "demo:work-entitlement": "node examples/work-entitlement/run.mjs",
     "test:oss-work": "node --test tests/oss-work-integration.mjs",
     "test:text": "node --test tests/text-reserve.mjs tests/text-browser.mjs",
-    "test:oss-text": "node --test tests/oss-text-integration.mjs"
+    "test:oss-text": "node --test tests/oss-text-integration.mjs",
+    "build:apps": "node scripts/build-app-reserves.mjs",
+    "test:apps": "node --test tests/self-service-apps*.mjs integrations/multi-app/tests/*.mjs",
+    "test:operator": "node --test tests/operator-portability.mjs",
+    "drill:operator": "node scripts/operator-portability-drill.mjs",
+    "create:operator": "node operator/create.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

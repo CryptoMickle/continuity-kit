@@ -1,0 +1,47 @@
+{
+  "checkedOn": "2026-10-10",
+  "boundary": "Two ContinuityKit-written adapters around independently authored editors; neither upstream adoption nor endorsement. Vendored sources retained unchanged. Textarea functions are extracted with listed patches; EasyMDE official browser bundle is wrapped as ESM without runtime changes.",
+  "textarea": {
+    "project": "Textarea",
+    "author": "Anton Medvedev",
+    "repository": "https://github.com/antonmedv/textarea",
+    "commit": "8aa2247e4d92d963059e8788624e0c0d1be8d6a3",
+    "license": "MIT",
+    "patches": [
+      "Omit persistence, compressed URL sharing, SW and menu wiring.",
+      "Expose upstream recordHistory/debounceHighlight to plain-paste helper.",
+      "Fix upstream Editor.destroy receiver from editor to element.",
+      "Run upstream timers within disposed lifecycle; disable link navigation."
+    ]
+  },
+  "easymde": {
+    "project": "EasyMDE",
+    "author": "Jeroen Akkerman",
+    "repository": "https://github.com/Ionaru/easy-markdown-editor",
+    "version": "2.20.0",
+    "license": "MIT",
+    "registry": "https://registry.npmjs.org/easymde/2.20.0",
+    "tarball": "https://registry.npmjs.org/easymde/-/easymde-2.20.0.tgz",
+    "integrity": "sha512-V1Z5f92TfR42Na852OWnIZMbM7zotWQYTddNaLYZFVKj7APBbyZ3FYJ27gBw2grMW3R6Qdv9J8n5Ij7XRSIgXQ==",
+    "bundleBoundary": "Official bundle includes CodeMirror 5.65.15, Marked, codemirror-spell-checker and Typo.js. No claim that the latter three embedded dependency versions were identified. Compatible upstream license notices are retained. Spellchecking, Markdown/HTML preview, uploads, remote fonts and autosave are disabled.",
+    "licenseSources": {
+      "codemirror": "https://registry.npmjs.org/codemirror/-/codemirror-5.65.15.tgz",
+      "marked": "https://registry.npmjs.org/marked/-/marked-4.3.0.tgz",
+      "spellchecker": "https://registry.npmjs.org/codemirror-spell-checker/-/codemirror-spell-checker-1.1.2.tgz",
+      "typo": "https://raw.githubusercontent.com/cfinke/Typo.js/master/license.txt"
+    }
+  },
+  "files": {
+    "vendor/textarea/index.html": "74ff304cd6e6b9192e0e008ad1e940e80b8d8bed8c5304b114d95c8d81fedd15",
+    "vendor/textarea/LICENSE": "e03f41ed49b86c6811a64aba3ea4abfb5aeb21263bfaa2941c5c25e0610a1516",
+    "vendor/easymde/package.json": "426d8cf8703568ca610aede586a916dca9cbfa506fc3b9b00e29a97ecce9b8c3",
+    "vendor/easymde/LICENSE": "98eee44a1cdad5ad0bb0ea976791ab57b5eef7ac4cafeb162f30e3808564a564",
+    "vendor/easymde/dist/easymde.min.js": "d684d83b1a2ed08b664e6e140984dbb2c26d7e6198a6537fcae3355e85cd47ba",
+    "vendor/easymde/dist/easymde.min.css": "e7a7feebd8e4a193c03f87dea9f782d40c0e50baa8b8b93cc552f92aa51a61c0",
+    "vendor/easymde/src/js/easymde.js": "be73d2a20a9136ae56055f0646b39783d2c7b09684ca2abd239e4da1c37d0da2",
+    "vendor/easymde/codemirror-LICENSE": "168a4becc968f5001e2ee2e0291b6e4daabafc1894a11ade1e11d56e96096e07",
+    "vendor/easymde/marked-LICENSE": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "vendor/easymde/codemirror-spell-checker-LICENSE": "b7b60ddfca29ae67375a83d15dd5795ed17888a952ffe133dc97e0216d843004",
+    "vendor/easymde/typo-js-LICENSE": "d36ddbbca5451e2799557c158305096ed88f0fa1f32f5542130954528cd61602"
+  }
+}

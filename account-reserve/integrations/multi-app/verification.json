@@ -1,0 +1,49 @@
+{
+  "checkedOn": "2026-10-10",
+  "scope": "Actual vendored editor runtime in JSDOM; no native browser or passkey claim.",
+  "upstreamSourcesVerified": 11,
+  "editorComponents": [
+    "Textarea 8aa2247e4d92d963059e8788624e0c0d1be8d6a3",
+    "EasyMDE 2.20.0 with CodeMirror 5.65.15"
+  ],
+  "build": {
+    "offline": true,
+    "files": [
+      "textarea-editor.mjs",
+      "plain-text-editing.mjs",
+      "easymde-editor.mjs",
+      "easymde-runtime.mjs",
+      "editors.css",
+      "THIRD_PARTY_NOTICES.txt",
+      "editor-provenance.json"
+    ],
+    "bytes": {
+      "textarea-editor.mjs": 12802,
+      "plain-text-editing.mjs": 5067,
+      "easymde-editor.mjs": 3115,
+      "easymde-runtime.mjs": 326942,
+      "editors.css": 14866,
+      "THIRD_PARTY_NOTICES.txt": 9413,
+      "editor-provenance.json": 3227
+    }
+  },
+  "tests": {
+    "command": "node --test tests/editors.mjs",
+    "passed": 4,
+    "failed": 0,
+    "coverage": [
+      "Literal text and Unicode via both actual editor APIs",
+      "No active HTML/image rendering from document text",
+      "Textarea upstream Markdown highlighting and contenteditable line normalization",
+      "CodeMirror editing, toolbar formatting, undo and redo",
+      "Attempted network/storage/URL/service-worker boundary traps during exercised flows",
+      "Editor disposal and rejected subsequent API use"
+    ]
+  },
+  "limits": [
+    "JSDOM uses layout/focus shims.",
+    "Native typing, browser CSP and responsive presentation are checked by the composed client.",
+    "Two ContinuityKit-written adapters, no upstream adoption or external maintainer endorsement.",
+    "Changing appId does not isolate applications from the shared reserve-origin operator."
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-10-10T10:01:53.018Z",
+  "status": "PASSED",
+  "scope": "Synthetic loopback operator replacement using installed SDK in separate OS processes; not native passkeys or a public hosting migration.",
+  "packageInstalled": true,
+  "sameRecoveryOrigin": true,
+  "originalProcessStopped": true,
+  "originalStoreRemoved": true,
+  "oneSyntheticCredential": true,
+  "distinctAppRecords": 2,
+  "transferContainsOnlyCiphertextAndPublicBinding": true,
+  "noPlaintextCredentialOrInvitationInTransfer": true,
+  "transferBytes": 2595,
+  "ciphertextArchiveByteIdenticalAfterImport": true,
+  "lifetimeAdmissionCountPreserved": true,
+  "outstandingCapabilitiesTransferred": false,
+  "prepared": {
+    "creates": 1,
+    "writes": 2
+  },
+  "recovered": {
+    "freshProcess": true,
+    "creates": 0,
+    "writes": 0,
+    "exactTexts": 2
+  },
+  "wrongOriginRejectedBeforeAuthenticator": true,
+  "changedCiphertextRejected": true,
+  "unchangedOtherAppRecovered": true,
+  "notClaimed": [
+    "physical passkey portability",
+    "provider or operator independence",
+    "recovery after losing the RP domain",
+    "production security audit",
+    "external adoption"
+  ]
+}

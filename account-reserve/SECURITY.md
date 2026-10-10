@@ -94,3 +94,28 @@ are static presence/configuration checks, never physical PRF or durability proof
 - Independent audit, formal verification, customer adoption, willingness to pay or promised prize eligibility.
 
 The previous data-only ContinuityKit public proof does not establish these new properties. No legal immunity follows from a technical test or an experimental disclaimer.
+
+
+## Two-app passkey reuse and operator replacement (10 October 2026)
+
+Explicit existing-key selection never falls back to creating a credential. It
+returns a short-lived, one-use handle bound to one exact app configuration.
+Preparation still refuses existing records, writes at most once, reads back exact
+bytes and independently rediscovers/decrypts with a fresh assertion. Separate app
+HKDF inputs are isolation against substitution, not protection from malicious B
+code. B remains trusted for every app it serves. The v1 wire format/PRF salt have
+not changed; existing snapshots require their original app config and origin.
+
+The public UI accepts exactly two configured app routes; URL/query/opener content
+cannot supply an appId. Editors run locally without upstream persistence, remote
+fonts or rendered external-content previews. A discard destroys the editor and
+undo context; it is not a proof of physical RAM erasure.
+
+The self-hosted package uses private invitation-gated upload admissions, bounded
+SQLite transactions and opaque immutable records. Export/import retains public
+bindings, ciphertext and issuance counts, omits live capabilities and refuses
+existing destinations. Transfer checksums are not signatures. An older/forked
+archive can roll back or fork effective counts; no anti-rollback/global quota is
+claimed. Private operator-owned directories, disk, TLS, domain retention, trusted
+code and backup/retention operations remain the operator's responsibilities.
+See operator/README.md for stop-before-export and same-origin requirements.

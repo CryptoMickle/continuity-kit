@@ -1,3 +1,23 @@
+# Two-app reuse and operator replacement — 10 October 2026
+
+The new `/apps/` routes are published on the existing Primary/Reserve Sites.
+They run pinned Textarea and EasyMDE/CodeMirror editors with explicit first-key or
+existing-key preparation. Old `/text/` and Work routes, record bindings, shared
+limits and database schema are preserved. The native two-app ceremony remains
+pending; earlier physical reports do not cover it.
+
+The operator package and installed-SDK local replacement drill passed: original
+process stopped before export, temporary original DB removed, new DB/process at
+the same origin, both exact documents recovered in a fresh process. Transfer
+contains no plaintext/key/invitation; tampering and wrong-origin access reject.
+This is synthetic local evidence, not a public-provider migration or audit.
+
+Video and final submission remain deferred. No external adoption is claimed.
+See [operator proof](../evidence/operator-portability-2026-10-10.json) and the updated
+[judge guide](JUDGE_GUIDE.md). Older dated records below retain their own scope.
+
+---
+
 # Text-v1 iPhone acceptance report — 10 October 2026
 
 The builder reported **“Gjenopprettet og eksportert på iphone”** after instructions

@@ -86,7 +86,7 @@ async function fixture(t, { primary = false, enrolling = !primary, delayedRespon
     navigator: { clipboard: { async writeText(text) { copies.push(text); } } },
     crypto: { getRandomValues(bytes) { bytes.fill(7); return bytes; } },
     prismBackdrop: '', prismSculpture: '', WORK_SCHEMA: 'continuity-work/brief-v1', MAX_WORK_BYTES: 16384,
-    validateEnvironment, validateCapability, performance: { now: () => time.Date.now() - Date.UTC(2026, 9, 9) },
+    validateEnvironment: (env, href) => validateEnvironment(env, href, time.Date.now()), validateCapability, performance: { now: () => time.Date.now() - Date.UTC(2026, 9, 9) },
     validateWork(value) { assert.ok(['title', 'client', 'brief', 'deliverable', 'nextStep'].every(key => typeof value[key] === 'string' && value[key].length)); return Object.freeze({ ...value }); },
     createSecp256k1SigningSession({ privateKey }) { counts.sessions++; assert.ok(privateKey.some(value => value)); return { end() { counts.sessionsEnded++; } }; },
     toViemAccount() { return { address: '0x' + '1'.repeat(40) }; },

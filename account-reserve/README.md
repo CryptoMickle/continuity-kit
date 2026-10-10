@@ -10,7 +10,46 @@ snapshot. Later edits must be exported. A competent encrypted export also protec
 the narrower benefit here is finding and opening a prepared copy without retaining that
 export file. The reserve service and compatible passkey must still be available.
 
-## Try the account-free text candidate
+## One reserve passkey, two real editor integrations
+
+[Open the two-app demo](https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/).
+Prepare a fictional Textarea draft in B. For Markdown Studio, explicitly choose
+**Use existing reserve passkey**. Each app has a fixed, distinct HKDF namespace and
+one immutable snapshot; the same B origin is trusted with both. Earlier `/text/`
+and Work reserves stay at their existing routes and retain their original bindings.
+
+Textarea runs the pinned upstream editor; Markdown Studio runs EasyMDE 2.20.0 and
+CodeMirror. Both are builder-made integrations of independently authored components,
+not external customers or endorsements. No wallet or chain action is added.
+The protocol's format, fixed PRF salt and old derivation inputs are unchanged.
+Native same-key preparation across these two integrations is **not yet human-verified**;
+the earlier text-v1 iPhone report does not establish this new composed flow.
+
+An [operator package](operator/README.md) serves the same client and durable SQLite
+storage without Sites/Vercel/D1. Its installed-SDK [replacement drill](evidence/operator-portability-2026-10-10.json)
+stopped the old process, removed its test database, imported ciphertext into a new
+database and recovered both exact documents in a fresh process. One synthetic
+credential was created; the second app reused it. Tampering and wrong-origin access
+were rejected. This is reproducible local evidence, not physical authentication or
+a completed public-provider migration. Retaining the exact recovery origin/RP,
+app IDs and operator-controlled domain is required. Existing chatgpt.site demo
+hostnames are not proved transferable.
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm --prefix integrations/multi-app ci --ignore-scripts --no-audit --no-fund
+npm run build:apps
+npm run test:apps
+npm run test:operator
+node operator/create.mjs /absolute/empty/operator-package
+```
+
+See [editor provenance](integrations/multi-app/README.md), [protocol](sdk/TEXT_PROTOCOL.txt)
+and [operator responsibilities](operator/README.md). Public Work, text and multi-app
+routes share the same existing 64-record and 256-admission limits. No new quota,
+database schema, pricing plan or blockchain transaction was introduced.
+
+## Earlier account-free text candidate
 
 [Open original workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)
 → edit fictional text → prepare in B → reopen

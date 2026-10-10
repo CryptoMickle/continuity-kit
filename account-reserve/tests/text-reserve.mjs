@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { createTextReserveCredential, prepareTextReserve, recoverTextReserve, validateText, TEXT_PROTOCOL, MAX_TEXT_BYTES } from '../sdk/text-reserve.mjs';
+import { createTextReserveCredential, selectTextReserveCredential, prepareTextReserve, recoverTextReserve, validateText, TEXT_PROTOCOL, MAX_TEXT_BYTES } from '../sdk/text-reserve.mjs';
 
 const user = { name: 'Synthetic text reserve', displayName: 'Synthetic text reserve' };
 const sample = '\ufeffA real text document.\r\nÅ, 界 and 🦊.\n\nKeep the final newline.\n';
@@ -50,10 +50,11 @@ function fixture(t, { fallback = false } = {}) {
   };
   const store = memoryStore();
   const create = async overrides => { const result = await createTextReserveCredential({ config, user, webAuthnClient: client, ...overrides }); handles.push(result); return result; };
+  const select = async overrides => { const result = await selectTextReserveCredential({ config, webAuthnClient: client, ...overrides }); handles.push(result); return result; };
   const prepare = (recoveryCredential, overrides) => prepareTextReserve({ config, recoveryCredential, text: sample, store, webAuthnClient: client, ...overrides });
   const recover = overrides => recoverTextReserve({ config, store, webAuthnClient: client, ...overrides });
   t.after(() => { for (const handle of handles) handle.close(); prfKey.fill(0); });
-  return { config, id, output, outputs, requests, counts, client, store, create, prepare, recover };
+  return { config, id, output, outputs, requests, counts, client, store, create, select, prepare, recover };
 }
 async function keys(f, config = f.config, credentialId = b64(f.id)) {
   const raw = f.output(prfSalt());
@@ -160,6 +161,104 @@ test('create and discoverable recovery reach adapter synchronously in caller cli
   const before = f.counts.gets, recovering = f.recover(); assert.equal(f.counts.gets, before + 1); await recovering;
   assert.equal(f.requests.at(-1).request.allowCredential, undefined);
   assert.ok(f.requests.every(request => request.salt.length === 32));
+});
+
+test('one credential protects two app namespaces with independent reads and no recreation', async t => {
+  const f = fixture(t), secondConfig = { ...f.config, appId: f.config.appId + '-second' };
+  const first = await f.prepare(await f.create());
+  const before = f.counts.gets, selecting = f.select({ config: secondConfig });
+  assert.equal(f.counts.gets, before + 1, 'selection reaches WebAuthn in the click stack');
+  const selected = await selecting;
+  assert.equal(selected.credentialId, b64(f.id)); assert.ok(Object.isFrozen(selected));
+  assert.deepEqual(Object.keys(selected).sort(), ['close', 'credentialId']);
+  assert.equal(f.requests.at(-1).request.allowCredential, undefined);
+  const secondText = '\ufeffThe other application\r\n🦊\n';
+  const second = await f.prepare(selected, { config: secondConfig, text: secondText });
+  assert.notEqual(second.locator, first.locator); assert.equal(f.store.records().length, 2);
+  assert.deepEqual(f.counts, { creates: 1, gets: 3 });
+  assert.deepEqual(f.store.calls, { get: 6, put: 2 });
+  const fresh = await import(`../sdk/text-reserve.mjs?twoapps=${randomBytes(6).toString('hex')}`);
+  const readonlyStore = { get: f.store.get };
+  const reopenedFirst = await fresh.recoverTextReserve({ config: f.config, store: readonlyStore, webAuthnClient: f.client });
+  const reopenedSecond = await fresh.recoverTextReserve({ config: secondConfig, store: readonlyStore, webAuthnClient: f.client });
+  assert.equal(reopenedFirst.text, sample); assert.equal(reopenedSecond.text, secondText);
+  assert.equal(f.counts.creates, 1); assert.equal(f.store.calls.put, 2);
+  const firstBytes = f.store.records().find(([locator]) => locator === first.locator)[1];
+  const secondBytes = f.store.records().find(([locator]) => locator === second.locator)[1];
+  f.store.replace(first.locator, secondBytes); f.store.replace(second.locator, firstBytes);
+  await assert.rejects(f.recover(), code('MANIFEST_AUTH_FAILED'));
+  await assert.rejects(f.recover({ config: secondConfig }), code('MANIFEST_AUTH_FAILED'));
+  assert.ok(f.outputs.every(value => !value.prfOutput || value.prfOutput.every(byte => byte === 0)));
+});
+
+test('selected handles bind config, reject copies, expire, close and consume without new credentials', async t => {
+  const f = fixture(t), handle = await f.select();
+  await assert.rejects(f.prepare({ ...handle }), code('RESERVE_CREDENTIAL_INVALID'));
+  await assert.rejects(f.prepare(handle, { config: { ...f.config, appId: 'another-app' } }), code('CREDENTIAL_MISMATCH'));
+  await f.prepare(handle); await assert.rejects(f.prepare(handle), code('RESERVE_CREDENTIAL_CONSUMED'));
+  const closed = await f.select(); closed.close(); closed.close();
+  await assert.rejects(f.prepare(closed), code('RESERVE_CREDENTIAL_CLOSED'));
+  const controller = new AbortController(), aborted = await f.select({ signal: controller.signal }); controller.abort();
+  await assert.rejects(f.prepare(aborted), code('OPERATION_CANCELLED'));
+  const expired = await f.select({ timeoutMs: 1000 }), now = Date.now;
+  Date.now = () => now() + 2000;
+  try { await assert.rejects(f.prepare(expired), code('RESERVE_CREDENTIAL_EXPIRED')); }
+  finally { Date.now = now; }
+  assert.equal(f.counts.creates, 0); assert.equal(f.store.calls.put, 1);
+});
+
+test('existing selection cannot overwrite a prepared app even in a fresh module instance', async t => {
+  const f = fixture(t), ready = await f.prepare(await f.create()), before = f.store.records()[0][1];
+  const fresh = await import(`../sdk/text-reserve.mjs?selection=${randomBytes(6).toString('hex')}`);
+  const selected = await fresh.selectTextReserveCredential({ config: f.config, webAuthnClient: f.client });
+  await assert.rejects(fresh.prepareTextReserve({ config: f.config, recoveryCredential: selected, text: 'replace', store: f.store, webAuthnClient: f.client }), code('RESERVE_EXISTS'));
+  assert.deepEqual(f.store.records(), [[ready.locator, before]]);
+  assert.equal(f.counts.creates, 1); assert.equal(f.store.calls.put, 1);
+});
+
+test('selection validates config, deadline, origin and pre-abort before any assertion', async t => {
+  const f = fixture(t), controller = new AbortController(); controller.abort();
+  await assert.rejects(f.select({ signal: controller.signal }), code('OPERATION_CANCELLED'));
+  await assert.rejects(f.select({ config: { ...f.config, appId: '' } }), code('CONFIG_INVALID'));
+  for (const timeoutMs of [0, -1, 300001, NaN]) await assert.rejects(f.select({ timeoutMs }), code('TIMEOUT_INVALID'));
+  const previous = Object.getOwnPropertyDescriptor(globalThis, 'location');
+  Object.defineProperty(globalThis, 'location', { configurable: true, value: { origin: 'https://reserve.example:8443' } });
+  try { await assert.rejects(f.select(), code('RECOVERY_ORIGIN_MISMATCH')); }
+  finally { if (previous) Object.defineProperty(globalThis, 'location', previous); else delete globalThis.location; }
+  assert.deepEqual(f.counts, { creates: 0, gets: 0 }); assert.deepEqual(f.store.calls, { get: 0, put: 0 });
+});
+
+test('failed existing selection never falls back to creation or writes storage', async t => {
+  const f = fixture(t); let selections = 0;
+  const denied = { ...f.client, getCredential() { selections++; throw Object.assign(new Error('No selected credential'), { name: 'NotAllowedError' }); } };
+  await assert.rejects(f.select({ webAuthnClient: denied }));
+  assert.equal(selections, 1); assert.equal(f.counts.creates, 0); assert.deepEqual(f.store.calls, { get: 0, put: 0 });
+  const unavailable = { ...f.client, async getCredential() { selections++; return { credentialId: f.id }; } };
+  await assert.rejects(f.select({ webAuthnClient: unavailable }));
+  assert.equal(selections, 2); assert.equal(f.counts.creates, 0);
+});
+
+test('native selection cancellation propagates and wipes a late result without fallback', async t => {
+  const f = fixture(t), pending = deferred(), controller = new AbortController(), output = randomBytes(32);
+  const previous = Object.getOwnPropertyDescriptor(globalThis, 'navigator'); let options, creations = 0;
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { credentials: {
+    get(value) { options = value; return pending.promise; }, create() { creations++; throw Error('UNEXPECTED_CREATE'); },
+  } } });
+  try {
+    const selecting = selectTextReserveCredential({ config: f.config, signal: controller.signal });
+    assert.ok(options); assert.equal(options.publicKey.userVerification, 'required'); assert.equal(options.publicKey.allowCredentials, undefined);
+    controller.abort(); await assert.rejects(selecting, code('OPERATION_CANCELLED')); assert.equal(options.signal.aborted, true);
+    pending.resolve({ type: 'public-key', rawId: new Uint8Array(f.id).buffer, getClientExtensionResults: () => ({ prf: { results: { first: output } } }) });
+    await tick(); assert.ok(output.every(byte => byte === 0)); assert.equal(creations, 0); assert.deepEqual(f.store.calls, { get: 0, put: 0 });
+  } finally { if (previous) Object.defineProperty(globalThis, 'navigator', previous); else delete globalThis.navigator; }
+});
+
+test('selected credential must be independently rediscovered; wrong key cannot produce readiness', async t => {
+  const f = fixture(t), handle = await f.select();
+  const other = { ...f.client, async getCredential(request) { const result = await f.client.getCredential(request); result.credentialId = randomBytes(24); return result; } };
+  await assert.rejects(f.prepare(handle, { webAuthnClient: other }), error => error.code === 'RESERVE_MISSING' && error.recordMayExist === true);
+  await assert.rejects(f.prepare(handle), code('RESERVE_CREDENTIAL_CONSUMED'));
+  assert.equal(f.counts.creates, 0); assert.equal(f.store.calls.put, 1); assert.equal((await f.recover()).text, sample);
 });
 
 test('native default client forwards cancellation to navigator and wipes a late PRF result', async t => {

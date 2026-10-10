@@ -1,4 +1,4 @@
-import { createTextReserveCredential, prepareTextReserve, validateText, TEXT_PROTOCOL } from './text-reserve.mjs';
+import { createTextReserveCredential, selectTextReserveCredential, prepareTextReserve, validateText, TEXT_PROTOCOL } from './text-reserve.mjs';
 import { createWebAuthnScope } from './webauthn-scope.mjs';
 
 const FIELDS = ['appId', 'recoveryOrigin', 'recoveryRpId'];
@@ -66,7 +66,12 @@ export function startTextReserveSetup({ config: supplied, originalOrigin, recove
   function abort() { stop('OPERATION_CANCELLED'); }
   function pagehide() { stop('OPERATION_CANCELLED'); }
   function receive(event) {
-    if (phase !== 'waiting' || Date.now() >= expiresAt || !matches(event, target.origin, popup, nonce, 'receive')) return;
+    if (phase !== 'waiting' || Date.now() >= expiresAt) return;
+    if (event.origin === target.origin && event.source === popup && exact(event.data, ['version', 'kind', 'nonce', 'code'])
+      && event.data.version === 1 && event.data.kind === 'failed' && event.data.nonce === nonce && /^[A-Z][A-Z0-9_]{1,63}$/.test(event.data.code)) {
+      stop(event.data.code); return;
+    }
+    if (!matches(event, target.origin, popup, nonce, 'receive')) return;
     phase = 'transferred';
     try {
       const channel = new window.MessageChannel(); port = channel.port1; transferredPort = channel.port2;
@@ -94,7 +99,7 @@ export function startTextReserveSetup({ config: supplied, originalOrigin, recove
   return Object.freeze({ completion, cancel: abort });
 }
 
-/** Construct on B page load; credential creation requires explicit prepare(). */
+/** Construct on B page load; creating/selecting a credential requires prepare(). */
 export function createTextReserveReceiver({ config: supplied, originalOrigin, onState, timeoutMs, window: suppliedWindow }) {
   const config = configCopy(supplied), window = browser(suppliedWindow), timeout = duration(timeoutMs);
   const original = trustedOrigin(originalOrigin);
@@ -113,7 +118,10 @@ export function createTextReserveReceiver({ config: supplied, originalOrigin, on
   const stop = code => {
     if (closed || completed) return;
     closed = true; const error = fail(code); error.recordMayExist = received;
-    try { port?.postMessage({ kind: 'failed', code }); } catch { /* caller gone */ }
+    try {
+      if (port) port.postMessage({ kind: 'failed', code });
+      else if (isEnrollment) opener.postMessage({ version: 1, kind: 'failed', nonce, code }, original.origin);
+    } catch { /* caller gone */ }
     controller.abort(error); rejectPayload?.(error); clear(); emit(onState, 'failed', code);
   };
   function dispose() { stop('OPERATION_CANCELLED'); }
@@ -140,10 +148,11 @@ export function createTextReserveReceiver({ config: supplied, originalOrigin, on
     window.addEventListener('message', receiveCancel); window.addEventListener('pagehide', dispose, { once: true }); emit(onState, 'available');
   }
   function active() { if (closed || controller.signal.aborted) throw controller.signal.reason ?? fail('OPERATION_CANCELLED'); if (Date.now() >= expiresAt) throw fail('SETUP_EXPIRED'); }
-  async function prepare({ store, user, webAuthnClient, signal } = {}) {
+  async function prepare({ store, user, credentialMode = 'create', webAuthnClient, signal } = {}) {
     check(isEnrollment, 'ENROLLMENT_UNAVAILABLE'); check(!attempted, 'RESERVE_ALREADY_ATTEMPTED'); active();
     check(store && typeof store.get === 'function' && typeof store.putIfAbsent === 'function', 'STORE_INVALID');
-    check(user && typeof user.name === 'string' && user.name.trim() && user.name.length <= 128 && typeof user.displayName === 'string' && user.displayName.trim() && user.displayName.length <= 128, 'USER_INVALID');
+    check(credentialMode === 'create' || credentialMode === 'existing', 'CREDENTIAL_MODE_INVALID');
+    if (credentialMode === 'create') check(user && typeof user.name === 'string' && user.name.trim() && user.name.length <= 128 && typeof user.displayName === 'string' && user.displayName.trim() && user.displayName.length <= 128, 'USER_INVALID');
     check(!signal?.aborted, 'OPERATION_CANCELLED'); attempted = true;
     externalSignal = signal; externalAbort = dispose; signal?.addEventListener('abort', externalAbort, { once: true });
     const ceremony = createWebAuthnScope({ webAuthnClient, signal: controller.signal, timeoutMs: Math.max(1, expiresAt - Date.now()) });
@@ -155,8 +164,9 @@ export function createTextReserveReceiver({ config: supplied, originalOrigin, on
     const work = (async () => {
       let credential, receivedPayload;
       try {
-        emit(onState, 'creating-credential'); active();
-        credential = await createTextReserveCredential({ config, user, webAuthnClient, signal: controller.signal, timeoutMs: Math.max(1, expiresAt - Date.now()) });
+        emit(onState, credentialMode === 'existing' ? 'selecting-credential' : 'creating-credential'); active();
+        const acquire = credentialMode === 'existing' ? selectTextReserveCredential : createTextReserveCredential;
+        credential = await acquire({ config, user, webAuthnClient, signal: controller.signal, timeoutMs: Math.max(1, expiresAt - Date.now()) });
         active();
         receivedPayload = await new Promise((yes, no) => {
           resolvePayload = yes; rejectPayload = no; window.addEventListener('message', receiveChannel);

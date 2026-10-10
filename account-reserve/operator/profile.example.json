@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "primaryOrigin": "https://writing.example.org",
+  "recoveryOrigin": "https://reserve.example.org",
+  "expiresAt": "2026-11-10T00:00:00.000Z",
+  "apps": [
+    { "id": "textarea", "label": "Textarea", "appId": "continuity-textarea-v1" },
+    { "id": "markdown", "label": "Markdown Studio", "appId": "continuity-markdown-v1" }
+  ]
+}

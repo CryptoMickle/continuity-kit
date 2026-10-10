@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-10",
+  "scope": "Existing text passkey selection, fixed two-app UI and host review, and legacy wire compatibility",
+  "status": "LOCAL_AUTOMATED_CHECKS_PASSED",
+  "runtime": { "node": "v24.19.0" },
+  "checks": [
+    {
+      "command": "node --test tests/text-reserve.mjs tests/text-browser.mjs",
+      "passed": 65,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/self-service-ui.mjs tests/self-service-text-ui.mjs tests/self-service-apps-ui.mjs tests/self-service-apps-host.mjs tests/self-service-text-host.mjs",
+      "passed": 62,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution bundler --lib ES2022,DOM,ESNext.Disposable tests/text-types.mts",
+      "exitCode": 0
+    }
+  ],
+  "compatibility": {
+    "baselinePublicCommit": "27df242f16dc96f9752f5e6b0bd918c85ca60467",
+    "comparison": "Direct byte equality against the clean public source archive; each source slice independently hashed with SHA-256",
+    "comparisons": [
+      {
+        "source": "sdk/text-reserve.mjs",
+        "slice": "Prefix before /** Only an exact",
+        "covers": "Configuration validation, fixed PRF salt, canonical encoding, key derivation and credential discovery",
+        "identical": true,
+        "sha256": "ab2c4be2788e4778c0ab91d530481b467882d47cca9af6060b7f9dfdbdd7bebb"
+      },
+      {
+        "source": "sdk/text-reserve.mjs",
+        "slice": "function takeCredential through end of file",
+        "covers": "Handle consumption, encryption, authenticated record format, immutable write, independent verification and recovery",
+        "identical": true,
+        "sha256": "f702719a1234c1285a14feed11555cfce74e27d54ca05d636d244a426d0a009b"
+      },
+      {
+        "source": "sdk/TEXT_PROTOCOL.txt",
+        "slice": "Configuration and input through immediately before Operation lifecycle",
+        "covers": "Configuration and text boundaries, PRF/HKDF derivation and encrypted wire record specification",
+        "identical": true,
+        "sha256": "3f7ea1ea16a677f772acc486755896dbd42bb9c6c2c23e07db7ffa5904ec2c5c"
+      },
+      {
+        "source": "sdk/work-reserve.mjs",
+        "slice": "Entire file",
+        "identical": true,
+        "sha256": "a52505ec92b588bbf5da82af6b05a940991326683047ab03e314cb596b14abd7"
+      },
+      {
+        "source": "sdk/work-browser.mjs",
+        "slice": "Entire file",
+        "identical": true,
+        "sha256": "a0d805144f12a52a5897181eedc24ab4d9b347e5d7e2a55a47364ade947b11f2"
+      },
+      {
+        "source": "sdk/index.mjs",
+        "slice": "Entire file",
+        "identical": true,
+        "sha256": "5d66b0236d13f41305c322bfdebde6e7cd98e53625f314e1a8c62f04b746f9b3"
+      }
+    ],
+    "conclusion": "Text v1 stored bytes, configuration binding, PRF/HKDF rules and prepare/recover implementation are unchanged. Existing credential selection is an additive acquisition API; browser acquisition and early failure handling changed. Legacy Work and account core modules remain byte-identical."
+  },
+  "covered": [
+    "One credential creation protects two distinct app namespaces; each snapshot independently reasserts, rereads and verifies before readiness.",
+    "Same-app overwrite, swapped records, wrong credential, forged metadata handle, consumed/expired/aborted selection and implicit creation fallback are rejected.",
+    "Original-app handoff contains no credential, PRF or derived key material; forged early failure messages cannot cancel another operation.",
+    "Only the fixed textarea and markdown routes, origins and app IDs are accepted; the original shared capacity, admission limits and expiry remain enforced by host configuration.",
+    "Admission precedes the explicit native click; preparation makes one attempt; cancellation, unknown writes and late results cannot claim success or retry silently.",
+    "Recovery editor mounts only after its panel is visible and recovery succeeds; setup and late results after leaving cannot mount an editor.",
+    "Discard destroys the original editor and its undo interface; recovered text remains editable and TXT/JSON exports work after access expires.",
+    "Legacy UI fixtures inject their frozen time into existing validators; no production expiry validation was relaxed."
+  ],
+  "limitations": [
+    "SDK and browser tests use controlled credential adapters; this review does not establish a physical passkey ceremony or cross-device behavior.",
+    "Apps UI tests execute actual app source with narrow DOM, SDK and editor-loader doubles; upstream editor DOM checks and browser visual checks are separate evidence.",
+    "One shared recovery client remains trusted for both cryptographically separated app namespaces.",
+    "This review performed no deployment, existing-reserve migration, production database mutation or transaction.",
+    "Automated checks are not a security audit, user-demand validation or prize-eligibility decision."
+  ]
+}

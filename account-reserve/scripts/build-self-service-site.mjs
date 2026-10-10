@@ -4,6 +4,7 @@ import { join, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { validateSelfServiceProfile } from '../self-service/backend/profile.mjs';
+import { buildAppReserves } from './build-app-reserves.mjs';
 
 // Reproducible, secret-free build. Does not issue capabilities or touch D1.
 export async function buildSelfServiceSite(root, role) {
@@ -23,13 +24,15 @@ export async function buildSelfServiceSite(root, role) {
       if (!stat.isFile() || stat.size>2*1024*1024) throw Error('ASSET_INVALID');
       const bytes=await readFile(path);
       if (key.endsWith('.js') && /SYNTHETIC_CREDENTIAL_UNAVAILABLE|\/api\/synthetic|createSyntheticClient/.test(bytes.toString())) throw Error('SYNTHETIC_ADAPTER_REJECTED');
-      assets[key]={base64:bytes.toString('base64'),contentType:({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml'})[extname(key)]??'application/octet-stream'};
+      assets[key]={base64:bytes.toString('base64'),contentType:({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.json':'application/json'})[extname(key)]??'application/octet-stream'};
     }
   }
   await collect(client);
   const textClient = join(root, 'artifacts/self-service-text-client');
   await build({root:join(root,'self-service/text'),base:'/text/',configFile:false,build:{target:'es2022',outDir:textClient,emptyOutDir:true}});
   await collect(textClient, '/text');
+  const appsClient = await buildAppReserves(root, join(root, 'artifacts/app-reserves-client'));
+  await collect(appsClient);
   await build({root,configFile:false,define:{__SELF_SERVICE_PROFILE__:JSON.stringify(profile),__SELF_SERVICE_ROLE__:JSON.stringify(role),__SELF_SERVICE_ASSETS__:JSON.stringify(assets)},build:{ssr:join(root,'self-service/backend/entry.mjs'),target:'es2022',outDir:join(root,'dist/server'),emptyOutDir:true,rollupOptions:{output:{entryFileNames:'index.js'}}},ssr:{noExternal:true}});
   const entry=join(root,'dist/server/index.js'), worker=(await import(entry+'?check='+Date.now())).default;
   const env={DB:{prepare(){throw Error('BUILD_DATABASE_ACCESS');},batch(){throw Error('BUILD_DATABASE_ACCESS');}}};
@@ -44,6 +47,10 @@ export async function buildSelfServiceSite(root, role) {
   const textValue = await textConfig.json();
   if(textConfig.status!==200 || textValue.config.appId!=='continuity-judge-text-v1' || Object.keys(textValue.config).sort().join(',')!=='appId,recoveryOrigin,recoveryRpId') throw Error('TEXT_CONFIG_INVALID');
   if((await worker.fetch(new Request(origin+'/text/'),env)).status!==200) throw Error('TEXT_PAGE_INVALID');
+  const appsConfig = await worker.fetch(new Request(origin+'/api/apps-config'),env);
+  const appsValue = await appsConfig.json();
+  if(appsConfig.status!==200 || appsValue.apps?.length!==2 || appsValue.operatorHosted!==false || appsValue.enrollmentRequiresInvitation!==false) throw Error('APPS_CONFIG_INVALID');
+  for(const path of ['/apps/','/apps/textarea/','/apps/markdown/']) if((await worker.fetch(new Request(origin+path),env)).status!==200) throw Error('APPS_PAGE_INVALID');
   for(const path of ['/api/synthetic','/rpc','/api/primary','/api/status']) if((await worker.fetch(new Request(origin+path),env)).status!==404) throw Error('UNEXPECTED_ROUTE');
   await mkdir(join(root,'dist/.openai'),{recursive:true});
   await cp(join(root,'.openai/hosting.json'),join(root,'dist/.openai/hosting.json'));

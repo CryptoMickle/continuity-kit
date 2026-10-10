@@ -4,7 +4,7 @@ import type { TextReserveConfig, TextReserveReady, TextReserveStore } from './te
 export type TextBrowserConfig = TextReserveConfig;
 export type TextBrowserReady = TextReserveReady;
 export type TextSetupState = Readonly<{
-  state: 'available' | 'waiting' | 'creating-credential' | 'preparing' | 'ready' | 'failed';
+  state: 'available' | 'waiting' | 'creating-credential' | 'selecting-credential' | 'preparing' | 'ready' | 'failed';
   code?: string;
 }>;
 export interface TextSetupController {
@@ -25,13 +25,14 @@ export declare function startTextReserveSetup(options: {
 }): TextSetupController;
 export interface TextReserveReceiver {
   readonly isEnrollment: boolean;
-  /** Explicit user action; exactly one attempt per receiver. */
+  /** Explicit user action; exactly one attempt per receiver. Existing mode
+   * authenticates a chosen passkey and never falls back to creation. */
   prepare(options: {
     store: TextReserveStore;
-    user: { name: string; displayName: string };
     webAuthnClient?: WebAuthnClient;
     signal?: AbortSignal;
-  }): Promise<Readonly<TextBrowserReady>>;
+  } & ({ credentialMode?: 'create'; user: { name: string; displayName: string } }
+    | { credentialMode: 'existing'; user?: { name: string; displayName: string } })): Promise<Readonly<TextBrowserReady>>;
   dispose(): void;
 }
 export declare function createTextReserveReceiver(options: {
