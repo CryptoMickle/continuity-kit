@@ -14,7 +14,7 @@ npm pack --ignore-scripts --pack-destination /absolute/empty/package-output
 ```
 
 In a separate application, install the resulting `.tgz` as a dependency with
-`npm install --ignore-scripts /absolute/package-output/continuitykit-account-reserve-0.0.1-experimental.tgz`.
+`npm install --ignore-scripts /absolute/empty/package-output/continuitykit-account-reserve-0.0.1-experimental.tgz`.
 Copy `actions.mjs` beside your application code. It imports only the installed public
 API, never a repository-relative module. The package entry includes TypeScript declarations.
 
