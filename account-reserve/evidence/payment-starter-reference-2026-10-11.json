@@ -1,0 +1,194 @@
+{
+  "verifiedAt": "2026-10-10T22:12:04.972284+00:00",
+  "status": "published-source-and-anonymous-replay-verified",
+  "milestone": "generated-stateless-payment-receipt",
+  "sourceCommit": "bdf7f76eee8b3fdefd465e3048780b32521105c0",
+  "sourceTree": "7ffb4614b57e84cbe4ddf6f1297b4c05f11dfd1b",
+  "verifiedSourceFiles": {
+    "README.md": {
+      "sha256": "494b76bf2f77eee87e4da4a54901d402fe4047c43b14f7c397efc5cc4d1ca02d",
+      "gitBlob": "26dadd04a38be4d8f5b072e7e3e926c6860b5377"
+    },
+    "payment-starter/main.mjs": {
+      "sha256": "8e5a6d4b6b04e12bb0d4e262872d2b56f21cc913879d0cf19770c662c62d6173",
+      "gitBlob": "9562bf9d251887f5e048f9ac0e4ae4d1ced5edc8"
+    },
+    "payment-starter/page.mjs": {
+      "sha256": "2f6cf74fc6f04d0ce0a3b7e00e84a4c626b889bce24c4ff506c023eaba95cf8d",
+      "gitBlob": "f8039221304113f8ac58ed9e5b533d567e4ec21d"
+    },
+    "payment-starter/style.css": {
+      "sha256": "5d16f9d7408b0488295da2d8e944738c442a6314cfe511423998be0946adbd77",
+      "gitBlob": "912b81e839e4bbcc89448973b18c0f1d1c4be148"
+    },
+    "payment-starter/README.md": {
+      "sha256": "7c13b110f12611a5b3006ddb6d5b0b9f443f22ca27331d171e2d0de51eda8e48",
+      "gitBlob": "77fa98a63be8a9f3c41e1512a7e432c1faa192a9"
+    },
+    "tests/payment-starter-ui.mjs": {
+      "sha256": "81f34059836801216f3b701fcd3bd380a10f298a0c7c72690901a9771a31e883",
+      "gitBlob": "37ba5b9437d28e7b63b004e3c680d975c1b85e7a"
+    },
+    "tests/payment-starter-continuity.mjs": {
+      "sha256": "6cc8b2f0c1d206681cffe0fe7314de9058f5cd82c2ea901725909e505a6fec04",
+      "gitBlob": "3ab721ed95105af17a3cbb7d01e3e800bfb22cbc"
+    },
+    "tests/payment-starter-continuity-worker.mjs": {
+      "sha256": "9f89b95299674260d353005687f22f2aa706e270900a53417490adfd84aaf668",
+      "gitBlob": "8f84d1406a6a340afaaec50a842be9e4fc31d8f8"
+    }
+  },
+  "onlyExpectedPathsChanged": true,
+  "value": "A receiver can verify an exact payment reference in the generated recovery page from a browser without the original transaction journal or a signing session.",
+  "implementationScope": "Generated main/renderer/styles/docs and integration/UI tests. Existing SDK verifier, helper, contracts, signing policy and journals unchanged.",
+  "anonymousReplay": {
+    "verifiedAt": "2026-10-10T22:11:45.632Z",
+    "commit": "bdf7f76eee8b3fdefd465e3048780b32521105c0",
+    "anonymousArchive": true,
+    "archiveSha256": "ac61b50c962539c1ad8ab95446a90f99a14a5600451fe372d24a4aa717117fcd",
+    "archiveBytes": 2673698,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 104,
+    "failed": 0,
+    "skipped": 0,
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true,
+    "generatedConsumerReport": {
+      "experiment": "generated-payment-survival-proof",
+      "generatedPaymentSurvival": true,
+      "installedSdk": true,
+      "generatedMainAndPageBodiesUnchanged": true,
+      "canonicalHelperBytesUnchanged": true,
+      "productionAssetsUnchanged": true,
+      "originalHttpStatus": 503,
+      "originalRequestsDuringRecoveryAndClaim": 0,
+      "existingReserveCiphertextPreserved": true,
+      "actualDefaultWebAuthnAdapter": true,
+      "browserCredentialOracle": true,
+      "actualMeraSigner": true,
+      "chainId": 10143,
+      "localEvm": true,
+      "claimBroadcasts": 1,
+      "acceptedReplyDeliberatelyLost": true,
+      "signedHashStoredBeforeSend": true,
+      "exactBeneficiaryAmountNonceAndEvent": true,
+      "beneficiaryBalanceMatchesPaymentMinusGas": true,
+      "originalAndRecoveredSignerEnded": true,
+      "freshProcessReconciliation": true,
+      "freshProcessCredentials": 0,
+      "freshProcessBroadcasts": 0,
+      "durableJournalConfirmed": true,
+      "journalFreeReferenceProcess": true,
+      "journalFreeReferenceVerified": true,
+      "historicalExpiredProfileVerified": true,
+      "wrongApprovedRightRejected": true,
+      "unknownReferencePending": true,
+      "referenceCredentials": 0,
+      "referenceJournalReads": 0,
+      "referenceLocks": 0,
+      "referenceBroadcasts": 0,
+      "referencePersistenceAccesses": 0,
+      "referenceDidNotMutateJournal": true,
+      "historicalConfigServedOnlyByTestHost": true,
+      "publicNetwork": false,
+      "physicalPasskeyVerified": false,
+      "deployed": false,
+      "limits": [
+        "generated source modules executed; built bundle verified but not executed",
+        "Node/JSDOM with CSS loader and transparent helper-session observer",
+        "synthetic existing WebAuthn PRF credential; no physical device",
+        "fixed public RPC names redirected to one owned local EVM; no provider independence",
+        "expired public configuration served only by the test host; built assets unchanged",
+        "disposable local payment funding; no customer demand"
+      ]
+    }
+  },
+  "browserReview": {
+    "scope": "compiled isolated renderer fixture only; fake verifier and actions; not physical-device or payment execution",
+    "browser": "Codex in-app browser",
+    "desktopVerifiedReference": true,
+    "emptyReferenceRejected": true,
+    "mobileViewportRequested": {
+      "width": 390,
+      "height": 844
+    },
+    "documentWidth": 375,
+    "noHorizontalOverflow": true,
+    "allActionTargetsAtLeast48px": true,
+    "wrongSelectedPayment": "mismatch",
+    "wrongReferenceResultCleared": true,
+    "fixtureUsesNoSdkCredentialsWalletOrNetworkPayments": true,
+    "productionSourceModulesUsed": [
+      "payment-starter/page.mjs",
+      "payment-starter/style.css",
+      "payment-starter/prism-art.mjs"
+    ],
+    "screenshots": [
+      "desktop-verified.png",
+      "mobile-verified.png"
+    ],
+    "temporaryTabsClosed": true,
+    "viewportReset": true,
+    "previewServerStopped": true
+  },
+  "checkedBoundaries": [
+    "Uses the installed public createTestnetPaymentVerifier, constructed without I/O and invoked only on deliberate reference checking.",
+    "Valid reference checks close any active or late-opening account session and invalidate readiness. No reference check starts while a claim is in flight.",
+    "Strict selected right/hash/chain/contract/beneficiary/amount/readOnly/finality/paymentVerified checks before a successful result.",
+    "Verified, pending-or-unknown, reverted, mismatch, unavailable and invalid states are separate from the local payment/journal result.",
+    "Input edits, payment selection, Stop, Close and page exit fence late results. An unfinished bounded read remains tracked; Stop ignores the result and does not claim to abort underlying SDK reads.",
+    "Reference checks never clear an uncertain journal, mutate its receipt, release its blocker or authorize another sending attempt.",
+    "Fresh third source process receives only public profile and hash; journal and lock accessors throw. Exact real local receipt verified with expired public profile; same hash under another approved right rejected; absent hash unconfirmed.",
+    "Reference phase makes zero credential requests, reserve reads/writes, journal reads/writes, locks, persistence accesses or broadcasts.",
+    "Existing A503, same beneficiary, one accepted real local claim, durable pre-send hash, dropped accepted reply, credential-free journal reconciliation, actual signer closure and encrypted-byte preservation remain covered.",
+    "Compiled isolated renderer fixture checked in desktop/mobile browser, including valid/invalid/wrong-payment outcomes and minimum48px button targets; no horizontal overflow.",
+    "ARIA-live reference result writes only when content changes, avoiding repeated announcements from the refresh timer."
+  ],
+  "reproduction": [
+    "Download the anonymous GitHub archive for sourceCommit; use Node24+ and installed local Anvil/Forge.",
+    "npm ci --ignore-scripts",
+    "npm ci --prefix integrations/multi-app --ignore-scripts",
+    "npm run build",
+    "npm run test:payment-survival",
+    "Full targeted replay:104 top-level tests. Counts include29 generated UI cases,1 installed continuity/reference case and5 stateless SDK cases. Nested and repeated runs are not added.",
+    "npm run build:payments"
+  ],
+  "internalReview": {
+    "independentReadOnlyReviews": 1,
+    "remainingBlockers": [],
+    "scope": "Internal agent review of final implementation and test boundaries; not an external audit."
+  },
+  "limits": [
+    "generated source modules executed; built bundle verified but not executed",
+    "Node/JSDOM with CSS loader and transparent helper-session observer",
+    "synthetic existing WebAuthn PRF credential; no physical device",
+    "fixed public RPC names redirected to one owned local EVM; no provider independence",
+    "expired public configuration served only by the test host; built assets unchanged",
+    "disposable local payment funding; no customer demand",
+    "Existing generated-page preflight inspects browser WebAuthn method availability; zero credential requests does not mean zero reads of navigator.credentials.",
+    "The complete SDK payment integration executes unchanged generated source ESM in Node/JSDOM; its built bundle is hashed but not executed by that integration proof.",
+    "Visual browser verification executes compiled renderer with clearly labeled fake actions/verifier, not an actual payment or physical passkey.",
+    "The expired historical configuration is supplied only by the isolated test HTTP host; production built assets stay unchanged.",
+    "Actual local Anvil chain ID10143 is not the Monad testnet network. Both public RPC aliases map to one owned local node.",
+    "No new physical-device test, public payment, hosted release, external adoption, customer demand or prize probability is established."
+  ],
+  "publicSitesChanged": false,
+  "publicTransactionsSent": 0,
+  "physicalPasskeyVerified": false,
+  "videoOrFinalSubmissionPerformed": false,
+  "curatedSourceCandidate": {
+    "status": "local-reviewed-source-archive",
+    "fileCount": 486,
+    "sha256": "2f171997f367cd5c50036f0fe715295539adb5b202a296dd37594cf204be276c",
+    "all8ReviewedSourceBytesPreserved": true,
+    "operationalFilesExcluded": true,
+    "transformed": [
+      "delivery/PHYSICAL_TEST.md"
+    ],
+    "notPublishedAsArchive": true,
+    "assembledBeforeAddingThisCandidateMetadata": true
+  }
+}

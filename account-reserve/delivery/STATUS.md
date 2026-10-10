@@ -1,3 +1,38 @@
+# Journal-free payment reference in generated page — 11 October 2026
+
+The generated payment starter can verify a supplied transaction reference from a
+browser without the original journal. It uses the installed public read-only SDK
+verifier through a separate field/result. Checking closes account sessions and
+never clears pending local uncertainty or authorizes a retry. Correct exact
+receipts, unknown/pending, reverted, mismatched and unavailable evidence stay distinct.
+
+The fresh installed integration retains A503, one real local payment, dropped
+accepted reply, durable journal, later reconciliation and actual signer closure.
+A third fresh source process with no credential or journal verifies the exact
+local receipt using an expired public profile, rejects it for another approved
+payment, and leaves an absent hash unconfirmed. Credential requests, journal and
+lock accesses and broadcasts are all zero in that reference phase.
+
+Exact anonymous replay of `bdf7f76eee8b3fdefd465e3048780b32521105c0` passed **104 targeted top-level tests**,
+zero failures/skips after fresh offline installs and app/payment builds. Nested
+or repeated runs are not added. Eight reviewed source paths changed; SDK/helper/
+contract/signing policy bytes are unchanged. Internal read-only review found no
+release blocker. The compiled isolated renderer passes desktop/mobile checks and
+keeps Prism curves; ARIA-live updates avoid repeated unchanged announcements.
+
+Limits: complete payment execution is unchanged source ESM under Node/JSDOM,
+synthetic WebAuthn and one local Anvil; the bundle is built/hashed. Browser design
+QA uses clearly labeled fake renderer actions/verifier. The page retains its
+existing WebAuthn-capability gate. These checks prove no physical-device behavior,
+independent public providers, new public payment, adoption or demand.
+
+[Evidence and replay](../evidence/payment-starter-reference-2026-10-11.json). All19 concrete milestones are complete.
+Further development is bounded maintenance for observed defects or a specific
+integration requirement until the saved deadline. Public Sites, actual keys and
+copies stay unchanged. Video and final submission remain deferred.
+
+---
+
 # Generated payment page survives A outage — 10 October 2026
 
 The complete generated consumer's source entry and renderer now have one combined
