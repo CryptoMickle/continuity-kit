@@ -17,9 +17,10 @@ The account-free text reserve continues to work without blockchain transactions.
 ## Use it from an installed SDK
 
 The experimental `@continuitykit/account-reserve/payments` export includes
-TypeScript declarations and two factories: `createTestnetPaymentClient` accepts an
+TypeScript declarations and three factories: `createTestnetPaymentClient` accepts an
 existing recovered account; `createTestnetPaymentReader` checks an existing local
-transaction record without a credential or signer. Both use the same fixed Monad
+transaction record without a credential or signer; `createTestnetPaymentVerifier`
+checks an explicit transaction reference without any local record. All use the same fixed Monad
 testnet RPCs and policy checks as the demonstration. They accept no transport or
 endpoint override through the public entry.
 
@@ -40,6 +41,39 @@ distributed from the public source as a tarball; it is not published to npm.
 records a clean anonymous replay, strict TypeScript checks and the browser module
 graph. The separate consumer uses real disposable Mera signing sessions with mocked
 RPC responses; its simulated sends are not additional public transactions.
+
+## Check a reference from a fresh browser
+
+The hosted `/payments/` view has **Verify transaction reference** below the account
+controls. Select the expected payment and paste its complete hash. This action
+closes any open signing session, checks public chain data and shows the exact
+amount, beneficiary, contract and finalized block only after successful verification.
+Changing the selected payment or reference clears the old result. Stopping the
+check or leaving the page prevents a late response from appearing as success.
+
+A separate app can use the same typed entry:
+
+```js
+import { createTestnetPaymentVerifier } from '@continuitykit/account-reserve/payments';
+
+// profile is the application's reviewed policy; rightId and amount use bigint.
+const verifier = createTestnetPaymentVerifier({ profile });
+const result = await verifier.check({ rightId: 2n, hash: transactionReference });
+if (result.paymentVerified) {
+  console.log(result.beneficiary, result.amount, result.blockNumber);
+}
+```
+
+`finalized` with `paymentVerified: true` is success. `reverted` means the claim did
+not deliver the payment. `pending-or-unknown` does not yet link the supplied hash
+to this account or payment. Invalid input, mismatches and network failures reject
+with bounded error codes. Only the fixed testnet RPCs are used; no endpoint override
+is accepted. Historical checks remain available after signing-policy expiry.
+
+This verifier does not use a signer, passkey, Storage or Web Locks. It never changes
+a local attempt record or enables retrying an unresolved payment. Use the existing
+`createTestnetPaymentReader` for that browser's journal reconciliation. It checks a
+reference you supply; it neither discovers history nor synchronizes devices.
 
 ## Local verification
 
@@ -73,7 +107,7 @@ including gas. These are not physical-device or independent-provider proofs.
 - `pending.mjs` coordinates cooperating tabs on one origin for the same account,
   including different contracts. Other devices and A/B origins do not share that
   local lock. Exact nonce checks and the contract provide additional boundaries.
-- `testnet.mjs` separates signing from credential-free receipt checking. Neither
+- `testnet.mjs` separates signing from credential-free receipt checking. No
   factory reads RPCs or asks for credentials during construction.
 - The new `/payments/` view opens only an existing primary or recovery passkey.
   Opening an account does not claim a payment. An explicit second action sends

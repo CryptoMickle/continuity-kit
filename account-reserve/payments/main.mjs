@@ -7,7 +7,7 @@ import {recoverReserve} from '../sdk/index.mjs';
 import {createReserveHttpStore} from '../release/browser-store.mjs';
 import {validateClientProfile} from '../release/client-profile.mjs';
 import {validatePaymentProfile} from './guard.mjs';
-import {createTestnetPaymentClient,createTestnetPaymentReader} from './testnet.mjs';
+import {createTestnetPaymentClient,createTestnetPaymentReader,createTestnetPaymentVerifier} from './index.mjs';
 import {mountPaymentPage} from './page.mjs';
 const root=document.getElementById('app');
 let bootDead=false;const bootAbort=new AbortController();
@@ -29,7 +29,7 @@ try{
       const key=await openPrimaryKey({create:false,model:'iris',rpId:config.originalRpId,signal});
       let session;try{session=createSecp256k1SigningSession({privateKey:key});const account=toViemAccount(session);return {owner:account.address,account,close:()=>session.end()};}catch(e){session?.end();throw e;}finally{key.fill(0);}
     },
-    createClient:recovered=>createTestnetPaymentClient({profile,recovered}),createReader:()=>createTestnetPaymentReader({profile}),
+    createClient:recovered=>createTestnetPaymentClient({profile,recovered}),createReader:()=>createTestnetPaymentReader({profile}),createVerifier:()=>createTestnetPaymentVerifier({profile}),
   });
 }catch{if(!bootDead)root.innerHTML='<main class="payment-shell"><h1>Payment demonstration unavailable.</h1><p>Keep your existing passkeys. No credential or transaction was requested.</p></main>';}
 finally{if(!bootDead){window.removeEventListener('pagehide',bootHide);window.removeEventListener('pageshow',bootShow);}}

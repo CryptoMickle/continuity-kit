@@ -108,3 +108,45 @@ export interface PaymentReader {
  * constructing the adapter performs no network or credential operation. */
 export declare function createTestnetPaymentClient(options: PaymentClientOptions): PaymentClient;
 export declare function createTestnetPaymentReader(options: PaymentReaderOptions): PaymentReader;
+
+export interface PaymentVerifierOptions {
+  readonly profile: PaymentProfile;
+}
+
+export interface PaymentVerificationInput {
+  readonly rightId: bigint;
+  /** Exact transaction hash supplied by the caller; no history discovery. */
+  readonly hash: Hash;
+}
+
+export interface PaymentVerificationIdentity {
+  readonly chainId: 10143;
+  readonly contract: Address;
+  readonly beneficiary: Address;
+  readonly rightId: bigint;
+  /** Approved obligation amount in wei. Reverted/pending results do not mean
+   * this amount was delivered. Only paymentVerified:true establishes payment. */
+  readonly amount: bigint;
+  readonly hash: Hash;
+  readonly readOnly: true;
+}
+
+/** Frozen scalar summary. No receipt or journal mutation is implied. RPC
+ * failures and mismatches reject instead of being reported as pending. */
+export type PaymentVerificationResult = PaymentVerificationIdentity & (
+  | { readonly status: 'finalized'; readonly finalized: true; readonly paymentVerified: true; readonly blockNumber: bigint; readonly blockHash: Hash }
+  | { readonly status: 'reverted'; readonly finalized: true; readonly paymentVerified: false; readonly blockNumber: bigint; readonly blockHash: Hash }
+  | { readonly status: 'pending-or-unknown'; readonly finalized: false; readonly paymentVerified: false }
+);
+
+export interface PaymentVerifier {
+  /** Exact one-argument read. Uses neither credentials, Storage nor Web Locks.
+   * Validates the approved right and signed transaction using both fixed RPCs.
+   * An expired profile can still verify its historical payments. Does not
+   * create, clear or reconcile local attempt entries or authorize a new send. */
+  check(input: PaymentVerificationInput): Promise<PaymentVerificationResult>;
+}
+
+/** Stateless experimental verifier; exact profile-only options. Construction
+ * performs no network or credential operation. No RPC override is accepted. */
+export declare function createTestnetPaymentVerifier(options: PaymentVerifierOptions): PaymentVerifier;

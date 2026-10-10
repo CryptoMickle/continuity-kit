@@ -24,6 +24,10 @@ separates chain verification, the builder report and controlled HTTP observation
 The integration includes a wallet-free command for verifying either exact receipt.
 These are development payments, not external usage. The text API remains account-free.
 
+A fresh browser can now verify either payment from its transaction reference, without
+opening a passkey or relying on a local transaction log. The [reference verifier](payments/README.md#check-a-reference-from-a-fresh-browser) checks the exact expected payment and never
+changes an unresolved sending attempt.
+
 The experimental `@continuitykit/account-reserve/payments` entry lets a separate
 application import the typed client and credential-free receipt reader from the
 installed SDK. The [integration example](integrations/payment-client/README.md)

@@ -67,3 +67,47 @@ export function createTestnetPaymentReader({profile:input,storage,locks},{rpcTra
     });},
   });
 }
+
+const VERIFICATION_ERRORS = new Set([
+  'PAYMENT_VERIFICATION_INPUT_INVALID','PAYMENT_NOT_APPROVED','PAYMENT_RECEIPT_UNAVAILABLE',
+  'PAYMENT_RECEIPT_MISMATCH','PAYMENT_RECEIPT_DISAGREEMENT','PAYMENT_EVENT_MISMATCH',
+  'PAYMENT_CHAIN_MISMATCH','PAYMENT_RUNTIME_MISMATCH','PAYMENT_ISSUER_MISMATCH',
+  'PAYMENT_CANONICAL_BLOCK_MISMATCH','PAYMENT_FINALIZED_HEAD_INVALID','PAYMENT_TRANSACTION_MISMATCH',
+  'PAYMENT_TRANSACTION_SIGNATURE_INVALID','PAYMENT_TRANSACTION_HASH_MISMATCH',
+  'PAYMENT_SIGNED_OWNER_MISMATCH','PAYMENT_RIGHT_MISMATCH',
+]);
+function verificationCode(error) {
+  try { const d=Object.getOwnPropertyDescriptor(error,'code');return d&&Object.hasOwn(d,'value')?d.value:undefined; }
+  catch { return undefined; }
+}
+function verificationInput(input,count) {
+  try {
+    if(count!==1||!input||![Object.prototype,null].includes(Object.getPrototypeOf(input)))throw 0;
+    const keys=Reflect.ownKeys(input);if(keys.length!==2||keys.some(k=>!['rightId','hash'].includes(k)))throw 0;
+    const captured={};for(const name of ['rightId','hash']){const d=Object.getOwnPropertyDescriptor(input,name);if(!d?.enumerable||!Object.hasOwn(d,'value'))throw 0;captured[name]=d.value;}
+    if(typeof captured.rightId!=='bigint'||captured.rightId<=0n||captured.rightId>=2n**256n||typeof captured.hash!=='string'||captured.hash.length!==66||!/^0x[0-9a-f]{64}$/i.test(captured.hash))throw 0;
+    return {rightId:captured.rightId,hash:captured.hash.toLowerCase()};
+  }catch{throw fail('PAYMENT_VERIFICATION_INPUT_INVALID');}
+}
+
+// Stateless receipt verification. Does not construct or touch browser storage,
+// Web Locks, a signing account, credentials, or the local attempt journal.
+export function createTestnetPaymentVerifier({profile:input},{rpcTransport=publicTestnetTransport}={}) {
+  const profile=validatePaymentProfile(input);
+  if(profile.chainId!==10143)throw fail('PAYMENT_TESTNET_REQUIRED');
+  const chain={id:10143,name:'Monad testnet exact payment verifier',nativeCurrency:{name:'Test MON',symbol:'MON',decimals:18},rpcUrls:{default:{http:[...APPROVED_TESTNET_RPCS]}}};
+  const clients=APPROVED_TESTNET_RPCS.map(url=>createPublicClient({chain,ccipRead:false,cacheTime:0,transport:rpcTransport(url)}));
+  const guard=createPaymentGuard({profile,clients});
+  return Object.freeze({
+    async check(input){
+      try{
+        const {rightId,hash}=verificationInput(input,arguments.length),selected=guard.forRight(rightId);
+        const identity={chainId:profile.chainId,contract:profile.address,beneficiary:profile.owner,rightId,amount:selected.policy.amount,hash,readOnly:true};
+        let receipt;
+        try{receipt=await selected.getTransactionReceipt({hash});}
+        catch(error){if(verificationCode(error)==='PAYMENT_CONFIRMATION_PENDING')return Object.freeze({...identity,status:'pending-or-unknown',finalized:false,paymentVerified:false});throw error;}
+        return Object.freeze({...identity,status:receipt.status==='success'?'finalized':'reverted',finalized:true,paymentVerified:receipt.status==='success',blockNumber:receipt.blockNumber,blockHash:receipt.blockHash});
+      }catch(error){const code=verificationCode(error);throw fail(VERIFICATION_ERRORS.has(code)?code:'PAYMENT_VERIFICATION_FAILED');}
+    },
+  });
+}

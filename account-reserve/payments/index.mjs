@@ -1,6 +1,7 @@
 import {
   createTestnetPaymentClient as internalClient,
   createTestnetPaymentReader as internalReader,
+  createTestnetPaymentVerifier as internalVerifier,
 } from './testnet.mjs';
 
 const invalid = () => Object.assign(new Error('PAYMENT_OPTIONS_INVALID'), { code: 'PAYMENT_OPTIONS_INVALID' });
@@ -32,4 +33,10 @@ export function createTestnetPaymentClient(options) {
  * record a verified confirmation; it never signs or broadcasts a transaction. */
 export function createTestnetPaymentReader(options) {
   return internalReader(capture(options, ['profile'], ['storage', 'locks'], arguments.length));
+}
+
+/** Verify an explicit transaction reference without a signer or local journal.
+ * Construction performs no requests. Only check() reads the fixed RPCs. */
+export function createTestnetPaymentVerifier(options) {
+  return internalVerifier(capture(options, ['profile'], [], arguments.length));
 }
