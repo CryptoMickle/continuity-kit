@@ -63,7 +63,7 @@ async function hosts(records) {
     stats, offline() { offline = true; }, setConfig(bytes) { configBytes = Buffer.from(bytes); }, close: () => Promise.all([closeServer(primary), closeServer(recovery)]) };
 }
 
-test('clean generated payment page recovers after A503, sends once on real local EVM, and reconciles in a fresh credential-free process', { timeout: 180000 }, async t => {
+test('clean generated payment page survives A503, reconciles its real local payment and independently verifies a reference without a journal', { timeout: 180000 }, async t => {
   const directory = await mkdtemp(join(tmpdir(), 'payment-starter-survival-')), consumer = join(directory, 'consumer');
   let chain, servers, originalSession, originalAccount;
   const privateKey = new Uint8Array(randomBytes(32)), credentialId = randomBytes(24), credentialSecret = randomBytes(32), records = new Map();
@@ -141,6 +141,16 @@ test('clean generated payment page recovers after A503, sends once on real local
   const confirmed = await freshPage(consumer, { ...base, phase: 'reconcile', journal: attempted.journal });
   assert.equal(confirmed.hash, attempted.hash); assert.equal(confirmed.counts.nativeGet, 0); assert.equal(confirmed.counts.sends, 0); assert.equal(confirmed.counts.reserveGets, 0);
   const journal = JSON.parse(confirmed.journal[0][1]); assert.equal(journal.active, null); assert.equal(journal.entries.length, 1); assert.equal(journal.entries[0].phase, 'confirmed');
+  for (const [name, hash] of Object.entries(hashes)) assert.equal(digest(await readFile(join(consumer, 'dist', name))), hash);
+  // This third process receives only public reference data. Its expired public
+  // configuration is served from the test host; production assets are unchanged.
+  const historicalProfile = { ...profile, payment: { ...profile.payment, expiresAt: '2020-01-01T00:00:00.000Z' } };
+  servers.setConfig(Buffer.from(JSON.stringify(historicalProfile)));
+  const reference = await freshPage(consumer, { ...base, profile: historicalProfile, phase: 'reference', hash: attempted.hash });
+  assert.equal(reference.hash, attempted.hash); assert.equal(reference.historicalReferenceVerified, true);
+  assert.equal(reference.wrongApprovedRightRejected, true); assert.equal(reference.unknownReferencePending, true);
+  for (const name of ['nativeGet', 'nativeCreate', 'reserveGets', 'reserveWrites', 'sends', 'journalReads', 'journalWrites', 'locks', 'persistenceAccess']) assert.equal(reference.counts[name], 0, name);
+  servers.setConfig(await readFile(join(consumer, 'dist/payment-config.json')));
   const receipt = await publicClient.getTransactionReceipt({ hash: attempted.hash }), transaction = await publicClient.getTransaction({ hash: attempted.hash });
   assert.equal(receipt.status, 'success'); assert.equal(getAddress(receipt.from), owner); assert.equal(getAddress(receipt.to), chain.contractAddress);
   assert.equal(transaction.chainId, 10143); assert.equal(transaction.nonce, 0); assert.equal(transaction.value, 0n); assert.equal(getAddress(transaction.from), owner);
@@ -162,6 +172,9 @@ test('clean generated payment page recovers after A503, sends once on real local
     claimBroadcasts: attempted.counts.sends, acceptedReplyDeliberatelyLost: true, signedHashStoredBeforeSend: true, exactBeneficiaryAmountNonceAndEvent: true,
     beneficiaryBalanceMatchesPaymentMinusGas: true, originalAndRecoveredSignerEnded: true, freshProcessReconciliation: true,
     freshProcessCredentials: confirmed.counts.nativeGet, freshProcessBroadcasts: confirmed.counts.sends, durableJournalConfirmed: true,
+    journalFreeReferenceProcess: true, journalFreeReferenceVerified: true, historicalExpiredProfileVerified: true, wrongApprovedRightRejected: true, unknownReferencePending: true,
+    referenceCredentials: reference.counts.nativeGet, referenceJournalReads: reference.counts.journalReads, referenceLocks: reference.counts.locks, referenceBroadcasts: reference.counts.sends,
+    referencePersistenceAccesses: reference.counts.persistenceAccess, referenceDidNotMutateJournal: true, historicalConfigServedOnlyByTestHost: true,
     publicNetwork: false, physicalPasskeyVerified: false, deployed: false,
-    limits: ['generated source modules executed; built bundle verified but not executed', 'Node/JSDOM with CSS loader and transparent helper-session observer', 'synthetic existing WebAuthn PRF credential; no physical device', 'fixed public RPC names redirected to one owned local EVM; no provider independence', 'disposable local payment funding; no customer demand'] }));
+    limits: ['generated source modules executed; built bundle verified but not executed', 'Node/JSDOM with CSS loader and transparent helper-session observer', 'synthetic existing WebAuthn PRF credential; no physical device', 'fixed public RPC names redirected to one owned local EVM; no provider independence', 'expired public configuration served only by the test host; built assets unchanged', 'disposable local payment funding; no customer demand'] }));
 });

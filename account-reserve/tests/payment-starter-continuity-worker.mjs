@@ -17,14 +17,14 @@ async function until(predicate, label) {
 }
 
 export async function runGeneratedPaymentProof(input) {
-  assert.deepEqual(Object.keys(input).sort(), ['phase', 'profile', 'primaryUrl', 'recoveryUrl', 'rpcUrl', 'jsdomPackage', ...(input.phase === 'claim' ? ['credential'] : ['journal'])].sort());
-  assert.ok(['claim', 'reconcile'].includes(input.phase));
+  assert.deepEqual(Object.keys(input).sort(), ['phase', 'profile', 'primaryUrl', 'recoveryUrl', 'rpcUrl', 'jsdomPackage', ...(input.phase === 'claim' ? ['credential'] : input.phase === 'reference' ? ['hash'] : ['journal'])].sort());
+  assert.ok(['claim', 'reconcile', 'reference'].includes(input.phase));
   assert.equal(input.profile.payment.chainId, 10143);
   for (const name of ['primaryUrl', 'recoveryUrl', 'rpcUrl']) { const url = new URL(input[name]); assert.equal(url.protocol, 'http:'); assert.equal(url.hostname, '127.0.0.1'); }
   const require = createRequire(input.jsdomPackage), { JSDOM } = require('jsdom');
   const dom = new JSDOM(await readFile(join(directory, 'index.html'), 'utf8'), { url: input.profile.recoveryOrigin + '/', pretendToBeVisual: true });
   const $ = id => dom.window.document.getElementById(id);
-  const counts = { config: 0, reserveGets: 0, reserveWrites: 0, primary: 0, nativeGet: 0, nativeCreate: 0, rpc: 0, sends: 0, acceptedSends: 0, journalReads: 0, journalWrites: 0, locks: 0 };
+  const counts = { config: 0, reserveGets: 0, reserveWrites: 0, primary: 0, nativeGet: 0, nativeCreate: 0, rpc: 0, sends: 0, acceptedSends: 0, journalReads: 0, journalWrites: 0, locks: 0, persistenceAccess: 0 };
   const values = new Map(input.journal ?? []), journalHistory = [];
   const storage = { getItem(key) { counts.journalReads++; return values.get(key) ?? null; }, setItem(key, value) {
     assert.equal(key, 'continuitykit:payment-journal:v1:10143:' + input.profile.payment.owner.toLowerCase());
@@ -88,6 +88,13 @@ export async function runGeneratedPaymentProof(input) {
   };
   for (const [name, value] of Object.entries({ window: dom.window, document: dom.window.document, location: dom.window.location,
     navigator: { credentials, locks }, localStorage: storage, PublicKeyCredential: class {}, isSecureContext: true })) Object.defineProperty(globalThis, name, { configurable: true, value });
+  if (input.phase === 'reference') {
+    const forbidden = () => { counts.persistenceAccess++; throw new Error('REFERENCE_PERSISTENCE_FORBIDDEN'); };
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, get: forbidden });
+    Object.defineProperty(globalThis.navigator, 'locks', { configurable: true, get: forbidden });
+    Object.defineProperty(dom.window, 'localStorage', { configurable: true, get: forbidden });
+    Object.defineProperty(dom.window.navigator, 'locks', { configurable: true, get: forbidden });
+  }
   globalThis.__paymentProofObservation = { sessions: [], actions: [] };
   const mainUrl = pathToFileURL(join(directory, 'main.mjs')).href, observerUrl = pathToFileURL(join(directory, 'proof-observer.mjs')).href;
   const hooks = registerHooks({
@@ -100,10 +107,21 @@ export async function runGeneratedPaymentProof(input) {
       return next(url, context);
     },
   });
+  async function verifyReference(hash, expected) {
+    $('payment-reference-hash').value = hash;
+    $('payment-reference-hash').dispatchEvent(new dom.window.Event('input'));
+    assert.equal($('payment-reference-check').disabled, false, 'reference reads remain available without authentication or a journal');
+    $('payment-reference-check').click();
+    await until(() => $('payment-reference-status').dataset.state === expected && !$('payment-reference-check').disabled, 'reference ' + expected);
+    if (expected === 'verified') {
+      assert.equal($('payment-reference-result').hidden, false);
+      assert.equal($('payment-reference-result').textContent, hash);
+    }
+  }
   try {
     await import(mainUrl);
     assert.ok($('payment-right'), $('app').textContent);
-    assert.equal($('payment-right').value, '1'); assert.equal($('payment-status').dataset.state, 'idle');
+    assert.equal($('payment-right').value, '1'); assert.equal($('payment-status').dataset.state, input.phase === 'reference' ? 'expired' : 'idle');
     assert.equal(counts.config, 1); assert.equal(counts.rpc, 0); assert.equal(counts.nativeGet, 0); assert.equal(counts.reserveGets, 0);
     assert.equal(counts.journalReads, 0); assert.equal(counts.journalWrites, 0); assert.equal(counts.locks, 0);
     assert.equal(globalThis.__paymentProofObservation.actions.length, 1);
@@ -132,7 +150,7 @@ export async function runGeneratedPaymentProof(input) {
       $('payment-right').value = '1'; $('payment-right').dispatchEvent(new dom.window.Event('change'));
       assert.equal($('payment-hash').textContent, acceptedHash);
       assert.equal(globalThis.__paymentProofObservation.actions[0].isOpen, false);
-    } else {
+    } else if (input.phase === 'reconcile') {
       assert.equal(input.credential, undefined); assert.equal(journal().entries[0].phase, 'signed');
       $('check').click(); await until(() => $('payment-status').dataset.state === 'confirmed' && !$('check').disabled, 'fresh-page finalized reconciliation');
       assert.equal($('payment-title').textContent, 'Payment received.'); assert.equal($('payment-hash').textContent, journal().entries[0].hash);
@@ -142,12 +160,29 @@ export async function runGeneratedPaymentProof(input) {
       // Repeated explicit reconciliation remains read-only at the transaction layer.
       $('check').click(); await until(() => !$('check').disabled, 'repeat existing receipt read');
       assert.equal(journal().entries[0].phase, 'confirmed'); assert.equal(counts.journalWrites, 1); assert.equal(counts.sends, 0);
+    } else {
+      assert.equal(input.credential, undefined); assert.equal(input.journal, undefined);
+      assert.ok(Date.parse(input.profile.payment.expiresAt) < Date.now());
+      await verifyReference(input.hash, 'verified');
+      $('payment-right').value = '2'; $('payment-right').dispatchEvent(new dom.window.Event('change'));
+      assert.equal($('payment-reference-hash').value, '');
+      assert.equal($('payment-reference-result').hidden, true);
+      await verifyReference(input.hash, 'mismatch');
+      assert.equal($('payment-reference-result').hidden, true);
+      $('payment-right').value = '1'; $('payment-right').dispatchEvent(new dom.window.Event('change'));
+      await verifyReference('0x' + '0'.repeat(64), 'pending');
+      assert.notEqual($('payment-reference-status').dataset.state, 'verified');
+      assert.equal($('payment-title').textContent, 'The signing window has ended.');
+      assert.equal($('open').disabled, true); assert.equal($('collect').disabled, true);
+      assert.equal(globalThis.__paymentProofObservation.sessions.length, 0); assert.equal(values.size, 0);
+      for (const name of ['nativeGet', 'nativeCreate', 'reserveGets', 'reserveWrites', 'sends', 'journalReads', 'journalWrites', 'locks', 'persistenceAccess']) assert.equal(counts[name], 0, name);
     }
     assert.equal(counts.primary, 0); assert.equal(counts.reserveWrites, 0); assert.equal(counts.nativeCreate, 0);
     dom.window.dispatchEvent(new dom.window.Event('pagehide'));
     assert.equal($('payment-status').dataset.state, 'closed');
     for (const session of globalThis.__paymentProofObservation.sessions) await assert.rejects(session.account.signMessage({ message: 'closed after page exit' }), error => error.code === 'SESSION_ENDED');
-    return { phase: input.phase, counts, journal: [...values], hash: acceptedHash ?? journal().entries[0].hash,
+    return { phase: input.phase, counts, ...(input.phase === 'reference' ? {} : { journal: [...values] }), hash: acceptedHash ?? input.hash ?? journal().entries[0].hash,
+      historicalReferenceVerified: input.phase === 'reference', wrongApprovedRightRejected: input.phase === 'reference', unknownReferencePending: input.phase === 'reference',
       originalRequests: 0, signerEnded: input.phase === 'claim', sourceBodiesUnchanged: true, cssLoaderAndTransparentSessionObserver: true, nativePasskey: false, publicNetwork: false };
   } finally {
     dom.window.dispatchEvent(new dom.window.Event('pagehide'));

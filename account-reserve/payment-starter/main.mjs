@@ -1,6 +1,7 @@
 import './style.css';
 import { recoverReserve } from '@continuitykit/account-reserve';
 import { createReserveHttpStore } from '@continuitykit/account-reserve/http-store';
+import { createTestnetPaymentVerifier } from '@continuitykit/account-reserve/payments';
 import { createPaymentActions } from './actions.mjs';
 import { parsePaymentStarterProfile, checkPaymentStarterEnvironment } from './profile.mjs';
 import { mountPaymentStarter, showPaymentStarterError } from './page.mjs';
@@ -44,7 +45,10 @@ try {
   const actions = createPaymentActions({ profile: profile.payment, lifetimeTarget: window,
     openExistingAccount: ({ signal }) => recoverReserve({ config: profile.reserve, store, signal }),
   });
-  try { mounted = mountPaymentStarter(root, { profile, actions, window }); }
+  try {
+    const verifier = createTestnetPaymentVerifier({ profile: profile.payment });
+    mounted = mountPaymentStarter(root, { profile, actions, verifier, window });
+  }
   catch (error) { actions.dispose(); throw error; }
 } catch {
   if (!dead) showPaymentStarterError(root);

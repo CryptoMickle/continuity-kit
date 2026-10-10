@@ -65,10 +65,19 @@ function fixture(t, changes = {}) {
     close() { counts.close++; resetSession(); },
     dispose() { counts.dispose++; resetSession(); },
   };
-  const mounted = mountPaymentStarter(root, { profile, actions, window: dom.window });
+  const references = [];
+  const referenceResult = (query = references.at(-1), overrides = {}) => ({
+    chainId: profile.payment.chainId, contract: profile.payment.address, beneficiary: profile.payment.owner,
+    rightId: query.rightId, amount: profile.payment.claims.find(item => item.rightId === query.rightId).amount,
+    hash: query.hash, readOnly: true, status: 'finalized', finalized: true, paymentVerified: true,
+    blockNumber: 10n, blockHash: '0x' + 'a'.repeat(64), ...overrides,
+  });
+  const verifier = { check(query) { references.push(query); return behavior.reference ? behavior.reference(query) : Promise.resolve(referenceResult(query)); } };
+  const mounted = mountPaymentStarter(root, { profile, actions, verifier, window: dom.window });
   t.after(() => { mounted.dispose(); dom.window.close(); });
-  return { dom, root, profile, counts, behavior, state, actions, observation, intervals, mounted, $: id => root.querySelector('#' + id),
+  return { dom, root, profile, counts, behavior, state, actions, verifier, references, referenceResult, observation, intervals, mounted, $: id => root.querySelector('#' + id),
     select(id) { const control = root.querySelector('#payment-right'); control.value = String(id); control.dispatchEvent(new dom.window.Event('change')); },
+    reference(hash = '0x' + 'a'.repeat(64)) { const input = root.querySelector('#payment-reference-hash'); input.value = hash; input.dispatchEvent(new dom.window.Event('input')); root.querySelector('#payment-reference-check').click(); },
     async funded() { root.querySelector('#availability').click(); await tick(); },
   };
 }
@@ -209,4 +218,141 @@ test('unconfigured panel gives fixed setup guidance and contains no interactive 
   const f = fixture(t); f.mounted.dispose(); showPaymentStarterError(f.root);
   assert.match(f.root.textContent, /exact recovery origin/); assert.match(f.root.textContent, /generated README/);
   assert.match(f.root.textContent, /No passkey or transaction was requested/); assert.equal(f.root.querySelector('button'), null);
+});
+
+test('valid main bootstrap constructs an inert public verifier separately from the payment helper', async () => {
+  const source = (await readFile(new URL('../payment-starter/main.mjs', import.meta.url), 'utf8')).replace(/^import .+;\n/gm, '');
+  const names = ['document', 'window', 'location', 'fetch', 'showPaymentStarterError', 'parsePaymentStarterProfile', 'checkPaymentStarterEnvironment', 'createReserveHttpStore', 'createPaymentActions', 'recoverReserve', 'mountPaymentStarter', 'createTestnetPaymentVerifier'];
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+  const root = {}, win = { addEventListener() {} }, payment = {}, profile = { payment, storeBasePath: '/api/reserve' };
+  const calls = [], forbidden = () => assert.fail('bootstrap may not read a reserve, check a reference, authenticate or sign');
+  const actions = { dispose: forbidden }, verifier = { check: forbidden };
+  await new AsyncFunction(...names, source)({ getElementById: () => root }, win,
+    { href: 'https://reserve.example.test/', origin: 'https://reserve.example.test' },
+    async () => new Response('{}'), forbidden, () => profile, () => ({ ok: true }),
+    () => ({ get: forbidden }), options => { calls.push('actions'); assert.equal(options.profile, payment); return actions; }, forbidden,
+    (target, options) => { calls.push('mount'); assert.equal(target, root); assert.equal(options.actions, actions); assert.equal(options.verifier, verifier); return { dispose: forbidden }; },
+    options => { calls.push('verifier'); assert.deepEqual(options, { profile: payment }); return verifier; });
+  assert.deepEqual(calls, ['actions', 'verifier', 'mount']);
+});
+
+test('supplied reference is deliberate, closes the session first, and never enters local journal or credential actions', async t => {
+  const f = fixture(t);
+  Object.defineProperty(f.dom.window, 'localStorage', { get() { assert.fail('reference must not access Storage'); } });
+  Object.defineProperty(f.dom.window.navigator, 'locks', { get() { assert.fail('reference must not access Locks'); } });
+  Object.defineProperty(f.dom.window.navigator, 'credentials', { get() { assert.fail('reference must not access credentials'); } });
+  assert.equal(f.references.length, 0); assert.equal(f.$('payment-reference-status').dataset.state, 'idle');
+  await f.funded(); f.$('open').click(); await tick();
+  f.behavior.reference = query => {
+    assert.equal(f.counts.close, 1); assert.equal(f.state.isOpen, false); assert.equal(f.state.canOpen, false);
+    return f.referenceResult(query);
+  };
+  f.reference('0x' + 'A'.repeat(64)); await tick();
+  assert.deepEqual(f.references, [{ rightId: 1n, hash: '0x' + 'a'.repeat(64) }]);
+  assert.equal(f.$('payment-reference-status').dataset.state, 'verified');
+  assert.match(f.$('payment-reference-status').textContent, /0\.01 test-MON/);
+  assert.equal(f.$('payment-reference-result').textContent, '0x' + 'a'.repeat(64));
+  assert.equal(f.$('payment-receipt').hidden, true); assert.equal(f.counts.check, 0); assert.equal(f.counts.collect, 0);
+  assert.equal(f.$('open').disabled, true); assert.equal(f.$('collect').disabled, true);
+  f.$('payment-reference-hash').value = '0x' + 'b'.repeat(64);
+  f.$('payment-reference-hash').dispatchEvent(new f.dom.window.Event('input'));
+  assert.equal(f.$('payment-reference-result').hidden, true); assert.equal(f.$('payment-reference-status').dataset.state, 'idle');
+});
+
+test('invalid or oversized supplied hashes do not close a signer or start a read', async t => {
+  const f = fixture(t); await f.funded(); f.$('open').click(); await tick();
+  for (const input of ['', '0x' + 'a'.repeat(63), '0x' + 'a'.repeat(65), '0x' + 'g'.repeat(64), '0x' + 'a'.repeat(64) + ' ', '<img src=x onerror=alert(1)>']) {
+    f.reference(input); await tick();
+    assert.equal(f.$('payment-reference-status').dataset.state, 'invalid');
+  }
+  assert.equal(f.$('payment-reference-hash').maxLength, 66);
+  assert.equal(f.references.length, 0); assert.equal(f.counts.close, 0); assert.equal(f.state.isOpen, true);
+  assert.equal(f.root.querySelector('img'), null);
+});
+
+test('reference outcomes require exact captured identity and flags; errors remain distinct and sanitized', async t => {
+  const f = fixture(t);
+  const cases = [
+    [{ status: 'pending-or-unknown', finalized: false, paymentVerified: false }, 'pending'],
+    [{ status: 'reverted', paymentVerified: false }, 'reverted'],
+    [{ paymentVerified: false }, 'unavailable'], [{ finalized: false }, 'unavailable'],
+    [{ rightId: 2n }, 'unavailable'], [{ hash: '0x' + 'b'.repeat(64) }, 'unavailable'],
+    [{ amount: 999n }, 'unavailable'], [{ beneficiary: '0x' + '4'.repeat(40) }, 'unavailable'],
+    [{ contract: '0x' + '4'.repeat(40) }, 'unavailable'], [{ chainId: 1 }, 'unavailable'],
+    [{ readOnly: false }, 'unavailable'], [{ blockHash: '0x0' }, 'unavailable'],
+    [{ blockNumber: -1n }, 'unavailable'],
+  ];
+  for (const [overrides, state] of cases) {
+    f.behavior.reference = query => f.referenceResult(query, overrides);
+    f.reference(); await tick(); assert.equal(f.$('payment-reference-status').dataset.state, state);
+    assert.equal(f.$('payment-status').dataset.state, 'idle');
+  }
+  for (const [code, expected] of [['PAYMENT_TRANSACTION_MISMATCH', 'mismatch'], ['PAYMENT_RECEIPT_UNAVAILABLE', 'unavailable'], ['RAW_SECRET', 'unavailable']]) {
+    f.behavior.reference = () => Promise.reject({ code, message: '<img src=x onerror=alert(1)> private endpoint' });
+    f.reference(); await tick(); assert.equal(f.$('payment-reference-status').dataset.state, expected);
+    assert.equal(f.$('payment-reference-result').hidden, true); assert.equal(f.root.textContent.includes('private endpoint'), false);
+  }
+  assert.equal(f.counts.check, 0); assert.equal(f.counts.open, 0); assert.equal(f.counts.collect, 0);
+});
+
+test('canonical checksum addresses from the SDK match the same configured address', async t => {
+  const f = fixture(t);
+  f.profile.payment.owner = '0x' + 'ab'.repeat(20); f.profile.payment.address = '0x' + 'cd'.repeat(20);
+  f.behavior.reference = query => f.referenceResult(query, { beneficiary: '0x' + 'Ab'.repeat(20), contract: '0x' + 'Cd'.repeat(20) });
+  f.reference(); await tick(); assert.equal(f.$('payment-reference-status').dataset.state, 'verified');
+});
+
+for (const interrupt of ['input', 'selection', 'stop', 'close', 'pagehide']) test(`${interrupt} fences a late reference and retains the outstanding-read gate until settlement`, async t => {
+  const pending = deferred(), f = fixture(t); f.behavior.reference = () => pending.promise;
+  f.reference(); assert.equal(f.references.length, 1); assert.equal(f.$('payment-reference-status').dataset.state, 'checking');
+  const query = f.references[0];
+  if (interrupt === 'input') { f.$('payment-reference-hash').value = '0x' + 'b'.repeat(64); f.$('payment-reference-hash').dispatchEvent(new f.dom.window.Event('input')); }
+  if (interrupt === 'selection') { f.select(2n); assert.equal(f.$('payment-reference-hash').value, ''); }
+  if (interrupt === 'stop') f.$('payment-reference-stop').onclick();
+  if (interrupt === 'close') f.$('close').click();
+  if (interrupt === 'pagehide') f.dom.window.dispatchEvent(new f.dom.window.Event('pagehide'));
+  const state = f.$('payment-reference-status').dataset.state;
+  assert.equal(f.$('payment-reference-check').disabled, true);
+  f.$('payment-reference-check').onclick(); assert.equal(f.references.length, 1);
+  pending.resolve(f.referenceResult(query)); await tick();
+  assert.equal(f.$('payment-reference-status').dataset.state, state); assert.equal(f.$('payment-reference-result').hidden, true);
+  assert.equal(f.$('payment-reference-check').disabled, interrupt === 'pagehide');
+});
+
+test('reference checking cancels pending authentication and ignores its late result', async t => {
+  const pending = deferred(), f = fixture(t); f.behavior.open = () => pending.promise;
+  await f.funded(); f.$('open').click(); f.reference(); await tick();
+  assert.equal(f.counts.close, 1); assert.equal(f.$('payment-reference-status').dataset.state, 'verified');
+  pending.resolve({ owner: f.profile.payment.owner }); await tick();
+  assert.equal(f.$('payment-reference-status').dataset.state, 'verified'); assert.equal(f.$('collect').disabled, true);
+  assert.equal(f.$('open').disabled, true); assert.equal(f.counts.collect, 0);
+});
+
+test('claim in flight refuses reference checks even after closing or forcing a disabled handler', async t => {
+  const pending = deferred(), f = fixture(t); f.behavior.collect = () => pending.promise;
+  await f.funded(); f.$('open').click(); await tick(); f.$('collect').click();
+  f.$('payment-reference-hash').value = '0x' + 'a'.repeat(64);
+  assert.equal(f.$('payment-reference-check').disabled, true); f.$('payment-reference-check').onclick();
+  f.$('close').click(); f.$('payment-reference-check').onclick(); assert.equal(f.references.length, 0);
+  pending.resolve({ hash: '0x' + '1'.repeat(64) }); await tick();
+  assert.equal(f.$('payment-reference-check').disabled, false);
+});
+
+test('verified reference never clears a known unresolved attempt or replaces the local receipt', async t => {
+  const f = fixture(t), journal = { hash: '0x' + 'c'.repeat(64), unresolved: true, confirmed: false };
+  Object.assign(f.state, { payment: journal, accountBlocked: true, unresolvedPayments: [1n] });
+  f.reference(); await tick();
+  assert.equal(f.$('payment-reference-status').dataset.state, 'verified');
+  assert.equal(f.$('payment-status').dataset.state, 'pending'); assert.equal(f.state.payment, journal);
+  assert.equal(f.$('payment-hash').textContent, journal.hash); assert.equal(f.$('unresolved').hidden, false);
+  assert.equal(f.$('open').disabled, true); assert.equal(f.$('collect').disabled, true); assert.equal(f.counts.check, 0);
+});
+
+test('historical reference verification remains available after the signing deadline', async t => {
+  const f = fixture(t); t.mock.method(Date, 'now', () => Date.parse(f.profile.payment.expiresAt) + 1);
+  f.dom.window.dispatchEvent(new f.dom.window.Event('focus'));
+  assert.equal(f.$('payment-status').dataset.state, 'expired'); assert.equal(f.$('payment-reference-check').disabled, false);
+  f.reference(); await tick();
+  assert.equal(f.$('payment-reference-status').dataset.state, 'verified'); assert.equal(f.$('payment-status').dataset.state, 'expired');
+  assert.equal(f.counts.open, 0); assert.equal(f.counts.collect, 0); assert.equal(f.counts.check, 0);
 });

@@ -4,7 +4,7 @@ A complete browser page for collecting approved Monad **testnet** payments throu
 an account reserve that already exists. Generate a separate consumer, install the
 packed SDK, supply your public configuration and build the page. The template
 includes payment selection, availability, existing-passkey recovery, deliberate
-collection, pending-transaction checks and session closure.
+collection, pending-transaction checks, supplied-reference verification and session closure.
 
 This is an experimental integration reference. It does not create a reserve,
 passkey, issuer, contract or payment. It does not include storage hosting, deploy
@@ -100,12 +100,35 @@ and closes the signer. Cancellation prevents late native results from becoming a
 usable session. It cannot undo a transaction already broadcast. Device prompts
 vary; one deliberate action is not a promise of one native confirmation.
 
+## Check a reference from another browser
+
+Choose the approved payment, paste its full transaction hash under **Check a
+transaction reference**, then press **Verify reference**. This separate public
+read needs no local transaction history, reserve opening or passkey. It stays
+available after the signing deadline.
+
+Only an exact finalized payment is shown as verified. Pending or unknown,
+unsuccessful transactions, mismatched evidence and unavailable verification have
+separate results. A verified reference does **not** reconcile this browser’s
+journal, clear an unresolved attempt or authorize another send. Use **Check
+existing transaction** for that journal's recorded attempt.
+
+Reference checking closes any existing or pending signing session first and is
+unavailable while a claim is in flight. Editing the hash, changing payment,
+stopping the check or leaving the page discards its displayed result and ignores
+late replies. The bounded read can still finish in the background; another
+reference check waits for it to settle. No hash is loaded from the URL or saved by
+this form, and no reference is checked automatically.
+
 ## Integration boundary
 
 `main.mjs` imports only public SDK entries and the copied `actions.mjs` helper.
-`page.mjs` renders current helper state; it never constructs arbitrary transactions.
+`page.mjs` renders current helper state and a separate public receipt verifier; it
+never constructs arbitrary transactions or uses reference verification to alter
+the helper’s transaction journal.
 The fixed bounded profile, chain reads, fee/nonce guards and local pending journal
-remain authoritative. There is no arbitrary address or transaction form.
+remain authoritative. The reference form accepts only a transaction hash for a configured payment; it
+cannot select an arbitrary beneficiary or construct a transaction.
 
 Production assets contain no teaching authenticator, native override, mock RPC,
 issuer key, enrollment server or test-only control. Repository tests can supply

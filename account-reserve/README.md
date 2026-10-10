@@ -64,6 +64,16 @@ ciphertext stays unchanged. This is a synthetic browser/passkey integration test
 the built bundle is preserved but not executed, and both RPC names map to one
 local node. It proves no new physical-device test, public payment or adoption.
 
+The generated page also provides a separate supplied-reference check for a
+receiver using another browser. It uses the public read-only verifier, closes any
+signing session, and leaves this browser's pending journal and retry blocker
+unchanged. The [journal-free reference proof](evidence/payment-starter-reference-2026-10-11.json)
+checks an actual local receipt with an expired public profile, rejects the same
+hash for a different approved payment, and leaves an absent hash unconfirmed.
+No credential request, journal access, lock or broadcast occurs in that phase.
+The page retains its existing WebAuthn-capability preflight. These are synthetic
+source-module checks, with the same local-node and physical-device limits above.
+
 ## Start with your own text editor
 
 The [text starter](text-starter/README.md) generates a separate, installable
