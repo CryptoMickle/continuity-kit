@@ -1,0 +1,29 @@
+{
+  "format": "continuitykit/public-source-replay/v1",
+  "checkedAt": "2026-10-10T19:07:00Z",
+  "repository": "https://github.com/CryptoMickle/continuity-kit",
+  "commit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",
+  "archiveSha256": "f9afd10d35212e5e5de8f3b06bf3d80c4f4bd32cb892fdb39005ac06db677158",
+  "anonymousDownload": true,
+  "freshDirectory": true,
+  "sourceTakenFromLocalWorkspace": false,
+  "npmCiRootPassed": true,
+  "npmCiEditorIntegrationPassed": true,
+  "dependencyCache": "Previously fetched public registry packages; offline install, no workspace source links",
+  "applicationBuildPassed": true,
+  "baseTests": 135,
+  "paymentTests": 72,
+  "nativeTests": 119,
+  "failed": 0,
+  "skipped": 0,
+  "paymentBrowserBuildPassed": true,
+  "multiAppBuildPassed": true,
+  "nativeInstalledConsumersVerified": true,
+  "initialNativeAttempt": "Default npm cache lacked a required registry package. Reran using the same explicit cache as clean installation; no source changes.",
+  "limits": [
+    "Synthetic credentials and local disposable chains, not a physical-user proof.",
+    "No public wallet transaction was sent by this replay.",
+    "Public beneficiary claims and two-payment outage demonstration remain pending.",
+    "New evidence-only commits do not change the code validated at the recorded commit."
+  ]
+}

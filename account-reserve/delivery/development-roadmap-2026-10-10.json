@@ -203,8 +203,8 @@
       "publicCommit": "38b06b9e65d5281105d0413c1b1d439e9321299b"
     }
   ],
-  "lastCompleted": "Actionable native operator diagnostics completed: 119 native tests passed; installed CLI/API diagnostics distinguish binding, permissions, locks and ports without state changes or service interference.",
-  "next": "Finish the separate bounded sequential-payment adapter and verify its issuer deployment and first funded obligation on Monad testnet, then use the existing beneficiary passkeys for the A-to-B payment continuity proof. No video or final submission.",
+  "lastCompleted": "Anonymous public-source replay completed at 309f62e: 135 base, 72 payment and 119 native tests passed. Public contract and first funded payment are finalized; beneficiary-native continuation is still pending.",
+  "next": "Continue the exact payment proposal after the user opens the existing primary account and claims right1. Corroborate exact finalized claim1, then make A unavailable, fund right2 under the same proposal and recover/claim through existing B. Restore A afterwards. No new passkeys, proposal retry, video or submission.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -216,25 +216,21 @@
   },
   "deferredReleaseAssessment": {
     "id": "public-native-release-reproducibility",
-    "status": "planned",
+    "status": "complete",
     "observedGap": "Historical candidate archive omits text-native, text-starter, operator and integrations. Existing anonymous replay predates native milestones; recent installed tests start from the local development checkout.",
-    "evidence": [
-      "scripts/package-candidate.mjs",
-      "evidence/apps-public-replay-2026-10-10.json",
-      "tests/native-installed-fixture.mjs",
-      "tests/text-native-package.mjs"
-    ],
+    "evidence": "evidence/payments-public-replay-2026-10-10.json",
     "acceptance": [
       "Exact anonymous public commit download, archive digest and fresh directory",
       "Documented installation, build and relevant native tests without local source references",
       "Generated native consumer builds and diagnoses from published package only",
       "Candidate archive deliberately scoped and free of private runtime files",
       "No hosted flow changes, native prompts, spending, video or final submission"
-    ]
+    ],
+    "publicCommit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b"
   },
   "transactionPriority": {
     "recordedAt": "2026-10-10T18:34:33.466764+00:00",
-    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet vårt ikke genererte transaksjoner",
+    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet v\u00e5rt ikke genererte transaksjoner",
     "evidenceBoundary": "User-reported reason for the prior loss; not independently verified judge feedback or a formal current eligibility rule.",
     "currentGap": "Current text collection/replica product sends no blockchain transactions. The separate Account Reserve proof is a historical single claimed payment. The current PaymentRight contract permits only one right per beneficiary, and the release executor pins right 1 and nonce 0. Recurring usage is not demonstrated.",
     "priority": "Before further general operator polish, establish a narrowly scoped useful recurring transaction loop using the account-reserve capability.",
@@ -254,17 +250,20 @@
     "id": "repeatable-monad-transaction-value",
     "status": "in_progress",
     "basis": "Direct user steering on 10 October 2026; see transactionPriority",
-    "releaseGate": "public-native-release-reproducibility remains required before a source release, not the main product objective.",
+    "releaseGate": "Complete: exact anonymous public commit replay passed base135, payments72 and native119 tests plus builds and installed consumers.",
     "localProgress": {
-      "contractTests": 4,
-      "guardTestsBeforeReceiptHardening": 9,
-      "journalAndExecutorTests": 25,
-      "pageTests": 7,
-      "routeTests": 3,
-      "realSdkContinuityTests": 1,
-      "publicTransactionsExecuted": false,
+      "paymentTests": 72,
+      "legacyTransactionRegression": 44,
+      "sourcePackagingTests": 15,
+      "publicIssuerTransactionsFinalized": 2,
+      "publicBeneficiaryClaimsVerified": 0,
       "nativeProof": false,
-      "evidenceBoundary": "Local EVM and synthetic credential tests; not public transaction completion, adoption, demand or eligibility."
-    }
+      "evidenceBoundary": "Local SDK/EVM proof and two public issuer transactions; beneficiary claims pending."
+    },
+    "sourceCommit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",
+    "publicPrimaryVersion": 5,
+    "publicReserveVersion": 4,
+    "awaitingUser": "Existing Primary passkey authentication and explicit claim at /payments/. Native prompt only; no new credential. Do not issue second obligation until first exact claim finalizes.",
+    "publicEvidence": "evidence/payments-validation-2026-10-10.json"
   }
 }

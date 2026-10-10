@@ -1,0 +1,63 @@
+{
+  "checkedAt": "2026-10-10T19:03:27.980Z",
+  "results": [
+    {
+      "role": "primary",
+      "path": "/",
+      "status": 200,
+      "sha256": "9d14e2cb3a791451a1c686dafeffe5e0cdfd47e1812fd3f43b4121394940405b",
+      "verification": "legacy-document-and-asset-references-preserved-edge-platform-appends-script"
+    },
+    {
+      "role": "primary",
+      "path": "/api/config",
+      "status": 200,
+      "sha256": "3dfd1441a7da9b7b4bcffddeb6ca6dc54d18fc7b245199158244d0769a626780",
+      "verification": "byte-identical-legacy-config"
+    },
+    {
+      "role": "primary",
+      "path": "/payments/",
+      "status": 200,
+      "sha256": "61f6d5cd282b0f2eea6c90091b951a39bbab5eae248cebdd1bee91c5ad8e5693",
+      "verification": "public-route-available"
+    },
+    {
+      "role": "primary",
+      "path": "/payments/profile.json",
+      "status": 200,
+      "sha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+      "verification": "public-route-available"
+    },
+    {
+      "role": "recovery",
+      "path": "/",
+      "status": 200,
+      "sha256": "9f0c107a77332fe35595951a0b6947e9cf6463c30163237a3d4d5d7e3e67150b",
+      "verification": "legacy-document-and-asset-references-preserved-edge-platform-appends-script"
+    },
+    {
+      "role": "recovery",
+      "path": "/api/config",
+      "status": 200,
+      "sha256": "a71027c6c5301877453c0f587a1bc36376e2678988808b23b044784a0f304385",
+      "verification": "byte-identical-legacy-config"
+    },
+    {
+      "role": "recovery",
+      "path": "/payments/",
+      "status": 200,
+      "sha256": "a90c7dd3ff5b37ca3e5e2dce525daf3cb9c2f02b6408f8b48640864af85831b6",
+      "verification": "public-route-available"
+    },
+    {
+      "role": "recovery",
+      "path": "/payments/profile.json",
+      "status": 200,
+      "sha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+      "verification": "public-route-available"
+    }
+  ],
+  "physicalPasskey": false,
+  "transactionsSentByCheck": 0
+}

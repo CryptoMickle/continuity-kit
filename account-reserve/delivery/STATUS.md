@@ -15,7 +15,9 @@ The existing Account Primary and Reserve Sites now serve additive `/payments/`
 pages. Legacy code, origin/RP/namespace bindings, passkeys and stored records remain
 unchanged. Unknown signed outcomes close the signer and leave read-only checking;
 there is no automatic resend. Native authentication with the existing primary key
-is the next required user action. Public-source replay is being completed.
+is the next required user action. Anonymous public-source replay of commit
+`309f62e552ecb6bafbc841afcc1fe5928cd40d3b` passed 135 base, 72 payment and
+119 native tests, plus application/payment/multi-app builds and installed consumers.
 
 This closes an implementation gap, not the demand gap. Test funding and claims do
 not establish organic transactions, customers, sponsor acceptance or prize odds.

@@ -61,7 +61,15 @@
     "Developer-funded testnet activity is not organic use, external adoption, revenue, demand or prize eligibility.",
     "Two RPC observations are not a light-client proof.",
     "Browser journal locks coordinate one origin only, not separate devices or origins.",
-    "Native claims and public original-app outage proof remain unfinished.",
-    "Source-package reproduction is local until exact anonymous public replay is recorded."
-  ]
+    "Native claims and public original-app outage proof remain unfinished."
+  ],
+  "publicSourceReplay": {
+    "commit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",
+    "evidence": "evidence/payments-public-replay-2026-10-10.json",
+    "baseTests": 135,
+    "paymentTests": 72,
+    "nativeTests": 119,
+    "failed": 0,
+    "skipped": 0
+  }
 }
