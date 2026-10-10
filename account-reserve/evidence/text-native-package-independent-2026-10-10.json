@@ -1,0 +1,12 @@
+{
+  "status": "PASSED",
+  "audit": "Independent full native package suite after build and doctor fixes",
+  "node": "v24.19.0",
+  "nodePathEmpty": true,
+  "script": "npm run test:native-text",
+  "exitCode": 0,
+  "tests": 30,
+  "physicalPasskeyVerified": false,
+  "deployed": false,
+  "scope": "Independent agent replay; not independent human or physical-device acceptance"
+}

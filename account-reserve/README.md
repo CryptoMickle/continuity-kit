@@ -56,6 +56,30 @@ This optional package reuses the operator gateway and unchanged SQLite runtime.
 It still simulates the credential locally and shares one machine, frontend and
 gateway. It does not change hosted Sites or establish independent providers.
 
+For an integration using **real browser passkeys**, the separate
+[native text package](text-native/README.md) builds A and B against explicit
+origins, an exact recovery hostname and two or three fixed storage routes:
+
+```sh
+npm run create:native-text -- /absolute/empty/native-text
+cd /absolute/empty/native-text
+npm ci --ignore-scripts
+# Configure profile.json from the example with your owned origins.
+npm run build -- --profile profile.json
+npm run doctor -- --profile profile.json
+```
+
+The operator issues one private, short-lived upload permission per store. The
+browser checks the bundle before a separate, deliberate passkey action; fresh
+recovery needs no upload permission. Deployable assets exclude the teaching
+authenticator and failure controls. The host exposes only fixed reserve routes.
+The doctor verifies profile, role, asset hashes and referenced files without
+requesting a credential. Follow the guide to run the actual stores and TLS proxy.
+
+This is a separately buildable native integration, **not a newly deployed or
+physically verified service**. Existing public Sites and passkeys are unchanged.
+[Validation and limitations](evidence/text-native-package-validation-2026-10-10.json).
+
 To run the repository's generator/UI regressions, first install the root and
 shared test harness dependencies into your normal npm cache:
 
@@ -65,6 +89,7 @@ npm --prefix integrations/multi-app ci --ignore-scripts --no-audit --no-fund
 npm run test:text-starter
 npm run test:replica-browser
 npm run test:replica-starter
+npm run test:native-text
 ```
 
 The regression suite installs generated consumers offline and respects npm's

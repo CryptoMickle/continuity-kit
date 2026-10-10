@@ -1,3 +1,39 @@
+# Native text integration package — 10 October 2026
+
+The new `create:native-text` generator creates a standalone installed-SDK consumer
+with native WebAuthn, two separately built role directories, and two or three
+fixed storage routes. A validated profile binds the exact A/B origins, app ID,
+recovery hostname and expiry. The teaching authenticator and fault controls are
+excluded from deployable assets. Existing public Sites and reserves are unchanged.
+
+A private operator tool prechecks each store and issues short-lived, single-use
+upload grants into a new private file. B validates the bundle before a separate
+passkey button; fresh recovery requires no upload permission. The public host
+exposes only bounded GET/PUT reserve operations and static built assets. It does
+not expose enrollment issuance or arbitrary upstream targets.
+
+The final suite passed 30/30, including clean offline installation of the installed
+generator, both builds, tampered/missing/symlinked asset rejection, profile and
+grant boundaries, browser lifecycle, actual temporary SQLite stores and gateway
+routing. A separate agent also passed 30/30 before the final empty-editor polish;
+the final suite and frontend review cover that change. Two build/doctor defects
+found during review were corrected before completion.
+
+Browser QA verified A-to-B handoff, invalid permission rejection, fresh recovery
+without a grant, and mobile layout without horizontal overflow. No native
+credential was requested and no upload grant was issued during browser QA.
+This package is not deployed or physically accepted; earlier native evidence
+belongs to the previous public versions. Separate-provider operation is unproven.
+
+[Guide](../text-native/README.md) ·
+[Final evidence](../evidence/text-native-package-validation-2026-10-10.json) ·
+[Independent replay](../evidence/text-native-package-independent-2026-10-10.json).
+Video and final submission remain deferred until Monday. Next development target:
+a repeatable operator launch/preflight that reduces manual configuration without
+opening public admission or automatically requesting passkeys.
+
+---
+
 # Replica browser reference — 10 October 2026
 
 The text starter now has an optional `--replicas` mode with a full A-to-B browser

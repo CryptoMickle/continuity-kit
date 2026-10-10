@@ -54,7 +54,10 @@
     "operator/profile.mjs",
     "operator/store.mjs",
     "operator/host.mjs",
-    "operator/replica-gateway.mjs"
+    "operator/replica-gateway.mjs",
+    "text-native",
+    "scripts/create-native-text-starter.mjs",
+    "operator/cli.mjs"
   ],
   "scripts": {
     "dev": "node server.mjs",
@@ -97,7 +100,9 @@
     "create:text-starter": "node scripts/create-text-starter.mjs",
     "test:text-starter": "node --test tests/text-starter-package.mjs",
     "test:replica-browser": "node --test tests/text-browser-replicas.mjs",
-    "test:replica-starter": "node --test tests/text-starter-replicas.mjs tests/text-starter-replica-ui.mjs tests/text-replica-starter-package.mjs"
+    "test:replica-starter": "node --test tests/text-starter-replicas.mjs tests/text-starter-replica-ui.mjs tests/text-replica-starter-package.mjs",
+    "create:native-text": "node scripts/create-native-text-starter.mjs",
+    "test:native-text": "node --test tests/text-native-profile.mjs tests/text-native-ui.mjs tests/text-native-operator.mjs tests/text-native-package.mjs"
   },
   "dependencies": {
     "@category-labs/mera": "0.2.0",

@@ -81,7 +81,7 @@
     {
       "id": "native-replica-integration",
       "priority": 5,
-      "status": "planned",
+      "status": "complete",
       "value": "Provide a separately buildable native browser integration against configured operator storage without carrying the teaching authenticator into deployable assets.",
       "acceptance": [
         "Separate native build entrypoints from local synthetic server and fixtures",
@@ -90,9 +90,25 @@
         "Clean installed consumer builds and security-boundary tests; no automatic native credential requests",
         "Preserve existing public Sites, passkeys and immutable records; no accounts, funds, new domains or final submission",
         "Native-device and independent-provider proof remain unclaimed unless actually performed"
+      ],
+      "evidence": "evidence/text-native-package-validation-2026-10-10.json",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
+    },
+    {
+      "id": "native-operator-onboarding",
+      "priority": 6,
+      "status": "pending",
+      "value": "Reduce operator configuration errors with a repeatable local launch and read-only readiness check for the native package.",
+      "acceptance": [
+        "Explicit existing profile and private state directory; preserve records and passkey bindings",
+        "Verify frontend, gateway and each operator agree before setup",
+        "No credentials or upload grants on page load; no automatic native prompt",
+        "Actionable bounded errors and clean owned-process shutdown",
+        "Clean installed replay and exact documented commands; no hosted/provider proof inferred"
       ]
     }
   ],
-  "lastCompleted": "Replica browser reference completed with real local SQLite child failures, installed-package proof and browser QA.",
-  "next": "Build separately deployable native replica frontend with explicit operator configuration and no synthetic authenticator in its assets. Continue substantive development until Monday; video and final submission remain deferred."
+  "lastCompleted": "Native text package completed with 30 passing tests, independent replay and pre-authentication browser QA.",
+  "next": "Implement native operator onboarding and read-only readiness checks. Continue substantive development until Monday; video and final submission remain deferred."
 }

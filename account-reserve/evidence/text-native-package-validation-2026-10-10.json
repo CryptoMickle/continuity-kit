@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-10",
+  "status": "passed",
+  "scope": "Separately buildable native WebAuthn text integration with two or three fixed operator stores; no physical ceremony or deployment",
+  "automated": {
+    "finalSuite": {
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0,
+      "files": [
+        "tests/text-native-profile.mjs",
+        "tests/text-native-ui.mjs",
+        "tests/text-native-operator.mjs",
+        "tests/text-native-package.mjs"
+      ]
+    },
+    "installedConsumer": {
+      "generatedFromInstalledSdk": true,
+      "offlineCleanInstall": true,
+      "bothRoleBuilds": true,
+      "macOSTmpAlias": true,
+      "nativeAssetsOnly": true,
+      "operatorRuntimeByteIdentical": true,
+      "doctorRejectsMissingChangedSymlinkedAssetsAndInvalidHtmlReferences": true
+    },
+    "operator": {
+      "actualTemporarySqliteStores": true,
+      "fixedGatewayGetPut": true,
+      "publicEnrollmentAndSyntheticRoutesDenied": true,
+      "privateGrantFileMode": "0600",
+      "privateOutputDirectoryMode": "0700",
+      "grantLifetimeMaxSeconds": 300,
+      "partialIssuanceNeverRetried": true
+    },
+    "independentReview": {
+      "fullSuitePassed": 30,
+      "nodePathEmpty": true,
+      "offlineInstall": true,
+      "note": "Independent full suite before final hide-empty-editor polish; final root suite and UI suite passed after that edit."
+    }
+  },
+  "browser": {
+    "scope": "Local render and pre-authentication handoff only",
+    "nativeCredentialsInvoked": false,
+    "grantsIssued": false,
+    "liveStorage": false,
+    "primaryOpensBoundRecoveryWindow": true,
+    "invalidPermissionRejectedAndCleared": true,
+    "freshRecoveryNeedsNoGrant": true,
+    "emptyEditorHiddenUntilRecovery": true,
+    "requestedMobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "observedMobileClientWidth": 375,
+    "observedMobileScrollWidth": 375,
+    "consoleErrorsOrWarnings": 0,
+    "screenshots": [
+      "text-native-desktop-2026-10-10.png",
+      "text-native-mobile-2026-10-10.png"
+    ]
+  },
+  "reviewFindingsFixed": [
+    "macOS /tmp path alias rejected by build",
+    "Doctor previously missed absent asset references",
+    "Empty recovery editor before text was opened"
+  ],
+  "physicalPasskeyVerified": false,
+  "deployed": false,
+  "publicSitesChanged": false,
+  "limitations": [
+    "Native default is wired but actual device compatibility and prompt count are unverified for this package",
+    "Temporary local SQLite processes are not independent providers",
+    "Shared gateway, recovery frontend and origin remain dependencies",
+    "Short-lived grants require operator handoff and are bearer permissions, not signed identity attestations",
+    "Immutable snapshots require export to retain subsequent edits",
+    "No adoption, external audit, prize probability or final submission claimed"
+  ]
+}
