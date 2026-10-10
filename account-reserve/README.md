@@ -99,6 +99,14 @@ copies, with one existing-passkey SDK assertion and separate editor/export
 results per app. It preserves v1 packages and does not migrate an existing
 profile or change hosted Sites. [Validation and limits](evidence/native-collection-package-2026-10-10.json).
 
+The native package also has a [complete operator backup/restore path](text-native/README.md#back-up-and-restore-the-complete-operator).
+Stop the managed stack, export all encrypted replicas and their fixed policy,
+then restore into fresh private state using a separately retained SHA-256 digest.
+Ciphertext and consumed quota survive; administrator invitations are renewed and
+old upload grants are discarded. The same B hostname and existing passkey are
+still required. This is an explicit operator migration, not an automatic offsite
+backup or protection against losing the recovery origin or credential.
+
 To run the repository's generator/UI regressions, first install the root and
 shared test harness dependencies into your normal npm cache:
 

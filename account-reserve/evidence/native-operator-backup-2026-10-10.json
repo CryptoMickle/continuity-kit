@@ -1,0 +1,137 @@
+{
+  "checkedAt": "2026-10-10T17:01:43.470322+00:00",
+  "milestone": "native-operator-portable-backup",
+  "scope": "Managed private operator migration; source delivery only. No new public Sites deployment.",
+  "validation": {
+    "command": "SDK_TEST_NPM_CACHE=/tmp/continuity-reserve-npm /usr/bin/sandbox-exec -f scripts/loopback-only.sb node --test tests/text-native-*.mjs",
+    "node": "24.19.0",
+    "network": "loopback only; offline dependency cache",
+    "passedTopLevelTests": 107,
+    "failed": 0,
+    "skipped": 0,
+    "priorNativeRegressionCases": 87,
+    "newBackupBoundaryCases": 14,
+    "newRaceBoundaryCases": 4,
+    "newInstalledRestoreCases": 1,
+    "newPrivatePackagingCases": 1,
+    "repeatRunsCountedAgain": false
+  },
+  "installedRestoration": {
+    "installedNativeBackupPackage": true,
+    "installedGeneratorReplay": true,
+    "offlineConsumerInstall": true,
+    "appNamespaces": 2,
+    "distinctPrivateStates": 2,
+    "explicitNewPorts": true,
+    "sameExactProfileAndExpiry": true,
+    "managedStarts": 2,
+    "stoppedAllReplicaBackup": true,
+    "liveBackupRefused": true,
+    "digestMismatchRefusedBeforeCreation": true,
+    "existingStateRefusedWithoutMutation": true,
+    "sourceStateUnavailableAtOriginalPath": true,
+    "byteExactCiphertextPreserved": true,
+    "fullIssuedQuotaPreserved": true,
+    "freshInvitations": true,
+    "pendingCapabilitiesTransferred": false,
+    "oldPendingGrantsRejected": true,
+    "freshRecoveryProcesses": 2,
+    "installedUiWithRealSdk": true,
+    "exactExports": true,
+    "primaryListenerClosed": true,
+    "replicaFailoverAfterRestore": true,
+    "noRecoveryWrites": true,
+    "sourceStateOrGrantsSuppliedToRecovery": false,
+    "secretsOrTestDependenciesInDeployableAssets": false,
+    "sameMachineOnly": true,
+    "physicalPasskeyProof": false,
+    "nativeBrowserEngineProof": false,
+    "publicTlsVerified": false,
+    "independentProviders": false,
+    "cases": [
+      {
+        "oneReplicaUnavailable": false,
+        "freshInstalledUi": true,
+        "oneExistingCredentialAssertion": true,
+        "exactExports": true,
+        "noRecoveryWrites": true
+      },
+      {
+        "oneReplicaUnavailable": true,
+        "freshInstalledUi": true,
+        "oneExistingCredentialAssertion": true,
+        "exactExports": true,
+        "noRecoveryWrites": true
+      }
+    ]
+  },
+  "privatePackageBoundary": {
+    "nativePrivatePackageBoundary": true,
+    "actualTarballsInspected": 4,
+    "installedSdkRepackSafeWithoutIgnoreFile": true,
+    "installedGeneratorSafe": true,
+    "generatedIgnoreRulesPreserved": true,
+    "offlineInstall": true,
+    "onlyFictionalSecretsUsed": true
+  },
+  "preserved": [
+    "original v1/v2 app IDs, labels, ordering, A/B origins, B RP and profile expiry",
+    "each ordered replica ciphertext and consumed issuance quota",
+    "source state bytes and counters during backup and restore",
+    "existing hosted passkeys and immutable snapshots"
+  ],
+  "newState": [
+    "explicit new destination and listener ports",
+    "fresh per-replica administrator invitations",
+    "zero transferred capability rows",
+    "manifest published last after all bounded transfers are validated"
+  ],
+  "negativeCases": [
+    "live/stale managed lock",
+    "wrong or missing retained digest",
+    "corrupt, incomplete, extra, duplicate and reordered archive entries",
+    "changed trusted profile or expiry",
+    "noncanonical JSON including UTF-8 BOM and invalid UTF-8",
+    "public-mode, hardlinked, symlinked, empty and oversized inputs",
+    "existing destination state",
+    "getter and extra-field options",
+    "second-replica import or final-manifest failure",
+    "competing files retained on failed cleanup",
+    "replaced state/output directory",
+    "growing archive or lock constrained by bounded reads",
+    "asymmetric per-replica records and quotas preserved"
+  ],
+  "limits": [
+    "A retained digest is an integrity check against that value, not a signature or freshness proof.",
+    "Rollback or parallel restored forks can fork effective quota; there is no global anti-rollback.",
+    "All manually launched database writers must be stopped; runtime.lock coordinates managed tools only.",
+    "The archive contains visible metadata and opaque ciphertext; it must be retained privately outside the failed host.",
+    "The existing B origin/RP and usable credential remain necessary. This does not rebind keys or extend expiry.",
+    "Tests use synthetic credentials, local processes and a fresh temporary directory on one machine, not a physical replacement host.",
+    "No independent provider, native-device acceptance, external adoption or production audit is established."
+  ],
+  "physicalPasskeyVerified": false,
+  "independentProvidersVerified": false,
+  "externalAdoptionClaimed": false,
+  "publicSitesChanged": false,
+  "walletTransactions": false,
+  "moneySpent": false,
+  "videoOrFinalSubmission": false,
+  "sourceSha256": {
+    "text-native/operator-backup.mjs": "1e6d16b1fea3cdc3594d3a3ae444e40d8598961645452b6c8b11197bf0eb45e5",
+    "text-native/operator-state.mjs": "bdec65cbfdbb7f6b53361f3172ebb11ce3e52e028bba09d8713252883a0f4ab1",
+    "text-native/package.json": "74d3a90887e46111f42b1c27a4067781bd2730b9d2c95363bbe10b0107c46ba6",
+    "scripts/create-native-text-starter.mjs": "d9466a20d552b567bc3172ec09b4b936a7327ad533f20d0e0f718545a2ae06fd",
+    "text-native/.npmignore": "f5647bbc0c8ae520f73af368fda863815b4a7ed501845be2d78af1bf003ec015",
+    "text-native/.gitignore": "f5647bbc0c8ae520f73af368fda863815b4a7ed501845be2d78af1bf003ec015",
+    "package.json": "23bd8621a77ae3955501d9831aef3e299b00f60550ccbabf66d2294a8258674e"
+  },
+  "internalReview": {
+    "scope": "Independent agent review; not an external security audit",
+    "remainingReleaseBlockers": 0,
+    "targetedBoundaryAndRaceTestsPassed": 18,
+    "actualTarballTestPassed": 1,
+    "installedRestoreReplayPassed": 1,
+    "repeatRunsCountedAsNewTests": false
+  }
+}

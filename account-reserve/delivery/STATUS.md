@@ -1,3 +1,52 @@
+# Managed operator backup and restore — 10 October 2026
+
+The native package can now export every configured encrypted replica and restore
+it into a new private operator state directory. The fixed app/origin/RP profile,
+expiry, ciphertext and consumed quota survive. Fresh administrator invitations
+replace the old ones, and outstanding upload grants are not transferred.
+
+Backup requires a stopped managed stack and takes the launcher's exclusive lock.
+Restore requires the original profile and a separately retained SHA-256 digest.
+Every bounded transfer is checked before state creation; a final manifest makes
+successful state usable. Existing state is never overwritten. Interrupted imports
+remove only owned files and preserve unexpected competing files.
+
+**107 relevant tests passed, with no failures or skips:** 87 native regressions,
+14 new backup boundary cases, 4 deterministic race cases, one installed restoration
+case and one private packaging case. Repeated independent runs are not added again.
+
+The installed SDK generated another fresh consumer, installed offline and ran the
+actual backup/restore commands. Two app snapshots were recovered and exported
+exactly using the same synthetic credential after the original state path was
+removed and the original app listener stopped. Recovery also succeeded after one
+restored store was killed. Each collection used one SDK assertion, no recovery
+writes or source grant files. Old unused grants received HTTP 403; full consumed
+quota remained, with zero transferred capability rows.
+
+Review found and fixed a package boundary flaw: the previous broad native folder
+inclusion could package private runtime files. Native SDK packaging now uses an
+explicit file allowlist that survives installation and repacking; source and
+generated projects also exclude private state and build output. Four actual
+archives with fictional secret sentinels were inspected. No real secrets were
+used for that check, and no private runtime data is part of this source publication.
+
+This proves a local migration into new state, not transfer between physical
+machines, native passkey compatibility or independently operated providers. The
+same B origin/RP and usable credential remain required. A retained digest proves
+neither author identity nor freshness; old backups and parallel restored forks
+can roll back/fork effective quota. Backups must be retained outside the failed
+host by the operator. Existing public Sites, passkeys and snapshots are unchanged.
+
+Next: actionable operator diagnostics. A changed profile and insecure file
+permissions currently collapse into one generic startup error. A read-only
+preflight should tell an integrator which correction is needed while leaving
+files, ports and runtime locks untouched.
+
+[Operator backup guide](../text-native/README.md#back-up-and-restore-the-complete-operator) ·
+[Validation and limits](../evidence/native-operator-backup-2026-10-10.json).
+
+---
+
 # Native collection integration package — 10 October 2026
 
 The generated native package now supports 2–8 fixed app reserves in one recovery

@@ -61,6 +61,79 @@ Only the A and B frontend listeners belong behind your public TLS proxy. **Do no
 
 Two stores on one computer still share the machine, gateway and B frontend. Loss of B's origin or the usable passkey can prevent recovery. Configure retention and ownership deliberately before inviting other users; automatic snapshot updates, key migration and automatic repair remain outside this protocol.
 
+## Back up and restore the complete operator
+
+The managed backup combines every configured replica, the original app/origin/RP
+policy, encrypted records and consumed issuance quota into one private file.
+It works with both profile versions. It contains no passkey material, plaintext,
+administrator invitations or outstanding upload grants. App labels, origins,
+opaque locators, record counts and ciphertext remain visible to anyone who can
+read it; this is not an encrypted wrapper around that metadata.
+
+Back up before the fixed profile expires. Stop `operator:start` cleanly before
+backup, and stop any manually launched store writers too. The command takes the same exclusive `runtime.lock` as the managed
+launcher. A live or stale lock is refused; no process is killed and no old lock
+is removed automatically. The lock does not coordinate manual lower-level tools.
+
+Create a private destination outside the served role directories. It must have
+an existing `0700` parent; the new file is `0600` and is never overwritten:
+
+```sh
+mkdir -m 700 private/backups
+npm run operator:backup -- --profile profile.json --state private/operator \
+  --out private/backups/operator-2026-10-10.json
+```
+
+Retain the returned `sha256` separately through a trusted channel. Copy the
+backup and the original public profile to independently retained storage; keeping
+them only beside the original databases does not protect against machine loss.
+Copying to external storage is a deliberate operator task, not an automatic
+upload performed by this command. Preserve private file modes on the destination.
+The old managed stack may be restarted after the backup command returns.
+
+On the replacement installation, use the same package and original `profile.json`.
+Build and run the doctor as above, supply explicit local `ports.json`, and restore
+into a **new, nonexistent** directory. Do not run `operator:init` there first:
+
+```sh
+npm run operator:restore -- --profile profile.json --ports ports.json \
+  --in private/backups/operator-2026-10-10.json \
+  --sha256 <the-separately-retained-64-character-digest> \
+  --state private/restored
+npm run operator:start -- --profile profile.json --state private/restored --out dist
+npm run operator:check -- --profile profile.json --state private/restored --out dist
+```
+
+Replace the digest placeholder; do not compute a new digest from an untrusted
+received file and treat that as verification. Restore validates the complete
+bounded bundle and each ordered replica before writing state, uses no-overwrite
+database imports and commits the state manifest last. It preserves ciphertext,
+app bindings, expiry and used quota. It generates fresh administrator invitations;
+old pending grants cannot upload after restore. Issue any future grants using
+`private/restored/invitations.json`. Recovery itself requires no upload grant.
+
+Keep the original B hostname/RP, origin and app IDs reachable through your owned
+TLS routing. Internal HTTPS proxy ports may change explicitly; localhost A/B
+ports must still match their profile origins. This command does not move a
+domain, rebind a passkey, extend expiry or merge different profiles. Before
+retiring the old deployment, check each app through fresh B and export the
+expected text using the existing passkey. A successful structural import is not
+proof that a passkey is available or every ciphertext decrypts.
+
+The retained digest detects a byte change relative to that retained value. It
+does not establish an author's identity, the latest snapshot, anti-rollback or
+a global quota across restored forks. Do not run an old and restored fork as if
+their quotas were coordinated. A copy stored on another disk is also not proof
+of an independently operated provider. The installed test replays recovery from
+new temporary state after removing the original path, with synthetic credentials
+on one machine; no physical-device or external-host recovery is implied.
+
+Native SDK packaging explicitly allows only source files, and the generated
+project excludes private state, backup/grant files and build output from npm and
+Git. These exclusions do not protect a manual upload of the entire directory.
+Run the repository's `npm run test:native-backup` for file-boundary, rollback,
+package-exclusion and installed-SDK restoration checks.
+
 ## Issue one setup permission
 
 The operator, not a public browser endpoint, issues short-lived upload grants. The initialization step creates the private `invitations.json` with the exact replica ports and distinct invitations, so no bearer values need to be copied into configuration by hand.

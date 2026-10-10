@@ -162,12 +162,13 @@
       ],
       "evidence": "evidence/native-collection-package-2026-10-10.json",
       "publicSitesChanged": false,
-      "physicalPasskeyVerified": false
+      "physicalPasskeyVerified": false,
+      "publicCommit": "1cf2bf2567b5eb8b60596b0b3b52ae4f29e95192"
     },
     {
       "id": "native-operator-portable-backup",
       "priority": 10,
-      "status": "pending",
+      "status": "complete",
       "value": "Restore the complete managed encrypted reserve state on a fresh machine/state directory so loss of the current host does not require manual profile and replica reconstruction. Reuse existing lower-level database export/import.",
       "acceptance": [
         "Require a stopped owned stack and explicit private backup destination; no live copy of open SQLite files",
@@ -177,9 +178,26 @@
         "Prove exact recovery of two app texts using the same existing test credential after the original state is unavailable",
         "Reject corrupt, incomplete, extra or mismatched bundle entries without usable partial state or writes to the original",
         "Keep public Sites and existing state untouched; no native-device or provider proof inferred"
+      ],
+      "evidence": "evidence/native-operator-backup-2026-10-10.json",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
+    },
+    {
+      "id": "native-operator-actionable-diagnostics",
+      "priority": 11,
+      "status": "pending",
+      "value": "Remove an observed integrator blocker: startup currently collapses a mismatched app profile and insecure state-file permissions into the same generic error even though their remedies differ.",
+      "acceptance": [
+        "Read-only preflight distinguishes profile/state binding, private file permissions, occupied ports and runtime locks with useful corrective guidance",
+        "Do not disclose invitations, upload grants, private text, locators or arbitrary error detail",
+        "Validate in a freshly generated installed package before managed child processes start",
+        "No automatic profile/state rewriting, permission repair, port changes or lock deletion",
+        "Preserve all state bytes, counters, live/stale locks and existing hosted flows",
+        "No native authentication, provider deployment, video or final submission required"
       ]
     }
   ],
-  "lastCompleted": "Native collection package completed: 87 relevant passing tests, native-only generated assets, durable multi-app storage, actual installed UI/SDK exports after A/store loss, and browser responsive/cancellation checks.",
-  "next": "Implement managed operator backup/restore by reusing the existing encrypted database export/import; preserve fixed bindings and consumed quota. No video or final submission until Monday user review."
+  "lastCompleted": "Managed operator backup/restore completed: 107 native tests passed, installed-to-installed generation, exact two-app exports after original-state loss and replica failure, private npm packaging fixed.",
+  "next": "Implement read-only actionable native operator diagnostics for observed binding/permissions ambiguity, plus occupied ports and runtime locks. No automatic repairs, video or final submission."
 }

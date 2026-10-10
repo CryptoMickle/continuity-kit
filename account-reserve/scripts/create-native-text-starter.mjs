@@ -4,8 +4,11 @@ import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const files = ['package.json','README.md','profile.mjs','profile.example.json','profile.collection.example.json','ports.example.json','adapter.mjs','index.html','main.mjs','style.css','collection-index.html','collection-main.mjs','collection-style.css','prism-art.mjs','build.mjs','doctor.mjs','operator.mjs','native-host.mjs','operator-state.mjs','operator-readiness.mjs','operate.mjs','operator-worker.mjs'];
+const files = ['package.json','README.md','profile.mjs','profile.example.json','profile.collection.example.json','ports.example.json','adapter.mjs','index.html','main.mjs','style.css','collection-index.html','collection-main.mjs','collection-style.css','prism-art.mjs','build.mjs','doctor.mjs','operator.mjs','native-host.mjs','operator-state.mjs','operator-backup.mjs','operator-readiness.mjs','operate.mjs','operator-worker.mjs'];
 const operatorFiles = ['profile.mjs','store.mjs','host.mjs','replica-gateway.mjs','cli.mjs'];
+// npm omits ignore files from an installed SDK. Recreate these rules rather
+// than reading a template that would disappear on the installed-generator path.
+const privateIgnore = 'node_modules/\n/private/\n/dist/\n/dist-*/\n*.tgz\n*.log\n*.db\n*.db-*\n*.sqlite\n*.sqlite-*\n*.sqlite3\n*.sqlite3-*\n*-journal\n*-wal\n*-shm\nruntime.lock\n.env\n.env.*\n*.pem\n*.key\n*invitation*.json\n*invitation*.txt\n*grants*.json\n*backup*.json\n';
 const within = (child, parent) => child === parent || child.startsWith(parent + sep);
 const ordered = value => JSON.stringify(Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.localeCompare(b))));
 
@@ -50,7 +53,7 @@ export async function createNativeTextStarter(supplied) {
   await writeFile(join(target, 'package.json'), JSON.stringify(manifest, null, 2) + '\n');
   await writeFile(join(target, 'package-lock.json'), JSON.stringify(lock, null, 2) + '\n', { flag: 'wx' });
   await writeFile(join(target, 'sdk-package.json'), JSON.stringify({ name: packed.name, version: packed.version, filename: packed.filename, integrity: packed.integrity }, null, 2) + '\n', { flag: 'wx' });
-  await writeFile(join(target, '.gitignore'), 'node_modules/\n/private/\n/dist/\n*.tgz\n*.log\n', { flag: 'wx' });
+  for (const name of ['.gitignore', '.npmignore']) await writeFile(join(target, name), privateIgnore, { flag: 'wx' });
   return { directory: target, sdkIntegrity: packed.integrity, status: 'Files only; not installed, configured, authenticated or deployed', next: ['npm ci --ignore-scripts','Copy profile.example.json to profile.json and configure owned origins and expiry','npm run build -- --profile profile.json','npm run doctor -- --profile profile.json'], mode: 'Native WebAuthn integration; physical-device behavior remains unverified' };
 }
 if (process.argv[1] && await realpath(process.argv[1]) === fileURLToPath(import.meta.url)) {

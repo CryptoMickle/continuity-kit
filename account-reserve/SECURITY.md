@@ -184,3 +184,37 @@ session, automatic repair, automatic new-key fallback, or snapshot update.
 Installed process/storage tests use a synthetic authenticator injected only by
 the test harness. They do not establish physical passkey compatibility, external
 adoption, provider independence, production security, or an external audit.
+
+## Managed operator backup and restore (10 October 2026)
+
+Backup obtains the managed launcher's exclusive lock before inspecting state or
+exporting SQLite records. Manual lower-level writers must also be stopped: this
+lock is not an OS-wide database lease. A stale lock fails closed. Export uses the
+existing validated logical transfer format rather than copying live SQLite files.
+It preserves the original app/origin/RP profile, ordered replicas and lifetime
+issuance counts. It omits administrator invitations, all capability rows and any
+passkey material. Ciphertext is unchanged; metadata such as app labels, origins,
+opaque locators and counts is not additionally encrypted. Keep the archive private.
+
+Restore requires an exact externally retained digest and the original trusted
+profile. It checks a bounded canonical bundle and every transfer before creating
+new private state, refuses existing targets, generates fresh invitations, drops
+old grants and commits the manifest last. Failure cleanup removes only files
+owned by that operation; unexpected competing contents remain untouched. Source
+databases are not opened for write during backup or touched during restore.
+
+The digest provides integrity against retained bytes, not a signature, freshness
+or third-party authorship. Replaying an old backup or running independent restored
+forks can roll back/fork effective quotas. There is no global anti-rollback counter,
+automatic mirror repair or newest-copy claim. The transport bundle does not prove
+which physical provider supplied a replica. Valid structural ciphertext still
+requires authenticated SDK decryption with the existing credential. Origin/RP loss,
+credential loss, expiry, malicious trusted B code and same-machine failures remain
+outside this migration mechanism. Independently retain the backup, digest and
+profile; no remote upload or provider separation is performed by the tools.
+
+Native npm packaging uses an explicit source-file allowlist; generated consumers
+also receive private-state and build-output ignore rules. Regression tests inspect
+actual source-style, installed-SDK and generated-project archives containing only
+fictional secret sentinels. This protects those packaging paths, not arbitrary
+manual copies or uploads of operator directories.

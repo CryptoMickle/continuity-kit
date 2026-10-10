@@ -13,7 +13,9 @@
     "issue:grants": "node operator.mjs",
     "operator:init": "node operator-state.mjs init",
     "operator:start": "node operate.mjs",
-    "operator:check": "node operator-readiness.mjs"
+    "operator:check": "node operator-readiness.mjs",
+    "operator:backup": "node operator-backup.mjs backup",
+    "operator:restore": "node operator-backup.mjs restore"
   },
   "dependencies": {
     "@continuitykit/account-reserve": "file:./continuitykit-account-reserve-0.0.1-experimental.tgz"
