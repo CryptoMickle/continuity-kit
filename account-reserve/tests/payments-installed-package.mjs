@@ -34,12 +34,12 @@ async function installedBehavior() {
   const { createPaymentActions } = await import('./payment-actions.mjs');
   assert.deepEqual(Object.keys(api).sort(), ['createTestnetPaymentAvailability', 'createTestnetPaymentClient', 'createTestnetPaymentReader', 'createTestnetPaymentVerifier']);
   await assert.rejects(import('@continuitykit/account-reserve/payments/testnet.mjs'), error => error.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED');
-  const abi = parseAbi(['function claim(uint256 id)', 'function issuer() view returns (address)', 'function rightForOwner(address owner) view returns (uint256)', 'function getRight(uint256 id) view returns ((address beneficiary,uint256 amount,bool claimed))', 'event RightClaimed(uint256 indexed id,address indexed beneficiary,uint256 amount)']);
+  const abi = parseAbi(['function claim(uint256 id)', 'function issuer() view returns (address)', 'function nextId() view returns (uint256)', 'function rightForOwner(address owner) view returns (uint256)', 'function getRight(uint256 id) view returns ((address beneficiary,uint256 amount,bool claimed))', 'event RightClaimed(uint256 indexed id,address indexed beneficiary,uint256 amount)']);
   const secret = new Uint8Array(32).fill(3), address = getAddress('0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), issuer = getAddress('0xbcdefabcdefabcdefabcdefabcdefabcdefabcde');
   const endpointNames = ['https://testnet-rpc.monad.xyz', 'https://rpc-testnet.monadinfra.com'];
   const key = n => '0x' + n.toString(16).padStart(64, '0');
   const code = expected => error => error.code === expected;
-  let signatures = 0, sends = 0, closures = 0, nativeCalls = 0, writes = 0, nativeRequests = 0, inLock = 0, maxInLock = 0;
+  let signatures = 0, sends = 0, closures = 0, nativeCalls = 0, writes = 0, nativeRequests = 0, inLock = 0, maxInLock = 0, opens = 0;
   const realNow = Date.now, originalFetch = globalThis.fetch;
   const sessions = [], actions = [], calls = [], lockNames = [], values = new Map(), transactions = new Map(), receipts = new Map(), scenarios = [];
   let queue = Promise.resolve(), finalized = false, corruptPrevious = false, currentRight = 1n;
@@ -76,6 +76,7 @@ async function installedBehavior() {
       case 'eth_call': {
         const call = decodeFunctionData({ abi, data: params[0].data }); let answer;
         if (call.functionName === 'issuer') answer = issuer;
+        else if (call.functionName === 'nextId') answer = currentRight + 1n;
         else if (call.functionName === 'rightForOwner') answer = currentRight;
         else if (call.functionName === 'getRight') answer = { beneficiary: profile.owner, amount: profile.claims[Number(call.args[0]) - 1].amount, claimed: [...transactions.values()].some(tx => tx.right === call.args[0]) };
         else assert.fail('unexpected read');
@@ -107,14 +108,22 @@ async function installedBehavior() {
     assert.throws(() => createTestnetPaymentReader(options, {}), code('PAYMENT_OPTIONS_INVALID'));
     assert.throws(() => createTestnetPaymentClient({ ...options, recovered: firstSigner }, {}), code('PAYMENT_OPTIONS_INVALID'));
     assert.throws(() => createTestnetPaymentReader({ ...options, profile: { ...profile, chainId: 31337 } }), code('PAYMENT_TESTNET_REQUIRED'));
-    const reader = createTestnetPaymentReader(options), first = createPaymentActions({ ...options, openExistingAccount: async () => firstSigner, lifetimeTarget: new EventTarget() }); actions.push(first);
+    const reader = createTestnetPaymentReader(options), first = createPaymentActions({ ...options, openExistingAccount: async () => { opens++; return firstSigner; }, lifetimeTarget: new EventTarget() }); actions.push(first);
     assert.equal(getterCalls, 0); assert.equal(nativeRequests, 0); await assert.rejects(reader.check(1n), code('PAYMENT_TRANSACTION_MISSING')); assert.equal(nativeRequests, 0);
     scenarios.push('strict public boundary and inert construction');
 
-    await first.open();
+    assert.equal(first.selectedRightId,1n);assert.equal(first.canOpen,false);assert.ok(Object.isFrozen(first.state));assert.ok(Object.isFrozen(first.approvedPayments));
+    assert.deepEqual(first.approvedPayments.map(claim=>claim.rightId),[1n,2n]);
+    await assert.rejects(first.open(),code('PAYMENT_AVAILABILITY_REQUIRED'));assert.equal(opens,0);assert.equal(nativeRequests,0);
+    first.select(2n);assert.equal(nativeRequests,0);assert.equal(first.selectedRightId,2n);
+    const absent=await first.refreshAvailability();assert.equal(absent.status,'not-available');assert.equal(absent.reason,'not-issued');assert.equal(first.canOpen,false);
+    await assert.rejects(first.open(),code('PAYMENT_AVAILABILITY_REQUIRED'));assert.equal(opens,0);
+    first.select(1n);assert.equal(first.canOpen,false);const available=await first.refreshAvailability();assert.equal(available.status,'funded');assert.equal(first.canOpen,true);assert.equal(signatures,0);assert.equal(sends,0);assert.equal(opens,0);
+    scenarios.push('explicit selected availability blocks unissued payment before authentication');
+    const firstOpening=first.open();assert.equal(opens,1,'native callback starts in the explicit open turn');const opened=await firstOpening;assert.equal(opened.rightId,1n);
     const competingSigner = recovered(), competing = createTestnetPaymentClient({ ...options, recovered: competingSigner });
     const blocked = competing.forRight(2n);
-    const attempts = await Promise.allSettled([first.collect(1n), blocked.claim()]);
+    const attempts = await Promise.allSettled([first.collect(), blocked.claim()]);
     assert.equal(attempts[0].status, 'rejected'); assert.equal(attempts[0].reason.code, 'PAYMENT_BROADCAST_UNKNOWN');
     assert.equal(attempts[1].status, 'rejected'); assert.equal(attempts[1].reason.code, 'PAYMENT_ACCOUNT_BLOCKED');
     assert.equal(signatures, 1); assert.equal(sends, 1); assert.equal(maxInLock, 1); assert.equal(new Set(lockNames).size, 1);
@@ -127,30 +136,32 @@ async function installedBehavior() {
     competing.close(); assert.equal(closures, 2);
     await assert.rejects(firstSigner.account.signMessage({ message: 'must be closed' }), code('SESSION_ENDED'));
     await assert.rejects(competingSigner.account.signMessage({ message: 'must be closed' }), code('SESSION_ENDED'));
-    await assert.rejects(first.collect(1n), code('PAYMENT_SESSION_CLOSED')); assert.throws(() => blocked.claim(), code('PAYMENT_SESSION_CLOSED'));
+    await assert.rejects(first.collect(1n), code('PAYMENT_ACCOUNT_BLOCKED')); assert.throws(() => blocked.claim(), code('PAYMENT_SESSION_CLOSED'));
     scenarios.push('unknown-send helper finally and explicit client closure end actual Mera signers');
 
     const beforePending = writes;
     assert.deepEqual(await first.check(1n), { hash: firstHash }); assert.equal(writes, beforePending);
     finalized = true; currentRight = 2n;
+    first.select(2n);assert.equal(first.canOpen,false);assert.equal((await first.refreshAvailability()).status,'funded');assert.equal(first.canOpen,false,'known unresolved account blocks a different funded payment');await assert.rejects(first.open(),code('PAYMENT_ACCOUNT_BLOCKED'));assert.equal(opens,1);
     const confirmed = await first.check(1n); assert.equal(confirmed.receipt.status, 'success'); assert.equal(journal().active, null); assert.equal(writes, beforePending + 1);
     await reader.check(1n); assert.equal(writes, beforePending + 1); assert.equal(signatures, 1); assert.equal(sends, 1);
     scenarios.push('credential-free reconciliation survives signer closure');
 
     let secondSigner;
-    const second = createPaymentActions({ ...options, openExistingAccount: async () => secondSigner = recovered(), lifetimeTarget: new EventTarget() }); actions.push(second); await second.open();
+    const second = createPaymentActions({ ...options, openExistingAccount: async () => { opens++;return secondSigner = recovered(); }, lifetimeTarget: new EventTarget() }); actions.push(second);second.select(2n);await second.refreshAvailability();await second.open();
     corruptPrevious = true; const beforeRejected = writes;
     await assert.rejects(second.collect(2n), code('PAYMENT_EVENT_MISMATCH')); assert.equal(writes, beforeRejected); assert.equal(signatures, 1); assert.equal(sends, 1);
     assert.equal(second.isOpen, false); await assert.rejects(secondSigner.account.signMessage({ message: 'failed preflight closed signer' }), code('SESSION_ENDED'));
-    corruptPrevious = false; await second.open();
-    const secondResult = await second.collect(2n); assert.equal(secondResult.receipt.status, 'success'); assert.equal(signatures, 2); assert.equal(sends, 2);
+    corruptPrevious = false; await second.refreshAvailability();await second.open();
+    const secondResult = await second.collect(); assert.equal(secondResult.receipt.status, 'success'); assert.equal(signatures, 2); assert.equal(sends, 2);
     assert.equal(second.isOpen, false); await assert.rejects(secondSigner.account.signMessage({ message: 'success closed signer' }), code('SESSION_ENDED'));
     const settled = JSON.stringify(journal()), beforeRepeat = writes;
-    await second.open(); assert.equal((await second.collect(1n)).receipt.status, 'success'); assert.equal((await second.check(2n)).receipt.status, 'success');
+    second.select(1n);const collected=await second.refreshAvailability();assert.equal(collected.status,'already-collected');assert.equal(second.canOpen,false);const beforeOpen=opens;await assert.rejects(second.open(),code('PAYMENT_AVAILABILITY_REQUIRED'));assert.equal(opens,beforeOpen);assert.equal((await second.check(1n)).receipt.status,'success');assert.equal((await second.check(2n)).receipt.status,'success');
     assert.equal(JSON.stringify(journal()), settled); assert.equal(writes, beforeRepeat); assert.equal(signatures, 2); assert.equal(sends, 2);
     assert.deepEqual(journal().entries.map(entry => [entry.rightId, entry.nonce, entry.phase]), [['1', 0, 'confirmed'], ['2', 1, 'confirmed']]);
     await assert.rejects(secondSigner.account.signMessage({ message: 'completed intent also closed signer' }), code('SESSION_ENDED'));
     scenarios.push('prior receipt rechecked, next approved nonce settles once and helper success closes signer');
+    scenarios.push('already-collected observation prevents needless reopening while old-right checks stay credential free');
 
     const beforeBroken = nativeRequests;
     const broken = createTestnetPaymentReader({ ...options, storage: { getItem() { throw Error('storage unavailable'); }, setItem() { assert.fail(); } } });
@@ -161,7 +172,7 @@ async function installedBehavior() {
     // Only publicly observable material crosses into the fresh verifier process.
     // No account object, private key, browser journal or lock adapter is exported.
     await (await import('node:fs/promises')).writeFile('public-claim-fixture.json', JSON.stringify({ profile, hash: firstHash, transaction: transactions.get(firstHash), receipt: receipts.get(firstHash) }, (_, value) => typeof value === 'bigint' ? value.toString() : value), { flag: 'wx', mode: 0o600 });
-    process.stdout.write(JSON.stringify({ scenarios, nativeCalls, publicNetwork: false, rpcSimulated: true, actualEvm: false, signatures, sends, closures, maxConcurrentLockOwners: maxInLock, fixedRpcNames: true, journalEntries: journal().entries.length }) + '\n');
+    process.stdout.write(JSON.stringify({ scenarios, nativeCalls, publicNetwork: false, rpcSimulated: true, actualEvm: false, signatures, sends, closures, opens, maxConcurrentLockOwners: maxInLock, fixedRpcNames: true, journalEntries: journal().entries.length }) + '\n');
   } finally { actions.forEach(action => action.dispose()); sessions.forEach(session => session.end()); secret.fill(0); globalThis.fetch = originalFetch; }
 }
 
@@ -392,8 +403,8 @@ console.log(JSON.stringify({browserBundle:true,publicModules:own.sort(),moduleCo
 `);
   const bundle = JSON.parse((await execute(consumer, ['build-consumer.mjs'])).trim());
   await writeFile(join(consumer, 'payment-consumer.mjs'), `await (${installedBehavior.toString()})();\n`);
-  const behavior = JSON.parse((await execute(consumer, ['payment-consumer.mjs'])).trim());
-  assert.equal(behavior.scenarios.length, 6); assert.equal(behavior.signatures, 2); assert.equal(behavior.sends, 2); assert.equal(behavior.closures, 5); assert.equal(behavior.nativeCalls, 0);
+  const behavior = JSON.parse((await execute(consumer, ['payment-consumer.mjs'],60000)).trim());
+  assert.equal(behavior.scenarios.length, 8); assert.equal(behavior.signatures, 2); assert.equal(behavior.sends, 2); assert.equal(behavior.closures, 4); assert.equal(behavior.opens,3); assert.equal(behavior.nativeCalls, 0);
   const publicFixtureBefore = await readFile(join(consumer, 'public-claim-fixture.json'));
   await writeFile(join(consumer, 'payment-stateless-consumer.mjs'), `await (${installedStatelessVerifier.toString()})();\n`);
   const stateless = JSON.parse((await execute(consumer, ['payment-stateless-consumer.mjs'])).trim());
