@@ -1,7 +1,7 @@
 {
   "format": "continuitykit/sequential-payment-validation/v1",
-  "recordedAt": "2026-10-10T19:15:54.982Z",
-  "state": "public-first-payment-claimed-second-payment-and-outage-proof-pending",
+  "recordedAt": "2026-10-10T19:47:43.703Z",
+  "state": "public-second-payment-funded-after-primary-outage-reserve-claim-pending",
   "tests": {
     "paymentSuites": 81,
     "failed": 0,
@@ -42,7 +42,7 @@
     },
     "corroboratedByBothPinnedRpcs": true,
     "firstClaimVerified": true,
-    "secondFundingIssued": false,
+    "secondFundingIssued": true,
     "secondClaimVerified": false,
     "physicalPasskeyVerifiedForNewFlow": false,
     "firstClaim": {
@@ -66,6 +66,58 @@
       "signerLoaded": false,
       "pendingJournalRequired": false,
       "independentInternalReview": true
+    },
+    "secondFunding": {
+      "hash": "0xa7a1b3a83272f2a655670a1965aaf5161375f9a7a4075402fccfef28045e8d63",
+      "block": "69912000",
+      "blockHash": "0xf773c645a8a5aa390a479b0d2e784042916ff12b6989fb86baae0d2b7b181eb5",
+      "amountTestMon": "0.01",
+      "finalized": true,
+      "issuedAt": "2026-10-10T19:45:03.000Z",
+      "issuedAfterRecordedPrimaryOutage": true
+    },
+    "controlledPrimaryOutage": {
+      "observedAt": "2026-10-10T19:43:38.674Z",
+      "primaryRoutes": [
+        {
+          "path": "/",
+          "status": 503
+        },
+        {
+          "path": "/api/config",
+          "status": 503
+        },
+        {
+          "path": "/payments/",
+          "status": 503
+        },
+        {
+          "path": "/payments/profile.json",
+          "status": 503
+        }
+      ],
+      "reserveRoutes": [
+        {
+          "path": "/",
+          "status": 200
+        },
+        {
+          "path": "/api/config",
+          "status": 200
+        },
+        {
+          "path": "/payments/",
+          "status": 200
+        },
+        {
+          "path": "/payments/profile.json",
+          "status": 200
+        }
+      ],
+      "stillActive": true,
+      "restorationPending": true,
+      "operatorControlled": true,
+      "independentProviderProof": false
     }
   },
   "sites": {
@@ -85,7 +137,7 @@
     "Developer-funded testnet activity is not organic use, external adoption, revenue, demand or prize eligibility.",
     "Two RPC observations are not a light-client proof.",
     "Browser journal locks coordinate one origin only, not separate devices or origins.",
-    "Second funding, reserve claim and public original-app outage proof remain unfinished."
+    "Second funding after controlled A HTTP503 is verified. Fresh B recovery, second claim and A restoration remain unfinished."
   ],
   "publicSourceReplay": {
     "commit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",

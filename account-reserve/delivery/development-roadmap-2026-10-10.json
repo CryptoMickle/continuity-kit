@@ -203,8 +203,8 @@
       "publicCommit": "38b06b9e65d5281105d0413c1b1d439e9321299b"
     }
   ],
-  "lastCompleted": "First public beneficiary claim finalized in block 69905019; exact signed envelope, event and state corroborated by both pinned RPCs. Public second payment/outage proof remains unfinished.",
-  "next": "First claim is verified. Continue the same exact proposal with a recorded A outage, second funding, existing B recovery/claim, then restore A when wallet execution is in scope. Do not ask the user to repeat claim1. No new credentials, journal reset, video or submission.",
+  "lastCompleted": "Second 0.01 test-MON payment finalized after recorded A HTTP503; same proposal and beneficiary. Fresh B recovery and claim2 still pending.",
+  "next": "Verify exact second claim while A remains HTTP503, then restore A by removing only ACCOUNT_RESERVE_PRIMARY_OFFLINE and redeploying the existing saved version. Do not resend funding.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -255,17 +255,17 @@
       "paymentTests": 81,
       "legacyTransactionRegression": 44,
       "sourcePackagingTests": 15,
-      "publicIssuerTransactionsFinalized": 2,
+      "publicIssuerTransactionsFinalized": 3,
       "publicBeneficiaryClaimsVerified": 1,
       "nativeProof": false,
-      "evidenceBoundary": "Local SDK/EVM proof, two public issuer transactions and one exact public beneficiary claim. Public post-outage second payment remains pending; chain receipts do not prove device authentication.",
+      "evidenceBoundary": "Local SDK/EVM proof, three public issuer transactions and one exact public beneficiary claim. Second payment funded after controlled A HTTP503; native B recovery, claim2 and A restoration remain pending.",
       "receiptVerifierTests": 9,
       "currentSourcePackagingTests": 2
     },
     "sourceCommit": "309f62e552ecb6bafbc841afcc1fe5928cd40d3b",
     "publicPrimaryVersion": 5,
     "publicReserveVersion": 4,
-    "awaitingUser": "Clarification requested because latest heartbeat says no wallet transactions while earlier direct instruction authorizes testnet. First claim is already verified; do not repeat it. No second funding or A outage in this run.",
+    "awaitingUser": "Existing Account Reserve passkey at B/payments/, followed by explicit Collect this payment. No new credential; first claim must not be repeated.",
     "publicEvidence": "evidence/payments-validation-2026-10-10.json",
     "lastHeartbeat": {
       "at": "2026-10-10T19:15:54.982Z",
@@ -274,6 +274,19 @@
       "scope": "Read-only chain verification during the 19:09 heartbeat, which says not to execute wallet transactions. Existing direct testnet authorization is retained above; no new funding was attempted in this run."
     },
     "receiptVerifierPublicCommit": "174d68012819abf63406486ecf04cff788e0c21a",
-    "receiptVerifierReplayEvidence": "evidence/payment-receipt-replay-2026-10-10.json"
+    "receiptVerifierReplayEvidence": "evidence/payment-receipt-replay-2026-10-10.json",
+    "currentRun": {
+      "startedAt": "2026-10-10T19:41:32Z",
+      "authorization": "Direct user Fortsett after exact testnet continuation question; previous limited testnet scope retained.",
+      "primaryOffline": true,
+      "primaryVersion": 5,
+      "primaryEnvironmentRevision": 3,
+      "primaryDeployment": "appgdep_6aca954d8c188191b38be8cb50b28913",
+      "outageEvidence": "artifacts/payments-testnet-2026-10-10/outage-before-second-funding.json",
+      "secondFunding": "finalized",
+      "restoreRequired": true,
+      "restoreAction": "Remove only ACCOUNT_RESERVE_PRIMARY_OFFLINE and redeploy the same saved A version. Preserve all other environment entries and the public audience.",
+      "secondFundingHash": "0xa7a1b3a83272f2a655670a1965aaf5161375f9a7a4075402fccfef28045e8d63"
+    }
   }
 }

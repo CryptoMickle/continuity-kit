@@ -84,7 +84,8 @@ verification exits with code 1. The reported `amount` is denominated in wei.
 The public profile and these source files are trust inputs. This is a reproducible
 RPC check, not a light client or independent audit. A receipt proves settlement,
 not which browser or device was used, nor that a passkey ceremony occurred.
-The second funding and recovery claim are not yet completed on public testnet.
+The second payment is now funded on public testnet after the original app began
+returning HTTP 503. Its recovery claim is still pending.
 
 ## Issuer operation
 

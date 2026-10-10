@@ -17,7 +17,8 @@ recurring onchain obligation: collect a funded payment in A, then collect a seco
 payment through B with the same prepared account after A is unavailable. The local
 SDK/EVM proof passes. The new contract and first 0.01 test-MON obligation are now
 confirmed on Monad testnet, and the first beneficiary claim is finalized. The
-second funding and public recovery claim remain pending. The integration includes
+second payment is funded after a controlled original-app outage; its public
+recovery claim remains pending. The integration includes
 a wallet-free command for verifying the exact public receipt.
 These are development payments, not external usage. The text API remains account-free.
 

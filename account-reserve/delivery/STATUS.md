@@ -1,4 +1,4 @@
-# Sequential payments: first public claim verified — 10 October 2026
+# Sequential payments: second payment funded during A outage — 10 October 2026
 
 The additive payment integration passed 81 relevant tests. An actual local EVM
 and SDK test collected two independently funded payments with the same account;
@@ -12,7 +12,10 @@ corroborated on the two fixed RPCs. The first beneficiary claim is now finalized
 in block `69905019`: `0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600`.
 The operator verified the exact signed envelope, sender, amount, nonce, event,
 canonical block and contract state through both RPCs. The second obligation is
-not yet funded. Public recovery after an original-app outage remains unfinished.
+now funded after a recorded operator-controlled original-app HTTP 503.
+Funding hash: `0xa7a1b3a83272f2a655670a1965aaf5161375f9a7a4075402fccfef28045e8d63`, block `69912000`.
+B continues to serve its existing recovery flow. Fresh B recovery and claim2 remain
+pending; no public recovery-completion claim is made.
 
 The existing Account Primary and Reserve Sites now serve additive `/payments/`
 pages. Legacy code, origin/RP/namespace bindings, passkeys and stored records remain
@@ -32,8 +35,10 @@ checks passed, including a fresh offline install and 64 payment tests from the
 extracted archive. The CLI also verified the real first claim using the public
 profile downloaded from B. Existing Sites and browser flows were not changed.
 
-This verification run performed chain reads only. Second funding remains pending;
-A remains available and the original proposal/journal are preserved.
+The user authorized continuing the bounded testnet proposal. Only its second
+issuer funding was sent in this continuation, after fresh checks; no resend or
+journal reset occurred. A is temporarily unavailable for the native B test and
+must be restored afterward. Existing passkeys and reserve records are unchanged.
 
 This closes an implementation gap, not the demand gap. Test funding and claims do
 not establish organic transactions, customers, sponsor acceptance or prize odds.
