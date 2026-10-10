@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-10T10:55:51.544Z",
+  "status": "PUBLISHED_AND_VERIFIED",
+  "sitesVersion": 7,
+  "sourceChange": "Observed-only progress, in-panel app label, and read-only navigation after missing snapshot. No cryptographic or storage change.",
+  "automatedAppEditorTests": {
+    "passed": 26,
+    "failed": 0
+  },
+  "publicHttpChecks": {
+    "passed": 40,
+    "failed": 0,
+    "initialAttempt": "New primary JS asset returned 404 immediately after publication; full delayed recheck passed."
+  },
+  "browserCheck": {
+    "role": "recovery",
+    "app": "textarea",
+    "viewportWidth": 390,
+    "documentWidth": 375,
+    "completedSteps": [],
+    "currentStep": 3,
+    "panelAppLabel": "Textarea / Reserve",
+    "nativeCeremonies": 0,
+    "uploadAttempts": 0
+  },
+  "nativeAcceptance": "Pending; one missing Textarea lookup, Markdown exact-text check requested.",
+  "screenshot": "apps-progress-fixed-2026-10-10.png"
+}

@@ -1,5 +1,28 @@
 # Two-app reuse and operator replacement — 10 October 2026
 
+## Native two-app test is incomplete — 12:48 Oslo time
+
+The builder supplied an iPhone screenshot showing a missing snapshot. Recent
+server metadata shows Textarea setup admission without a subsequent reserve read
+or upload, then Markdown admission followed by PUT 201 and two successful reads.
+A fresh Textarea lookup later returned 404. This is consistent with incomplete
+Textarea preparation; it does not establish credential identity or export success.
+The builder has been asked to open Markdown directly with the existing key.
+See [scoped incident](../evidence/apps-native-missing-2026-10-10.json).
+
+A UI defect was confirmed: fresh B painted prior steps as complete without having
+observed setup. The correction keeps unobserved steps neutral, names the current
+app inside the recovery panel, and offers read-only links after a missing lookup.
+The 26 app/editor tests pass. Cryptography, storage bindings and existing records
+are unchanged. The automated and earlier text-v1 results below do not close this
+new native acceptance gap.
+
+The correction is published on both Sites as version 7. Forty public HTTP checks
+passed; a fresh Textarea B page at 390px showed its app label, step 3 active and
+no steps marked complete. [UI verification](../evidence/apps-progress-fix-2026-10-10.json).
+
+## Earlier release record
+
 The new `/apps/` routes are published on the existing Primary/Reserve Sites.
 They run pinned Textarea and EasyMDE/CodeMirror editors with explicit first-key or
 existing-key preparation. Old `/text/` and Work routes, record bindings, shared

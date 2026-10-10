@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-10-10T10:28:01.626Z",
+  "checkedAt": "2026-10-10T10:56:13.906Z",
   "status": "PASSED",
   "checks": 40,
   "details": [
@@ -13,8 +13,8 @@
     "primary: previous Work namespace preserved",
     "primary: rejects /api/apps-config?appId=untrusted",
     "primary: rejects /apps/untrusted/",
-    "primary: exact asset /apps/assets/index-BoD6n-6z.js",
     "primary: exact asset /apps/assets/index-JkaZbVXT.css",
+    "primary: exact asset /apps/assets/index-ZG-Hv70m.js",
     "primary: exact asset /apps/editors/THIRD_PARTY_NOTICES.txt",
     "primary: exact asset /apps/editors/easymde-editor.mjs",
     "primary: exact asset /apps/editors/easymde-runtime.mjs",
@@ -33,8 +33,8 @@
     "recovery: previous Work namespace preserved",
     "recovery: rejects /api/apps-config?appId=untrusted",
     "recovery: rejects /apps/untrusted/",
-    "recovery: exact asset /apps/assets/index-BoD6n-6z.js",
     "recovery: exact asset /apps/assets/index-JkaZbVXT.css",
+    "recovery: exact asset /apps/assets/index-ZG-Hv70m.js",
     "recovery: exact asset /apps/editors/THIRD_PARTY_NOTICES.txt",
     "recovery: exact asset /apps/editors/easymde-editor.mjs",
     "recovery: exact asset /apps/editors/easymde-runtime.mjs",

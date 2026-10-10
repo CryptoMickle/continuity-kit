@@ -33,6 +33,7 @@ async function main() {
   let setupAttempted = false, token, tokenUntil = 0, capTimer, capRequest, demoTimer, deadlineTimer;
   let setupDeadline = 0, baseline;
   const downloads = new Set();
+  const completedSteps = new Set();
 
   // Each HTTP store request already has a bounded transport signal. Joining the
   // page lifetime keeps its body reads abortable when this window is discarded.
@@ -61,6 +62,7 @@ async function main() {
   function state(update) {
     if (update.state === 'failed') { stopSetup(update.code); return; }
     if (stopped || demoExpired || leaving) return;
+    if (update.state === 'preparing') step(2, [1]);
     const messages = {
       waiting: 'Continue in window B. Keep this window open until B confirms that the snapshot was independently checked.',
       'selecting-credential': 'Choose your existing reserve passkey. This does not create another key. Further prompts independently check the saved work.',
@@ -107,9 +109,11 @@ async function main() {
           <div class="side-column">
             <section class="control-panel" aria-labelledby="heading">
               <div class="panel-kicker"><span>${primary ? 'A' : 'B'}</span>${primary ? 'Original workspace' : 'Independent reserve'}</div>
+              <p class="field-label" id="panel-app-label"></p>
               <h2 id="heading">${primary ? 'Start with your own example.' : enrolling ? 'Prepare this snapshot.' : 'Pick up where you left off.'}</h2>
               <p id="intro">${primary ? 'Edit your fictional text, then prepare its reserve in window B. No wallet or account is created.' : enrolling ? 'Checking whether this demonstration can accept a snapshot. No passkey is created during this check.' : 'Choose your existing reserve passkey when your device asks. Use the passkey made for this B site.'}</p>
               <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+              <nav id="missing-reserve-help" class="context-note" aria-label="Other existing reserves" hidden></nav>
               <div id="operator-invitation" hidden><label class="field-label" for="invitation">Operator invitation</label><input id="invitation" type="password" autocomplete="off" maxlength="64"><p class="context-note">Provided by the operator. It permits one upload and is not needed for recovery.</p></div><div class="actions" id="actions"></div>
               <p class="context-note" id="action-context">${primary ? 'The next step opens B. Only B asks for a reserve passkey. Keep both windows open until the check finishes.' : enrolling ? 'Your browser and authenticator must support passkey PRF. Keep both windows open; the full preparation may need several device confirmations.' : 'Use the same reserve passkey for either editor; this page opens only the selected app. The device may ask for more than one confirmation.'}</p>
               <p class="deadline" id="deadline" hidden></p>
@@ -133,6 +137,7 @@ async function main() {
       <footer><span>A project by Mikkel / CryptoMickle.</span><span>Self-service passkey demonstration · Fictional work · No funds</span></footer>
     </div>`;
   $('app-label').textContent = selected.label + (primary ? ' / Original' : ' / Reserve');
+  $('panel-app-label').textContent = selected.label + (primary ? ' / Original draft' : ' / Reserve');
   const module = await import(/* @vite-ignore */ '/apps/editors/' + (selected.id === 'textarea' ? 'textarea' : 'easymde') + '-editor.mjs');
   if (leaving) return;
   if (Date.now() >= expiresAtMs) { expireDemo(); return; }
@@ -143,12 +148,15 @@ async function main() {
   $('demo-expiry').textContent = 'Access ends ' + utc(expiresAtMs) + '.';
   $('retention-copy').textContent = 'Access ends ' + utc(expiresAtMs) + '. Active encrypted records become eligible for expiry cleanup at that time. Cleanup is separate from access expiry; deletion is not confirmed by this page. Provider recovery history may retain deleted records for up to 30 further days. Immediate erasure of every copy is not promised.';
   $('reserve-url').value = publicReserveUrl;
-  function step(number) {
+  function step(number, observed = []) {
+    for (const completed of observed) completedSteps.add(completed);
     for (let i = 1; i <= 4; i++) {
-      const element = $('step-' + i); element.className = i < number ? 'complete' : '';
+      const element = $('step-' + i); element.className = completedSteps.has(i) ? 'complete' : '';
       if (i === number) element.setAttribute('aria-current', 'step'); else element.removeAttribute('aria-current');
     }
   }
+  // A fresh B page knows only which action is available. Prior steps become
+  // complete only when this page observes the corresponding successful work.
   step(primary ? 1 : enrolling ? 2 : 3);
   function scene(title, intro, context) {
     $('heading').textContent = title; $('intro').textContent = intro; $('action-context').textContent = context;
@@ -248,16 +256,28 @@ async function main() {
       TEXT_INVALID: 'Use valid text for your fictional example.',
       TEXT_TOO_LARGE: 'Shorten the draft to keep the snapshot below 16 KB.',
       POPUP_BLOCKED: 'Allow the separate reserve window, then press Prepare in B again. Your draft remains in this window.',
-      RESERVE_MISSING: 'No snapshot was found for this app and selected passkey. Check the other app or your earlier text reserve. Keep the key and check that setup completed. No new passkey has been created.',
+      RESERVE_MISSING: `No ${selected.label} snapshot was found with the selected passkey. Check the other app or your earlier text reserve below. Keep your existing passkeys. No new key or snapshot was created.`,
       OPERATION_CANCELLED: 'Recovery was cancelled. You can try opening the same existing reserve again.',
       STORE_UNAVAILABLE: 'The reserve could not be read. Keep your existing passkey and try recovery again later.',
     };
     status(messages[code] ?? `The action stopped (${code}). Completion is not assumed. Keep your existing passkey.`, 'error');
+    if (code === 'RESERVE_MISSING') {
+      const other = env.apps.find(app => app.id !== selected.id);
+      const help = $('missing-reserve-help'); help.replaceChildren();
+      for (const [label, href] of [
+        [`Check ${other.label} reserve`, '/apps/' + other.id + '/'],
+        ['Check earlier text reserve', '/text/'],
+      ]) {
+        const paragraph = document.createElement('p'), link = document.createElement('a');
+        link.textContent = label; link.href = href; paragraph.append(link); help.append(paragraph);
+      }
+      help.hidden = false;
+    }
   }
   function ready() {
     if (stopped || demoExpired || leaving) return;
     clearCapability(); clearPrepareButton(); clearInterval(deadlineTimer); setupDeadline = 0; deadline();
-    snapshotTaken = true; changed(); step(3);
+    snapshotTaken = true; changed(); step(3, [1, 2]);
     $('actions').replaceChildren(); fresh(); $('public-link').hidden = false;
     if (primary) button('Discard this A window’s state', discardOriginal, 'text-button');
     scene('Your snapshot is ready.', 'The saved work was reopened and independently checked against the text you prepared. Now open a fresh B page and recover with this passkey.', 'Keep the reserve passkey and public B link. You may close the original A tab after this confirmation.');
@@ -267,7 +287,7 @@ async function main() {
     setupActive();
     // Open B synchronously from this click; do not await network work first.
     setup = startTextReserveSetup({ config: env.config, originalOrigin: env.originalOrigin, recoveryUrl: publicReserveUrl, text: textFromEditor(), signal: lifetime.signal, onState: state });
-    clearPrepareButton(); step(2); setDeadline(performance.now() + Math.min(expiresAtMs - Date.now(), SESSION_MS));
+    clearPrepareButton(); step(2, [1]); setDeadline(performance.now() + Math.min(expiresAtMs - Date.now(), SESSION_MS));
     editable(false); $('actions').replaceChildren(); cancelButton();
     try {
       const result = await setup.completion;
@@ -336,6 +356,7 @@ async function main() {
   }
   async function recover() {
     closeOpened();
+    $('missing-reserve-help').hidden = true; $('missing-reserve-help').replaceChildren();
     status('Choose your existing reserve passkey. Looking for the text you prepared.');
     try {
       opened = await recoverTextReserve({ config: env.config, store: readStore, signal: lifetime.signal, onProgress: stage => {
@@ -363,7 +384,7 @@ async function main() {
       $('draft-helper').textContent = 'Keep writing, then export the current version. The saved reserve stays unchanged.';
       $('actions').replaceChildren();
       button('Continue writing ↓', () => { $('work-deliverable').querySelector('textarea,[contenteditable]')?.focus(); $('work-deliverable').scrollIntoView({ behavior: 'auto', block: 'center' }); });
-      fresh(); step(4);
+      fresh(); step(4, [3]);
       scene('The work is open.', 'Continue the draft and export TXT or JSON. Your text remains editable here.', 'Edits and exports contain text only. The saved snapshot stays unchanged.');
       status('Text recovered and verified. No account or signer is involved.', 'success');
     } finally { closeOpened(); }

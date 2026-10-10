@@ -132,6 +132,7 @@ async function fixture(t, { primary = false, enrolling = !primary, delayedRespon
     resolvePreparation: () => preparation.resolve({ owner: '0x' + '1'.repeat(40) }),
     resolveHandoff: () => handoff.resolve({ owner: '0x' + '1'.repeat(40) }),
     recover(text) { recovery.resolve({ text, textDigest: 'b'.repeat(64), locator: 'A'.repeat(43) }); },
+    rejectRecovery(code = 'RESERVE_MISSING') { recovery.reject(Object.assign(new Error(code), { code })); },
   };
 }
 
@@ -183,6 +184,8 @@ for (const [label, mode] of [['Use existing reserve passkey', 'existing'], ['Cre
   test(`${mode} choice waits for admission then invokes native preparation synchronously once`, async t => {
     const ui = await fixture(t);
     assert.equal(ui.counts.issues, 1); assert.equal(ui.counts.prepares, 0); assert.equal(ui.counts.editorMounts, 0);
+    assert.equal(ui.element('step-1').className, ''); assert.equal(ui.element('step-2').className, '');
+    assert.equal(ui.element('step-2').attributes['aria-current'], 'step', 'admission alone does not prove a saved reserve');
     const button = ui.control(label), pending = button.dispatch('click');
     assert.equal(ui.counts.prepares, 1, 'no asynchronous work precedes receiver.prepare');
     assert.equal(ui.prepareOptions().credentialMode, mode);
@@ -190,6 +193,8 @@ for (const [label, mode] of [['Use existing reserve passkey', 'existing'], ['Cre
     await button.dispatch('click'); assert.equal(ui.counts.prepares, 1);
     assert.equal(ui.counts.writeStores, 1);
     ui.resolvePreparation(); await pending;
+    assert.equal(ui.element('step-1').className, 'complete'); assert.equal(ui.element('step-2').className, 'complete');
+    assert.equal(ui.element('step-3').attributes['aria-current'], 'step');
     assert.equal(ui.control('Open a fresh B reserve').href, ui.env.recoveryOrigin + '/apps/textarea/');
     assert.equal(ui.counts.issues, 1); assert.equal(ui.counts.prepares, 1); assert.ok(ui.counts.cleared >= 1); assert.equal(ui.counts.editorMounts, 0);
   });
@@ -245,9 +250,15 @@ test('expired capacity and failed admission never request a credential', async t
 test('fresh B recovers only its chosen app and exports edited text even after access expires', async t => {
   const ui = await fixture(t, { enrolling: false, app: 'markdown' });
   assert.equal(ui.counts.editorMounts, 0); assert.equal(ui.element('editor').hidden, true);
+  for (const number of [1, 2, 3, 4]) assert.equal(ui.element('step-' + number).className, '');
+  assert.equal(ui.element('step-3').attributes['aria-current'], 'step');
+  assert.equal(ui.element('panel-app-label').textContent, 'Markdown Studio / Reserve');
   const pending = ui.control('Open my existing reserve').dispatch('click');
   assert.equal(ui.counts.recovered, 1); assert.equal(ui.recoveryOptions().config.appId, 'continuity-markdown-v1');
   ui.recover('# A recovered release note\n'); await pending;
+  assert.equal(ui.element('step-1').className, ''); assert.equal(ui.element('step-2').className, '');
+  assert.equal(ui.element('step-3').className, 'complete'); assert.equal(ui.element('step-4').attributes['aria-current'], 'step');
+  assert.equal(ui.element('missing-reserve-help').hidden, true);
   assert.equal(ui.read(), '# A recovered release note\n'); assert.equal(ui.counts.issues, 0); assert.equal(ui.counts.writeStores, 0);
   assert.equal(ui.counts.editorMounts, 1); assert.equal(ui.element('editor').hidden, false);
   ui.write('# Finished\n\nLiteral <script>text only</script>\n');
@@ -257,6 +268,35 @@ test('fresh B recovers only its chosen app and exports edited text even after ac
   assert.deepEqual(JSON.parse(await ui.blobs[1].text()), { format: 'continuity-text-export/v1', text: 'After expiry\n' });
   assert.equal(ui.counts.prepares, 0); assert.equal(ui.counts.issues, 0);
 });
+
+for (const [app, label, otherApp, otherLabel] of [
+  ['textarea', 'Textarea', 'markdown', 'Markdown Studio'],
+  ['markdown', 'Markdown Studio', 'textarea', 'Textarea'],
+]) {
+  test(`missing ${app} reserve names its namespace and offers only read-only navigation without claiming setup passed`, async t => {
+    const ui = await fixture(t, { enrolling: false, app });
+    assert.equal(ui.element('panel-app-label').textContent, label + ' / Reserve');
+    assert.equal(ui.counts.recovered, 0); assert.equal(ui.counts.prepares, 0); assert.equal(ui.counts.issues, 0);
+    assert.equal(ui.element('missing-reserve-help').hidden, true);
+    const pending = ui.control('Open my existing reserve').dispatch('click');
+    ui.rejectRecovery(); await pending;
+    assert.ok(ui.element('status').textContent.startsWith(`No ${label} snapshot was found with the selected passkey.`));
+    for (const number of [1, 2, 3, 4]) assert.equal(ui.element('step-' + number).className, '');
+    assert.equal(ui.element('step-3').attributes['aria-current'], 'step');
+    const help = ui.element('missing-reserve-help'); assert.equal(help.hidden, false);
+    const links = help.children.map(paragraph => paragraph.children[0]);
+    assert.deepEqual(links.map(link => [link.tagName, link.textContent, link.href]), [
+      ['A', `Check ${otherLabel} reserve`, `/apps/${otherApp}/`],
+      ['A', 'Check earlier text reserve', '/text/'],
+    ]);
+    for (const link of links) { assert.equal(link.listeners.size, 0); assert.equal(link.onclick, undefined); }
+    assert.equal(ui.counts.recovered, 1, 'only the explicit open action requests recovery');
+    assert.equal(ui.counts.prepares, 0); assert.equal(ui.counts.writeStores, 0); assert.equal(ui.counts.issues, 0); assert.equal(ui.counts.setups, 0);
+    assert.equal(ui.counts.editorMounts, 0); assert.equal(ui.element('editor').hidden, true);
+    assert.equal(ui.control('Use existing reserve passkey'), undefined); assert.equal(ui.control('Create my first reserve passkey'), undefined);
+    assert.ok(ui.control('Open my existing reserve'), 'retry remains an explicit read-only action');
+  });
+}
 
 test('leaving B during recovery prevents a late result from mounting an editor', async t => {
   const ui = await fixture(t, { enrolling: false, app: 'markdown' });
