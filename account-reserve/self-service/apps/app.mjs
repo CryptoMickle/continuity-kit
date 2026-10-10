@@ -99,7 +99,7 @@ async function main() {
         <div class="work-layout">
           <section class="editor-panel" id="editor" aria-labelledby="editor-title" ${primary ? '' : 'hidden'}>
             <div class="editor-heading"><div><h2 id="editor-title">Make it your example.</h2><p id="editor-subtitle">Write a fictional draft and leave something to finish. One document, up to 16 KB.</p></div><span class="editor-icon">${paper}</span></div>
-            <label class="field"><span class="field-label">Working draft</span><div id="work-deliverable" class="integration-editor" aria-label="Working draft"></div><span class="field-helper" id="draft-helper">The reserve will keep the version you prepare. Later edits stay in the current window.</span></label>
+            <div class="field"><span class="field-label">Working draft</span><div id="work-deliverable" class="integration-editor" aria-label="Working draft"></div><span class="field-helper" id="draft-helper">The reserve will keep the version you prepare. Later edits stay in the current window.</span></div>
             <div class="editor-footer"><span id="edit-state">Example content · Held in this window</span><span id="size"></span></div>
             <div class="editor-prepare" id="editor-prepare" hidden></div>
             <div class="export-actions" id="exports"><button id="export-text">Export TXT</button><button id="export-json" class="secondary">Export JSON</button></div>

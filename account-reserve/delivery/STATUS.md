@@ -12,7 +12,23 @@ the same origin, both exact documents recovered in a fresh process. Transfer
 contains no plaintext/key/invitation; tampering and wrong-origin access reject.
 This is synthetic local evidence, not a public-provider migration or audit.
 
-Video and final submission remain deferred. No external adoption is claimed.
+Description, judge instructions and Mera explanation were saved at 10:18 UTC; all 13 fields matched after reload, with ten unchanged. Checklist remains 5/6. Video and final submission remain deferred. No external adoption is claimed.
+
+Both Sites are now version 6. Final public HTTP checks passed 40/40, including
+exact compiled assets and preserved legacy routes. Actual Textarea TXT and
+Markdown JSON exports were byte-checked in the browser; cancelling setup before
+authentication stopped both windows. At 390px, the final Markdown editor has no
+horizontal page overflow. A reproduced label-click formatting bug was corrected
+and checked on the published page. No native authentication was invoked by the agent.
+
+An anonymous download of public commit `c76a9a325efb27e8ba000c9d9dfc363ba825396f`
+passed clean installs, build, 24 app/editor tests, six operator tests and standalone
+package installation. The later one-line editor-label correction passed 24/24
+again locally. The final clean operator archive contains the corrected build.
+See [public replay](../evidence/apps-public-replay-2026-10-10.json),
+[browser scope](../evidence/apps-browser-2026-10-10.json),
+[HTTP proof](../evidence/apps-public-http-2026-10-10.json), and
+[archive verification](../evidence/operator-delivery-artifact-2026-10-10.json).
 See [operator proof](../evidence/operator-portability-2026-10-10.json) and the updated
 [judge guide](JUDGE_GUIDE.md). Older dated records below retain their own scope.
 

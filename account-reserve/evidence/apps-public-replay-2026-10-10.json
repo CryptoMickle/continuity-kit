@@ -1,0 +1,98 @@
+{
+  "recordedAt": "2026-10-10T10:20:03.875Z",
+  "status": "PASSED",
+  "source": {
+    "repository": "https://github.com/CryptoMickle/continuity-kit",
+    "commit": "c76a9a325efb27e8ba000c9d9dfc363ba825396f",
+    "archiveUrl": "https://codeload.github.com/CryptoMickle/continuity-kit/tar.gz/c76a9a325efb27e8ba000c9d9dfc363ba825396f",
+    "archiveBytes": 1681844,
+    "archiveSha256": "2f3daf263b45affded30ca5257aba92aaac0024f138bc2f6c3ee369e8ccccf30",
+    "subdirectory": "account-reserve",
+    "anonymousDownload": true
+  },
+  "isolation": {
+    "newEmptyTemporaryDirectory": true,
+    "sourceFiles": "Downloaded exact public commit only.",
+    "developmentWorkspaceModulesImported": false,
+    "dependencyInstallation": "Fresh public registry installs from committed lockfiles; install scripts disabled.",
+    "liveServiceWrites": false,
+    "nativePasskeyCeremonies": false
+  },
+  "runtime": {
+    "node": "v24.19.0",
+    "platform": "darwin"
+  },
+  "commands": [
+    {
+      "command": "npm ci --ignore-scripts --no-audit --no-fund",
+      "exitCode": 0,
+      "installedPackages": 86
+    },
+    {
+      "command": "npm --prefix integrations/multi-app ci --ignore-scripts --no-audit --no-fund",
+      "exitCode": 0,
+      "installedPackages": 36
+    },
+    {
+      "command": "npm run build:apps",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run test:apps",
+      "exitCode": 0,
+      "tests": 24,
+      "passed": 24,
+      "failed": 0
+    },
+    {
+      "command": "npm run test:operator",
+      "exitCode": 0,
+      "tests": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "command": "node operator/create.mjs <new empty destination outside source>",
+      "exitCode": 0
+    },
+    {
+      "command": "npm ci --ignore-scripts --no-audit --no-fund --omit=dev (generated operator package)",
+      "exitCode": 0,
+      "installedPackages": 29
+    }
+  ],
+  "operatorPackage": {
+    "generatedFromActualPublicBrowserBuild": true,
+    "sdkName": "@continuitykit/account-reserve",
+    "sdkVersion": "0.0.1-experimental",
+    "sdkIntegrity": "sha512-7zId2exjuV/CBVYgKtACLd4kFGJTUFO4ar2uj2EJbj+1FtjaObZxX7WHYfkbCo4r4lWB4ZTg0OizSRt53FEMiA==",
+    "editorCssPresent": true,
+    "editorCssSha256": "9137ca5635274c83b93bc280a60edb0b01368ca598308c7bd2b961c7b7e5afb1"
+  },
+  "coverage": [
+    "Real pinned Textarea and EasyMDE/CodeMirror runtime editing and formatting in JSDOM.",
+    "Two fixed app namespaces and exact-origin client configuration.",
+    "Admission before explicit native-selection boundary, cancellation, expiry and uncertain-write reconciliation using synthetic/test doubles.",
+    "Durable immutable storage, lifetime quota preservation, no-clobber ciphertext import and invalidated pending capabilities.",
+    "Fresh installed public SDK recovers both app texts in a new process after original operator process stops and original database is removed.",
+    "Wrong origin rejected before authenticator; altered ciphertext rejected while unchanged second app recovers."
+  ],
+  "warnings": [
+    {
+      "kind": "Dependency deprecation notices",
+      "detail": "npm reports legacy @esbuild-kit packages; installation succeeded."
+    },
+    {
+      "kind": "Expected staged stylesheet emission",
+      "detail": "Vite reports the editor stylesheet absent during its initial phase. The documented builder emits it afterward; it exists in the finished browser build and generated operator package."
+    }
+  ],
+  "documentationFailures": [],
+  "notClaimed": [
+    "Physical passkey or native browser proof.",
+    "Human integration time or external adoption.",
+    "Public provider migration or independent operators.",
+    "Recovery after losing the recovery RP/domain.",
+    "Production security audit or guaranteed prize eligibility."
+  ]
+}

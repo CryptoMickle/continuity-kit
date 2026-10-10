@@ -30,6 +30,12 @@ The [operator guide](../operator/README.md) includes the runnable package, expli
 invitation gate, storage limits, migration commands and exact-domain requirement.
 Both additions target developer reuse and continuity; neither is demand evidence.
 
+The [public-source replay](../evidence/apps-public-replay-2026-10-10.json) records
+the exact anonymous source archive, fresh installs, all 24 app/editor and six
+operator test results, plus standalone package installation. The final public
+pages also passed [40 HTTP checks](../evidence/apps-public-http-2026-10-10.json)
+and [scoped browser checks](../evidence/apps-browser-2026-10-10.json).
+
 ---
 
 # Inspect ContinuityKit Text Reserve

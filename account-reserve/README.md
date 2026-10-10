@@ -49,6 +49,15 @@ and [operator responsibilities](operator/README.md). Public Work, text and multi
 routes share the same existing 64-record and 256-admission limits. No new quota,
 database schema, pricing plan or blockchain transaction was introduced.
 
+The [clean public-source replay](evidence/apps-public-replay-2026-10-10.json)
+passed both documented installs, the browser build, 24 app/editor tests, six
+operator tests and installation of the generated standalone operator package at
+the recorded commit. The later editor-label correction was rebuilt, passed the
+same 24 app/editor tests and was checked in the published 390px layout.
+[Live HTTP checks](evidence/apps-public-http-2026-10-10.json) passed 40 conditions,
+including exact compiled asset matches and preservation of the earlier routes.
+These are agent-run engineering checks, not human adoption or native passkey proof.
+
 ## Earlier account-free text candidate
 
 [Open original workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/)

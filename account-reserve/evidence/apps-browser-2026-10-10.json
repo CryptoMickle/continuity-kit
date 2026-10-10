@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-10T10:29:00.068Z",
+  "status": "PASSED_WITH_NATIVE_ACCEPTANCE_PENDING",
+  "sitesVersion": 6,
+  "checks": [
+    {
+      "flow": "Textarea primary",
+      "result": "Edited fictional text exported as TXT; downloaded bytes matched input exactly."
+    },
+    {
+      "flow": "Markdown Studio primary",
+      "result": "Edited fictional Markdown exported as JSON; parsed text matched input exactly."
+    },
+    {
+      "flow": "Setup cancellation",
+      "result": "Explicit new/existing passkey choices visible in B. Cancel before authentication stopped B and A. No native ceremony or upload."
+    },
+    {
+      "flow": "Final Markdown layout",
+      "viewportWidth": 390,
+      "documentWidth": 375,
+      "editorHeight": 406,
+      "pageHorizontalOverflow": false
+    },
+    {
+      "flow": "Editor label regression",
+      "before": "Clicking Working draft inserted **** by activating the nested Bold button.",
+      "after": "Outer div replaces label; clicking Working draft left text unchanged on the final published page."
+    },
+    {
+      "flow": "Final browser warnings/errors",
+      "count": 0
+    }
+  ],
+  "nativeCeremonies": 0,
+  "uploadAttempts": 0,
+  "admissionsIssued": 1,
+  "previousVersions": "TXT/JSON and cancel-before-auth checks used preceding deployment; final version changes only editor wrapper markup.",
+  "notClaimed": [
+    "Physical iPhone test of this new two-app sequence.",
+    "Same physical key successfully preparing and reopening both new namespaces.",
+    "External adoption or integration time.",
+    "Public provider migration."
+  ]
+}

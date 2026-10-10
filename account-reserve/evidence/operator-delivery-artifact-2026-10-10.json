@@ -1,0 +1,37 @@
+{
+  "recordedOn": "2026-10-10",
+  "status": "PACKAGED_AND_READBACK_VERIFIED",
+  "sourceBaseCommit": "c76a9a325efb27e8ba000c9d9dfc363ba825396f",
+  "additionalSourceFix": {
+    "file": "self-service/apps/app.mjs",
+    "change": "Replace outer editor label with div to prevent Working draft text clicks from activating the Markdown Bold button.",
+    "sha256": "b4311b74cfd8c8e3ccad5bab065e1b06d8b17ab8d73df41d96808e51741ad0fd",
+    "verifiedInGeneratedBrowserAssets": true
+  },
+  "artifact": {
+    "file": "artifacts/continuitykit-operator-2026-10-10.tgz",
+    "bytes": 417791,
+    "sha256": "fdfb0d99bd7a783d7f03d6186c563b3d2851f11ee6d979267ed356df297897c9",
+    "files": 23,
+    "allBytesReadBack": true,
+    "format": "gzip plus POSIX ustar, normalized metadata"
+  },
+  "contents": {
+    "operatorSource": true,
+    "actualFinalBrowserBuild": true,
+    "lockedSdkTarball": true,
+    "licensesAndProvenance": true,
+    "nodeModules": false,
+    "runtimeDatabase": false,
+    "liveCredentialsOrInvitations": false,
+    "appleDoubleFiles": false,
+    "extendedAttributes": false,
+    "symlinksOrSpecialFiles": false,
+    "nestedSdkMembersChecked": 57
+  },
+  "scope": [
+    "This final delivery archive includes the reviewed UI wrapper correction and rebuilt assets.",
+    "The separate public replay evidence remains scoped to its exact c76a9a3 source commit.",
+    "No physical passkey, cloud deployment or independently operated hosting migration is asserted by packaging."
+  ]
+}

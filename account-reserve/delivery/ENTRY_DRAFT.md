@@ -1,6 +1,6 @@
 # Metropolis entry — two-app/operator update, 10 October 2026
 
-**Current update:** the three sections below are prepared for a new draft save; this file does not itself establish portal publication. New native two-app acceptance remains pending.
+**Current update saved:** 10 October 2026, 10:18 UTC. Description, judge instructions and Mera explanation were updated. All 13 text fields matched after reload; ten were preserved. Checklist remains 5/6. New native two-app acceptance remains pending. See `evidence/apps-portal-draft-2026-10-10.json`.
 
 **Earlier text-v1 version saved to the portal and verified after reload at 21:52 UTC, 9 October 2026.**
 Five changed fields matched this draft; all 13 text fields were read back, with the
@@ -115,7 +115,7 @@ This is a prepared immutable snapshot, not automatic sync or lost-passkey recove
 
 ## Remaining submission boundary
 
-The 10 October acceptance update was saved at 09:36 UTC and verified after reload.
+The two-app/operator update was saved at 10:18 UTC on 10 October; all 13 fields matched after reload.
 Text sites are published; source commands refer
 to the current tree. Native text-v1 iPhone recovery/export is builder-reported with
 the server corroboration and limitations above. Technical demo and
