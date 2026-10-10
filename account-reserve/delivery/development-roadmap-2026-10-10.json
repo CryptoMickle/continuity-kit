@@ -294,10 +294,30 @@
       "publicCommit": "a16ff1a27b0d06b9cd6706170c79a507915d4af3",
       "publicSitesChanged": false,
       "physicalPasskeyVerified": false
+    },
+    {
+      "id": "installed-payment-recovery-template",
+      "status": "complete",
+      "observedGap": "integrations/payment-client includes only a helper and README with host UI placeholders. They are not in the SDK tarball; the hosted payment page depends on repository-private configuration. The existing account starter creates its own example reserve and has no payment flow.",
+      "value": "A developer can generate and build a separate consumer with complete selected-payment controls and explicit existing-reserve configuration, instead of assembling the demo from private repository internals.",
+      "acceptance": [
+        "Generate into an empty external directory with pinned SDK dependency, reviewed helper, complete UI and config template; provide build, doctor and test commands.",
+        "Use only public SDK exports and preserve all existing published Sites, credentials, ciphertext and profile bindings.",
+        "Configure the existing reserve, same-origin read store and explicit bounded trusted payment profile; do not create a reserve, key, issuer, contract or payment.",
+        "Doctor rejects missing configuration and RP/origin mismatch before authentication; moving B to localhost cannot reuse an origin-bound existing passkey.",
+        "Expose selection, availability, explicit existing-key open, collect, pending reconciliation and close with the helper lifecycle intact.",
+        "Prove clean installation and working browser controls with isolated test doubles outside production assets; no new funding, native authentication or hosting required.",
+        "Keep the evidence as internal integration proof, not demand or external adoption; reassess the value of further tooling after this bounded template."
+      ],
+      "priority": 17,
+      "evidence": "evidence/payment-starter-validation-2026-10-10.json",
+      "publicCommit": "3afd9acd26ae87a1e253ad65d709983e546ee582",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
     }
   ],
-  "lastCompleted": "Installed payment helper now selects approved payments and verifies readiness before native authentication, preserving account-wide uncertainty and closing late/expired signing sessions. Exact anonymous public source replay passed 51 tests including 34 focused lifecycle tests and a clean installed consumer. No public Sites, credentials, ciphertext, SDK surface or contract changes; no new public transaction or native authentication.",
-  "next": "Generate a runnable installed payment-recovery template for an existing reserve, so integrators do not invent the UI and configuration around the copyable helper.",
+  "lastCompleted": "Published a separately installable existing-reserve payment page, strict configuration doctor and bounded build/preview. Exact anonymous public source replay passed 79 top-level tests including installed-to-installed generator, browser lifecycle and existing payment regressions. No hosted flow, credential, ciphertext, SDK export, contract or public transaction changed.",
+  "next": "Close the remaining whole-template evidence gap: one generated installed consumer must recover real encrypted reserve data through the unchanged SDK and settle a disposable local obligation while its original app is unavailable. Do not add another general-purpose tooling layer.",
   "testnetAuthorization": {
     "grantedBy": "direct user instruction on 2026-10-10",
     "scope": "Necessary testnet wallet transactions for development and verification",
@@ -323,7 +343,7 @@
   },
   "transactionPriority": {
     "recordedAt": "2026-10-10T18:34:33.466764+00:00",
-    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet vårt ikke genererte transaksjoner",
+    "userInstruction": "Husk at vi tapte forrige hackathon fordi produktet v\u00e5rt ikke genererte transaksjoner",
     "evidenceBoundary": "User-reported reason for the prior loss; not independently verified judge feedback or a formal current eligibility rule.",
     "currentGap": "Two exact testnet claims demonstrated recurring settlement through the same beneficiary, including a controlled original-app outage. Installed SDK integration and fresh-browser receipt verification are now tested; external adoption and demand remain unproven.",
     "priority": "Before further general operator polish, establish a narrowly scoped useful recurring transaction loop using the account-reserve capability.",
@@ -393,8 +413,22 @@
     }
   },
   "nextDevelopmentAssessment": {
-    "id": "installed-payment-recovery-template",
+    "id": "generated-payment-survival-proof",
     "status": "planned",
+    "observedGap": "The new generated UI is tested with controlled renderer/bootstrap fixtures, while actual SDK recovery/signing and local-chain survival are proven in separate integrations. These component proofs do not yet prove the complete generated page together.",
+    "value": "Demonstrate that the distributable developer template, not only the private reference app or isolated helper, preserves payment access after original-app unavailability.",
+    "acceptance": [
+      "Start from a clean installed generated consumer and its unchanged public SDK/helper; no private repository imports in production entrypoints.",
+      "Use disposable local encrypted reserve data and a local EVM with explicit isolated authenticator/RPC test adapters outside all production assets.",
+      "Make A unavailable, open the existing reserve through B, verify the same beneficiary and claim one previously funded obligation exactly once.",
+      "Verify post-claim receipt, pending/reconciliation behavior and signer closure through the generated page; no retry by changing payment.",
+      "Preserve published Sites, all actual credentials/ciphertext/origin bindings and contract policies. No public wallet transaction or human/native authentication is required for this local proof.",
+      "Publish exact replay evidence with clear internal/synthetic limits; reassess actual product value before further scaffolding."
+    ]
+  },
+  "lastCompletedAssessment": {
+    "id": "installed-payment-recovery-template",
+    "status": "complete",
     "observedGap": "integrations/payment-client includes only a helper and README with host UI placeholders. They are not in the SDK tarball; the hosted payment page depends on repository-private configuration. The existing account starter creates its own example reserve and has no payment flow.",
     "value": "A developer can generate and build a separate consumer with complete selected-payment controls and explicit existing-reserve configuration, instead of assembling the demo from private repository internals.",
     "acceptance": [
@@ -405,25 +439,10 @@
       "Expose selection, availability, explicit existing-key open, collect, pending reconciliation and close with the helper lifecycle intact.",
       "Prove clean installation and working browser controls with isolated test doubles outside production assets; no new funding, native authentication or hosting required.",
       "Keep the evidence as internal integration proof, not demand or external adoption; reassess the value of further tooling after this bounded template."
-    ]
-  },
-  "lastCompletedAssessment": {
-    "id": "payment-integration-helper-readiness",
-    "status": "complete",
-    "observedGap": "integrations/payment-client/actions.mjs still exposes open() before a selected payment or fresh availability observation; its README teaches opening the existing account first. Integrators must reconstruct the lifecycle already implemented in the public page.",
-    "value": "Let an installed SDK consumer reuse approved payment selection, readiness and safe cancellation rather than copying the application page.",
-    "acceptance": [
-      "Use only installed public SDK imports and the existing trusted bounded payment profile.",
-      "Explicit approved payment selection and fresh credential-free availability precede native authentication; readiness is advisory, never payment proof.",
-      "Keep the native call within the deliberate user gesture; never auto-authenticate, auto-send or create a key.",
-      "Changing payment or cancelling closes the signer, clears readiness and rejects stale asynchronous completion; do not allow overlapping native prompts.",
-      "Preserve account-wide unresolved-attempt blocking, journal reconciliation, final guard, nonce, fees, expiry and once-only behavior.",
-      "Exercise the documented helper through a clean installed consumer with asynchronous cancellation and uncertainty cases.",
-      "No new SDK surface, contract, public transaction or native device test is required unless implementation evidence shows a concrete need."
     ],
-    "priority": 16,
-    "evidence": "evidence/payment-helper-readiness-validation-2026-10-10.json",
-    "publicCommit": "a16ff1a27b0d06b9cd6706170c79a507915d4af3",
+    "priority": 17,
+    "evidence": "evidence/payment-starter-validation-2026-10-10.json",
+    "publicCommit": "3afd9acd26ae87a1e253ad65d709983e546ee582",
     "publicSitesChanged": false,
     "physicalPasskeyVerified": false
   }

@@ -1,3 +1,39 @@
+# Installable payment-recovery page — 10 October 2026
+
+A developer can now generate a separate consumer with the public SDK, canonical
+payment helper, complete Prism UI and an explicit existing-reserve profile. The
+page selects an approved payment, checks availability, opens the existing key,
+collects only on a separate action, checks uncertain transactions and closes the
+signing session. It creates no reserve, credential, issuer, contract or payment.
+
+The static doctor catches profile/origin/RP mismatch before use and can validate
+the exact built assets. The browser checks its actual environment before creating
+the get-only reserve reader. Preview is loopback-only, has no reserve proxy, and
+blocks credentials and external RPC. Build refuses existing output. Cancellation
+closes late native sessions through the unchanged helper.
+
+Exact anonymous replay of `3afd9acd26ae87a1e253ad65d709983e546ee582` passed **79 top-level tests**,
+zero failures or skips, after fresh offline installation and app/payment builds.
+This includes 9 profile/doctor cases, 15 UI/bootstrap cases, the installed-to-installed
+generator, clean consumer build/doctor/smoke, exact helper bytes, and existing SDK,
+lifecycle and source-package regressions. Nested and repeated runs are not added.
+Desktop and 390px mobile UI were reviewed with an explicitly isolated fixture;
+the generated production build refuses the wrong origin before authentication.
+
+Independent internal review found no remaining blocker after fixing config-fetch
+cleanup and early preview-process cancellation. This is not an external audit.
+No native authentication, public transaction or hosted change occurred. Existing
+Sites, keys, ciphertext, SDK exports, contract and fee/nonce policies are unchanged.
+This is developer integration evidence, not external adoption or demand.
+
+[Template and commands](../payment-starter/README.md) ·
+[Validation and exact replay](../evidence/payment-starter-validation-2026-10-10.json).
+The remaining gap is a full generated-page outage proof with real encrypted
+reserve data and a disposable local EVM; component tests currently establish
+those capabilities separately. Video and final submission remain deferred.
+
+---
+
 # Installed payment helper checks before authentication — 10 October 2026
 
 The copyable payment integration now includes approved payment selection,

@@ -1,0 +1,293 @@
+{
+  "verifiedAt": "2026-10-10T21:44:02.735795+00:00",
+  "status": "published-source-and-anonymous-replay-verified",
+  "milestone": "installed-payment-recovery-template",
+  "sourceCommit": "3afd9acd26ae87a1e253ad65d709983e546ee582",
+  "sourceTree": "08041a6628673fa97e2a3490b92a2d37234b55ea",
+  "verifiedSourceFiles": {
+    "README.md": {
+      "sha256": "f41b412feab3dbf367f1f497d6f5debdc13077081c78a26e9255c13c39fc9dc7",
+      "gitBlob": "c2388eed3bf9969006148f4940dcdd7df3ce8ee5"
+    },
+    "package.json": {
+      "sha256": "7ef882148a641b9d8f19dd7210fc27b9aede68f235cddd963d01a35f694a3159",
+      "gitBlob": "0ec22a83f4dc260580340aadf203f41b4e4aca50"
+    },
+    "scripts/create-payment-starter.mjs": {
+      "sha256": "c512770027223a2a6cee5c6bf7a38576f829ca63179405c564644231b07c87e3",
+      "gitBlob": "368d38d29f7f5b99cd4ffb325410250b3b83d9c7"
+    },
+    "scripts/package-candidate.mjs": {
+      "sha256": "96893ddf1e92671ce40539fee9b45dc25ac0cdd00989bc02054babe7280a2335",
+      "gitBlob": "9b97e0ce6462e0724a41d34663c5ef58e7448809"
+    },
+    "tests/source-candidate-current.mjs": {
+      "sha256": "ab2571d1923381d25dfb0fe061065ce91d4744c71fa976a8ee12865a60314214",
+      "gitBlob": "7a114ef5acb0124350a02878b08f7b69fd2955a4"
+    },
+    "tests/payment-starter-profile.mjs": {
+      "sha256": "be33a02da871891220105bb56815545976dfc79e99e8f76057a7a7130aa0ddc6",
+      "gitBlob": "67fadfe32022ca6317d3898b0492b97109153c06"
+    },
+    "tests/payment-starter-ui.mjs": {
+      "sha256": "068656af85295e532e673ed40fbd7f0a5046a2c357fae1024ed46895090b9872",
+      "gitBlob": "c5d07aa7b72b58cd18324d67506a416e66896acd"
+    },
+    "tests/payment-starter-package.mjs": {
+      "sha256": "cf21785225fc0d6f5c025f055cd4c37a1850051d82c43471f43ca2c7e8f7c997",
+      "gitBlob": "a413104683a45edeb2ea42b93b9fa180e21c1a00"
+    },
+    "payment-starter/README.md": {
+      "sha256": "1f7d85dab6e0601d8044d05c48926745479f56c90f807a88f29ecb9ac98d9c7c",
+      "gitBlob": "08c99ee63434fc86e5a7d0c4618caf15de894a46"
+    },
+    "payment-starter/package.json": {
+      "sha256": "3ac228703c4370c5c73495ebe04fdeca821630187f80dc8acc644bd52c97889a",
+      "gitBlob": "8a134eb1b7be0a5bb1a6ee46a5d217335be3748b"
+    },
+    "payment-starter/profile.mjs": {
+      "sha256": "719905463eaf8c709a7aa0e70d0bc1af0c635bb6d2478034955e1773fd1dc29b",
+      "gitBlob": "9a74fb2657cd30ef1870a56a0cfdd611c7a5d44c"
+    },
+    "payment-starter/profile.example.json": {
+      "sha256": "e2b73de3a48f88b0deda948b65865e1c1b0b92010ff8a6cdfadb1b25e8279367",
+      "gitBlob": "d7ac0cc8e4b712357d0aca2f7f91f8eaa6d55220"
+    },
+    "payment-starter/doctor.mjs": {
+      "sha256": "844aa57907d2db65713cad90d869654f6ef66881d79f3896d12e930b465ffb90",
+      "gitBlob": "e10061181e5160aa6cf21319da1f058a446939d0"
+    },
+    "payment-starter/build.mjs": {
+      "sha256": "e7452e7f9b0beb6f760505311dceac371e0fe3039867d081bfef0f35d3a464e1",
+      "gitBlob": "be1524caaa18aeea1418eabf0f5ef0ab6ce40240"
+    },
+    "payment-starter/serve.mjs": {
+      "sha256": "4ada452f2c734f75fca2ae90e7d3bca812f4bdfabe4e955bcce6f80fcc28ec4e",
+      "gitBlob": "5c1a4d7c4d6e2aa78c3ab1deb691ae68bc5fc96e"
+    },
+    "payment-starter/smoke.mjs": {
+      "sha256": "3c33ca4029006700c8679c467da53506f5f5d9cc74178999e8e8b6da71786ec0",
+      "gitBlob": "0719b3a6e1c5733cb9d0528a902aba0de89dc6b9"
+    },
+    "payment-starter/index.html": {
+      "sha256": "53d634a2e08e262c53eb43c8e49f65308e5ecdc9597ec9aa5c66e6d9a66ce1ab",
+      "gitBlob": "bb4c4b5c709ea124239469aed95aec3fa0a37653"
+    },
+    "payment-starter/main.mjs": {
+      "sha256": "51fcb6463a0e30b842b348c603471b19772d953e36457309a9d661ae2c113d55",
+      "gitBlob": "ef0838f23e7b42ae796987184323b22f53fc537d"
+    },
+    "payment-starter/page.mjs": {
+      "sha256": "392a8a5b67d59cdd1d29fbb0b6a38b32eccdcc6ec08c9d1c01be85221094e8f4",
+      "gitBlob": "582c55891489cebf46a245592e2b540fc3c7f0bf"
+    },
+    "payment-starter/style.css": {
+      "sha256": "09ec28019ebcf8741f9a73be661475cb0326a1450ba3acb39c421ae7aa74ad57",
+      "gitBlob": "ecbda118abe6796b28a65bab7edbe69d429dbb41"
+    },
+    "payment-starter/prism-art.mjs": {
+      "sha256": "be5f25415351cf7763dad35b1cee6d64a1120e90ae76ea16deb444c2140d4052",
+      "gitBlob": "e73f8a629d0b8afc3c6a4d09843df314d4e1f8f8"
+    },
+    "integrations/multi-app/.gitignore": {
+      "sha256": "790e3169bc19b046fe55ba1da6d13b976c28363c8c00462a2195fe5faf260910",
+      "gitBlob": "b9470778764f72c5257a3361590d2994547f90e1"
+    }
+  },
+  "value": "Generate a separately installable payment-recovery page with explicit existing-reserve configuration, instead of reconstructing UI and authentication wiring around a code fragment.",
+  "implementation": [
+    "Empty external target, pinned local SDK tarball and lockfile, source and installed-SDK generator paths; canonical helper copied unchanged.",
+    "Complete approved selection, availability, deliberate existing-key opening, separate collect, local pending reconciliation and close controls with Prism desktop/mobile layout.",
+    "Strict versioned public profile, duplicate-key rejection, bounded canonical payment values, exact RP and original/recovery origin bindings, same-origin get-only ciphertext store.",
+    "Static read-only doctor before build and optional exact artifact validation afterward; actual browser origin/API gate before helper and reserve construction.",
+    "Configured native browser build has no authenticator/RPC doubles, issuer tooling, enrollment, funding or deployment controls.",
+    "Local static preview has no reserve proxy; exact loopback host/method/path allowlist, credentials disabled, external RPC blocked, owned-process cancellation cleanup."
+  ],
+  "anonymousReplay": {
+    "verifiedAt": "2026-10-10T21:43:49.596Z",
+    "commit": "3afd9acd26ae87a1e253ad65d709983e546ee582",
+    "anonymousArchive": true,
+    "archiveSha256": "783ab233e8a6e4faa24e533f8934606e6cb3a48ee6ff5a3ccc8dc7239dfc72b9",
+    "archiveBytes": 2651136,
+    "freshInstall": true,
+    "offlineInstall": true,
+    "appBuild": true,
+    "paymentBuild": true,
+    "tests": 79,
+    "failed": 0,
+    "skipped": 0,
+    "noPublicTransactions": true,
+    "noNativeAuthentication": true,
+    "installedConsumerReport": {
+      "experiment": "installed-public-payment-adapter",
+      "strictTypes": true,
+      "browserBundle": true,
+      "publicModules": [
+        "payments/executor.mjs",
+        "payments/guard.mjs",
+        "payments/index.mjs",
+        "payments/pending.mjs",
+        "payments/testnet.mjs",
+        "release/client-profile.mjs",
+        "release/paced-rpc.mjs"
+      ],
+      "scenarios": [
+        "strict public boundary and inert construction",
+        "explicit selected availability blocks unissued payment before authentication",
+        "account lock and unknown send never replay",
+        "unknown-send helper finally and explicit client closure end actual Mera signers",
+        "credential-free reconciliation survives signer closure",
+        "prior receipt rechecked, next approved nonce settles once and helper success closes signer",
+        "already-collected observation prevents needless reopening while old-right checks stay credential free",
+        "persistence failure closes safely and no native credentials"
+      ],
+      "nativeCalls": 0,
+      "publicNetwork": false,
+      "rpcSimulated": true,
+      "actualEvm": false,
+      "signatures": 2,
+      "sends": 2,
+      "closures": 4,
+      "opens": 3,
+      "maxConcurrentLockOwners": 1,
+      "fixedRpcNames": true,
+      "journalEntries": 2,
+      "stateless": {
+        "freshProcess": true,
+        "noJournal": true,
+        "noAccount": true,
+        "forbiddenBrowserAccess": 0,
+        "observations": [
+          "finalized",
+          "pending-or-unknown",
+          "reverted",
+          "mismatch-rejected"
+        ],
+        "expiredProfileRead": true,
+        "fixedRpcNames": true,
+        "publicNetwork": false,
+        "persistenceUntouched": true
+      },
+      "availability": {
+        "freshProcess": true,
+        "noJournal": true,
+        "noAccount": true,
+        "forbiddenBrowserAccess": 0,
+        "observations": [
+          "funded",
+          "not-issued",
+          "already-collected",
+          "expired",
+          "insufficient-gas",
+          "rpc-disagreement-rejected",
+          "rpc-failure-rejected"
+        ],
+        "errors": [
+          "PAYMENT_CANONICAL_BLOCK_MISMATCH",
+          "PAYMENT_AVAILABILITY_FAILED"
+        ],
+        "availabilityIsNotPaymentProof": true,
+        "fixedRpcNames": true,
+        "publicNetwork": false,
+        "persistenceUntouched": true
+      },
+      "limits": [
+        "simulated RPC responses",
+        "disposable local Mera signing sessions",
+        "no native passkey",
+        "no EVM or public transaction",
+        "same-origin in-memory lock adapter"
+      ]
+    },
+    "starterConsumerReport": {
+      "installedPaymentStarter": true,
+      "offlineInstall": true,
+      "installedGenerator": true,
+      "helperBytesUnchanged": true,
+      "publicSdkOnly": true,
+      "localPreviewOnly": true,
+      "physicalPasskeyVerified": false,
+      "paymentsSent": 0
+    }
+  },
+  "firstReplayCorrection": "The first source replay found an omitted reviewed editor .gitignore and missing installation of pinned JSDOM fixture dependencies. The ignore file is now published and test-only installation is explicit in the README and replay. The generated consumer itself installed and built successfully in that attempt.",
+  "focusedTestCounts": {
+    "profileAndDoctor": 9,
+    "browserLifecycleAndBootstrap": 15,
+    "installedStarterPackage": 2,
+    "canonicalHelperLifecycle": 34,
+    "publicPaymentApi": 4,
+    "paymentAvailability": 6,
+    "paymentTestnetAdapter": 6,
+    "installedPaymentConsumer": 1,
+    "sourceCandidate": 2
+  },
+  "counting": "79 top-level tests from one exact anonymous replay. Nested/subprocess and repeated review runs are not added.",
+  "browserReview": {
+    "isolatedUiFixture": true,
+    "fixtureOutsideProductionAssets": true,
+    "desktopVerified": true,
+    "mobileViewport": {
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": false
+    },
+    "observedFlow": [
+      "initially inert",
+      "explicit availability",
+      "separate simulated open",
+      "separate simulated collection and confirmed display",
+      "payment switch clears prior display"
+    ],
+    "minimumObservedMobileButtonHeight": 48,
+    "consoleErrorsOrWarnings": 0,
+    "generatedNativeBuildWrongOrigin": "Static local preview shows configuration refusal before native authentication.",
+    "screenshotsLocalOnly": {
+      "desktop.png": "d4ef3fe040e31907511d82567bcccfb9ad1cecd5a45dfc692243cc8537884335",
+      "origin-refused.png": "18de13eef219e90cbfe60e94be29cfb850a4d54d1b52dc73c1ec4001fe890e43",
+      "mobile.png": "d4ef3fe040e31907511d82567bcccfb9ad1cecd5a45dfc692243cc8537884335"
+    },
+    "physicalDeviceTest": false,
+    "paymentSimulationOnly": true
+  },
+  "securityReview": {
+    "scope": "Independent internal code review plus tests; not an external audit.",
+    "blockersRemaining": 0,
+    "fixedFindings": [
+      "Abort configuration fetch on early invalid response before reader acquisition.",
+      "Honor preview SIGTERM received during asynchronous startup before its handle exists."
+    ],
+    "limits": "Trusted local source and filesystem parent directory; profile/deployment ownership, real device support, live storage and actual payment funding require separate evidence."
+  },
+  "sourceCandidate": {
+    "fileCount": 484,
+    "archiveSha256": "ad1cbe3ffd3522cd8a011a6b1e18ff81d40f7f4b42f6f4e0fffcef74561fce0e",
+    "allChangedSourceBytesPreserved": true,
+    "privateSentinelsExcluded": true
+  },
+  "preserved": {
+    "publicSites": true,
+    "originsAndRpBindings": true,
+    "existingPasskeysAndCiphertext": true,
+    "publicSdkExports": true,
+    "contractAndFeeNonceOnceOnlyPolicy": true
+  },
+  "actionsNotPerformed": [
+    "native authentication",
+    "credential creation",
+    "public wallet transactions",
+    "new funding or obligations",
+    "hosting publication",
+    "domain changes",
+    "new accounts",
+    "outreach",
+    "video",
+    "final competition submission"
+  ],
+  "limitations": [
+    "Internal developer integration proof, not external adoption or demand.",
+    "Configured production bootstrap is verified through isolated fixtures and static build checks; the full generated page has not yet completed a real encrypted-reserve/local-EVM outage flow.",
+    "No fresh physical-device claim is made.",
+    "The template requires an existing trusted reserve origin, ciphertext endpoint and separately funded approved payment profile."
+  ]
+}
