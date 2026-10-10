@@ -2,7 +2,7 @@ import { constants, openSync, closeSync, fstatSync, lstatSync, realpathSync, rea
 import { resolve, dirname, basename, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
-import { validateNativeProfile, parseNativeGrants } from './profile.mjs';
+import { validateNativeProfile, nativeApps, nativeAppProfile, parseNativeGrants } from './profile.mjs';
 import { requestLocalJson } from './native-host.mjs';
 
 const fail = (code, issuedMayExist = false) => Object.assign(new Error(code), { code, issuedMayExist });
@@ -13,7 +13,7 @@ const packageRoot = realpathSync(fileURLToPath(new URL('./', import.meta.url)));
 export function runtimeProfile(supplied) {
   const profile = validateNativeProfile(supplied);
   return Object.freeze({ version: 1, primaryOrigin: profile.primaryOrigin, recoveryOrigin: profile.recoveryOrigin,
-    expiresAt: profile.expiresAt, apps: Object.freeze([Object.freeze({ id: 'text', label: 'Text reserve', appId: profile.appId })]) });
+    expiresAt: profile.expiresAt, apps: Object.freeze(nativeApps(profile).map(({ id, label, config }) => Object.freeze({ id, label, appId: config.appId }))) });
 }
 function invitations(path, profile) {
   let fd;
@@ -53,18 +53,20 @@ async function exchange(port, profile, path, options = {}) {
 /** Deliberate operator action only. All stores are checked before any grant is
  * requested; each admission is attempted once. An uncertain outcome is never
  * retried and may have consumed operator quota. No bearer is printed/returned. */
-export async function issueNativeGrants({ profile: supplied, invitationsFile, output }) {
-  const profile = validateNativeProfile(supplied), target = outputTarget(output), sources = invitations(invitationsFile, profile);
+export async function issueNativeGrants({ profile: supplied, app, invitationsFile, output }) {
+  const profile = validateNativeProfile(supplied), selected = nativeAppProfile(profile, app);
+  const target = outputTarget(output), sources = invitations(invitationsFile, profile);
   let dispatched = false, temporary;
   try {
-    const expected = runtimeProfile(profile);
+    const expected = nativeApps(profile);
     for (const source of sources) {
       const { status, value } = await exchange(source.port, profile, '/api/config');
       if (status !== 200 || value?.synthetic !== false || value?.operatorHosted !== true || value?.role !== 'recovery'
         || value.originalOrigin !== profile.primaryOrigin || value.recoveryOrigin !== profile.recoveryOrigin || value.expiresAt !== profile.expiresAt
-        || !Array.isArray(value.apps) || value.apps.length !== 1 || value.apps[0].id !== expected.apps[0].id || value.apps[0].label !== expected.apps[0].label
-        || !exact(value.apps[0].config, ['appId', 'recoveryOrigin', 'recoveryRpId']) || value.apps[0].config.appId !== profile.appId
-        || value.apps[0].config.recoveryOrigin !== profile.recoveryOrigin || value.apps[0].config.recoveryRpId !== profile.recoveryRpId) throw fail('OPERATOR_PROFILE_MISMATCH');
+        || !Array.isArray(value.apps) || value.apps.length !== expected.length
+        || expected.some((app, index) => !exact(value.apps[index], ['id','label','config']) || value.apps[index].id !== app.id || value.apps[index].label !== app.label
+          || !exact(value.apps[index].config, ['appId','recoveryOrigin','recoveryRpId'])
+          || Object.keys(app.config).some(key => value.apps[index].config[key] !== app.config[key]))) throw fail('OPERATOR_PROFILE_MISMATCH');
     }
     const replicas = [];
     for (const source of sources) {
@@ -75,7 +77,7 @@ export async function issueNativeGrants({ profile: supplied, invitationsFile, ou
         || Date.parse(value.expiresAt) <= Date.parse(value.serverNow) || Date.parse(value.expiresAt) > Date.parse(value.serverNow) + 300000) throw fail('GRANT_ISSUANCE_UNCONFIRMED', true);
       replicas.push({ id: source.id, enrollmentToken: value.enrollmentToken, expiresAt: value.expiresAt });
     }
-    const bundle = parseNativeGrants(JSON.stringify({ format: 'continuitykit/native-replica-grants/v1', appId: profile.appId, recoveryOrigin: profile.recoveryOrigin, replicas }), profile);
+    const bundle = parseNativeGrants(JSON.stringify({ format: 'continuitykit/native-replica-grants/v1', appId: selected.appId, recoveryOrigin: selected.recoveryOrigin, replicas }), selected);
     temporary = join(dirname(target), '.native-grants-' + randomBytes(16).toString('hex') + '.tmp');
     const fd = openSync(temporary, 'wx', 0o600);
     try { writeFileSync(fd, JSON.stringify(bundle, null, 2) + '\n'); fsyncSync(fd); } finally { closeSync(fd); }
@@ -90,10 +92,10 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
     const args = {};
     for (let index = 2; index < process.argv.length; index += 2) {
       const key = process.argv[index]?.slice(2), value = process.argv[index + 1];
-      if (!process.argv[index]?.startsWith('--') || !['profile', 'invitations', 'out'].includes(key) || !value || value.startsWith('--') || Object.hasOwn(args, key)) throw fail('ARGUMENTS_INVALID'); args[key] = value;
+      if (!process.argv[index]?.startsWith('--') || !['profile', 'app', 'invitations', 'out'].includes(key) || !value || value.startsWith('--') || Object.hasOwn(args, key)) throw fail('ARGUMENTS_INVALID'); args[key] = value;
     }
     if (!args.profile || !args.invitations || !args.out) throw fail('ARGUMENTS_INVALID');
-    const result = await issueNativeGrants({ profile: JSON.parse(readFileSync(args.profile, 'utf8')), invitationsFile: args.invitations, output: args.out });
+    const result = await issueNativeGrants({ profile: JSON.parse(readFileSync(args.profile, 'utf8')), app: args.app, invitationsFile: args.invitations, output: args.out });
     console.log(JSON.stringify(result));
   } catch (error) {
     console.error(JSON.stringify({ error: /^[A-Z_]+$/.test(error?.code ?? '') ? error.code : 'OPERATOR_FAILED', issuedMayExist: error?.issuedMayExist === true })); process.exitCode = 1;

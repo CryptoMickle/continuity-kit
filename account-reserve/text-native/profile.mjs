@@ -1,6 +1,7 @@
 // Public configuration and short-lived operator capabilities only. These
 // validators do not request credentials, access storage or perform network I/O.
 const PROFILE_FIELDS = ['version', 'appId', 'primaryOrigin', 'recoveryOrigin', 'recoveryRpId', 'expiresAt', 'replicas'];
+const COLLECTION_PROFILE_FIELDS = ['version', 'apps', 'primaryOrigin', 'recoveryOrigin', 'recoveryRpId', 'expiresAt', 'replicas'];
 const GRANT_FIELDS = ['format', 'appId', 'recoveryOrigin', 'replicas'];
 const GRANT_FORMAT = 'continuitykit/native-replica-grants/v1';
 const APP_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$/;
@@ -29,11 +30,11 @@ function record(input, fields, code) {
     return result;
   } catch { fail(code); }
 }
-function array(input, code) {
+function array(input, code, minimum = 2, maximum = 3) {
   try {
     check(Array.isArray(input), code);
     const length = Object.getOwnPropertyDescriptor(input, 'length');
-    check(length && Object.hasOwn(length, 'value') && length.value >= 2 && length.value <= 3, code);
+    check(length && Object.hasOwn(length, 'value') && length.value >= minimum && length.value <= maximum, code);
     check(Object.getOwnPropertySymbols(input).length === 0 && Object.getOwnPropertyNames(input).length === length.value + 1, code);
     const result = [];
     for (let index = 0; index < length.value; index++) {
@@ -74,8 +75,22 @@ function expiry(value, now, invalidCode, expiredCode) {
  * origin aliases and same-host A/B ports are rejected rather than normalized.
  */
 export function validateNativeProfile(input, options = {}) {
-  const now = nowValue(options), value = record(input, PROFILE_FIELDS, 'NATIVE_PROFILE_INVALID');
-  check(value.version === 1 && typeof value.appId === 'string' && APP_ID.test(value.appId), 'NATIVE_PROFILE_INVALID');
+  const now = nowValue(options);
+  let version; try { version = Object.getOwnPropertyDescriptor(input, 'version')?.value; } catch { fail('NATIVE_PROFILE_INVALID'); }
+  check(version === 1 || version === 2, 'NATIVE_PROFILE_INVALID');
+  const value = record(input, version === 1 ? PROFILE_FIELDS : COLLECTION_PROFILE_FIELDS, 'NATIVE_PROFILE_INVALID');
+  if (version === 1) check(typeof value.appId === 'string' && APP_ID.test(value.appId), 'NATIVE_PROFILE_INVALID');
+  else {
+    const selectors = new Set(), appIds = new Set();
+    value.apps = Object.freeze(array(value.apps, 'NATIVE_PROFILE_INVALID', 2, 8).map(inputApp => {
+      const app = record(inputApp, ['id','label','appId'], 'NATIVE_PROFILE_INVALID');
+      check(typeof app.id === 'string' && REPLICA_ID.test(app.id) && !selectors.has(app.id)
+        && typeof app.appId === 'string' && APP_ID.test(app.appId) && !appIds.has(app.appId)
+        && typeof app.label === 'string' && app.label.trim().length > 0 && app.label.length <= 64
+        && !/[\x00-\x1f\x7f]/.test(app.label), 'NATIVE_PROFILE_INVALID');
+      selectors.add(app.id); appIds.add(app.appId); return Object.freeze(app);
+    }));
+  }
   const primary = origin(value.primaryOrigin), recovery = origin(value.recoveryOrigin);
   check(primary.origin !== recovery.origin && primary.hostname !== recovery.hostname, 'NATIVE_PROFILE_INVALID');
   check(typeof value.recoveryRpId === 'string' && value.recoveryRpId.length <= 253
@@ -95,7 +110,28 @@ export function validateNativeProfile(input, options = {}) {
 /** SDK configuration only; no issuer token, origin role or storage policy. */
 export function nativeConfig(profile) {
   const value = validateNativeProfile(profile);
+  check(value.version === 1, 'NATIVE_APP_SELECTION_REQUIRED');
   return Object.freeze({ appId: value.appId, recoveryOrigin: value.recoveryOrigin, recoveryRpId: value.recoveryRpId });
+}
+
+/** A collection is public ordered policy. Each SDK config still describes one
+ * app; the underlying immutable reserve protocol does not change. */
+export function nativeApps(profile, options = {}) {
+  const value = validateNativeProfile(profile, options);
+  const apps = value.version === 1 ? [{ id: 'text', label: 'Text reserve', appId: value.appId }] : value.apps;
+  return Object.freeze(apps.map(({ id, label, appId }) => Object.freeze({ id, label,
+    config: Object.freeze({ appId, recoveryOrigin: value.recoveryOrigin, recoveryRpId: value.recoveryRpId }) })));
+}
+
+/** The explicit selector binds an existing v1 grant bundle to one app. It is
+ * not a new storage capability format or a server-side plaintext app check. */
+export function nativeAppProfile(profile, id, options = {}) {
+  const value = validateNativeProfile(profile, options);
+  if (value.version === 1) { check(id === undefined || id === 'text', 'NATIVE_APP_SELECTION_REQUIRED'); return value; }
+  check(typeof id === 'string', 'NATIVE_APP_SELECTION_REQUIRED');
+  const app = value.apps.find(item => item.id === id); check(app, 'NATIVE_APP_SELECTION_REQUIRED');
+  return Object.freeze({ version: 1, appId: app.appId, primaryOrigin: value.primaryOrigin, recoveryOrigin: value.recoveryOrigin,
+    recoveryRpId: value.recoveryRpId, expiresAt: value.expiresAt, replicas: value.replicas });
 }
 
 /** Bind the runtime artifact to this exact page origin before offering actions.
@@ -156,6 +192,7 @@ function canonicalToken(value) {
  */
 export function parseNativeGrants(text, suppliedProfile, options = {}) {
   const now = nowValue(options), profile = validateNativeProfile(suppliedProfile, { now });
+  check(profile.version === 1, 'NATIVE_APP_SELECTION_REQUIRED');
   check(typeof text === 'string' && text.length <= MAX_GRANTS_BYTES && new TextEncoder().encode(text).length <= MAX_GRANTS_BYTES, 'NATIVE_GRANTS_INVALID');
   const value = record(uniqueJson(text), GRANT_FIELDS, 'NATIVE_GRANTS_INVALID');
   check(value.format === GRANT_FORMAT, 'NATIVE_GRANTS_INVALID');

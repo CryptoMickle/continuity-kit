@@ -150,7 +150,7 @@
     {
       "id": "native-collection-package",
       "priority": 9,
-      "status": "pending",
+      "status": "complete",
       "value": "Make the multi-app recovery view usable by a native WebAuthn integrator with an explicit fixed profile and durable operator state, without copying the synthetic teaching server.",
       "acceptance": [
         "Fixed multi-app profile with original app IDs, B RP/origin and explicit replica policy",
@@ -159,9 +159,27 @@
         "One deliberate collection recovery and per-app editor/export behavior",
         "Installed package and lifecycle/security tests with synthetic test injection kept outside deployed assets",
         "Preserve existing native single-app packages and published Sites; no inferred physical multi-app acceptance"
+      ],
+      "evidence": "evidence/native-collection-package-2026-10-10.json",
+      "publicSitesChanged": false,
+      "physicalPasskeyVerified": false
+    },
+    {
+      "id": "native-operator-portable-backup",
+      "priority": 10,
+      "status": "pending",
+      "value": "Restore the complete managed encrypted reserve state on a fresh machine/state directory so loss of the current host does not require manual profile and replica reconstruction. Reuse existing lower-level database export/import.",
+      "acceptance": [
+        "Require a stopped owned stack and explicit private backup destination; no live copy of open SQLite files",
+        "Export the complete fixed app/origin/RP and replica policy with encrypted records and consumed quota; no plaintext, passkey bytes or administrator invitations",
+        "Validate the full bounded bundle and explicit expected digest before creating fresh private state; distinguish integrity check from third-party authenticity",
+        "Restore into a new directory only; preserve ciphertext, protocol and consumed quota, create fresh private administrator invitations and drop outstanding grants",
+        "Prove exact recovery of two app texts using the same existing test credential after the original state is unavailable",
+        "Reject corrupt, incomplete, extra or mismatched bundle entries without usable partial state or writes to the original",
+        "Keep public Sites and existing state untouched; no native-device or provider proof inferred"
       ]
     }
   ],
-  "lastCompleted": "Collection browser reference completed: 75 relevant passing tests, installed real-storage UI proof and actual browser checks at mobile and desktop widths.",
-  "next": "Build the native collection integration package with fixed multi-app policy and existing-key preparation. Keep hosted flows unchanged; video and final submission remain deferred until Monday."
+  "lastCompleted": "Native collection package completed: 87 relevant passing tests, native-only generated assets, durable multi-app storage, actual installed UI/SDK exports after A/store loss, and browser responsive/cancellation checks.",
+  "next": "Implement managed operator backup/restore by reusing the existing encrypted database export/import; preserve fixed bindings and consumed quota. No video or final submission until Monday user review."
 }

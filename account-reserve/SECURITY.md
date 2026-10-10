@@ -155,3 +155,32 @@ strings or downloads. The teaching authenticator is intentionally synthetic and
 must never be deployed. Local SQLite processes share the same machine, gateway
 and B origin. Its tests do not establish physical passkey behavior, separate
 providers, audit or external adoption. Existing hosted flows remain unchanged.
+
+
+## Native collection integration package (10 October 2026)
+
+Profile v2 binds 2–8 fixed app namespaces, one A origin, one B origin/RP and an
+ordered 2–3 replica policy. Existing profile v1 is unchanged; switching a
+committed state directory to v2 or altering its app list fails without mutation.
+Collection assets use the native SDK default and exclude teaching credential,
+issuer and failure-control endpoints. Configuration checks perform no credential
+probe, admission or recovery. One explicit recovery asks the SDK to authenticate
+each app separately using one discoverable assertion; device prompts may differ.
+
+Permission bundles must match the fixed selected app, B and store order before
+an explicit create/existing gesture. The bundle is a context-bound handoff,
+not a signed policy or a server-enforced app-scoped token. The opaque storage
+capability still authorizes one ciphertext write and cannot inspect the encrypted
+app namespace. Keep both administrator invitations and short-lived grants private.
+
+The whole ordered collection result is checked before any plaintext is rendered.
+Failed apps expose no editor/export, including conflicts between authenticated
+records. Untrusted Markdown/HTML stays text. Cancelling or leaving discards late
+results; close/pagehide clear editor backing buffers and revoke export links.
+Profile expiry blocks new reads and writes but keeps already-open local edits
+exportable, matching the native single-app package. There is no persistent key
+session, automatic repair, automatic new-key fallback, or snapshot update.
+
+Installed process/storage tests use a synthetic authenticator injected only by
+the test harness. They do not establish physical passkey compatibility, external
+adoption, provider independence, production security, or an external audit.

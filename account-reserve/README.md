@@ -92,6 +92,13 @@ physically verified service**. Existing public Sites and passkeys are unchanged.
 [Native integration validation](evidence/text-native-package-validation-2026-10-10.json) ·
 [Operator startup and recovery validation](evidence/native-operator-onboarding-2026-10-10.json).
 
+For several apps, use `profile.collection.example.json` and follow the
+[native collection guide](text-native/README.md#several-app-reserves-with-the-same-native-passkey).
+It builds a native recovery view for 2–8 fixed apps and 2–3 encrypted storage
+copies, with one existing-passkey SDK assertion and separate editor/export
+results per app. It preserves v1 packages and does not migrate an existing
+profile or change hosted Sites. [Validation and limits](evidence/native-collection-package-2026-10-10.json).
+
 To run the repository's generator/UI regressions, first install the root and
 shared test harness dependencies into your normal npm cache:
 
@@ -278,7 +285,7 @@ authenticated records fail for that app, even if their text is equal. Existing
 APIs, passkeys and text-v1 records are unchanged. It makes one SDK assertion;
 device confirmation counts may differ.
 
-The native starter remains single-app and the hosted collection remains
+The native starter also supports a fixed multi-app profile; the hosted collection remains
 single-store. The combined capability is verified through installed-SDK local
 storage tests; it is not a new hosted multi-app deployment or native acceptance.
 Run `npm run test:collection-replicas` for the combined API and installed replay.

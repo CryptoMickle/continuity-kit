@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "apps": [
+    { "id": "textarea", "label": "Text draft", "appId": "your-text-app-v1" },
+    { "id": "markdown", "label": "Markdown draft", "appId": "your-markdown-app-v1" }
+  ],
+  "primaryOrigin": "https://writer.example.test",
+  "recoveryOrigin": "https://reserve.example.test",
+  "recoveryRpId": "reserve.example.test",
+  "expiresAt": "2026-11-10T00:00:00.000Z",
+  "replicas": [
+    { "id": "alpha", "basePath": "/api/replicas/alpha/reserve" },
+    { "id": "beta", "basePath": "/api/replicas/beta/reserve" }
+  ]
+}

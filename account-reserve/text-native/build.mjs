@@ -3,7 +3,7 @@ import { resolve, dirname, basename, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { build } from 'vite';
-import { validateNativeProfile } from './profile.mjs';
+import { validateNativeProfile, nativeApps } from './profile.mjs';
 
 const root = fileURLToPath(new URL('./', import.meta.url));
 const fail = code => Object.assign(new Error(code), { code });
@@ -39,7 +39,9 @@ export async function buildNative({ profile: supplied, out = join(root, 'dist') 
           if (/\/(?:text-starter|tests|release|self-service)\/|synthetic-client|replica-server|replica-worker|native-host\.mjs|operator\.mjs/.test(id)) throw fail('NON_NATIVE_MODULE');
         }
       } }],
-      build: { outDir: bundled, target: 'es2022', sourcemap: false, emptyOutDir: false } });
+      build: { outDir: bundled, target: 'es2022', sourcemap: false, emptyOutDir: false,
+        ...(profile.version === 2 ? { rollupOptions: { input: join(root, 'collection-index.html') } } : {}) } });
+    if (profile.version === 2) await rename(join(bundled, 'collection-index.html'), join(bundled, 'index.html'));
     const files = ['index.html', ...(await readdir(join(bundled, 'assets'))).map(name => 'assets/' + name)];
     const assetSha256 = {};
     for (const file of files) {
@@ -53,7 +55,7 @@ export async function buildNative({ profile: supplied, out = join(root, 'dist') 
       await writeFile(join(directory, 'continuity-config.json'), JSON.stringify({ profile, role }) + '\n', { flag: 'wx' });
     }
     const operatorProfile = { version: 1, primaryOrigin: profile.primaryOrigin, recoveryOrigin: profile.recoveryOrigin, expiresAt: profile.expiresAt,
-      apps: [{ id: 'text', label: 'Text reserve', appId: profile.appId }] };
+      apps: nativeApps(profile).map(({ id, label, config }) => ({ id, label, appId: config.appId })) };
     await writeFile(join(stage, 'operator-profile.json'), JSON.stringify(operatorProfile, null, 2) + '\n', { flag: 'wx' });
     await rm(bundled, { recursive: true });
     const digest = createHash('sha256').update(JSON.stringify(profile)).digest('hex');

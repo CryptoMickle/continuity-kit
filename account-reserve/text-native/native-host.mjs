@@ -96,9 +96,11 @@ export async function startNativeHost({ profile: supplied, role, assets, gateway
     try {
       if (closing || request.headers.host !== expectedHost) return send(421, { error: 'HOST_REJECTED' });
       if (Date.now() >= Date.parse(profile.expiresAt)) return send(410, { error: 'PROFILE_EXPIRED' });
-      if (typeof request.url !== 'string' || request.url.length > 4096 || !request.url.startsWith('/') || request.url.startsWith('//') || /[%\\?#]/.test(request.url)
-        || new URL(request.url, origin).pathname !== request.url) return send(400, { error: 'PATH_REJECTED' });
-      const route = /^(\/api\/replicas\/[a-z][a-z0-9-]{0,31}\/reserve)\/([A-Za-z0-9_-]{43})$/.exec(request.url);
+      const selector = profile.version === 2 && /^\/\?app=([a-z][a-z0-9-]{0,31})$/.exec(request.url ?? '');
+      const path = selector && profile.apps.some(app => app.id === selector[1]) ? '/' : request.url;
+      if (typeof path !== 'string' || path.length > 4096 || !path.startsWith('/') || path.startsWith('//') || /[%\\?#]/.test(path)
+        || new URL(path, origin).pathname !== path) return send(400, { error: 'PATH_REJECTED' });
+      const route = /^(\/api\/replicas\/[a-z][a-z0-9-]{0,31}\/reserve)\/([A-Za-z0-9_-]{43})$/.exec(path);
       if (role === 'recovery' && route && paths.has(route[1]) && locator(route[2])) {
         if (!['GET', 'PUT'].includes(request.method)) return send(405, { error: 'METHOD_REJECTED' });
         const writing = request.method === 'PUT';
@@ -116,7 +118,7 @@ export async function startNativeHost({ profile: supplied, role, assets, gateway
       if (request.url.startsWith('/api/')) return send(404, { error: 'NOT_FOUND' });
       if (request.method !== 'GET') return send(405, { error: 'METHOD_REJECTED' });
       if (request.headers['content-encoding'] || request.headers['transfer-encoding'] || request.headers['content-length'] && request.headers['content-length'] !== '0') return send(400, { error: 'BODY_INVALID' });
-      const asset = entries.get(request.url); if (!asset) return send(404, { error: 'NOT_FOUND' });
+      const asset = entries.get(path); if (!asset) return send(404, { error: 'NOT_FOUND' });
       response.writeHead(200, { 'content-type': asset.type }); response.end(asset.bytes);
     } catch (error) { const status = error?.code === 'BODY_INVALID' ? 400 : 503; send(status, { error: status === 400 ? 'BODY_INVALID' : 'RESERVE_OPERATION_UNCONFIRMED' }); }
     finally { clearTimeout(timer); controller.abort(); controllers.delete(controller); request.removeListener('aborted', disconnect); response.removeListener('close', disconnect); }

@@ -1,3 +1,45 @@
+# Native collection integration package — 10 October 2026
+
+The generated native package now supports 2–8 fixed app reserves in one recovery
+view, with 2–3 encrypted storage copies. Each app keeps its original namespace;
+one deliberate SDK assertion opens the collection and returns separate app results.
+The v1 single-app package, persisted operator bindings and published Sites are preserved.
+This is source development; no new native collection was deployed or physically tested.
+
+**87 relevant top-level tests passed:** 60 existing native regressions, 7 new
+profile/operator/host cases, 18 collection UI cases and 2 installed-package/process
+integration cases. Internal independent review repeated the changed boundaries
+without finding a remaining blocker; repeats are not counted as additional tests.
+
+The installed replay started the durable operator four times using the same private
+state and opened nine fresh recovery processes. Three imported the installed UI
+and exercised the real SDK, actual B/gateway/SQLite reads and exact TXT/JSON Blob
+exports. A was made unavailable by closing its owned listener; one store was
+terminated. Healthy sibling apps remained usable when another app was corrupt or
+missing. Database bytes and counters stayed unchanged during each read.
+
+The native frontend has no teaching authenticator, issuer or failure-control routes.
+App-specific permission bundles are checked before any credential gesture. The
+underlying opaque storage tokens are not cryptographically app-scoped. Selecting
+an existing passkey never falls back to creating one. A now has an explicit cancel
+button which preserves its draft and export without waiting for the setup timeout.
+Already-open work remains exportable after profile expiry; page exit clears it.
+
+Actual browser checks confirmed the Prism layout at 390 and 1280px with no horizontal
+overflow, A-to-B setup navigation, invalid permission rejection and cancellation.
+No physical passkey or upload permission was requested. The temporary native preview
+was stopped; existing hosted flows and credentials were untouched.
+
+The next milestone is a complete private operator backup/restore path. Both local
+replicas still share one machine; restoring the managed state elsewhere is the
+remaining operational gap. This will reuse the existing low-level encrypted
+database export/import rather than change the snapshot protocol.
+
+[Integrator guide](../text-native/README.md#several-app-reserves-with-the-same-native-passkey) ·
+[Validation and limits](../evidence/native-collection-package-2026-10-10.json).
+
+---
+
 # Collection browser reference — 10 October 2026
 
 The text starter now has a `--collection-replicas` mode: two app drafts,

@@ -1,0 +1,142 @@
+{
+  "checkedAt": "2026-10-10T16:35:38.160283+00:00",
+  "milestone": "native-collection-package",
+  "status": "validated-source",
+  "scope": "Native integration package, installed consumer and agent-run verification; existing public Sites unchanged.",
+  "profile": {
+    "version": 2,
+    "apps": [
+      2,
+      8
+    ],
+    "replicas": [
+      2,
+      3
+    ],
+    "v1Preserved": true,
+    "fixedAppNamespaces": true,
+    "sameRecoveryOriginAndRp": true,
+    "durableStateImmutableBinding": true,
+    "migrationPerformed": false
+  },
+  "tests": {
+    "uniqueTopLevelPassed": 87,
+    "failed": 0,
+    "breakdown": {
+      "legacyNative": 60,
+      "collectionProfileHostOperator": 7,
+      "collectionUi": 18,
+      "installedPackage": 1,
+      "managedUiAndSdkRecovery": 1
+    },
+    "runs": [
+      "85 passing before added primary cancel case and extended managed UI proof",
+      "Final changed scope: 20 passing (18 UI + installed package + managed)"
+    ],
+    "independentInternalReview": "No remaining implementation blocker; independent repeated tests are not double-counted."
+  },
+  "managedProof": {
+    "managedStarts": 4,
+    "freshRecoveryProcesses": 9,
+    "freshJsdomProcesses": 3,
+    "installedPublicSdk": true,
+    "installedUiWithActualSdkAndStores": true,
+    "originalAppFailure": "Closed owned A HTTP listener; connection refused, not a simulated HTTP status",
+    "storeFailure": "Terminated owned alpha child process",
+    "sameStateRestart": true,
+    "perAppCorruptAndMissingIsolation": true,
+    "allStoresUnavailable": true,
+    "oneExistingAssertionPerCollection": true,
+    "newCredentialOnRecovery": false,
+    "recoveryWrites": 0,
+    "databaseBytesAndCountersUnchangedDuringReads": true,
+    "exactUtf8TxtAndJsonExports": true,
+    "cases": [
+      "healthy",
+      "ui-healthy",
+      "A-closed-alpha-killed",
+      "ui-A-closed-alpha-killed",
+      "same-state-restart",
+      "one-app-corrupt",
+      "ui-one-app-corrupt",
+      "one-app-missing",
+      "both-stores-killed"
+    ],
+    "authenticator": "Synthetic test-only credential; native deployed graph has no injected authenticator."
+  },
+  "ui": {
+    "defaultNativeSdk": true,
+    "syntheticAndFailureEndpointsAbsent": true,
+    "noCredentialActivityOnLoad": true,
+    "fixedAppGrantContext": true,
+    "opaqueStorageTokensCryptographicallyAppScoped": false,
+    "existingSelectionNeverCreatesFallback": true,
+    "wholeBatchValidatedBeforeText": true,
+    "cancelAndNavigationRejectLateResults": true,
+    "pagehideAndCloseClearBackingTextAndExportUrls": true,
+    "expiry": "Blocks new reads/preparation; preserves already-open local edits for export.",
+    "primaryCancelPreservesDraftAndExport": true
+  },
+  "browserQa": {
+    "realBrowser": "Codex in-app browser",
+    "renderOnlyNativeAuthentication": true,
+    "responsiveWidths": [
+      390,
+      1280
+    ],
+    "clientWidths": [
+      375,
+      1265
+    ],
+    "horizontalOverflow": false,
+    "columns": [
+      "one on mobile",
+      "two on desktop"
+    ],
+    "actualPrimarySetupOpenedB": true,
+    "invalidPermissionRejectedWithoutPrompt": true,
+    "primaryCancelRestoredEditingAndExport": true,
+    "nativeCredentialsInvoked": false,
+    "grantsIssued": false,
+    "liveStorageInBrowserPreview": false,
+    "consoleErrors": 0,
+    "previewStoppedAfterQa": true,
+    "screenshots": [
+      "native-collection-mobile-2026-10-10.jpg",
+      "native-collection-desktop-2026-10-10.jpg",
+      "native-collection-cancel-2026-10-10.jpg"
+    ],
+    "screenshotsLocalOnly": true
+  },
+  "limits": {
+    "physicalNativeCollectionVerified": false,
+    "systemPromptCountVerified": false,
+    "publicTlsVerified": false,
+    "independentStorageProviders": false,
+    "externalAdoption": false,
+    "externalSecurityAudit": false,
+    "productionSecurityProven": false,
+    "sitesPublished": false,
+    "videoCreated": false,
+    "finalSubmission": false
+  },
+  "sourceSha256": {
+    "text-native/profile.mjs": "1616320ccebabc6b40f3b74f8f2a3f784402dc052fb5a04bf6aff26439d6585d",
+    "text-native/build.mjs": "c45fc4ed122208626292ec2ed6458032cfa93c0fb82fb37e4c5f4215a2db9e92",
+    "text-native/doctor.mjs": "46820682a0f723d9e933c54a9e7a36156a3cf3537badd50cc1a1c4807a3098e0",
+    "text-native/operator.mjs": "70f03efa7b1c71e1a6ba04a937a844a67a79e226816a2bcbe5cab619c3c65029",
+    "text-native/operator-state.mjs": "8300e91d4cefc9fd5afa5ee87863960c6442660a81f780e1ae07da3260b40f60",
+    "text-native/operator-readiness.mjs": "9152597da9bd1446ddbcafd2f9eb8fb226a7c86c9344b60c987d4fccff62c057",
+    "text-native/native-host.mjs": "84423fbabc44cf1d70410063db7f07ee3059b358e14866b8befc43af613068b5",
+    "scripts/create-native-text-starter.mjs": "d9b1fad69e4c16037fb7403bfc89757bf383a56b9a927e25b50099daa2e6a0f7",
+    "text-native/collection-main.mjs": "953fb69e5bc8f2654e2031bc5305bbab1d3c51700b2d52a869e6151527917709",
+    "text-native/collection-index.html": "bf6766cf11be744e527c416e0706fde7317d5b2094e0e7aeb922b668ff1143f3",
+    "text-native/collection-style.css": "005602c78735c706edb0634df8e5592f531cc41bfcd8744c1a67c8372ab71609",
+    "text-native/prism-art.mjs": "be5f25415351cf7763dad35b1cee6d64a1120e90ae76ea16deb444c2140d4052",
+    "text-native/profile.collection.example.json": "a9de35ee5a0de210ad720f6cec4f3c2c8804f0f05255b7286621e2a4b0fdde08",
+    "tests/text-native-collection-profile.mjs": "b486a7b9b79603724be5ffe0ed2add27d02b4ad174f64f32fd087a3d69f6196b",
+    "tests/text-native-collection-ui.mjs": "4801a1722fe282f6050c9debec0d22c19a15c399bd0a40973c7cc8e759d78ccb",
+    "tests/text-native-collection-package.mjs": "d364edda0e6cc3698d9e97fbbbbeeb2f8aa01be4736efd57c1f0fc4b0179a6e6",
+    "tests/text-native-collection-managed.mjs": "c16572e43bdadae88ab8b4ddccaf53f98b22f4f3680790bd022bc2f7ed275501"
+  }
+}

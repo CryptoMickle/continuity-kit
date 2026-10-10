@@ -4,7 +4,7 @@ import { readFile, realpath } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes, createHash } from 'node:crypto';
-import { validateNativeProfile, validateNativeEnvironment } from './profile.mjs';
+import { validateNativeProfile, validateNativeEnvironment, nativeApps } from './profile.mjs';
 import { readNativeOperatorState } from './operator-state.mjs';
 import { runNativeDoctor } from './doctor.mjs';
 import { argumentsFrom, readProfile } from './build.mjs';
@@ -46,8 +46,7 @@ function json(response) {
 function operatorMatches(value, profile) {
   if (value?.synthetic !== false || value?.operatorHosted !== true || value?.enrollmentRequiresInvitation !== true || value?.role !== 'recovery'
     || value.originalOrigin !== profile.primaryOrigin || value.recoveryOrigin !== profile.recoveryOrigin || value.expiresAt !== profile.expiresAt
-    || !Array.isArray(value.apps) || value.apps.length !== 1 || value.apps[0].id !== 'text' || value.apps[0].label !== 'Text reserve'
-    || canonical(value.apps[0].config) !== canonical({ appId: profile.appId, recoveryOrigin: profile.recoveryOrigin, recoveryRpId: profile.recoveryRpId })) throw fail('OPERATOR_PROFILE_MISMATCH');
+    || canonical(value.apps) !== canonical(nativeApps(profile))) throw fail('OPERATOR_PROFILE_MISMATCH');
 }
 function sample(path) {
   const db = new DatabaseSync(path, { readOnly: true });

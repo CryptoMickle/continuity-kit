@@ -82,3 +82,80 @@ Fresh B needs only its existing passkey and one intact encrypted copy. No grant 
 `adapter.mjs` remains the two-function editor boundary, `getText()` and `applyText(text)`. `main.mjs` calls only the installed public `/text-browser`, `/text-reserve` and `/http-store` entrypoints. It supplies no synthetic WebAuthn override. Native authentication is initiated only by explicit buttons, and page exit aborts pending operations and clears the opened local copy.
 
 The parent repository's `npm run test:native-text` checks configuration, grant expiry and binding, frontend lifecycle/gesture boundaries, actual temporary operator databases, routing denials, safe initialization, managed process failures, read-only readiness and clean installed-generator behavior. Browser rendering checks do not authenticate. These checks are distinct from a user-run native passkey acceptance test.
+
+
+## Several app reserves with the same native passkey
+
+The same generated package also supports a **version 2 collection profile**.
+Copy `profile.collection.example.json` to a new `profile.json` before the first
+build and initialization. Define 2–8 apps using stable `id`, `label` and `appId`
+values. Keep each existing application's original `appId`; it is part of the
+key derivation and cannot be renamed to move a reserve. All apps use the same
+exact B origin/RP and the profile's ordered 2–3 storage routes. This reference
+hosts the example editors together on A; it is not a cross-origin app-directory
+or automatic discovery service.
+
+`id` selects an editor and permission handoff; `appId` binds the encrypted
+reserve. The browser never obtains either value from a pasted grant or arbitrary
+URL. B's `/?app=<id>` can select only an app already in the fixed profile.
+
+Use the same build, doctor, ports and operator commands documented above.
+The build chooses the collection interface for v2 and retains the single-app
+interface for v1. Initialize a **new private state directory for a new profile**.
+The existing state reader refuses a changed app list, ordering, label or binding;
+it does not rewrite databases. Do not modify an established v1 profile or copy
+its state into a v2 directory and assume migration occurred. Migration and
+additional apps in an existing deployed profile are not automated here.
+
+Prepare the apps one at a time. When the selected B setup tab is ready, issue
+its private permission bundle using the matching profile `id`:
+
+```sh
+npm run issue:grants -- --profile profile.json --app textarea \
+  --invitations private/operator/invitations.json \
+  --out private/operator/textarea-grants.json
+```
+
+In that B tab, paste the file contents into **One-time upload permission**, then
+choose **Check upload permission**. This clears the input and checks the app,
+origin, store order and short expiry without requesting a passkey. Choose
+**Create my first reserve passkey** only if this is the first reserve at B.
+For every subsequent app, choose **Use my existing reserve passkey** and select
+that same key. Selection failure never falls back to creating another key.
+Wait for all configured copies to be independently checked before closing A.
+
+Use the second profile ID and a fresh private output file for the next app:
+
+```sh
+npm run issue:grants -- --profile profile.json --app markdown \
+  --invitations private/operator/invitations.json \
+  --out private/operator/markdown-grants.json
+```
+
+These JSON bundles bind the frontend handoff to the selected app. The underlying
+operator token still permits one opaque ciphertext write; it cannot inspect the
+encrypted record's app namespace. This is not server-enforced per-app admission.
+Never publish an invitation or grant file, and do not issue grants in advance of
+an available setup window. An uncertain issuance/write can consume quota and
+must not be repeated automatically.
+
+Open B's root address in a fresh tab and choose **Open my app reserves**. The
+installed SDK makes one discoverable assertion for the collection and checks
+each app's authenticated copies. That is one API assertion, not a promise of
+one device confirmation. Missing, unavailable, altered and conflicting copies
+are reported per app; a valid sibling remains editable and exportable. Markdown
+is displayed as plain text, never executed HTML.
+
+Each app offers exact TXT and structured JSON export. Unedited BOM/CRLF bytes
+are retained; actual typing follows the browser editor's text behavior. Closing
+the copies or leaving the page clears the retained editor state and export
+links. Cancelling rejects late results. When profile access expires, already-open
+work remains editable/exportable; new recovery and preparation stop. Edits do not
+update stored snapshots. No issuer, synthetic credential or storage-failure
+control is bundled into either deployed role directory.
+
+Automated installed-package checks cover actual SQLite restart and recovery
+through B after A and one store stop, with test-only synthetic credentials
+outside the deployed assets. This package is not yet physically accepted with
+native multi-app passkeys, deployed to the public Sites, or independently audited.
+See [collection package validation](https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/evidence/native-collection-package-2026-10-10.json).

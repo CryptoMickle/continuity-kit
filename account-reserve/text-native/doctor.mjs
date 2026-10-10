@@ -19,6 +19,7 @@ export async function runNativeDoctor({ profile, out = fileURLToPath(new URL('./
   await check('Installed public SDK', async () => {
     const browser = await import('@continuitykit/account-reserve/text-browser'), reserve = await import('@continuitykit/account-reserve/text-reserve');
     if (typeof browser.startTextReserveReplicaSetup !== 'function' || typeof browser.createTextReserveReplicaReceiver !== 'function' || typeof reserve.recoverTextReserveFromReplicas !== 'function') throw new Error();
+    if (profile.version === 2 && typeof reserve.recoverTextReservesFromReplicas !== 'function') throw new Error();
   }, 'Install this generated package with npm ci --ignore-scripts.');
   for (const role of ['primary','recovery']) await check(role + ' build matches profile', async () => {
     const directory = join(out, role);

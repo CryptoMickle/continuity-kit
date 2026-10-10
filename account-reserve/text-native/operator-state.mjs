@@ -3,7 +3,7 @@ import { resolve, dirname, basename, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { validateNativeProfile } from './profile.mjs';
+import { validateNativeProfile, nativeApps } from './profile.mjs';
 import { initializeDatabase } from './operator-runtime/store.mjs';
 import { canonical, ciphertext, locator, LIMITS } from './operator-runtime/profile.mjs';
 
@@ -42,7 +42,7 @@ function portsCopy(input, profile) {
   }
   return Object.freeze({ primary, recovery, gateway, replicas: Object.freeze(replicas) });
 }
-function runtimeProfile(profile) { return Object.freeze({ version: 1, primaryOrigin: profile.primaryOrigin, recoveryOrigin: profile.recoveryOrigin, expiresAt: profile.expiresAt, apps: Object.freeze([Object.freeze({ id: 'text', label: 'Text reserve', appId: profile.appId })]) }); }
+function runtimeProfile(profile) { return Object.freeze({ version: 1, primaryOrigin: profile.primaryOrigin, recoveryOrigin: profile.recoveryOrigin, expiresAt: profile.expiresAt, apps: Object.freeze(nativeApps(profile).map(({ id, label, config }) => Object.freeze({ id, label, appId: config.appId }))) }); }
 function gatewayConfiguration(profile, ports) { return Object.freeze({ recoveryOrigin: profile.recoveryOrigin, replicas: Object.freeze(ports.replicas.map(item => Object.freeze({ ...item }))) }); }
 function exists(path) { try { return lstatSync(path); } catch (error) { if (error.code === 'ENOENT') return undefined; throw error; } }
 function owned(stat) { return typeof process.getuid !== 'function' || stat.uid === process.getuid(); }
