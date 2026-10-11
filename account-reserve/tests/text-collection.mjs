@@ -121,6 +121,55 @@ test('missing, unavailable and corrupt records are isolated without exposing fai
   assert.equal(f.counts.gets, before.gets + 1); assert.equal(f.counts.writes, before.writes);
 });
 
+test('provider error accessors stay app-local without evaluation or early results', async t => {
+  const f = fixture(t); await f.prepare(1);
+  const healthy = f.prepared.get(1).locator, hidden = 'PRIVATE_PROVIDER_ERROR';
+  let getterCalls = 0;
+  const getter = { get() { getterCalls++; throw Error(hidden); } };
+  for (const kind of ['own', 'inherited', 'descriptor-trap']) {
+    let providerError = new TextReserveError(hidden);
+    if (kind === 'own') Object.defineProperty(providerError, 'code', getter);
+    else if (kind === 'inherited') {
+      delete providerError.code;
+      Object.setPrototypeOf(providerError, Object.create(TextReserveError.prototype, { code: getter }));
+    } else providerError = new Proxy(providerError, { getOwnPropertyDescriptor() { throw Error(hidden); } });
+    const pending = deferred(), started = deferred(); let settled = false;
+    const before = { ...f.counts };
+    const recovering = f.recover({ store: { get(locator) {
+      if (locator === healthy) { started.resolve(); return pending.promise; }
+      throw providerError;
+    } } });
+    recovering.then(() => { settled = true; }, () => { settled = true; });
+    try {
+      await started.promise; await tick(); assert.equal(settled, false, 'wait for the healthy sibling');
+      pending.resolve(new Uint8Array(f.records.get(healthy)));
+      const results = await recovering;
+      assert.deepEqual(results[0], { appId: f.configs[0].appId, status: 'unavailable', code: 'STORE_UNAVAILABLE' });
+      assert.equal(results[1].status, 'recovered'); assert.equal(results[1].reserve.text, f.texts[1]);
+      assert.ok(Object.isFrozen(results) && results.every(Object.isFrozen));
+      assert.equal(JSON.stringify(results).includes(hidden), false);
+      assert.equal(getterCalls, 0); assert.equal(f.counts.gets, before.gets + 1);
+      assert.equal(f.counts.writes, before.writes); assert.equal(f.counts.creates, before.creates);
+    } finally { pending.resolve(undefined); await recovering.catch(() => {}); }
+  }
+});
+
+test('cancellation still rejects every app when a provider error has an unsafe code', async t => {
+  const f = fixture(t); await f.prepare(1);
+  const healthy = f.prepared.get(1).locator, pending = deferred(), started = deferred(), controller = new AbortController();
+  let getterCalls = 0;
+  const providerError = new TextReserveError('PRIVATE_PROVIDER_ERROR');
+  Object.defineProperty(providerError, 'code', { get() { getterCalls++; throw Error('PRIVATE_PROVIDER_ERROR'); } });
+  const recovering = f.recover({ signal: controller.signal, store: { get(locator) {
+    if (locator === healthy) { started.resolve(); return pending.promise; }
+    throw providerError;
+  } } });
+  const rejected = assert.rejects(recovering, code('OPERATION_CANCELLED'));
+  await started.promise; await tick(); controller.abort(); await rejected;
+  pending.resolve(new Uint8Array(f.records.get(healthy))); await tick();
+  assert.equal(getterCalls, 0); assert.ok(f.outputs.every(result => result.prfOutput.every(byte => byte === 0)));
+});
+
 test('app ciphertext substitution fails independently and never returns unauthenticated text', async t => {
   const f = fixture(t); await f.prepare(0); await f.prepare(1);
   const first = f.prepared.get(0).locator, second = f.prepared.get(1).locator, firstBytes = f.records.get(first);

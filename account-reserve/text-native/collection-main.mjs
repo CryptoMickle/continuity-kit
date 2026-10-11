@@ -256,7 +256,15 @@ export function mountNativeCollection(document, window, options) {
 
 // A Node consumer can import mountNativeCollection without executing browser work.
 if (typeof document !== 'undefined' && document.getElementById('collection-root')) {
-  const controller = new AbortController(); const stop = () => controller.abort(); window.addEventListener('pagehide', stop, { once: true });
-  try { const response = await fetch('/continuity-config.json', { credentials: 'omit', redirect: 'error', cache: 'no-store', signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]) }); if (!response.ok) throw problem(); const text = await response.text(); if (text.length > 16384 || new TextEncoder().encode(text).length > 16384) throw problem(); const environment = JSON.parse(text); if (!controller.signal.aborted) mountNativeCollection(document, window, { environment }); }
+  const controller = new AbortController(), root = document.getElementById('collection-root');
+  let mounted = false;
+  const stop = () => {
+    controller.abort();
+    // The mounted view owns its plaintext cleanup. Before it exists, replace
+    // the loading placeholder so a cached return cannot remain stuck there.
+    if (!mounted) root.textContent = 'This view is closed. Open a fresh recovery tab to continue.';
+  };
+  window.addEventListener('pagehide', stop, { once: true });
+  try { const response = await fetch('/continuity-config.json', { credentials: 'omit', redirect: 'error', cache: 'no-store', signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]) }); if (!response.ok) throw problem(); const text = await response.text(); if (text.length > 16384 || new TextEncoder().encode(text).length > 16384) throw problem(); const environment = JSON.parse(text); if (!controller.signal.aborted) { mountNativeCollection(document, window, { environment }); mounted = true; } }
   catch { if (!controller.signal.aborted) document.getElementById('collection-root').textContent = 'This app reserve could not load its configured profile. No passkey request started. Ask the operator to check the deployment.'; }
 }

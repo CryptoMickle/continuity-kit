@@ -380,6 +380,13 @@ export async function recoverTextReserve({ config: suppliedConfig, store, webAut
 const COLLECTION_REJECTIONS = new Set(['RECORD_INVALID', 'MANIFEST_AUTH_FAILED', 'MANIFEST_INVALID', 'CONFIG_INVALID',
   'POLICY_MISMATCH', 'CREDENTIAL_MISMATCH', 'TEXT_DIGEST_INVALID', 'TEXT_INVALID', 'TEXT_AUTH_FAILED', 'TEXT_DIGEST_MISMATCH']);
 
+function ownErrorCode(error) {
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(error, 'code');
+    return typeof descriptor?.value === 'string' ? descriptor.value : undefined;
+  } catch { return undefined; }
+}
+
 async function discoverCollectionMaterials(configs, ceremony) {
   const materials = [], prfSalt = salt();
   let result, adapterOutput, succeeded = false;
@@ -425,12 +432,14 @@ export async function recoverTextReserves({ configs: suppliedConfigs, store, web
         return Object.freeze({ appId: config.appId, status: 'recovered', reserve });
       } catch (error) {
         ceremony.assertActive();
-        const missing = error?.code === 'RESERVE_MISSING';
-        const unavailable = error?.code === 'STORE_UNAVAILABLE' || error?.code === 'STORE_EXPIRED';
+        const capturedCode = ownErrorCode(error);
+        const missing = capturedCode === 'RESERVE_MISSING';
+        const unavailable = capturedCode === undefined || capturedCode === 'STORE_UNAVAILABLE' || capturedCode === 'STORE_EXPIRED';
         const status = missing ? 'missing' : unavailable ? 'unavailable' : 'rejected';
         // Do not copy arbitrary provider errors, messages or locators into a
-        // failed result. Only protocol-defined classifications are returned.
-        const code = missing ? 'RESERVE_MISSING' : unavailable ? error.code : COLLECTION_REJECTIONS.has(error?.code) ? error.code : 'RECORD_INVALID';
+        // failed result or invoke their accessors. Unreadable metadata cannot
+        // suppress a healthy app or establish that a stored record is corrupt.
+        const code = missing ? 'RESERVE_MISSING' : unavailable ? capturedCode ?? 'STORE_UNAVAILABLE' : COLLECTION_REJECTIONS.has(capturedCode) ? capturedCode : 'RECORD_INVALID';
         return Object.freeze({ appId: config.appId, status, code });
       } finally { materials[index] = undefined; }
     }));

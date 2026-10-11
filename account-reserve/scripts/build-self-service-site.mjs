@@ -33,6 +33,8 @@ export async function buildSelfServiceSite(root, role) {
   await collect(textClient, '/text');
   const appsClient = await buildAppReserves(root, join(root, 'artifacts/app-reserves-client'));
   await collect(appsClient);
+  // Buildless entry page: ordinary links only, no credential or storage flow.
+  await collect(join(root, 'self-service/start'), '/start');
   await build({root,configFile:false,define:{__SELF_SERVICE_PROFILE__:JSON.stringify(profile),__SELF_SERVICE_ROLE__:JSON.stringify(role),__SELF_SERVICE_ASSETS__:JSON.stringify(assets)},build:{ssr:join(root,'self-service/backend/entry.mjs'),target:'es2022',outDir:join(root,'dist/server'),emptyOutDir:true,rollupOptions:{output:{entryFileNames:'index.js'}}},ssr:{noExternal:true}});
   const entry=join(root,'dist/server/index.js'), worker=(await import(entry+'?check='+Date.now())).default;
   const env={DB:{prepare(){throw Error('BUILD_DATABASE_ACCESS');},batch(){throw Error('BUILD_DATABASE_ACCESS');}}};
@@ -51,6 +53,7 @@ export async function buildSelfServiceSite(root, role) {
   const appsValue = await appsConfig.json();
   if(appsConfig.status!==200 || appsValue.apps?.length!==2 || appsValue.operatorHosted!==false || appsValue.enrollmentRequiresInvitation!==false) throw Error('APPS_CONFIG_INVALID');
   for(const path of ['/apps/','/apps/textarea/','/apps/markdown/']) if((await worker.fetch(new Request(origin+path),env)).status!==200) throw Error('APPS_PAGE_INVALID');
+  for(const path of ['/start/index.html','/start/style.css']) if((await worker.fetch(new Request(origin+path),env)).status!==200) throw Error('START_PAGE_INVALID');
   for(const path of ['/api/synthetic','/rpc','/api/primary','/api/status']) if((await worker.fetch(new Request(origin+path),env)).status!==404) throw Error('UNEXPECTED_ROUTE');
   await mkdir(join(root,'dist/.openai'),{recursive:true});
   await cp(join(root,'.openai/hosting.json'),join(root,'dist/.openai/hosting.json'));

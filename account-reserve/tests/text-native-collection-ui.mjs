@@ -21,6 +21,50 @@ const deferred = () => { let resolve, reject; const promise = new Promise((yes, 
 const texts = ['\ufeffText draft — ÆØÅ 🦊\r\nPrivate line.\r\n', '# Markdown\n\n<img src=x onerror="throw 1">\n<script>window.bad=true</script>'];
 const diagnostic = (id, status, code) => ({ id, stage: 'verify', status, ...(code ? { code } : {}) });
 
+const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+const bootstrap = new AsyncFunction('document', 'window', 'fetch', 'AbortController', 'AbortSignal', 'TextEncoder', 'problem', 'mountNativeCollection', originalSource.slice(originalSource.indexOf('// A Node consumer')));
+
+test('bootstrap pagehide gives closed guidance before mounting and ignores late fetch or body completion', async t => {
+  for (const phase of ['fetch-abort', 'late-body']) {
+    const dom = new JSDOM(html, { url: 'https://reserve.example.test/' }); t.after(() => dom.window.close());
+    const { window } = dom, pending = deferred(); let fetches = 0, mounts = 0, signal;
+    const task = bootstrap(window.document, window, (_path, init) => {
+      fetches++; signal = init.signal;
+      if (phase === 'fetch-abort') {
+        signal.addEventListener('abort', () => pending.reject(new Error('ABORTED')), { once: true });
+        return pending.promise;
+      }
+      return Promise.resolve({ ok: true, text: () => pending.promise });
+    }, AbortController, AbortSignal, TextEncoder, () => new Error('CONFIG_INVALID'), () => { mounts++; });
+    await tick(); window.dispatchEvent(new window.Event('pagehide'));
+    assert.equal(signal.aborted, true);
+    const root = window.document.getElementById('collection-root');
+    assert.match(root.textContent, /view is closed.*fresh recovery tab/i);
+    const restored = new window.Event('pageshow'); Object.defineProperty(restored, 'persisted', { value: true });
+    window.dispatchEvent(restored);
+    if (phase === 'late-body') pending.resolve('{}');
+    await assert.doesNotReject(task); await tick();
+    assert.match(root.textContent, /view is closed.*fresh recovery tab/i);
+    assert.equal(fetches, 1); assert.equal(mounts, 0); assert.equal(root.querySelector('button'), null);
+  }
+});
+
+test('bootstrap leaves mounted DOM intact for its established pagehide cleanup', async t => {
+  const dom = new JSDOM(html, { url: 'https://reserve.example.test/' }); t.after(() => dom.window.close());
+  const { window } = dom; let cleanups = 0;
+  await bootstrap(window.document, window, async () => ({ ok: true, text: async () => '{}' }), AbortController, AbortSignal, TextEncoder,
+    () => new Error('CONFIG_INVALID'), document => {
+      document.getElementById('collection-root').innerHTML = '<p id="mounted-status">Open draft</p>';
+      window.addEventListener('pagehide', () => {
+        const status = document.getElementById('mounted-status');
+        assert.ok(status, 'bootstrap must not replace a mounted view before its cleanup');
+        cleanups++; status.textContent = 'Mounted view closed.';
+      });
+    });
+  window.dispatchEvent(new window.Event('pagehide'));
+  assert.equal(cleanups, 1); assert.equal(window.document.getElementById('mounted-status').textContent, 'Mounted view closed.');
+});
+
 async function fixture(t, { role = 'recovery', enrollment = false, lifetime = 3600000, url = '', secure = true, mutation, count = 2, storeDelay = 0 } = {}) {
   let time = Date.now(), sequence = 0;
   const ids = ['alpha', 'beta', 'gamma'].slice(0, count);

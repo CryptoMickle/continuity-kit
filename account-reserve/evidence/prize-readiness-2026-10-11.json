@@ -1,0 +1,232 @@
+{
+  "format": "continuitykit/prize-readiness-evidence-map/v1",
+  "recordedAt": "2026-10-11T21:07:43.406807Z",
+  "purpose": "Public-safe evidence references for the judge/developer start page; no prediction of eligibility or prize outcome.",
+  "collectionScope": {
+    "readOnly": true,
+    "newTransactions": 0,
+    "credentialRequests": 0,
+    "reserveReadsOrWrites": 0,
+    "testsRerun": false,
+    "externalMessagesSent": false
+  },
+  "publicPayments": {
+    "claim": "Two distinct developer-funded testnet payment rights were collected by the same beneficiary.",
+    "chainId": 10143,
+    "network": "Monad testnet",
+    "contract": "0x47C8c753295AC4fBe4c23D9BD2dC899F61b66564",
+    "beneficiary": "0x3efc5827c9f2f25f8fd4000C4BF9318154dF1B85",
+    "claims": [
+      {
+        "rightId": "1",
+        "amountWei": "10000000000000000",
+        "amountTestMon": "0.01",
+        "hash": "0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600",
+        "blockNumber": "69905019",
+        "blockHash": "0xc9fb6093d2bca5fa8958248c50f53ea949f247e53b96a19765e529c3a3e69cb5",
+        "finalized": true,
+        "paymentVerified": true,
+        "explorerUrl": "https://testnet.monadscan.com/tx/0xeba6bdebb6d0944d8d6f02d284a6c7b325e478ded63216cb1756ed2bd0aa8600",
+        "explorerHttpStatus": 200
+      },
+      {
+        "rightId": "2",
+        "amountWei": "10000000000000000",
+        "amountTestMon": "0.01",
+        "hash": "0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2",
+        "blockNumber": "69914955",
+        "blockHash": "0xaf511bedac0b277386b38395dd87d37daf2ba642611a96442f2d122fbbd1ff33",
+        "finalized": true,
+        "paymentVerified": true,
+        "explorerUrl": "https://testnet.monadscan.com/tx/0xf263554671e28415d0b9aa3f76e607dce987bd903f94d981a4bab1a2615da1b2",
+        "explorerHttpStatus": 200
+      }
+    ],
+    "liveVerification": {
+      "checkedAt": "2026-10-11T21:04:46.968Z",
+      "verifier": "payments/verify-claim.mjs",
+      "profileUrl": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/profile.json",
+      "profileSha256": "99f87410c88c9f0894219dc833ecfe21654fcc35a37b4c4d23ec64707fff0e58",
+      "rpcUrls": [
+        "https://testnet-rpc.monad.xyz",
+        "https://rpc-testnet.monadinfra.com"
+      ],
+      "bothFixedRpcChecksPassed": true,
+      "signerLoaded": false,
+      "journalRequired": false,
+      "notALightClientProof": true
+    },
+    "readerPage": "https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/",
+    "historicalOutage": {
+      "source": "evidence/payments-validation-2026-10-10.json",
+      "scope": "Operator-controlled public A routes returned HTTP 503 before second funding and again after second claim; B routes returned HTTP 200 in those probes. A was then restored.",
+      "secondRightIssuedAfterFirstOutageProbe": true,
+      "continuousOutageMonitoring": false,
+      "independentInfrastructureFailure": false,
+      "nativeAuthenticationIndependentlyObserved": false
+    },
+    "limits": [
+      "Chain receipts establish the approved payment outcomes, not which device, passkey or UI was used.",
+      "The builder reported completion after existing-key B instructions; physical authentication was not independently observed.",
+      "This is developer-funded testnet demonstration activity, not revenue, demand or external adoption."
+    ],
+    "contractExplorerUrl": "https://testnet.monadscan.com/address/0x47C8c753295AC4fBe4c23D9BD2dC899F61b66564",
+    "contractExplorerHttpStatus": 200
+  },
+  "nativeText": {
+    "separateAppRecovery": {
+      "status": "builder-reported-complete-with-http-corroboration",
+      "source": "evidence/apps-native-acceptance-2026-10-10.json",
+      "apps": [
+        "Textarea",
+        "Markdown Studio"
+      ],
+      "device": "Safari on iPhone, builder-reported",
+      "bothRecoveredReported": true,
+      "bothExportedReported": true,
+      "existingPasskeyReuse": "The instructions explicitly required the same existing key; completion was reported. Credential identity was not independently correlated.",
+      "httpCorroboration": "Published app routes, successful preparation and later reserve reads were recorded; redacted metadata does not prove decryption or exported bytes.",
+      "exportBytesIndependentlyInspected": false,
+      "physicalPromptCountKnown": false,
+      "independentTester": false,
+      "provesNativeOneAssertionCollection": false
+    },
+    "separateCrossDeviceReport": {
+      "status": "builder-reported-iphone-recovery-export",
+      "source": "evidence/text-native-acceptance-2026-10-10.json",
+      "scope": "Earlier single-text text-v1 test following Mac Safari preparation to iPhone Safari recovery instructions.",
+      "macSafariUploadAndLaterIphoneReadCorroborated": true,
+      "sameCredentialOrCiphertextCorrelatedByLogs": false,
+      "deviceScreensOrExportBytesIndependentlyInspected": false,
+      "notEvidenceForNewTwoAppOrReplicaFlow": true
+    },
+    "hostedEntry": {
+      "primary": "https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/",
+      "reserve": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/"
+    },
+    "newerCollectionView": {
+      "source": "evidence/collection-validation-2026-10-10.json",
+      "oneAssertionCoveredBySyntheticTests": true,
+      "nativePhysicalAcceptanceEstablished": false,
+      "apiCallsAreNotOsPromptCounts": true
+    },
+    "hostingLimits": [
+      "The published editors share one recovery origin and its trust boundary.",
+      "Hosted text collection uses its single-store configuration; separate local replica processes are a different evidence scope.",
+      "No independent second operator, provider, machine or public domain migration is established.",
+      "Closing A is not an HTTP outage; no public outage is established for the two-editor iPhone sequence."
+    ]
+  },
+  "localTamperAndFailureTests": {
+    "source": "evidence/text-collection-replica-installed-2026-10-10.json",
+    "scope": "Installed public SDK, synthetic credential, two app namespaces and separate real loopback SQLite storage processes.",
+    "oneStoreKilledBothAppsRecovered": true,
+    "survivingCiphertextTamperRejectedAffectedApp": true,
+    "healthySiblingStillRecovered": true,
+    "failedAppProducedNoTxtOrJson": true,
+    "samePlaintextDifferentAuthenticatedCiphertextConflictRejected": true,
+    "successfulExportsByteExact": true,
+    "recoveryChangedNoStoredBytesOrCounters": true,
+    "nativePublicTamperTest": false,
+    "independentOperators": false,
+    "primaryBoundary": "Original-app requests were forbidden; this particular proof did not start A and does not establish a deployed A outage."
+  },
+  "meraUse": {
+    "package": "@category-labs/mera",
+    "pinnedVersion": "0.2.0",
+    "nonAccountPurpose": "Discoverable user-verified PRF material locates and decrypts immutable app text; text recovery creates no account or signing session.",
+    "derivation": "One protocol-wide PRF salt; HKDF binds the app ID, exact recovery origin, RP and selected credential, with separate locator, manifest-encryption and text-encryption purposes. The PRF salt is not app-specific.",
+    "protocolSource": "sdk/TEXT_PROTOCOL.txt",
+    "officialDocs": [
+      {
+        "url": "https://mera.category.xyz/concepts/passkeys-and-prf/",
+        "httpStatus": 200
+      },
+      {
+        "url": "https://mera.category.xyz/recipes/use-an-existing-secret/",
+        "httpStatus": 200
+      }
+    ],
+    "crossDeviceDependency": "The same existing credential must be available on a compatible authenticator at the original recovery RP. This is not lost-passkey recovery or arbitrary domain migration.",
+    "limits": [
+      "Editors receive plaintext and intentional exports are plaintext.",
+      "App namespace separation does not protect against a malicious client on the shared recovery origin.",
+      "A retained encrypted export is a viable alternative; general superiority to backup is not established."
+    ]
+  },
+  "preciseGaps": [
+    {
+      "id": "maintenance-not-published",
+      "status": "locally-validated-only",
+      "source": "evidence/maintenance-review-2026-10-11.json",
+      "detail": "Original newline/BOM export preservation and two additional maintenance fixes are locally validated; the cited maintenance record says source and hosted publication remain incomplete. Do not label the live editors as containing those fixes."
+    },
+    {
+      "id": "new-collection-native-proof",
+      "status": "not-established",
+      "detail": "Physical execution of the newer one-assertion multi-app or replicated flow is not established. Keep that feature under local automated evidence unless a new demonstration is deliberately performed."
+    },
+    {
+      "id": "cross-device-live-presentation",
+      "status": "builder-report-exists-direct-presentation-deferred",
+      "detail": "Existing iPhone and earlier Mac-to-iPhone reports need no generic repeat. They do not supply an independently observed live cross-device comparison or inspected export bytes for the newer flow."
+    },
+    {
+      "id": "external-integration",
+      "status": "not-established",
+      "detail": "Project-authored editor integrations and internal reviews are not third-party integration, user retention or adoption."
+    },
+    {
+      "id": "operator-independence",
+      "status": "not-established",
+      "detail": "Separate local stores and an operator-controlled A outage do not prove independent operators or providers."
+    },
+    {
+      "id": "video-and-submission",
+      "status": "deferred",
+      "detail": "Video and final submission are outside this verification; this map claims neither completion nor sponsor acceptance."
+    }
+  ],
+  "publicSourceReferences": [
+    {
+      "path": "evidence/payments-validation-2026-10-10.json",
+      "url": "https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/evidence/payments-validation-2026-10-10.json",
+      "httpStatus": 200,
+      "localEvidenceSha256": "956fdfb6fb19ac5f8696f9ebe9b653768e76c67dd0091713e9643ac4f7cb1078"
+    },
+    {
+      "path": "evidence/apps-native-acceptance-2026-10-10.json",
+      "url": "https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/evidence/apps-native-acceptance-2026-10-10.json",
+      "httpStatus": 200,
+      "localEvidenceSha256": "38329971fbd49edf35b172a314e31660f8b6cd4db48506fe790785889a078013"
+    },
+    {
+      "path": "evidence/text-native-acceptance-2026-10-10.json",
+      "url": "https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/evidence/text-native-acceptance-2026-10-10.json",
+      "httpStatus": 200,
+      "localEvidenceSha256": "9b093dafd50daed8aa426f4a768d80cda4917adea82b219c3b88d83ee92a2b7b"
+    },
+    {
+      "path": "evidence/collection-validation-2026-10-10.json",
+      "url": "https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/evidence/collection-validation-2026-10-10.json",
+      "httpStatus": 200,
+      "localEvidenceSha256": "7956d41c6e38f9f681885ad1029612b92b564dd8156e0ef827754dea44790168"
+    },
+    {
+      "path": "evidence/text-collection-replica-installed-2026-10-10.json",
+      "url": "https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/evidence/text-collection-replica-installed-2026-10-10.json",
+      "httpStatus": 200,
+      "localEvidenceSha256": "426d4b0d24e89d69f2239ac061b2ce1e2c0cafdaefaf615a4448b3df304bf31d"
+    },
+    {
+      "path": "sdk/TEXT_PROTOCOL.txt",
+      "url": "https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/sdk/TEXT_PROTOCOL.txt",
+      "httpStatus": 200,
+      "localEvidenceSha256": "18d186bfd8b06ff8576f76b8d7a69886a8b23b922af21b82a5f79890fa959ece"
+    }
+  ],
+  "publication": {
+    "thisMapPublishedByThisTask": false,
+    "runtimeChangedByThisTask": false
+  }
+}

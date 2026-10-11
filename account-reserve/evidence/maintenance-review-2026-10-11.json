@@ -1,0 +1,222 @@
+{
+  "verifiedAt": "2026-10-11T20:55:12.314Z",
+  "status": "reviewed-and-validated-locally-not-published",
+  "scope": "Three reproduced maintenance defects; no new feature milestone.",
+  "sourceFiles": {
+    "sdk/text-reserve.mjs": {
+      "sha256": "6fe2fa3a687cd22ea1cc9acef492fe9db1af1707232582c664205edfedf3f2f9",
+      "bytes": 42782
+    },
+    "tests/text-collection.mjs": {
+      "sha256": "3201b870404f1e9de63e73ae2a409d2847051995ea08c2507f44fa549fbea093",
+      "bytes": 19556
+    },
+    "text-native/collection-main.mjs": {
+      "sha256": "e7727ba09159a52b205fd2b0f7af69458a23c79dc2e5d583bdbf076c8e54d0cd",
+      "bytes": 31861
+    },
+    "tests/text-native-collection-ui.mjs": {
+      "sha256": "5c78de4c132958812f96351e15509b99a28b8d633617de7e7c347c5fa286b48a",
+      "bytes": 21783
+    },
+    "self-service/apps/app.mjs": {
+      "sha256": "ccb3959dfc60a3a3607df44274d3e063cb748bc6d20ba8b44d6bc8400008e669",
+      "bytes": 38273
+    },
+    "self-service/text/app.mjs": {
+      "sha256": "1bd48b5b463272b46b5b3abd66db17d67705cbaabce5daecd64dc40bae83924d",
+      "bytes": 32546
+    },
+    "tests/self-service-exact-export.mjs": {
+      "sha256": "beb325bb3bf88a04db23e7195efc9efc4673880799887c57cd470bfc622371c4",
+      "bytes": 10453
+    }
+  },
+  "corrections": [
+    {
+      "id": "legacy-collection-provider-error-isolation",
+      "files": [
+        "sdk/text-reserve.mjs",
+        "tests/text-collection.mjs"
+      ],
+      "observedDefect": "A provider TextReserveError with an accessor or unreadable code could throw during legacy collection classification and suppress a healthy sibling app.",
+      "change": "Capture a string code only from a safe own data descriptor. Unreadable metadata becomes app-local STORE_UNAVAILABLE; no provider accessors or messages are exposed. Global cancellation assertions retain precedence.",
+      "reproducedBeforeFix": true,
+      "redPhase": "Targeted accessor regression failed with the provider exception before the source fix.",
+      "regressionCoverage": [
+        "Own and inherited code getters are not invoked",
+        "Throwing descriptor trap stays app-local",
+        "Healthy sibling read completes before return",
+        "Cancellation rejects the full batch without late plaintext"
+      ],
+      "wireFormatAndDerivationUnchanged": true
+    },
+    {
+      "id": "native-collection-bootstrap-closed-guidance",
+      "files": [
+        "text-native/collection-main.mjs",
+        "tests/text-native-collection-ui.mjs"
+      ],
+      "observedDefect": "Pagehide before native collection bootstrap completed could leave a restored page displaying its loading placeholder with no actionable closed-state guidance.",
+      "change": "Abort bootstrap and display closed-view guidance if the collection has not mounted. A mounted view retains ownership of its DOM and plaintext cleanup; late fetch/body completions cannot remount.",
+      "regressionCoverage": [
+        "Pagehide before response or body completion",
+        "Late bootstrap result ignored",
+        "Mounted cleanup remains intact"
+      ]
+    },
+    {
+      "id": "self-service-raw-text-export",
+      "files": [
+        "self-service/apps/app.mjs",
+        "self-service/text/app.mjs",
+        "tests/self-service-exact-export.mjs"
+      ],
+      "observedDefect": "Displaying authenticated recovered text through a textarea or EasyMDE could normalize line endings, changing unedited exports and falsely marking the snapshot as edited.",
+      "change": "Retain the recovered source and its rendered baseline. Export exact recovered text while the displayed value is unchanged; genuine edits export the current editor value. Cleanup clears both baselines.",
+      "regressionCoverage": [
+        "TXT and JSON retain BOM, CRLF and bare CR before editing on /text/, /apps/textarea/ and /apps/markdown/",
+        "Editor normalization alone does not label a user edit",
+        "Real editor changes export the edited value",
+        "Pagehide clears drafts and revokes download URLs"
+      ],
+      "actualCompiledEasyMdeInDomTest": true,
+      "noSnapshotRewrites": true
+    }
+  ],
+  "validation": {
+    "distinctTopLevelCases": 113,
+    "passed": 113,
+    "failed": 0,
+    "skipped": 0,
+    "counting": "110 distinct source/DOM cases plus 3 installed-package/integration cases. The 16 legacy and 17 combined collection cases repeated against the installed SDK are not added to the distinct total.",
+    "focusedRuns": [
+      {
+        "command": "node --test tests/text-collection.mjs tests/text-collection-replicas.mjs",
+        "tests": 33,
+        "passed": 33,
+        "failed": 0,
+        "skipped": 0,
+        "performedBy": "SDK maintenance agent",
+        "runPreviouslyInThisMaintenance": true
+      },
+      {
+        "command": "node --test tests/text-native-collection-ui.mjs",
+        "tests": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0,
+        "performedBy": "native maintenance agent",
+        "runPreviouslyInThisMaintenance": true
+      },
+      {
+        "command": "node --test tests/self-service-exact-export.mjs tests/self-service-text-ui.mjs tests/self-service-apps-ui.mjs tests/self-service-collection-ui.mjs",
+        "tests": 57,
+        "passed": 57,
+        "failed": 0,
+        "skipped": 0,
+        "performedBy": "root agent",
+        "runPreviouslyInThisMaintenance": true
+      },
+      {
+        "command": "node --test tests/text-native-collection-package.mjs",
+        "tests": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "assertions": [
+          "Fresh offline installed generator",
+          "Separate native v1 and v2 builds",
+          "Exact profile/role/app binding",
+          "Doctor acceptance and wrong-profile rejection",
+          "No synthetic or issuer endpoints in native assets"
+        ]
+      },
+      {
+        "command": "node --test tests/text-native-collection-managed.mjs tests/text-collection-replica-package.mjs",
+        "tests": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "localLoopbackPermissionGranted": true,
+        "durationMs": 9772.051542,
+        "assertions": [
+          "Installed public SDK and strict TypeScript",
+          "Separate actual local storage processes",
+          "Fresh B-only recovery with A listener closed",
+          "Store loss, same-state restart, missing/corrupt app isolation",
+          "Exact TXT/JSON exports",
+          "No recovery writes or state/quota changes"
+        ]
+      }
+    ],
+    "installedLegacyCollectionReplay": {
+      "tests": 16,
+      "passed": 16,
+      "failed": 0,
+      "offlineInstall": true,
+      "publicExportOnly": true,
+      "method": "Copy the unchanged tests/text-collection.mjs body into a temporary fresh installed consumer, replacing only its relative SDK import with @continuitykit/account-reserve/text-reserve; run Node test and remove the fixture.",
+      "newAccessorAndCancellationRegressions": true
+    },
+    "installedCombinedCollectionReplay": {
+      "tests": 17,
+      "passed": 17,
+      "strictTypeScript": true,
+      "partOf": "tests/text-collection-replica-package.mjs"
+    },
+    "managedNativeProof": {
+      "managedStarts": 4,
+      "freshRecoveryProcesses": 9,
+      "freshJsdomProcesses": 3,
+      "actualPrimaryListenerClosed": true,
+      "actualStoreProcessesKilled": true,
+      "oneSyntheticExistingAssertionPerCollection": true,
+      "exactExports": true,
+      "noRecoveryWrites": true,
+      "staticStatePreserved": true
+    },
+    "environmentNotes": [
+      "Initial package attempts stopped before assertions because the sandbox could not write the standard npm cache; an older temporary cache then lacked a required cached package.",
+      "A fresh writable temporary cache was populated only from existing cached public registry packages named by the pinned lockfile. All installs remained offline; no dependency or lockfile changed.",
+      "The first actual-store attempts stopped at sandbox loopback-listen restrictions. The same two unchanged tests passed after narrowly approved permission for disposable local synthetic servers.",
+      "An initial ad-hoc stdin replay invocation encountered the generator CLI argv guard before tests ran; correcting only the temporary runner invocation allowed the installed legacy suite to pass."
+    ]
+  },
+  "review": {
+    "scope": "Internal maintenance review and local regression validation, not an external security audit.",
+    "selfServiceIndependentReview": "Root reported independent internal review with no remaining finding."
+  },
+  "publication": {
+    "source": {
+      "status": "not-published",
+      "commit": null
+    },
+    "hosted": {
+      "status": "not-published",
+      "automaticApprovalReviewRejected": true,
+      "rejection": "The proposed publication would send a live source-repository credential to an existing terminal outside the managed sandbox/network proxy. Automatic review rejected the avoidable credential exposure and unauthorized repository access risk.",
+      "credentialTransferredByRejectedAttempt": false,
+      "reportedBy": "root agent",
+      "bypassAttemptedInThisValidation": false
+    }
+  },
+  "boundaries": {
+    "noWalletActions": true,
+    "noPublicTransactions": true,
+    "noNativePasskeyRequests": true,
+    "noPublicStorageWrites": true,
+    "noExistingUserStateMutation": true,
+    "noPaymentSuiteRerun": true,
+    "noHostedPublication": true,
+    "noSourcePublication": true,
+    "roadmapFeatureStatusesUnchanged": true,
+    "noVideoOrFinalSubmission": true
+  },
+  "limitations": [
+    "Installed recovery uses synthetic credentials and disposable local stores, not physical passkeys or independent providers.",
+    "Native UI evidence executes source under JSDOM; successful native builds do not establish physical-browser behavior.",
+    "The self-service export test uses controlled recovery data and actual compiled editor modules; it is not a new hosted recovery test.",
+    "These maintenance corrections provide no evidence of demand, retained adoption or prize outcomes."
+  ]
+}

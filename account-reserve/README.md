@@ -10,6 +10,24 @@ snapshot. Later edits must be exported. A competent encrypted export also protec
 the narrower benefit here is finding and opening a prepared copy without retaining that
 export file. The reserve service and compatible passkey must still be available.
 
+## Start here
+
+| What you want to check | Start | What it establishes |
+| --- | --- | --- |
+| Try the two fictional editors | [Public editor demo](https://continuitykit-try-primary.cryptomickle.chatgpt.site/apps/), then [your prepared reserve](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/apps/) | Prepare and reopen separate app snapshots with an existing compatible reserve passkey. Keep the B address. |
+| Integrate your own editor | [30-minute developer trial](text-starter/README.md#30-minute-trial-with-your-editor) | A local integration, with your own component, a real A HTTP 503, fresh B recovery and compared exports. Credentials are simulated in this starter. |
+| Check useful Monad transactions | [Payment receipt reader](https://continuitykit-account-reserve.cryptomickle.chatgpt.site/payments/), or [verify from the source](payments/README.md#check-a-reference-from-a-fresh-browser) | Two exact, finalized 0.01 test-MON claims by the same account; the second followed a controlled original-app outage. Receipt checking needs no passkey or wallet. |
+| Inspect the evidence and limits | [Evidence map](evidence/prize-readiness-2026-10-11.json) | Separate public chain results, builder-reported iPhone recovery, local tamper tests and remaining gaps. |
+
+The hosted editors currently use one recovery service and its single-store
+configuration. Separate local replica processes are a different demonstration;
+neither proves independent operators. No outside developer integration is yet
+established. Two testnet payments prove repeatable functionality, not demand.
+
+The [static start page](self-service/start/index.html) packages these same routes.
+Its hosted publication is tracked separately; this README is the public starting
+point until that release is verified.
+
 ## Repeated payments through the same account
 
 The separate [sequential-payment integration](payments/README.md) exercises a

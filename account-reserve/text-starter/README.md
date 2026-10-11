@@ -4,6 +4,74 @@ A small editor you own, wired to the installed ContinuityKit public SDK. It prep
 
 **Local simulation only.** These servers emulate the credential; they do not invoke a physical passkey. The default mode keeps its encrypted snapshot in RAM. The optional replica and collection modes below use two temporary SQLite databases and separate storage processes. All modes keep the synthetic credential in the parent server's RAM; stopping that server ends recovery. Never deploy these servers or `synthetic-client.mjs`. They do not establish independent infrastructure or providers.
 
+## 30-minute trial with your editor
+
+The question is whether this SDK makes recovery useful enough to justify adding
+it to an editor you already maintain. Use a development copy of that editor or
+its existing text component, fictional text, and the default single-app starter.
+No account signup, wallet, payment, hosting or physical passkey is needed.
+Thirty minutes is a time limit, not a promised integration time: stop and report
+the first blocker if you cannot finish. A negative result is useful.
+
+With Git and Node.js 24+ available, start in a writable folder. Both directory
+names below must be new; the generator refuses a nonempty target.
+
+```sh
+git clone https://github.com/CryptoMickle/continuity-kit.git continuitykit-trial-source
+cd continuitykit-trial-source/account-reserve
+git rev-parse HEAD
+npm run create:text-starter -- ../../continuitykit-editor-trial
+cd ../../continuitykit-editor-trial
+```
+
+Record the printed source commit. The generated folder is outside the cloned
+source and contains its own pinned SDK tarball and lockfile. Do not run the
+template's install directly in the repository's `text-starter` directory.
+The [public generator](https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/scripts/create-text-starter.mjs)
+and [editor adapter](https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/text-starter/adapter.mjs)
+show exactly what is supplied.
+
+1. Install with `npm ci --ignore-scripts`. Bring your existing editor component
+   into the generated page and connect its `getText()` and `applyText(text)` as
+   described under [Connect your own editor](#connect-your-own-editor). Save the
+   small integration diff. Renaming the sample editor is not this trial.
+2. Run `npm run build`, `npm run doctor`, `npm test`, then `npm run dev` from the
+   generated folder. Rebuild after changing your editor: the server serves
+   `dist/`, not live source. These checks validate the supplied infrastructure;
+   the browser steps below validate your integration.
+3. Open A at `http://text-starter-primary.localhost:5973/`. Write a short fictional
+   draft in your editor and export its original TXT for comparison. Choose
+   **Prepare a reserve in B**, then **Prepare this snapshot** in B. Wait for the
+   successful preparation message before continuing.
+4. In B, choose **Make A unavailable** and **Open B in a fresh tab**. Keep the
+   local server running. In the fresh B tab, choose **Open my existing reserve**;
+   A's page/API must remain unavailable. Export TXT before editing and compare
+   it with the original, then make a visible edit and export the edited copy.
+   The original snapshot stays unchanged.
+5. Stop at success or at 30 minutes. Report the result below; no positive quote,
+   public repository or ongoing adoption is required. Share only fictional
+   exports and code you are allowed to disclose. A screenshot alone cannot show
+   that your own component was integrated.
+
+```text
+Source commit / Node version / browser:
+Editor or component integrated (or unchanged starter only):
+Changed code: small diff or shareable snippet
+Outcome: completed / blocked / stopped at time limit
+Actual elapsed minutes, including setup:
+First blocker or most confusing step (exact error if present):
+A unavailable + fresh B recovered: yes / no / not reached
+Unedited TXT matched original; edited export kept the change: yes / no / not reached
+Files, if completed: original TXT, recovered TXT, edited TXT or JSON
+Why choose this over an encrypted export and re-import — or why not?
+Permission to quote this result or name your project: yes / no
+```
+
+This can establish one external **local integration trial**. Running the
+unchanged starter is an evaluation; neither outcome establishes native passkey
+compatibility, production security, paying users or retained adoption. If a
+reciprocal review was agreed, keep it separate and equally bounded.
+
 ## Run from this generated folder
 
 Use Node.js 24 or later.
@@ -115,9 +183,26 @@ const editor = {
 // Both: exportText(editor, 'txt') returns the current local draft.
 ```
 
+For the generated page, replace the `textareaAdapter($('draft'))` initialization
+in `main.mjs` with your mounted component's adapter. That page also calls
+`editor.clear()` on close and navigation: add `clear: () => myEditor.setValue('')`
+to the adapter and clear any component-owned history on disposal. Its controls
+currently set `#draft.disabled`; keep that element contract for a textarea, or
+wire the same locked/editable state into your component. The two text methods
+are the SDK boundary, not a claim that every editor is a two-line drop-in. Keep
+the supplied handoff, cancellation and capability handling in place.
+
 `main.mjs` shows the complete integration. Call `startTextReserveSetup` directly inside A's click handler so its B popup is allowed. On B, `createTextReserveReceiver().prepare(...)` handles the explicit setup. Fresh B uses `recoverTextReserve(...)` and a read-only HTTP store with no enrollment capability. Imports use only the installed `/text-browser`, `/text-reserve` and `/http-store` entrypoints.
 
-Text is limited to 16 KiB raw UTF-8 per app. Unedited recovered text, including a leading BOM and CRLF, is exported exactly. Actual textarea edits follow the browser's newline behavior. Edits do not update the prepared snapshot; export them. Each server run permits one local credential and one immutable snapshot per configured app. A failed or uncertain write consumes its grant: check the existing reserve, never retry setup automatically.
+Text is limited to 16 KiB raw UTF-8 per app. The supplied `textareaAdapter`
+preserves the original recovered text while its displayed value is unchanged,
+including a leading BOM and CRLF. If your editor normalizes text on assignment,
+keep equivalent raw-source/displayed-baseline handling; the two method names
+alone do not guarantee byte-exact export. Actual textarea edits follow the
+browser's newline behavior. Edits do not update the prepared snapshot; export
+them. Each server run permits one local credential and one immutable snapshot
+per configured app. A failed or uncertain write consumes its grant: check the
+existing reserve, never retry setup automatically.
 
 ## What the automated proof establishes
 

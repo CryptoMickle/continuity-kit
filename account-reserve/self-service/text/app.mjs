@@ -26,7 +26,7 @@ async function main() {
   let setup, receiver, opened, writingStore;
   let busy = false, stopped = false, demoExpired = false, snapshotTaken = false, hasRecovered = false, discarded = false;
   let setupAttempted = false, token, tokenUntil = 0, capTimer, capRequest, demoTimer, deadlineTimer;
-  let setupDeadline = 0, baseline;
+  let setupDeadline = 0, baseline, baselineView;
   const downloads = new Set();
 
   // Each HTTP store request already has a bounded transport signal. Joining the
@@ -138,16 +138,22 @@ async function main() {
   function scene(title, intro, context) {
     $('heading').textContent = title; $('intro').textContent = intro; $('action-context').textContent = context;
   }
-  function textFromEditor() { return validateText($('work-deliverable').value); }
+  function currentText() {
+    const rendered = $('work-deliverable').value;
+    // A textarea normalizes line endings on assignment. Opening a snapshot
+    // alone must not change the source bytes used by either export format.
+    return baseline !== undefined && rendered === baselineView ? baseline : rendered;
+  }
+  function textFromEditor() { return validateText(currentText()); }
   function changed() {
     if (discarded) return;
-    const text = $('work-deliverable').value, bytes = new TextEncoder().encode(text).length;
+    const text = currentText(), bytes = new TextEncoder().encode(text).length;
     $('size').textContent = (bytes / 1024).toFixed(1) + ' / ' + (MAX_TEXT_BYTES / 1024) + ' KB';
     $('edit-state').textContent = bytes > MAX_TEXT_BYTES ? 'Too large. Shorten the draft before preparing or exporting.'
       : hasRecovered ? text === baseline ? 'Recovered snapshot' : 'Edited here · Export to keep your changes'
       : snapshotTaken ? 'Later edits stay here · Stored snapshot unchanged' : 'Example text · Held in this window';
   }
-  function fillEditor(text) { $('work-deliverable').value = text; baseline = text; changed(); }
+  function fillEditor(text) { $('work-deliverable').value = text; baseline = text; baselineView = $('work-deliverable').value; changed(); }
   function editable(value) { for (const field of FIELDS) $('work-' + field).readOnly = !value; }
   for (const field of FIELDS) $('work-' + field).addEventListener('input', changed);
   if (primary) fillEditor(SAMPLE);
@@ -307,7 +313,7 @@ async function main() {
   }
   function discardOriginal() {
     if (!primary || !snapshotTaken) return;
-    clearPrepareButton(); setup?.cancel(); setup = undefined; closeOpened(); clearCapability(); baseline = undefined; discarded = true;
+    clearPrepareButton(); setup?.cancel(); setup = undefined; closeOpened(); clearCapability(); baseline = undefined; baselineView = undefined; discarded = true;
     for (const field of FIELDS) $('work-' + field).value = '';
     $('editor').hidden = true;
     $('shell').classList.remove('has-work'); $('shell').classList.add('recovery-start');
@@ -368,7 +374,7 @@ async function main() {
     setup?.cancel(); receiver?.dispose(); setup = undefined; receiver = undefined; closeOpened(); readStore.clearEnrollmentCapability();
     for (const field of FIELDS) $('work-' + field).value = '';
     for (const url of downloads) URL.revokeObjectURL(url);
-    downloads.clear(); baseline = undefined;
+    downloads.clear(); baseline = undefined; baselineView = undefined;
   }, { once: true });
   window.addEventListener('pageshow', event => { if (event.persisted) window.location.reload(); });
 }
