@@ -1,0 +1,79 @@
+{
+  "format": "continuitykit/prize-actions/v1",
+  "recordedAt": "2026-10-11T22:57:11.907729+00:00",
+  "purpose": "Completed source support and bounded developer requests; not an adoption, sponsor acceptance or prize-outcome claim.",
+  "outreach": {
+    "newTargetedRequestsSent": 3,
+    "previousRecordedRequests": 3,
+    "totalRecordedRequests": 6,
+    "technicalFindingProvidedBeforeTrialRequest": true,
+    "messagesVisiblyVerifiedAndPersisted": true,
+    "agreementsObserved": 0,
+    "externalIntegrationResultsObserved": 0,
+    "endorsementOrQuotePermissionReceived": false,
+    "newAutomaticFollowup": false,
+    "limit": "Requests and reciprocal source findings are not developer adoption. One candidate has an existing prompt editor, one an existing Markdown editor, and one is a review swap with an unverified draft-editor need."
+  },
+  "marketQuestion": {
+    "trialGuide": "text-starter/README.md#30-minute-trial-with-your-editor",
+    "questionsAdded": [
+      "Existing app/workflow this would protect",
+      "Would the developer keep the integration after the trial, and why"
+    ],
+    "existingComparisonQuestion": "Why choose this over encrypted export and re-import, or why not?",
+    "actualAnswersReceived": false,
+    "interestOrIntentIsNotRetainedAdoption": true
+  },
+  "exportComparison": {
+    "script": "scripts/verify-cross-device-export.mjs",
+    "template": "evidence/cross-device-export-template-2026-10-12.json",
+    "status": "awaiting-supplied-device-files-and-device-report",
+    "newFocusedSyntheticFileChecksPassed": 21,
+    "sourceSyntaxCheckPassed": true,
+    "normalizationApplied": false,
+    "providedDeviceFilesCompared": 0,
+    "physicalDeviceIndependentlyObserved": false,
+    "existingCredentialIdentityVerified": false,
+    "originalPreparationBytesVerified": false,
+    "sameNativeKeyClaimFromFileEquality": false,
+    "limits": "The inspector establishes exact supplied-file content only. Without a preserved preparation export, label the comparison Mac-recovered versus iPhone-recovered. Existing /text/ and /apps/ namespaces must not be mixed.",
+    "previouslyRetainedLocalPair": {
+      "textByteExactAcrossTxtAndJson": true,
+      "historicalTextTest09MarkerPresent": false,
+      "deviceProvenance": "unknown",
+      "priorEdits": "unknown",
+      "crossDeviceOrOriginalPreparationProof": false,
+      "fileHashesPublished": false
+    }
+  },
+  "paymentProof": {
+    "guide": "payments/PAYMENT_CONTINUITY_PROOF.md",
+    "existingFinalizedClaims": 2,
+    "amountTestMonEach": "0.01",
+    "sameBeneficiary": true,
+    "latestReceiptVerification": "evidence/prize-readiness-2026-10-11.json",
+    "controlledOutageChronology": "evidence/payments-validation-2026-10-10.json",
+    "newTransactions": 0,
+    "newRpcVerificationReplay": false,
+    "fundedByBuilder": true,
+    "customerActivityOrRevenue": false,
+    "browserDeviceOrKeyNotEstablishedByReceipt": true
+  },
+  "sourceSha256": {
+    "scripts/verify-cross-device-export.mjs": "31b983729bbda40a39f4adc5064f2c2e5b14d78546e15058978e6f5705176edf",
+    "evidence/cross-device-export-template-2026-10-12.json": "47c2f3f18ed296704305dec20069d66b62cfc88c226dc5524f1792e4529846e0",
+    "payments/PAYMENT_CONTINUITY_PROOF.md": "251a14216e08b4f5a9fff0a7b9692a9e87dbc77a6f969ed9bb930ac421392096",
+    "text-starter/README.md": "931f25e879fbdcb183d6228aef55fef5f7a1980ce3927b2dd853a638e8e8c8a6"
+  },
+  "boundaries": {
+    "publishedSitesChanged": false,
+    "publishedSitesVersion": 9,
+    "protocolOrPasskeyChanges": false,
+    "reserveDatabaseReadsOrWritesByAgent": 0,
+    "mainnetOrRealMoneyActions": false,
+    "thirdPartySoftwareInstalledOrExecuted": false,
+    "videoOrPitchProduced": false,
+    "finalSubmission": false,
+    "pausedAutomationResumed": false
+  }
+}

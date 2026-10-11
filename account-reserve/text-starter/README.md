@@ -56,6 +56,7 @@ show exactly what is supplied.
 ```text
 Source commit / Node version / browser:
 Editor or component integrated (or unchanged starter only):
+Existing app/workflow this would protect:
 Changed code: small diff or shareable snippet
 Outcome: completed / blocked / stopped at time limit
 Actual elapsed minutes, including setup:
@@ -64,6 +65,7 @@ A unavailable + fresh B recovered: yes / no / not reached
 Unedited TXT matched original; edited export kept the change: yes / no / not reached
 Files, if completed: original TXT, recovered TXT, edited TXT or JSON
 Why choose this over an encrypted export and re-import — or why not?
+Would you keep this integration after the trial? yes / no / undecided; reason
 Permission to quote this result or name your project: yes / no
 ```
 

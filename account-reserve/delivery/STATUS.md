@@ -1,4 +1,28 @@
-# Published maintenance release and developer trial — 11 October 2026
+# Developer trials and payment evidence
+
+On 12 October, three additional targeted technical-review and integration-trial
+requests were sent and visibly checked in the existing developer communities.
+Each gave a concrete source finding first. Six requests are now recorded across
+11–12 October; no agreement, integration result or quote permission is established.
+The trial result form now asks which real workflow the integration would protect
+and whether the developer would retain it, with reasons. Interest and intent do
+not establish retained adoption.
+
+The [payment proof guide](../payments/PAYMENT_CONTINUITY_PROOF.md) explains the
+two already finalized rights and their controlled A-outage chronology, with
+credential-free reader steps. No new payment or RPC replay was needed.
+
+The [local export inspector](../scripts/verify-cross-device-export.mjs) compares
+existing TXT/JSON without normalizing BOM or line endings. Twenty-one focused
+fictional-file checks passed. The [device evidence template](../evidence/cross-device-export-template-2026-10-12.json)
+still awaits supplied unchanged Mac/iPhone files and precise device reports.
+No new physical passkey, cross-device success or original-export match is claimed.
+
+These support changes preserve the published Sites version 9 and all reserve
+protocols. Video, final submission and the paused automation remain deferred.
+[Current actions and limits](../evidence/prize-actions-2026-10-12.json).
+
+## Published maintenance release and developer trial — 11 October 2026
 
 Source commit `a56e3df33382745813e7c973d262d6421b337c67` publishes the three
 reviewed maintenance corrections, the 30-minute own-editor trial, a static Prism

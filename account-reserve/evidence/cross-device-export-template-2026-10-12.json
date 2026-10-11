@@ -1,0 +1,56 @@
+{
+  "format": "continuitykit/cross-device-export-evidence-template/v1",
+  "status": "AWAITING_SUPPLIED_EXPORT_FILES_AND_PRECISE_DEVICE_REPORT",
+  "purpose": "Close the file-content gap in the existing text-v1 Mac Safari to iPhone Safari builder report without a new setup or passkey.",
+  "historicalEvidence": {
+    "singleText": "evidence/text-native-acceptance-2026-10-10.json",
+    "scope": "Builder reported recovery/export on iPhone after Mac Safari preparation instructions. HTTP metadata supports Mac upload and later iPhone read, but redacted locators do not correlate credentials or ciphertext and downloaded bytes were not inspected.",
+    "separateTwoEditorReport": "evidence/apps-native-acceptance-2026-10-10.json",
+    "twoEditorLimit": "The two-editor result is an iPhone builder report, not a verified Mac-to-iPhone or newer one-assertion collection/replica test."
+  },
+  "existingRecoveryFlow": {
+    "url": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/",
+    "action": "Open my existing reserve",
+    "credential": "The existing My text reserve passkey from the earlier single-text test; do not create another key.",
+    "earlierRequestedMarker": "TEXT-TEST-09",
+    "expectedExportNames": ["my-text-reserve.txt", "my-text-reserve.json"],
+    "originalAppRequired": false,
+    "preparationOrUploadRequired": false,
+    "signingOrTransactionsRequired": false
+  },
+  "minimalUserInput": [
+    "Supply an unedited export made from this existing reserve in Safari on the Mac and an unedited export of the same snapshot from Safari on the iPhone. One TXT or JSON file per device is enough; TXT plus JSON is optional consistency evidence. Distinguish the two files without editing their contents.",
+    "If the unchanged original preparation export was already retained, supply that as the baseline instead. A freshly recovered Mac export must be labelled Mac-recovered, not original-preparation.",
+    "State which file came from which physical device/browser, that the existing reserve passkey was selected on both, whether any edits preceded export, and whether the same requested marker was visible. A report of no edits is required for snapshot-byte comparison.",
+    "If the expected snapshot or marker is absent, report the actual result. Do not create a key, prepare a replacement snapshot or overwrite an earlier export to make the test pass."
+  ],
+  "inspector": {
+    "script": "scripts/verify-cross-device-export.mjs",
+    "exampleCommand": "node scripts/verify-cross-device-export.mjs --original /path/to/mac-recovered.txt --recovered /path/to/iphone-recovered.txt --marker TEXT-TEST-09",
+    "supportedJsonFormat": "continuity-text-export/v1",
+    "comparison": "Exact UTF-8 text bytes, preserving BOM and CR/LF; no whitespace, Unicode or line-ending normalization.",
+    "publication": "No automatic file output or publication. Report contains hashes and sizes but no plaintext, supplied marker or local file paths. Review even hashes before publishing."
+  },
+  "newObservations": {
+    "performedAt": null,
+    "baselineProvenance": null,
+    "deviceAndBrowserReport": null,
+    "existingPasskeyReuseReport": null,
+    "noEditsBeforeExportReport": null,
+    "reportedMarkerVisible": null,
+    "fileComparisonReport": null,
+    "fileBytesCompared": false,
+    "exactUtf8Match": null,
+    "markerIndependentlyFoundInFiles": null,
+    "physicalDeviceIndependentlyObserved": false,
+    "credentialIdentityIndependentlyVerified": false,
+    "originalPreparationBytesIndependentlyVerified": false
+  },
+  "notClaimed": [
+    "New physical authentication or recovery success from this template or local inspector",
+    "Credential identity or native prompt count from plaintext equality",
+    "Physical acceptance of the newer collection or replica flow",
+    "An HTTP outage from closing the original app",
+    "Independent providers, operators, external adoption, security audit or prize eligibility"
+  ]
+}

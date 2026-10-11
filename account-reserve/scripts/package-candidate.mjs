@@ -34,12 +34,12 @@ const sourceAdditions={
   'self-service':['.gitignore','README.md','start/index.html','start/style.css','apps/config.mjs','apps/app.mjs','apps/style.css','apps/collection.mjs','apps/index.html','client/config.mjs','client/app.mjs','client/style.css','client/public/favicon.svg','client/index.html','text/config.mjs','text/app.mjs','text/style.css','text/index.html','backend/profile.mjs','backend/store.mjs','backend/host.mjs','backend/entry.mjs','backend/schema.sql','backend/db/schema.ts','backend/drizzle.config.mjs','backend/drizzle/0000_self_service_judge.sql','backend/drizzle/meta/_journal.json','backend/drizzle/meta/0000_snapshot.json'],
   payments:['index.mjs','index.d.ts','SequentialPayment.sol','SequentialPayment.artifact.json','build.mjs','harness.mjs','pending.mjs','executor.mjs','guard.mjs','testnet.mjs','proposal.mjs','operator.mjs','operator-journal.mjs','operator-runner.mjs','verify-claim.mjs','index.html','main.mjs','page.mjs','style.css','build-browser.mjs','build-sites.mjs','site-handler.mjs'],
 };
-const optionalSourceDocuments=['payments/README.md'];
+const optionalSourceDocuments=['payments/README.md','payments/PAYMENT_CONTINUITY_PROOF.md'];
 const excludedDirectories=new Set(['cache','out','node_modules','dist','build','artifacts','private','runtime','state','journals','backups']);
 const legacyDataFiles=new Set(['deploy/PaymentRight.paris.json','deploy/local-validation.json','deploy/operator-validation.json','deploy/proposal-input.template.json','release/disabled-profile.json']);
 
 // Operational logs, cloud responses, native session IDs and personal paths stay local.
-const optionalEvidence=['verification.json','native-proof-public.json','design-review.json','prism-integration.json','onboarding-browser.json','starter-design-review.json','prephysical-browser.json','maintenance-review-2026-10-11.json','prize-readiness-2026-10-11.json','prize-release-2026-10-11.json'];
+const optionalEvidence=['verification.json','native-proof-public.json','design-review.json','prism-integration.json','onboarding-browser.json','starter-design-review.json','prephysical-browser.json','maintenance-review-2026-10-11.json','prize-readiness-2026-10-11.json','prize-release-2026-10-11.json','cross-device-export-template-2026-10-12.json','prize-actions-2026-10-12.json'];
 const mandatoryEvidence=['public-proof.json'];
 const workRequiredFiles=['evidence/work-public-proof.json','evidence/work-finished-export-2026-10-09.json','evidence/work-recovered-2026-10-09.jpg','delivery/examples/finished-checkout.txt','delivery/examples/finished-checkout.json'];
 const publicBinaryAssets=new Set(['delivery/assets/continuitykit-logo.png','evidence/work-recovered-2026-10-09.jpg']);
