@@ -24,9 +24,10 @@ configuration. Separate local replica processes are a different demonstration;
 neither proves independent operators. No outside developer integration is yet
 established. Two testnet payments prove repeatable functionality, not demand.
 
-The [static start page](self-service/start/index.html) packages these same routes.
-Its hosted publication is tracked separately; this README is the public starting
-point until that release is verified.
+The [public start page](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/start/index.html)
+packages these same routes. Both Try sites publish version 9 with the reviewed
+maintenance fixes. The [release record](evidence/prize-release-2026-10-11.json)
+separates exact public-file checks from physical-device and outside-developer evidence.
 
 ## Repeated payments through the same account
 

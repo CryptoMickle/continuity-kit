@@ -156,12 +156,6 @@
   },
   "preciseGaps": [
     {
-      "id": "maintenance-hosted-not-published",
-      "status": "source-published-hosted-pending",
-      "source": "evidence/prize-release-2026-10-11.json",
-      "detail": "The three reviewed maintenance fixes are published in source commit a56e3df33382745813e7c973d262d6421b337c67. The staged hosted builds have passed local checks but remain unpublished because automatic approval review rejected the source-repository credential handoff. Do not label the live editors as containing these fixes."
-    },
-    {
       "id": "new-collection-native-proof",
       "status": "not-established",
       "detail": "Physical execution of the newer one-assertion multi-app or replicated flow is not established. Keep that feature under local automated evidence unless a new demonstration is deliberately performed."
@@ -227,7 +221,13 @@
   ],
   "publication": {
     "maintenanceSourceCommit": "a56e3df33382745813e7c973d262d6421b337c67",
-    "hostedMaintenanceStatus": "not-published",
-    "runtimeChangedByEvidenceCollection": false
+    "hostedMaintenanceStatus": "published-v9-public-readback-passed",
+    "runtimeChangedByEvidenceCollection": false,
+    "hostedStartPage": "https://continuitykit-try-reserve.cryptomickle.chatgpt.site/start/index.html",
+    "maintenanceHostedRelease": {
+      "status": "published-and-public-file-verified",
+      "source": "evidence/prize-release-2026-10-11.json",
+      "detail": "Both existing public Try sites publish version 9. All 54 static/config checks passed; 36 responses are raw byte-exact and 18 HTML responses preserve application HTML with a recorded hosting insertion. Existing frontend profiles match approved bindings. No new native recovery or export was performed."
+    }
   }
 }

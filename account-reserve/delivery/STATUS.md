@@ -1,17 +1,25 @@
-# Source release and developer trial — 11 October 2026
+# Published maintenance release and developer trial — 11 October 2026
 
 Source commit `a56e3df33382745813e7c973d262d6421b337c67` publishes the three
 reviewed maintenance corrections, the 30-minute own-editor trial, a static Prism
 start page, and a precise payment/native/local evidence map. All 16 selected
 public file contents were read back and matched the local release bytes.
-The GitHub README now provides a public start route while hosted publication is
-pending. The trial is a local simulation; outside integration is not established.
+The public [start page](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/start/index.html)
+now provides one route to the editor demos, own-editor trial and payment evidence.
+The trial is a local simulation; outside integration is not established.
 
 Both staged Sites builds passed their existing page/config checks and the new
 `/start/index.html` and CSS checks. Desktop and 390-pixel mobile layout were
-inspected; the desktop overflow was corrected. Deployment archives are ready.
-The public Sites versions are unchanged. The prior credential handoff rejection
-still blocks hosted publication; no bypass or new credential transfer occurred.
+inspected; the desktop overflow was corrected. Both existing public Try sites now
+publish version 9. Their audience remains public at access revision 2. The user
+explicitly approved the previously blocked short-lived credential handoff to the
+official Sites workflow; both source pushes and deployments then succeeded.
+This release changed no domains, accounts, access rules or stored reserve data.
+All 54 public static/configuration checks returned HTTP 200. The 36 non-HTML
+responses exactly match the reviewed build; 18 HTML responses preserve its HTML
+with one recorded hosting insertion. Approved frontend bindings are unchanged.
+The public start page was visually checked on desktop and at mobile width.
+These checks performed no new passkey, recovery, export or payment operation.
 
 Both exact 0.01 test-MON claims were reverified as finalized through the two
 fixed public RPCs. No new payment or wallet action was needed. Three reciprocal
