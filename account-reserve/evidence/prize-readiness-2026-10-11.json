@@ -156,10 +156,10 @@
   },
   "preciseGaps": [
     {
-      "id": "maintenance-not-published",
-      "status": "locally-validated-only",
-      "source": "evidence/maintenance-review-2026-10-11.json",
-      "detail": "Original newline/BOM export preservation and two additional maintenance fixes are locally validated; the cited maintenance record says source and hosted publication remain incomplete. Do not label the live editors as containing those fixes."
+      "id": "maintenance-hosted-not-published",
+      "status": "source-published-hosted-pending",
+      "source": "evidence/prize-release-2026-10-11.json",
+      "detail": "The three reviewed maintenance fixes are published in source commit a56e3df33382745813e7c973d262d6421b337c67. The staged hosted builds have passed local checks but remain unpublished because automatic approval review rejected the source-repository credential handoff. Do not label the live editors as containing these fixes."
     },
     {
       "id": "new-collection-native-proof",
@@ -226,7 +226,8 @@
     }
   ],
   "publication": {
-    "thisMapPublishedByThisTask": false,
-    "runtimeChangedByThisTask": false
+    "maintenanceSourceCommit": "a56e3df33382745813e7c973d262d6421b337c67",
+    "hostedMaintenanceStatus": "not-published",
+    "runtimeChangedByEvidenceCollection": false
   }
 }

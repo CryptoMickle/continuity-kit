@@ -1,0 +1,81 @@
+{
+  "format": "continuitykit/prize-release/v1",
+  "verifiedAt": "2026-10-11T21:16:27.049902+00:00",
+  "source": {
+    "status": "published-and-byte-verified",
+    "repository": "CryptoMickle/continuity-kit",
+    "commit": "a56e3df33382745813e7c973d262d6421b337c67",
+    "pathPrefix": "account-reserve/",
+    "updatedFileCount": 16,
+    "readback": "All sixteen published file contents exactly matched the selected local UTF-8 files at this commit.",
+    "sha256": {
+      "sdk/text-reserve.mjs": "6fe2fa3a687cd22ea1cc9acef492fe9db1af1707232582c664205edfedf3f2f9",
+      "tests/text-collection.mjs": "3201b870404f1e9de63e73ae2a409d2847051995ea08c2507f44fa549fbea093",
+      "text-native/collection-main.mjs": "e7727ba09159a52b205fd2b0f7af69458a23c79dc2e5d583bdbf076c8e54d0cd",
+      "tests/text-native-collection-ui.mjs": "5c78de4c132958812f96351e15509b99a28b8d633617de7e7c347c5fa286b48a",
+      "self-service/apps/app.mjs": "ccb3959dfc60a3a3607df44274d3e063cb748bc6d20ba8b44d6bc8400008e669",
+      "self-service/text/app.mjs": "1bd48b5b463272b46b5b3abd66db17d67705cbaabce5daecd64dc40bae83924d",
+      "tests/self-service-exact-export.mjs": "beb325bb3bf88a04db23e7195efc9efc4673880799887c57cd470bfc622371c4",
+      "evidence/maintenance-review-2026-10-11.json": "e86d2267a517ae91323d9dce4735617b739cc027a9e3faeb5d0b54105016625e",
+      "README.md": "a4e17bec03524f553f9ffcf5892000f8535aec6a66c7c6d02df106a753e1569e",
+      "text-starter/README.md": "edcc75f7afe7398e27cc3b536a15d5361f0f453d9ff8b4e67188e2bd12100410",
+      "self-service/start/index.html": "55336f61ba425f05f95c5eb9db9fdd5f9adafe147442faa9377108ccf9399cb3",
+      "self-service/start/style.css": "1d7d92a2b232f60efd0899eb4e7bba3b2bf745eabce6c853b7d6b180e63eb001",
+      "scripts/build-self-service-site.mjs": "f613513577f09bb9e76f2ce46b4b6c025eb3a7ffaaeecb4e70fa5c31f186d85c",
+      "scripts/stage-self-service-sites.mjs": "9f50491a44765ac6906f7f6e39f4c832bbd9659ec7123c1125cab65e6483a079",
+      "scripts/package-candidate.mjs": "40327d5aabe98d611c4bbaa37297b0b3bc97f29028214f4abac0dc19f9a1a335"
+    }
+  },
+  "validation": {
+    "maintenance": "113 distinct cases passed; see maintenance-review-2026-10-11.json. Unchanged successful cases were not repeated for this release.",
+    "installedTrial": "One fresh installed text-starter case passed before publication; the subsequent README change only replaced the pronoun in one sentence.",
+    "builds": {
+      "primaryWorkerSha256": "020f6d2a2e35a9720e6272dfbb4c042d90781bcb2b4111375836159776bd3d95",
+      "recoveryWorkerSha256": "eb747d875e2b2b50e319c050220eb776f006fd3bb16c0d24830e6616c474ab57",
+      "bothBuildsPassed": true,
+      "startHtmlAndCssStatus": 200,
+      "existingRootTextAppsRoutesChecked": true,
+      "databaseWrites": 0
+    },
+    "staticPage": {
+      "javascript": false,
+      "authentication": false,
+      "storage": false,
+      "desktopLayoutChecked": true,
+      "mobile390LayoutChecked": true,
+      "horizontalOverflow": false,
+      "inlineSvgOnly": true,
+      "internalAnchorsValid": true
+    },
+    "sourcePackaging": "492-file candidate passed existing source guards, includes the two start-page files and selected safe evidence; the whole candidate archive was not uploaded."
+  },
+  "hosted": {
+    "status": "staged-not-published",
+    "publicVersionsUnchanged": true,
+    "automaticApprovalReviewRejected": true,
+    "reason": "A prior credential handoff to a terminal outside the managed sandbox/network proxy was rejected for credential exposure and unauthorized repository access risk. This release did not retry or bypass it.",
+    "credentialTransferredByRejectedAttempt": false,
+    "localDeploymentArchivesReady": true,
+    "newDomainsOrAccounts": false
+  },
+  "externalIntegration": {
+    "status": "not-established",
+    "threeTargetedDeveloperRepliesPreviouslySent": true,
+    "reciprocalCodeOrBrowserReviewProvided": true,
+    "noAgreementOrTrialResultReceived": true
+  },
+  "paymentProof": {
+    "freshExactClaimsVerified": 2,
+    "amountTestMonEach": "0.01",
+    "developerFundedTestnetOnly": true,
+    "newTransactionsThisRelease": 0,
+    "notAdoption": true
+  },
+  "boundaries": {
+    "existingPasskeysPreserved": true,
+    "protocolAndCiphertextFormatUnchanged": true,
+    "storedReservesNotReadOrWritten": true,
+    "noVideoOrFinalSubmission": true,
+    "pausedAutomationNotResumed": true
+  }
+}

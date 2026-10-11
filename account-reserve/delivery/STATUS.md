@@ -1,3 +1,78 @@
+# Source release and developer trial — 11 October 2026
+
+Source commit `a56e3df33382745813e7c973d262d6421b337c67` publishes the three
+reviewed maintenance corrections, the 30-minute own-editor trial, a static Prism
+start page, and a precise payment/native/local evidence map. All 16 selected
+public file contents were read back and matched the local release bytes.
+The GitHub README now provides a public start route while hosted publication is
+pending. The trial is a local simulation; outside integration is not established.
+
+Both staged Sites builds passed their existing page/config checks and the new
+`/start/index.html` and CSS checks. Desktop and 390-pixel mobile layout were
+inspected; the desktop overflow was corrected. Deployment archives are ready.
+The public Sites versions are unchanged. The prior credential handoff rejection
+still blocks hosted publication; no bypass or new credential transfer occurred.
+
+Both exact 0.01 test-MON claims were reverified as finalized through the two
+fixed public RPCs. No new payment or wallet action was needed. Three reciprocal
+developer requests have been sent; no agreement or integration result was
+observed. Video, final submission and the paused automation remain untouched.
+
+Current release state: [release evidence](../evidence/prize-release-2026-10-11.json).
+Proof boundaries: [evidence map](../evidence/prize-readiness-2026-10-11.json).
+
+---
+
+## Earlier local validation record — 11 October 2026
+
+Three reproduced defects are corrected and reviewed locally:
+
+- Legacy collection recovery now classifies provider errors without invoking
+  their code accessors. An unreadable provider error cannot suppress a healthy
+  sibling app; global cancellation still rejects the whole operation.
+- Native collection bootstrap now shows closed-view guidance when pagehide
+  interrupts loading, ignores late replies, and leaves mounted cleanup intact.
+- Self-service text and both editor routes preserve BOM, CRLF and bare CR in
+  unedited TXT/JSON exports. Display normalization alone no longer counts as an
+  edit; genuine edits export the current editor value.
+
+**113 distinct relevant top-level tests passed**, with zero final failures or
+skips: 110 focused source/DOM cases and three fresh installed-package/integration
+cases. The legacy 16-case suite and combined 17-case suite also passed against
+the installed public SDK; those repeated cases are not added to the total. Native
+v1/v2 builds and doctor checks passed. Local managed storage checks retain exact
+exports through A/store loss and restart, with no recovery writes. An initial
+sandbox loopback restriction was resolved through narrowly approved local-only
+test permission. No unchanged payment suite was rerun.
+
+**Neither source nor hosted corrections are published.** Automatic approval
+review rejected the proposed Sites publication step because it would transfer a
+live source-repository credential to an existing terminal outside the managed
+sandbox/network proxy, creating avoidable exposure and unauthorized repository
+access risk. No credential was transmitted by the rejected attempt. Local test
+permission is separate from that publication rejection and does not authorize a
+bypass.
+
+Existing passkeys, encrypted-record format and derivation, immutable snapshots,
+and public deployments remain unchanged. These are local synthetic/DOM and
+installed-package checks, not new physical-device or hosted recovery evidence.
+No wallet action, public transaction, video or final submission occurred. All19
+feature milestones remain unchanged. [Exact files, hashes and validation limits](../evidence/maintenance-review-2026-10-11.json).
+
+---
+
+# Installed payment adapter path corrected — 11 October 2026
+
+The adapter guide packed the SDK into `/absolute/empty/package-output` but told
+the consumer to install from `/absolute/package-output`. The install example now
+uses the exact same directory. One documentation replacement was published at
+`c9aecacd76a4f93dba29dbfa6c80d56b51f90430`; exact committed readback and the local
+Git blob hash match. Runtime source, hosted flows, passkeys and stored records are
+unchanged. All19 milestone evidence files are present and readable. No unchanged
+test suite was repeated. Further work remains observed-defect maintenance only.
+
+---
+
 # Receipt reader no longer requires account-recovery APIs — 11 October 2026
 
 A concrete compatibility defect is fixed: generated main used the full recovery
