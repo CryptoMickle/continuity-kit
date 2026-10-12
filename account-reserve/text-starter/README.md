@@ -4,11 +4,14 @@ A small editor you own, wired to the installed ContinuityKit public SDK. It prep
 
 **Local simulation only.** These servers emulate the credential; they do not invoke a physical passkey. The default mode keeps its encrypted snapshot in RAM. The optional replica and collection modes below use two temporary SQLite databases and separate storage processes. All modes keep the synthetic credential in the parent server's RAM; stopping that server ends recovery. Never deploy these servers or `synthetic-client.mjs`. They do not establish independent infrastructure or providers.
 
-## 30-minute trial with your editor
+<a id="30-minute-trial-with-your-editor"></a>
+
+## Bounded developer trial
 
 The question is whether this SDK makes recovery useful enough to justify adding
-it to an editor you already maintain. Use a development copy of that editor or
-its existing text component, fictional text, and the default single-app starter.
+it to an editor you already maintain. First use the unchanged single-app starter
+and fictional text to check recovery in your browser. Connect your own component
+only after that works and if you have agreed to an integration trial.
 No account signup, wallet, payment, hosting or physical passkey is needed.
 Thirty minutes is a time limit, not a promised integration time: stop and report
 the first blocker if you cannot finish. A negative result is useful.
@@ -31,18 +34,17 @@ The [public generator](https://github.com/CryptoMickle/continuity-kit/blob/main/
 and [editor adapter](https://github.com/CryptoMickle/continuity-kit/blob/main/account-reserve/text-starter/adapter.mjs)
 show exactly what is supplied.
 
-1. Install with `npm ci --ignore-scripts`. Bring your existing editor component
-   into the generated page and connect its `getText()` and `applyText(text)` as
-   described under [Connect your own editor](#connect-your-own-editor). Save the
-   small integration diff. Renaming the sample editor is not this trial.
+1. Install with `npm ci --ignore-scripts`. Keep the supplied editor for this
+   first browser check; no component integration is required yet.
 2. Run `npm run build`, `npm run doctor`, `npm test`, then `npm run dev` from the
    generated folder. Rebuild after changing your editor: the server serves
    `dist/`, not live source. These checks validate the supplied infrastructure;
-   the browser steps below validate your integration.
+   the browser steps below check the actual browser flow.
 3. Open A at `http://text-starter-primary.localhost:5973/`. Write a short fictional
    draft in your editor and export its original TXT for comparison. Choose
    **Prepare a reserve in B**, then **Prepare this snapshot** in B. Wait for the
-   successful preparation message before continuing.
+   successful preparation message before continuing. Finish preparation within
+   five minutes of starting from A; expiry closes that attempt.
 4. In B, choose **Make A unavailable** and **Open B in a fresh tab**. Keep the
    local server running. In the fresh B tab, choose **Open my existing reserve**;
    A's page/API must remain unavailable. Export TXT before editing and compare
@@ -69,7 +71,11 @@ Would you keep this integration after the trial? yes / no / undecided; reason
 Permission to quote this result or name your project: yes / no
 ```
 
-This can establish one external **local integration trial**. Running the
+After the unchanged starter succeeds, an optional separate integration trial can
+connect your existing component as described below. Save the integration diff and
+repeat recovery/export; renaming the sample editor does not count as integration.
+
+This can establish one external **local integration trial** only if that work is done. Running the
 unchanged starter is an evaluation; neither outcome establishes native passkey
 compatibility, production security, paying users or retained adoption. If a
 reciprocal review was agreed, keep it separate and equally bounded.
@@ -98,6 +104,43 @@ npm run dev -- --primary-port=5975 --recovery-port=5976
 ```
 
 `npm run doctor -- --live` checks a running starter. Restore A in B first if you deliberately made A unavailable. A stopped local server cannot be recovered: this is intentionally disposable.
+
+## If the browser flow stops
+
+Stop at the first failure. Keep A open and export the fictional draft there.
+Do not delete the generated folder, create another credential or restart the
+server to diagnose an uncertain result. The simulated credential is in RAM:
+stopping the server loses it, even in replica modes.
+
+The local B error now includes safe request details: fixed path, method,
+`action=create/get`, HTTP status and a recognized error name. Send only that
+line, your source commit, Node/browser versions and the step you clicked.
+Do not send request bodies, successful `/api/synthetic` responses, credential
+IDs, PRF output, enrollment tokens or anything after `#` in a setup URL.
+
+- `404 CREDENTIAL_MISSING` means this server could not find the requested
+  simulated credential. The route exists. A newly opened B tab checks recovery;
+  it does not prepare a reserve. Return to A and preserve its draft first.
+- `404 ROUTE_UNAVAILABLE` means the server did not recognize that route for the
+  request. This is different from a missing credential. Use the exact B address
+  printed by the running server; report the diagnostic before another attempt.
+- `421 HOST_REJECTED` or `403 ORIGIN_REJECTED`: use the printed `.localhost`
+  names and ports, not bare `localhost`, a LAN IP or a replacement hostname.
+  Keep the Host/Origin checks and loopback binding enabled.
+- `409 ONE_LOCAL_CREDENTIAL_PER_RUN`: a simulated key already exists. Use
+  **Open my existing reserve** to check it. Do not create another key.
+- `SETUP_EXPIRED`: the five-minute attempt is closed. **Restore A** restores
+  availability only; it does not renew setup. Export from the original A tab
+  and check B for an existing reserve before deliberately starting over.
+- No HTTP status or an unrecognized response leaves the outcome uncertain;
+  it does not prove that nothing was saved. Check the existing reserve first.
+
+`npm run doctor -- --live` runs Node loopback requests with the expected Host.
+It checks the running server from that terminal, not browser DNS, Windows/WSL
+forwarding, popup handling or a physical passkey. A passing doctor or `npm test`
+does not establish that those browser steps work. With a Windows browser and
+Ubuntu/WSL server, keep the exact printed addresses; do not expose the server
+on `0.0.0.0` or weaken request checks as a workaround.
 
 ## Optional two-store browser example
 
