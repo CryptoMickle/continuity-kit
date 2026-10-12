@@ -28,7 +28,7 @@ export function mountTextReserveCollection({ root, env, expiresAtMs, lifetime, d
       <main id="collection-main">
         <aside class="demo-boundary"><strong>Fictional examples only.</strong> <span id="collection-expiry"></span> No funds or blockchain transactions.</aside>
         <section class="collection-intro" aria-labelledby="collection-title"><p class="eyebrow">Work continuity / Your independent reserve</p><h1 id="collection-title">All your drafts.<br><em>One way back.</em></h1><p class="lede">Open the drafts you prepared in these two apps with your existing reserve passkey. Choose a draft, keep writing and take it with you.</p></section>
-        <section class="collection-unlock" aria-label="Open your prepared reserves"><div><p class="eyebrow">A single recovery action</p><h2>Find the work you kept.</h2><p>This checks both apps with the key you choose. It does not create a passkey or save anything.</p></div><div class="collection-unlock-actions"><button class="button" id="collection-open" type="button">Open my app reserves</button><button class="secondary" id="collection-cancel" type="button" hidden>Cancel opening</button><p class="context-note">Your device may show more than one confirmation.</p></div></section>
+        <section class="collection-unlock" id="collection-unlock" aria-label="Open your prepared reserves"><div><p class="eyebrow">A single recovery action</p><h2>Find the work you kept.</h2><p>This checks both apps with the key you choose. It does not create a passkey or save anything.</p></div><div class="collection-unlock-actions"><button class="button" id="collection-open" type="button">Open my app reserves</button><button class="secondary" id="collection-cancel" type="button" hidden>Cancel opening</button><p class="context-note">Your device may show more than one confirmation.</p></div></section>
         <p id="collection-status" class="status" role="status" aria-live="polite" tabindex="-1">Choose the existing key you used to prepare these app reserves.</p>
         <div id="collection-cards" class="app-grid collection-grid" aria-label="Your app reserves"></div>
         <section id="collection-editor-panel" class="editor-panel collection-editor" aria-labelledby="collection-editor-title" hidden>
@@ -62,6 +62,7 @@ export function mountTextReserveCollection({ root, env, expiresAtMs, lifetime, d
   }
   function updateControls() {
     if (disposed) return;
+    $('collection-unlock').hidden = drafts.size > 0;
     $('collection-open').disabled = expired || Boolean(operation) || drafts.size > 0;
     $('collection-open').hidden = drafts.size > 0;
     $('collection-cancel').hidden = !operation;

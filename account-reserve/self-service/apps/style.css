@@ -30,8 +30,9 @@
 .collection-unlock-actions .context-note { font-size:12px; text-align:center; margin:0; }
 .collection-grid { margin:24px 0; }
 .collection-card { padding:30px; }
+.collection-card p { min-height:0; }
 .collection-card h2 { margin:12px 0; }
-.collection-card-state { min-height:68px; font-size:14px; }
+.collection-card-state { font-size:14px; }
 .collection-card[data-state=recovered] { border-color:#b9d8ce; }
 .collection-card[data-state=recovered] .collection-card-state { color:#285a49; }
 .collection-card[data-state=rejected], .collection-card[data-state=unavailable] { border-color:#edc9ae; }
@@ -54,7 +55,6 @@
   .collection-unlock { grid-template-columns:1fr; padding:24px; gap:22px; }
   .collection-unlock h2 { font-size:25px; }
   .collection-card { padding:24px; }
-  .collection-card-state { min-height:0; }
   .collection-editor { padding:22px; }
   .collection-exports { display:grid; grid-template-columns:1fr 1fr; }
   .collection-exports button { min-width:0; }
