@@ -154,7 +154,7 @@
     "test:replicas": "node --test tests/text-replicas.mjs tests/operator-replica-gateway.mjs tests/text-replica-drill.mjs",
     "drill:replicas": "node scripts/text-replica-drill.mjs",
     "create:text-starter": "node scripts/create-text-starter.mjs",
-    "test:text-starter": "node --test tests/text-starter-package.mjs",
+    "test:text-starter": "node --test tests/text-starter-package.mjs tests/text-starter-expiry-ui.mjs tests/text-starter-diagnostics.mjs tests/text-starter-diagnostics-ui.mjs",
     "test:replica-browser": "node --test tests/text-browser-replicas.mjs",
     "test:replica-starter": "node --test tests/text-starter-replicas.mjs tests/text-starter-replica-ui.mjs tests/text-replica-starter-package.mjs",
     "create:native-text": "node scripts/create-native-text-starter.mjs",
