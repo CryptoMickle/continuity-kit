@@ -1,10 +1,15 @@
 # ContinuityKit
 
+## Demo and pitch
+
+- [Technical demo — 2:15](https://continuitykit-playground.cryptomickle.chatgpt.site/videos/demo)
+- [Pitch — 1:45](https://continuitykit-playground.cryptomickle.chatgpt.site/videos/pitch)
+
 ## Current direction: a prepared way back to your work
 
 Prepare an encrypted text snapshot, reopen it with its reserve passkey, continue writing and export. The new text API requires one document, with no wallet or account key.
 
-**Try the published [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/) and [reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/).** Use fictional data only. Prepare in B, wait for its independent check, then reopen B with the same passkey. Native acceptance and same-passkey second-device proof for this new format are pending; earlier Work results do not establish that new result.
+**Try the published [text workspace A](https://continuitykit-try-primary.cryptomickle.chatgpt.site/text/) and [reserve B](https://continuitykit-try-reserve.cryptomickle.chatgpt.site/text/).** Use fictional data only. Prepare in B, wait for its independent check, then reopen B with the same passkey. On 10 October, the builder reported recovery and export in Safari on iPhone after the instructed Mac-to-iPhone text flow. Server logs corroborate Mac upload and iPhone reads; same-key identity and exported-file equality were not independently verified in that run.
 
 Read the [current SDK and commands](account-reserve/README.md) and [judge guide](account-reserve/delivery/JUDGE_GUIDE.md). The [actual Textarea text integration](account-reserve/integrations/textarea-text/README.md) consumes the packaged API without invented account or project fields. It is project-built work against pinned MIT upstream code, not upstream adoption. The [export comparison](account-reserve/delivery/EXPORT_COMPARISON.md) includes conditions in which a retained encrypted file wins. The [adoption and operating plan](account-reserve/delivery/ADOPTION_PLAN.md) separates proposed pilots and cost assumptions from evidence.
 
@@ -12,7 +17,7 @@ This is one immutable prepared snapshot, not automatic backup or synchronization
 
 The earlier Account Reserve's [Monad testnet proof](account-reserve/evidence/public-proof.json) is a separate result: the same recovered account claimed a pre-issued payment once. Text recovery sends no blockchain transaction. The [older synthetic playground](https://continuitykit-playground.cryptomickle.chatgpt.site/) and [physical Work evidence](account-reserve/evidence/work-public-proof.json) remain scoped references.
 
-Mikkel / CryptoMickle is the sole human builder, assisted by OpenAI Codex and GPT agents. Original source is MIT-licensed. The experimental SDK is not published on npm. No external adoption, demand, willingness to pay or independent security audit is claimed. Video and final submission remain deferred.
+CryptoMickle is the sole human builder, assisted by OpenAI Codex and GPT agents. Original source is MIT-licensed. The experimental SDK is not published on npm. No external adoption, demand, willingness to pay or independent security audit is claimed. Demo and pitch videos are published. As of 13 October 2026, the Metropolis portal shows this entry as **Ready for judging**.
 
 ## Earlier content-recovery prototype
 Recover private application work through a separately prepared client, and detect when a surviving copy does not match the owner's approved checkpoint.
